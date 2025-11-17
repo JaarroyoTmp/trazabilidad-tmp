@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TMP · Panel principal</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #0d1117;
+      color: #f0f6fc;
+      font-family: system-ui, sans-serif;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .logo {
+      height: 42px;
+    }
+
+    .userBox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    #btnLogout {
+      cursor: pointer;
+      color: #f85149;
+      font-weight: 600;
+    }
+
+    #welcomeBox {
+      padding: 16px 20px;
+      font-size: 17px;
+      background: #0d1117;
+      color: #f0f6fc;
+      border-bottom: 1px solid #30363d;
+      font-weight: 500;
+    }
+
+    .wrap {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    a.card {
+      display: block;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      color: #f0f6fc;
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 500;
+      transition: border 0.2s, transform 0.15s;
+    }
+
+    a.card:hover {
+      border-color: #58a6ff;
+      transform: translateX(3px);
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <header>
+    <img src="img/tmp-quality.png" class="logo">
+
+    <div class="userBox">
+      <span id="userEmail">Cargando…</span>
+      <span id="btnLogout">Salir</span>
+    </div>
+  </header>
+
+  <div id="welcomeBox">
+    Bienvenido, <b id="welcomeName"></b> <span id="welcomeRole" style="color:#8b949e"></span>
+  </div>
+
+  <div class="wrap">
+
+    <a class="card" href="TMP_Calibraciones_Lab.html">📏 Calibraciones · Laboratorio</a>
+    <a class="card" href="App_Patrones_TMP.html">📐 Patrones TMP</a>
+    <a class="card" href="App_Familias_TMP.html">🧩 Familias de Instrumentos</a>
+    <a class="card" href="movimiento.html">🔄 Movimientos de Instrumentos</a>
+    <a class="card" href="alta_instrumento.html">➕ Alta de Instrumento</a>
+    <a class="card" href="qr/qr.index.html">🏷 Generador de QR</a>
+
+  </div>
+
+  <script type="module">
+    const raw = localStorage.getItem("operario");
+    if (!raw) {
+      window.location.href = "login.html";
+    }
+
+    const operario = JSON.parse(raw);
+
+    // Header (arriba derecha)
+    document.getElementById("userEmail").textContent =
+      operario.nombre ?? operario.username;
+
+    // Bienvenida grande
+    document.getElementById("welcomeName").textContent = operario.nombre;
+
+    let rolFormateado = "";
+    switch (operario.rol) {
+      case "admin":
+        rolFormateado = "(Administrador de Calidad)";
+        break;
+      case "operario":
+        rolFormateado = "(Operario de Calidad)";
+        break;
+      default:
+        rolFormateado = "(" + operario.rol + ")";
+    }
+    document.getElementById("welcomeRole").textContent = " " + rolFormateado;
+
+    // Logout
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      localStorage.removeItem("operario");
+      window.location.href = "login.html";
+    });
+  </script>
+
+</body>
+</html>

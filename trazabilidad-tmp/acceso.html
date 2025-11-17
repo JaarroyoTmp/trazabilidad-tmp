@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso TMP</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #0d1117;
+            color: white;
+        }
+
+        .box {
+            width: 360px;
+            margin: 80px auto;
+            background: #161b22;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            width: 190px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #c9d1d9;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2ea043;
+        }
+
+        .msg {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error {
+            color: #f85149;
+        }
+
+        .ok {
+            color: #3fb950;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+        <div class="logo">
+            <img src="img/tmp-quality.png" alt="Logo TMP">
+        </div>
+
+        <h2>Acceso al sistema TMP</h2>
+
+        <form id="loginForm" autocomplete="off">
+
+            <label>Usuario</label>
+            <input 
+                type="text" 
+                name="username" 
+                placeholder="Ej: dtrujillo" 
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                required>
+
+            <label>PIN</label>
+            <input 
+                type="password" 
+                name="pin" 
+                placeholder="Ej: 5162" 
+                autocomplete="new-password"
+                autocorrect="off"
+                spellcheck="false"
+                inputmode="numeric"
+                required>
+
+            <button type="submit">Entrar</button>
+
+            <div id="loginMessage" class="msg"></div>
+        </form>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+
+    <script type="module">
+
+        const form = document.getElementById("loginForm");
+        const msg = document.getElementById("loginMessage");
+
+        function showMessage(text, type) {
+            msg.textContent = text;
+            msg.className = "msg " + type;
+            msg.style.display = "block";
+        }
+
+        // Si ya está logueado → ir a home
+        if (localStorage.getItem("operario")) {
+            window.location.href = "home.html";
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const username = form.username.value.trim().toLowerCase();
+            const pin = form.pin.value.trim();
+
+            showMessage("Validando...", "ok");
+
+            const { data, error } = await supabase
+                .from("operarios")
+                .select("*")
+                .eq("username", username)
+                .eq("pin", pin)
+                .single();
+
+            if (error || !data) {
+                showMessage("Usuario o PIN incorrectos.", "error");
+                return;
+            }
+
+            // Guardamos datos en localStorage
+            localStorage.setItem("operario", JSON.stringify({
+                id: data.id,
+                username: data.username,
+                nombre: data.nombre,
+                rol: data.rol
+            }));
+
+            showMessage("Acceso correcto ✓", "ok");
+
+            setTimeout(() => {
+                window.location.href = "home.html";
+            }, 500);
+        });
+
+    </script>
+
+</body>
+</html>

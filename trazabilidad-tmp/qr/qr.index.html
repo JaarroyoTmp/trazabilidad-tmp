@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMP · Generador de Códigos QR</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:#0d1117;
+    color:#f0f6fc;
+  }
+  header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 16px;
+    background:#161b22;
+    border-bottom:1px solid #30363d;
+  }
+  header img.logo{height:40px}
+  header h1{margin:0;font-size:18px}
+  header span.sub{font-size:12px;color:#8b949e}
+  .wrap{
+    max-width:460px;
+    margin:22px auto;
+    padding:0 16px 32px;
+  }
+  .card{
+    background:#161b22;
+    border-radius:16px;
+    border:1px solid #30363d;
+    padding:20px 16px;
+  }
+  h2{margin:0 0 10px;font-size:16px}
+  label{display:block;font-size:13px;color:#8b949e;margin-bottom:4px}
+  input{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid #30363d;
+    background:#0d1117;
+    color:#f0f6fc;
+    font-size:14px;
+    outline:none;
+  }
+  input:focus{border-color:#58a6ff;}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  button{
+    border:none;
+    border-radius:999px;
+    padding:9px 16px;
+    font-size:14px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .btn-main{background:#238636;color:#fff;}
+  .btn-main:hover{background:#2ea043;}
+  .btn-ghost{background:transparent;color:#58a6ff;border:1px solid #30363d;}
+  .btn-ghost:hover{border-color:#58a6ff;}
+  .sizes{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .sizes button{font-size:12px;padding:7px 12px}
+  #qrResult{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  #qrResult canvas{
+    background:#ffffff;
+    padding:10px;
+    border-radius:12px;
+  }
+  .hint{font-size:12px;color:#8b949e;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="../img/tmp-quality.png" alt="TMP" class="logo">
+  <div>
+    <h1>Generador de códigos QR</h1>
+    <span class="sub">Trazabilidad de instrumentos · TMP</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>Instrumento</h2>
+    <label for="codigo">Código del instrumento</label>
+    <input id="codigo" type="text" placeholder="Ejemplo: 11217">
+
+    <div class="row">
+      <button class="btn-main" onclick="generarQR()">Generar QR</button>
+    </div>
+
+    <div class="sizes">
+      <button class="btn-ghost" onclick="setSize(5)">Etiqueta 5 mm</button>
+      <button class="btn-ghost" onclick="setSize(7)">Etiqueta 7 mm</button>
+      <button class="btn-ghost" onclick="setSize(10)">Etiqueta 10 mm</button>
+    </div>
+
+    <div id="qrResult"></div>
+    <p class="hint">
+      El QR generado apunta a la URL: <code>/qr/&lt;código&gt;</code> y mostrará siempre la información
+      actualizada desde Supabase.
+    </p>
+  </div>
+</div>
+
+<script>
+let qrSize = 200;
+
+// Ajusta aquí tu dominio definitivo de Netlify
+// Ejemplo: const BASE_URL = "https://tmp-trazabilidad.netlify.app/qr/";
+const BASE_URL = window.location.origin && window.location.origin !== "null"
+  ? window.location.origin + "/qr/"
+  : "https://tmp-trazabilidad.netlify.app/qr/"; // puedes cambiar este dominio
+
+function setSize(mm){
+  qrSize = mm * 40; // aproximación mm→px para tus etiquetas
+  // si ya hay un código introducido, regeneramos con el nuevo tamaño
+  const codigo = document.getElementById("codigo").value.trim();
+  if (codigo) generarQR();
+}
+
+function generarQR(){
+  const codigo = document.getElementById("codigo").value.trim();
+  if (!codigo){
+    alert("Introduce el código del instrumento.");
+    return;
+  }
+
+  const url = BASE_URL + encodeURIComponent(codigo);
+
+  const cont = document.getElementById("qrResult");
+  cont.innerHTML = "";
+
+  const qrDiv = document.createElement("div");
+  cont.appendChild(qrDiv);
+
+  new QRCode(qrDiv, {
+    text: url,
+    width: qrSize,
+    height: qrSize
+  });
+
+  const p = document.createElement("p");
+  p.className = "hint";
+  p.textContent = "URL codificada en el QR: " + url;
+  cont.appendChild(p);
+}
+</script>
+
+</body>
+</html>

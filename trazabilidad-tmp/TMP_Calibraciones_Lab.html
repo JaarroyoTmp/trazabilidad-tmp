@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TMP · Calibraciones v9.7 (Plan + Medición + Resultados)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#0e2235; --bg1:#122b43; --bg2:#1a3b57; --card:#183049;
+    --muted:#8ea6bb; --txt:#e7f2fb; --accent:#47a3ff; --accent-2:#1f8fff;
+    --ok:#2bd47c; --warn:#ffd15c; --bad:#ff6b6b; --chip:#203a57;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--txt);
+    background: radial-gradient(1200px 800px at 10% 0%, var(--bg2) 0%, var(--bg1) 50%, var(--bg0) 100%);
+  }
+  .wrap{max-width:1120px;margin:24px auto;padding:0 16px}
+  header{display:flex;align-items:center;gap:16px;padding:12px 0 18px;border-bottom:1px solid #21436040}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  .badge{font-size:12px;background:var(--chip);padding:6px 10px;border-radius:999px;color:#b9d3ea}
+  .online{background:#103c26;color:#aaf2cd}
+  .offline{background:#3a1b1b;color:#ffc0c0}
+  .grid{display:grid;gap:12px}
+  .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .card{background:linear-gradient(180deg,#1a3551aa,#163049aa);border:1px solid #20466866;border-radius:14px;padding:16px}
+  .card h3{margin:0 0 10px;font-size:14px;font-weight:700;color:#d8e9f8}
+  label{display:block;font-size:12px;color:#a7c0d6;margin-bottom:6px}
+  input,select,textarea,button{font-family:inherit;color:inherit}
+  input[type="text"],input[type="number"],select,textarea{
+    width:100%;background:#102030;border:1px solid #2a537a;border-radius:10px;padding:10px 12px;color:#e9f4ff;outline:none
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+  textarea{min-height:70px;resize:vertical}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{background:var(--accent-2);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-weight:600;cursor:pointer;transition:.15s transform}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.secondary{background:#214360}
+  .btn.ghost{background:transparent;border:1px solid #2a537a}
+  .tabs{display:flex;gap:8px;margin:14px 0}
+  .tab{background:#12314e;border:1px solid #294d70;color:#cfe6fa;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .tab.active{background:#1a58a4;border-color:#2272d4}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--chip);border:1px solid #2d4e74;color:#b9d3ea;padding:6px 10px;border-radius:999px;font-size:12px}
+  .status{font-weight:700;padding:6px 10px;border-radius:999px}
+  .status.ok{background:#0e4027;border:1px solid #2bd47c80;color:#baf1d2}
+  .status.warn{background:#4a3a16;border:1px solid #ffd15c80;color:#ffe6ad}
+  .status.bad{background:#4a1b1b;border:1px solid #ff6b6b80;color:#ffc7c7}
+  table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
+  th,td{border-bottom:1px solid #244b6a66;padding:10px 8px;text-align:center;font-size:13px}
+  thead th{background:#112338;color:#cfe6fa}
+  tbody tr:nth-child(odd){background:#11263f80}
+  .note{font-size:12px;color:#a7c0d6}
+  .pill{padding:4px 8px;border-radius:999px;background:#104071;color:#bfe0ff;font-weight:600}
+  .danger{background:#5b3a1d;color:#ffe2c0} /* menos agresivo que rojo puro */
+  .success{background:#1c4c2b;color:#bff5d6}
+  dialog::backdrop{background:#0008}
+  dialog{border:none;border-radius:14px;background:#10243a;color:#e7f2fb;padding:16px 16px 10px;max-width:980px;width:min(96vw,980px)}
+  dialog h4{margin:0 0 10px}
+  .table-box{max-height:380px;overflow:auto;border:1px solid #2a537a;border-radius:12px}
+  .sel-row{cursor:pointer}
+  .help{font-size:12px;color:#96b7cf;margin-top:6px}
+  .footer-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+  .hidden{display:none}
+  .mt-8{margin-top:8px}
+  .right{margin-left:auto}
+  .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700}
+  .logo{height:22px;width:22px;border-radius:4px;background:linear-gradient(135deg,#3dd2ff,#1bb3ff);display:inline-block}
+  canvas.sig{background:#0b2035;border:1px dashed #2a537a;border-radius:10px}
+  .mini{font-size:11px;color:#9eb9cf}
+  .local-banner{
+    display:none;
+    background:#4b3a10;
+    color:#ffe8b3;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:11px;
+    margin-left:auto;
+  }
+  .local-banner.show{display:inline-flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">TMP · Calibraciones v9.7</div>
+    <h1>Plan · Medición · Resultados (Multipatrón)</h1>
+    <span id="localBanner" class="local-banner">Modo local: Supabase no guardará cambios.</span>
+    <span id="onlineBadge" class="badge offline right">Offline</span>
+  </header>
+
+  <!-- Instrumento -->
+  <div class="card">
+    <h3>Instrumento</h3>
+    <div class="grid g-3">
+      <div>
+        <label>Código</label>
+        <div class="row">
+          <input id="insCodigo" type="text" placeholder="Teclea el código o escanéalo" />
+          <button id="btnCargar" class="btn">Cargar</button>
+          <button id="btnLimpiar" class="btn secondary">Limpiar</button>
+        </div>
+      </div>
+      <div>
+        <label>Descripción</label>
+        <input id="insDescripcion" type="text" readonly>
+      </div>
+      <div>
+        <label>Fabricante / Tipo</label>
+        <input id="insFabTipo" type="text" readonly>
+      </div>
+
+      <div>
+        <label>Rango</label>
+        <input id="insRango" type="text" readonly>
+      </div>
+      <div>
+        <label>Próx. calibración</label>
+        <input id="insProx" type="text" readonly>
+      </div>
+      <div>
+        <label>Estado</label>
+        <div id="insEstado" class="status">—</div>
+      </div>
+
+      <div>
+        <label>Unidad base</label>
+        <select id="unidadBase">
+          <option value="mm">mm</option>
+          <option value="N·m">N·m</option>
+          <option value="g">g</option>
+        </select>
+      </div>
+      <div>
+        <label>Última calibración</label>
+        <input id="insUltima" type="text" readonly>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <div class="stamp"><span class="logo"></span> TMP · ISO/IEC 17025 · ILAC-G8</div>
+      </div>
+    </div>
+
+    <!-- Botonera de patrones -->
+    <div class="row mt-8">
+      <button id="btnSelPatrones" class="btn ghost">Seleccionar patrón(es)</button>
+      <div id="patronesSelChips" class="chips"></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="plan">Plan</div>
+    <div class="tab" data-tab="medicion">Medición</div>
+    <div class="tab" data-tab="resultados">Resultados</div>
+  </div>
+
+  <!-- PLAN -->
+  <section id="tab-plan" class="card">
+    <h3>Plan de calibración (por tipo de prueba)</h3>
+    <div class="chips">
+      <button class="btn ghost" data-addblock="GNG">+ GO/NO GO</button>
+      <button class="btn ghost" data-addblock="EXT">+ Exteriores</button>
+      <button class="btn ghost" data-addblock="INT">+ Interiores</button>
+      <button class="btn ghost" data-addblock="ALT">+ Alturas</button>
+      <button class="btn ghost" data-addblock="BAL">+ Balanzas</button>
+      <button class="btn ghost" data-addblock="DIN">+ Dinamométricas</button>
+      <button class="btn ghost" data-addblock="DURO">+ Durómetros</button>
+      <button class="btn ghost" data-addblock="PATRON">+ Calibración de patrones</button>
+    </div>
+    <p class="help">Añade bloques de plan y selecciona patrón + puntos exactos (0.001). Múltiples patrones permitidos.</p>
+    <div id="planBloques"></div>
+  </section>
+
+  <!-- MEDICIÓN -->
+  <section id="tab-medicion" class="card hidden">
+    <h3>Medición</h3>
+    <div class="grid g-3">
+      <div>
+        <label>Lado de medición (atributos)</label>
+        <select id="ladoMed">
+          <option value="GO">GO</option>
+          <option value="NOGO">NO GO</option>
+        </select>
+      </div>
+      <div>
+        <label>Nominal GO (mm)</label>
+        <input id="nominalGO" type="text" placeholder="p.ej. 8.000">
+      </div>
+      <div>
+        <label>Nominal NO GO (mm)</label>
+        <input id="nominalNOGO" type="text" placeholder="p.ej. 8.015">
+      </div>
+      <div>
+        <label>Referencia para el error</label>
+        <select id="refError">
+          <option value="patron">Punto del patrón (exacto)</option>
+          <option value="instrumento">Nominal del instrumento (GO/NO GO)</option>
+        </select>
+      </div>
+      <div>
+        <label>Tolerancia global ± (mm)</label>
+        <input id="tolGlobal" type="text" value="0.010">
+      </div>
+      <div>
+        <label>U base patrón k=2 (mm)</label>
+        <input id="uBase" type="text" value="0.002">
+      </div>
+    </div>
+    <div id="medicionBloques"></div>
+    <div class="row" style="margin-top:10px;justify-content:flex-end">
+      <button id="btnGuardarMed" class="btn">Guardar mediciones</button>
+      <button class="btn secondary" id="goResultados">Ir a Resultados</button>
+    </div>
+  </section>
+
+  <!-- RESULTADOS / INFORME PREMIUM -->
+  <section id="tab-resultados" class="card hidden">
+    <h3>Informe de calibración (ILAC-G8 / estilo laboratorio)</h3>
+
+    <!-- Ficha instrumento para informe -->
+    <div class="card" style="margin-top:8px">
+      <h3>1. Ficha del instrumento</h3>
+      <div id="resumenInstrumento" class="mini note">
+        (Se rellenará automáticamente al calcular resultados)
+      </div>
+    </div>
+
+    <!-- Condiciones ambientales -->
+    <div class="card" style="margin-top:8px">
+      <h3>2. Condiciones ambientales durante la calibración</h3>
+      <div class="grid g-3">
+        <div>
+          <label>Temperatura (°C)</label>
+          <input id="condTemp" type="text" placeholder="p.ej. 20.0">
+        </div>
+        <div>
+          <label>Humedad relativa (%)</label>
+          <input id="condHum" type="text" placeholder="p.ej. 50">
+        </div>
+        <div>
+          <label>Fecha de calibración</label>
+          <input id="condFechaCal" type="date">
+        </div>
+      </div>
+      <div class="mt-8">
+        <label>Observaciones ambientales</label>
+        <textarea id="condObs" placeholder="Estabilidad, tiempo de aclimatación, particularidades del entorno, etc."></textarea>
+      </div>
+    </div>
+
+    <!-- Método y gráfico -->
+    <div class="card" style="margin-top:8px">
+      <h3>3. Método de calibración y criterio de aceptación</h3>
+      <p class="mini">
+        La calibración se realiza comparando las indicaciones del instrumento con los valores nominales de un patrón
+        materializado trazable. Para cada punto se calcula el error:
+        <br><strong>E = I − R</strong>, donde I es la media de las indicaciones y R la referencia (patrón o nominal del instrumento).
+        La incertidumbre expandida U(k=2) se compone de la incertidumbre del patrón y contribuciones del proceso
+        de medida. El criterio de aceptación aplicado es el recomendado en ILAC-G8:
+        <br>|E| + U ≤ T → APTO · |E| − U &gt; T → NO APTO · resto → INDETERMINADO.
+      </p>
+      <div class="grid g-2" style="margin-top:8px">
+        <div>
+          <label class="mini">Gráfica de errores (primer bloque)</label>
+          <canvas id="grafErrores" width="420" height="200" style="background:#0b2035;border-radius:10px;border:1px solid #2a537a"></canvas>
+          <p class="mini">Se representa el error (µm) en función del valor nominal del patrón para el primer bloque del plan.</p>
+        </div>
+        <div>
+          <label class="mini">Resumen del método</label>
+          <ul class="mini">
+            <li>Lecturas repetidas (hasta 5) por punto para estimar la repetibilidad (σ).</li>
+            <li>Cálculo de la media aritmética de las indicaciones.</li>
+            <li>Cálculo del error E respecto al valor de referencia.</li>
+            <li>Conversión a micras (µm) para la interpretación.</li>
+            <li>Aplicación de U(k=2) global y comparación con la tolerancia T.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados detallados (lo que ya tenías) -->
+    <div class="card" style="margin-top:8px">
+      <h3>4. Resultados detallados por bloque y punto</h3>
+      <div id="resultadosBox"></div>
+    </div>
+
+    <!-- Resumen global -->
+    <div class="card" style="margin-top:8px">
+      <h3>5. Resumen global de la calibración</h3>
+      <div id="resumenGlobalBox" class="mini note">
+        (Se completará al calcular resultados)
+      </div>
+    </div>
+
+    <!-- Trazabilidad y referencias -->
+    <div class="card" style="margin-top:8px">
+      <h3>6. Trazabilidad metrológica y referencias</h3>
+      <div id="trazabilidadBox" class="mini note">
+        (Se completará con los patrones utilizados y la situación de calibración.)
+      </div>
+      <p class="mini" style="margin-top:6px">
+        Referencias normativas utilizadas: ISO/IEC 17025, guía ILAC-G8 para la evaluación de la conformidad y buenas
+        prácticas metrológicas del laboratorio TMP.
+      </p>
+    </div>
+
+    <!-- Firma y validación -->
+    <div class="card" style="margin-top:8px">
+      <h3>7. Validación del informe</h3>
+      <div class="grid g-3">
+        <div>
+          <label>Operario responsable *</label>
+          <input id="firmanteNombre" type="text" placeholder="Nombre y apellidos">
+        </div>
+        <div>
+          <label>Fecha de próxima calibración *</label>
+          <input id="firmanteProxima" type="date">
+        </div>
+        <div>
+          <label>Firma manuscrita *</label>
+          <canvas id="sigPad" class="sig" width="320" height="120"></canvas>
+          <div class="row mt-8"><button id="sigClear" class="btn secondary">Borrar firma</button></div>
+        </div>
+      </div>
+      <p class="mini">La firma, nombre y fecha de próxima calibración quedarán documentadas en el informe impreso.</p>
+    </div>
+
+    <div class="row" style="margin-top:10px;justify-content:flex-end">
+      <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
+      <button id="btnGuardarTodo" class="btn">Guardar todo (local)</button>
+    </div>
+    <p class="note">Criterio ILAC-G8: |Error| + U ≤ T → <span class="pill success">APTO</span> · |Error| − U &gt; T → <span class="pill danger">NO APTO</span> · resto → INDETERMINADO</p>
+  </section>
+</div>
+
+<!-- DIALOGO: Seleccionar patrón(es) -->
+<dialog id="dlgPatrones">
+  <h4>Selecciona patrón(es)</h4>
+  <div class="row">
+    <input id="patronFilter" type="text" placeholder="Filtrar por texto (código / descripción)..." />
+    <span class="muted mini right">Puedes marcar varios. Se cargan desde Supabase.</span>
+  </div>
+  <div class="table-box mt-8">
+    <table>
+      <thead>
+        <tr><th></th><th>Código</th><th>Descripción</th><th>U(k=2)</th><th>Nota</th></tr>
+      </thead>
+      <tbody id="patronRows"></tbody>
+    </table>
+  </div>
+  <div class="footer-bar">
+    <button class="btn secondary" id="cancelPatrones">Cancelar</button>
+    <button class="btn" id="okPatrones">Usar seleccionados</button>
+  </div>
+</dialog>
+
+<!-- DIALOGO: Seleccionar puntos -->
+<dialog id="dlgPuntos">
+  <h4>Selecciona puntos del patrón</h4>
+
+  <div class="row">
+    <input id="puntoSearchExacto" type="text" placeholder="Nominal exacto (p. ej. 8.001)" />
+    <button id="btnBuscarPunto" class="btn">Buscar nominal exacto</button>
+    <span class="muted mini">Si el punto no existe en Supabase no se mostrará (calibración requiere nominal exacto).</span>
+  </div>
+
+  <div class="table-box mt-8">
+    <table>
+      <thead>
+        <tr><th></th><th>#</th><th>Nominal</th><th>U(k=2)</th><th>Corrección</th><th>Caract.</th></tr>
+      </thead>
+      <tbody id="puntosRows"></tbody>
+    </table>
+  </div>
+
+  <div class="row mt-8">
+    <button id="btnCargarMas" class="btn secondary">Cargar más (lote +1000)</button>
+    <span class="muted mini">Navega por lotes si necesitas revisar el banco completo.</span>
+  </div>
+
+  <div class="footer-bar">
+    <button class="btn secondary" id="cancelPuntos">Cancelar</button>
+    <button class="btn" id="okPuntos">Usar seleccionados</button>
+  </div>
+</dialog>
+
+<script type="module">
+/* ========= CONFIG SUPABASE ========= */
+const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+
+/* ========= ESTADO ========= */
+const state = {
+  online: false,
+  instrumento: null,
+  patrones: [],
+  patronesSeleccionados: [],
+  puntosPage: { patronId:null, from:0, size:1000, cache:[] },
+  plan: [],
+  mediciones: {},
+  resultados: {}
+};
+
+/* ========= UTILIDADES ========= */
+const $ = q => document.querySelector(q);
+const $$ = q => Array.from(document.querySelectorAll(q));
+const fmt = (n,d=3) => Number(n).toFixed(d);
+const parseNum = (v) => {
+  if (typeof v === 'number') return v;
+  if (v===null || v===undefined) return 0;
+  const n = Number(String(v).trim().replace(',','.'));
+  return Number.isFinite(n)? n : 0;
+};
+const uid = () => Math.random().toString(36).slice(2,9);
+const fechaISO = s => { if(!s) return null; const d=new Date(s); return Number.isNaN(+d)? null : d; };
+const setBadge = ok => {
+  const b = $("#onlineBadge");
+  b.textContent = ok ? "Online (Supabase)" : "Offline";
+  b.classList.toggle("online", ok);
+  b.classList.toggle("offline", !ok);
+  state.online = ok;
+};
+
+/* ========= MODO LOCAL ========= */
+if (location.protocol === "file:") $("#localBanner").classList.add("show");
+
+/* ========= SUPABASE ========= */
+let supabase = null;
+async function ensureSupabase(){
+  if (!SUPABASE_URL.startsWith("http")) { setBadge(false); return null; }
+  if (!supabase) {
+    try {
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.5");
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e){ console.warn(e); supabase=null; }
+  }
+  setBadge(!!supabase);
+  return supabase;
+}
+
+/* ========= CARGA INSTRUMENTO ========= */
+async function cargarInstrumento(){
+  const codigo = $("#insCodigo").value.trim();
+  if (!codigo) return alert("Teclea un código de instrumento.");
+  await ensureSupabase();
+
+  let inst=null;
+  if (supabase){
+    const { data, error } = await supabase.from("instrumentos").select("*").eq("codigo", codigo).maybeSingle();
+    if (error) console.warn(error);
+    inst=data;
+  } else {
+    inst={ codigo, descripcion:"Tampón liso P/NP", fabricante_tipo:"N/A", rango:"Ø8 H7", unidad_base:"mm", fecha_ultima_cal:"2024-11-03", proxima_cal:"2025-11-03" };
+  }
+
+  state.instrumento = inst;
+  pintarInstrumento();
+
+  await cargarPatrones();
+
+  state.plan=[]; state.mediciones={}; state.resultados={};
+  $("#planBloques").innerHTML=""; $("#medicionBloques").innerHTML=""; $("#resultadosBox").innerHTML="";
+  $("#resumenInstrumento").textContent = "(Pendiente de cálculo de resultados)";
+  $("#resumenGlobalBox").textContent = "(Pendiente de cálculo de resultados)";
+  $("#trazabilidadBox").textContent = "(Pendiente de cálculo de resultados)";
+  $("#patronesSelChips").innerHTML=""; state.patronesSeleccionados=[];
+  alert("Instrumento cargado correctamente.");
+}
+
+function pintarInstrumento(){
+  const ins=state.instrumento||{};
+  $("#insDescripcion").value = ins.descripcion||"";
+  $("#insFabTipo").value = ins.fabricante_tipo||"";
+  $("#insRango").value = ins.rango||"";
+  $("#unidadBase").value = ins.unidad_base||"mm";
+  $("#insUltima").value = ins.fecha_ultima_cal || "—";
+  $("#insProx").value = ins.proxima_cal || "—";
+
+  const est = $("#insEstado");
+  let cl="ok", txt="OK";
+  const prox = fechaISO(ins.proxima_cal);
+  const hoy = new Date();
+  if (prox && hoy>prox){ cl="bad"; txt="FUERA"; }
+  else if (prox && (+prox - +hoy) < 1000*60*60*24*30){ cl="warn"; txt="PRÓXIMA"; }
+  est.className="status "+cl; est.textContent=txt;
+}
+
+/* ========= CATALOGO DE PATRONES ========= */
+async function cargarPatrones(){
+  await ensureSupabase();
+  if (supabase){
+    const { data, error } = await supabase.from("patrones").select("*").order("descripcion",{ascending:true});
+    if (error) console.warn(error);
+    state.patrones = data||[];
+  } else {
+    state.patrones = [
+      {id:"1288", codigo:"1288", descripcion:"Banco TRIMOS TELMA 500 — Máquina de una coordenada horizontal", u_k2:0.002, nota:"—"},
+      {id:"180456", codigo:"180456", descripcion:"Juego de bloques patrón 0–100 mm", u_k2:0.001, nota:"—"}
+    ];
+  }
+}
+
+/* ========= DIALOGO PATRONES (MULTI) ========= */
+$("#btnSelPatrones").addEventListener("click", async ()=>{
+  if (!state.patrones.length) await cargarPatrones();
+  const dlg=$("#dlgPatrones"), rows=$("#patronRows"), filter=$("#patronFilter");
+  const draw=()=>{
+    const f=(filter.value||"").toLowerCase();
+    rows.innerHTML = state.patrones
+      .filter(p=> !f || (p.descripcion||"").toLowerCase().includes(f) || (p.codigo||"").toLowerCase().includes(f))
+      .map(p=>`
+        <tr class="sel-row">
+          <td><input type="checkbox" value="${p.id}"></td>
+          <td>${p.codigo||p.id}</td>
+          <td>${p.descripcion||"—"}</td>
+          <td>${fmt(p.u_k2??0.002)}</td>
+          <td>${p.nota||"—"}</td>
+        </tr>`).join('');
+  };
+  draw(); filter.oninput=draw;
+  dlg.showModal();
+
+  $("#cancelPatrones").onclick=()=>dlg.close();
+  $("#okPatrones").onclick=()=>{
+    const ids = Array.from(rows.querySelectorAll('input[type="checkbox"]:checked')).map(x=>x.value);
+    if (!ids.length) return alert("Selecciona al menos un patrón.");
+    state.patronesSeleccionados = state.patrones.filter(p=> ids.includes(String(p.id)));
+    $("#patronesSelChips").innerHTML = state.patronesSeleccionados.map(p=>`<span class="chip">${p.codigo||p.id} · ${p.descripcion}</span>`).join('');
+    dlg.close();
+  };
+});
+
+/* ========= ELECCIÓN PATRÓN CUANDO HAY VARIOS ========= */
+async function elegirUnoDeSeleccionados(){
+  return await new Promise(res=>{
+    const options = state.patronesSeleccionados.map((p,i)=>`${i+1}. ${p.codigo||p.id} · ${p.descripcion}`).join('\n');
+    const ans = prompt(`Hay varios patrones seleccionados. Indica el número:\n${options}\n\n`, "1");
+    const idx = parseInt(ans,10)-1;
+    if (Number.isFinite(idx) && idx>=0 && idx<state.patronesSeleccionados.length) res(state.patronesSeleccionados[idx]); else res(null);
+  });
+}
+
+/* ========= PLAN: Añadir bloque ========= */
+$$('button[data-addblock]').forEach(b=>{
+  b.addEventListener("click", async ()=>{
+    if (!state.instrumento) return alert("Carga un instrumento primero.");
+    if (!state.patronesSeleccionados.length) return alert("Selecciona primero 1 o varios patrones.");
+    const patron = (state.patronesSeleccionados.length===1)
+      ? state.patronesSeleccionados[0]
+      : await elegirUnoDeSeleccionados();
+    if (!patron) return;
+    const puntos = await dialogSelectPuntosExactos(patron.id);
+    if (!puntos?.length) return;
+    const bloque = {
+      id: uid(),
+      tipo: b.dataset.addblock,
+      patron,
+      puntos,
+      nombrePatron: `${patron.codigo||patron.id} · ${patron.descripcion}`
+    };
+    state.plan.push(bloque);
+    renderPlan(); renderMedicion();
+  });
+});
+
+/* ========= RENDER PLAN ========= */
+function renderPlan(){
+  const box=$("#planBloques");
+  if (!state.plan.length){ box.innerHTML=`<p class="note">No hay bloques. Añade alguno con los botones superiores.</p>`; return; }
+  box.innerHTML = state.plan.map(b=>`
+    <div class="card" style="margin-top:10px">
+      <div class="row">
+        <div class="pill">${b.tipo}</div>
+        <div class="chip">${b.nombrePatron}</div>
+        <span class="right mini muted">${b.puntos.length} punto(s) seleccionados</span>
+      </div>
+      <div class="table-box mt-8">
+        <table>
+          <thead><tr><th>#</th><th>Nominal</th><th>U(k=2)</th><th>Corrección</th><th>Caract.</th></tr></thead>
+          <tbody>
+            ${b.puntos.map((p,i)=>`<tr><td>${i+1}</td><td>${fmt(p.valor_nominal)}</td><td>${fmt(p.u_k2)}</td><td>${fmt(p.correccion_patron)}</td><td>${p.caracteristica||"—"}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ========= MEDICION ========= */
+function renderMedicion(){
+  const box=$("#medicionBloques");
+  if (!state.plan.length){ box.innerHTML=`<p class="note">Primero define el plan (bloques y puntos).</p>`; return; }
+  box.innerHTML = state.plan.map(b=>{
+    const filas = b.puntos.map(p=>{
+      const key=`${b.id}|${p.id}`;
+      const med=state.mediciones[key]||{r:[null,null,null,null,null],media:null,s:null};
+      return `
+        <tr data-key="${key}">
+          <td>${p.valor_nominal.toFixed(3)}</td>
+          ${[0,1,2,3,4].map(i=>`<td><input class="rep" data-idx="${i}" type="text" inputmode="decimal" placeholder="—" value="${med.r[i]??""}"></td>`).join('')}
+          <td class="media">${med.media??"0.000"}</td><td class="s">${med.s??"0.000"}</td>
+        </tr>`;
+    }).join('');
+    return `
+      <div class="card" style="margin-top:12px">
+        <div class="row"><div class="pill">${b.tipo}</div><div class="chip">${b.nombrePatron}</div></div>
+        <div class="table-box mt-8">
+          <table>
+            <thead><tr><th>Nominal (ref. patrón exacto)</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>Media</th><th>σ</th></tr></thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('');
+
+  $$("#medicionBloques input.rep").forEach(inp=>{
+    inp.addEventListener('input',()=>{ inp.value = inp.value.replace(',', '.'); });
+    inp.addEventListener('change',()=>{
+      const tr=inp.closest('tr'); const key=tr.dataset.key; const idx=+inp.dataset.idx;
+      const med=state.mediciones[key]||{r:[null,null,null,null,null]};
+      med.r[idx]=parseNum(inp.value);
+      const vals=med.r.filter(x=>typeof x==='number'&&isFinite(x));
+      const n=vals.length; const media=n? (vals.reduce((a,b)=>a+b,0)/n) : 0;
+      const s=n>1? Math.sqrt(vals.reduce((a,b)=>a+(b-media)**2,0)/(n-1)) : 0;
+      med.media=fmt(media); med.s=fmt(s); state.mediciones[key]=med;
+      tr.querySelector('.media').textContent=med.media; tr.querySelector('.s').textContent=med.s;
+    });
+  });
+}
+$("#btnGuardarMed").addEventListener("click",()=>{
+  const codigo=$("#insCodigo").value.trim();
+  localStorage.setItem(`mediciones:${codigo}`, JSON.stringify(state.mediciones));
+  alert("Mediciones guardadas localmente.");
+});
+$("#goResultados").addEventListener("click",()=>{ calcularResultados(); switchTab('resultados'); });
+
+/* ========= RESULTADOS + INFORME ========= */
+function calcularResultados(){
+  const lado=$("#ladoMed").value;
+  const nominalGO=parseNum($("#nominalGO").value);
+  const nominalNOGO=parseNum($("#nominalNOGO").value);
+  const ref=$("#refError").value; 
+  const tol=parseNum($("#tolGlobal").value);
+  const uBase=parseNum($("#uBase").value);
+
+  const box=$("#resultadosBox");
+  if (!state.plan.length){ box.innerHTML=`<p class="note">No hay plan definido.</p>`; return; }
+
+  // --- 4. Resultados detallados ---
+  let html="";
+  let maxAbsError = 0;
+  let maxAbsErrorPlusU = 0;
+  let totalPuntos = 0;
+  let hayNoApto = false;
+  let hayIndeterminado = false;
+
+  for (const b of state.plan){
+    html += `
+      <div class="card" style="margin-top:12px">
+        <div class="row">
+          <div class="pill">${b.tipo}</div>
+          <div class="chip">${b.nombrePatron}</div>
+          <span class="right mini muted">Nominal bloque (${lado}): ${lado==='GO'?fmt(nominalGO):fmt(nominalNOGO)} mm</span>
+        </div>
+        <div class="table-box mt-8">
+          <table>
+            <thead><tr><th>#</th><th>Nominal patrón (mm)</th><th>Corrección (µm)</th><th>Media (mm)</th><th>Error (µm)</th><th>U_total (µm)</th><th>Tolerancia (µm)</th><th>Decisión</th></tr></thead>
+            <tbody>
+    `;
+    b.puntos.forEach((p,i)=>{
+      const key=`${b.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
+      let refVal = (ref==="patron") ? p.valor_nominal : (lado==="GO" ? nominalGO : nominalNOGO);
+      const error = (media - refVal)*1000; 
+      const U = (uBase*1000);           
+      const T = tol*1000;               
+      const absE = Math.abs(error);
+      const absEplusU = Math.abs(error)+U;
+      if (absE > maxAbsError) maxAbsError = absE;
+      if (absEplusU > maxAbsErrorPlusU) maxAbsErrorPlusU = absEplusU;
+      totalPuntos++;
+
+      const decision = (Math.abs(error)+U<=T) ? "APTO" : ((Math.abs(error)-U>T) ? "NO APTO" : "INDETERMINADO");
+      if (decision==="NO APTO") hayNoApto = true;
+      if (decision==="INDETERMINADO") hayIndeterminado = true;
+      const badge = decision==="APTO" ? "success" : (decision==="NO APTO" ? "danger" : "");
+      html += `
+        <tr>
+          <td>${i+1}</td>
+          <td>${fmt(p.valor_nominal)}</td>
+          <td>${fmt(p.correccion_patron*1000,3)}</td>
+          <td>${fmt(media)}</td>
+          <td>${fmt(error,1)}</td>
+          <td>${fmt(U,1)}</td>
+          <td>${fmt(T,1)}</td>
+          <td><span class="pill ${badge}">${decision}</span></td>
+        </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  }
+  box.innerHTML=html;
+
+  // --- 1. Ficha instrumento (para informe) ---
+  const ins = state.instrumento || {};
+  const resumenInst = `
+    <p class="mini">
+      <strong>Código:</strong> ${ins.codigo || "-"} ·
+      <strong>Descripción:</strong> ${ins.descripcion || "-"} ·
+      <strong>Fabricante / Tipo:</strong> ${ins.fabricante_tipo || "-"}<br>
+      <strong>Rango de medida:</strong> ${ins.rango || "-"} ·
+      <strong>Unidad base:</strong> ${ins.unidad_base || "mm"}<br>
+      <strong>Última calibración registrada:</strong> ${ins.fecha_ultima_cal || "-"} ·
+      <strong>Próxima calibración registrada:</strong> ${ins.proxima_cal || "-"}
+    </p>
+  `;
+  $("#resumenInstrumento").innerHTML = resumenInst;
+
+  // --- 5. Resumen global ---
+  let decisionGlobal = "APTO";
+  if (hayNoApto) decisionGlobal = "NO APTO";
+  else if (hayIndeterminado) decisionGlobal = "INDETERMINADO";
+
+  const resumenGlobal = `
+    <p class="mini">
+      <strong>Número de bloques:</strong> ${state.plan.length} ·
+      <strong>Número total de puntos evaluados:</strong> ${totalPuntos}<br>
+      <strong>Máx |E| (µm):</strong> ${fmt(maxAbsError,1)} ·
+      <strong>Máx (|E| + U) (µm):</strong> ${fmt(maxAbsErrorPlusU,1)} ·
+      <strong>Tolerancia global (µm):</strong> ${fmt(tol*1000,1)}<br>
+      <strong>Decisión global según ILAC-G8:</strong>
+      <span class="pill ${decisionGlobal==="APTO"?"success":(decisionGlobal==="NO APTO"?"danger":"")}">
+        ${decisionGlobal}
+      </span>
+    </p>
+  `;
+  $("#resumenGlobalBox").innerHTML = resumenGlobal;
+
+  // --- 6. Trazabilidad ---
+  const patronesTxt = (state.patronesSeleccionados||[]).map(p=>`${p.codigo||p.id} · ${p.descripcion||""}`).join("; ");
+  const traz = `
+    <p class="mini">
+      La trazabilidad metrológica se garantiza mediante el uso de patrones materializados cuyo estado de calibración
+      se controla en el sistema de gestión de patrones del laboratorio TMP. Para esta calibración se han utilizado
+      los siguientes patrones:<br>
+      <strong>Patrones empleados:</strong> ${patronesTxt || "No informado"}.
+    </p>
+    <p class="mini">
+      Los valores indicados de corrección del patrón (columna "Corrección") proceden del certificado de calibración
+      o, en puntos intermedios, de la interpolación matemática aplicada por el laboratorio. La incertidumbre informada
+      corresponde a la incertidumbre expandida U(k=2), con un nivel de confianza aproximado del 95 %.
+    </p>
+  `;
+  $("#trazabilidadBox").innerHTML = traz;
+
+  // --- Gráfica de errores (primer bloque) ---
+  dibujarGraficaErrores();
+}
+
+/* ========= GRÁFICA DE ERRORES (primer bloque) ========= */
+function dibujarGraficaErrores(){
+  const canvas = document.getElementById("grafErrores");
+  if (!canvas) return;
+  const ctxG = canvas.getContext("2d");
+  ctxG.clearRect(0,0,canvas.width,canvas.height);
+  const bloque = state.plan[0];
+  if (!bloque) {
+    ctxG.fillStyle="#9eb9cf";
+    ctxG.font="12px Inter";
+    ctxG.fillText("Sin datos de bloques.", 10, 20);
+    return;
+  }
+
+  const lado=$("#ladoMed").value;
+  const nominalGO=parseNum($("#nominalGO").value);
+  const nominalNOGO=parseNum($("#nominalNOGO").value);
+  const ref=$("#refError").value;
+  const uBase=parseNum($("#uBase").value);
+  const tol=parseNum($("#tolGlobal").value);
+
+  const puntosGraf = [];
+  bloque.puntos.forEach(p=>{
+    const key=`${bloque.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
+    let refVal = (ref==="patron") ? p.valor_nominal : (lado==="GO" ? nominalGO : nominalNOGO);
+    const error = (media - refVal)*1000;
+    puntosGraf.push({x:p.valor_nominal, y:error});
+  });
+  if (!puntosGraf.length){
+    ctxG.fillStyle="#9eb9cf";
+    ctxG.font="12px Inter";
+    ctxG.fillText("Sin mediciones en el primer bloque.", 10, 20);
+    return;
+  }
+
+  const margin = {left:40,right:10,top:10,bottom:25};
+  const xs = puntosGraf.map(p=>p.x);
+  const ys = puntosGraf.map(p=>p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const maxAbsY = Math.max(...ys.map(v=>Math.abs(v)), tol*1000, uBase*1000);
+  const minY = -maxAbsY, maxY = maxAbsY;
+
+  const sx = v => margin.left + ( (v-minX)/(maxX-minX || 1) ) * (canvas.width - margin.left - margin.right);
+  const sy = v => margin.top + ( (maxY-v)/(maxY-minY || 1) ) * (canvas.height - margin.top - margin.bottom);
+
+  ctxG.strokeStyle="#2a4f74";
+  ctxG.lineWidth=1;
+  ctxG.strokeRect(margin.left,margin.top,canvas.width-margin.left-margin.right,canvas.height-margin.top-margin.bottom);
+
+  const y0 = sy(0);
+  ctxG.strokeStyle="#3f6fa3";
+  ctxG.beginPath();
+  ctxG.moveTo(margin.left,y0);
+  ctxG.lineTo(canvas.width-margin.right,y0);
+  ctxG.stroke();
+
+  const yTolUp = sy(tol*1000);
+  const yTolDown = sy(-tol*1000);
+  ctxG.strokeStyle="#66501d";
+  ctxG.setLineDash([4,3]);
+  ctxG.beginPath(); ctxG.moveTo(margin.left,yTolUp); ctxG.lineTo(canvas.width-margin.right,yTolUp); ctxG.stroke();
+  ctxG.beginPath(); ctxG.moveTo(margin.left,yTolDown); ctxG.lineTo(canvas.width-margin.right,yTolDown); ctxG.stroke();
+  ctxG.setLineDash([]);
+
+  ctxG.fillStyle="#9eb9cf";
+  ctxG.font="10px Inter";
+  ctxG.fillText("Error (µm)", margin.left+4, margin.top+10);
+  ctxG.fillText("Nominal patrón (mm)", canvas.width/2-40, canvas.height-5);
+
+  ctxG.fillStyle="#58a6ff";
+  puntosGraf.forEach(p=>{
+    const x = sx(p.x);
+    const y = sy(p.y);
+    ctxG.beginPath();
+    ctxG.arc(x,y,3,0,Math.PI*2);
+    ctxG.fill();
+  });
+}
+
+/* ========= GUARDADO LOCAL + VALIDACIÓN ========= */
+$("#btnGuardarTodo").addEventListener("click",()=>{
+  const codigo=$("#insCodigo").value.trim();
+  const sigData = sigCanvas.toDataURL("image/png");
+  const payload = {
+    instrumento: state.instrumento,
+    patronesSeleccionados: state.patronesSeleccionados,
+    plan: state.plan,
+    mediciones: state.mediciones,
+    condiciones: {
+      temp: $("#condTemp").value,
+      hum: $("#condHum").value,
+      fechaCal: $("#condFechaCal").value,
+      obs: $("#condObs").value
+    },
+    validacion: {
+      firmante: $("#firmanteNombre").value.trim(),
+      proxima: $("#firmanteProxima").value,
+      firma_png: sigData
+    },
+    ts: new Date().toISOString()
+  };
+  localStorage.setItem(`calibracion:${codigo}`, JSON.stringify(payload));
+  alert("Calibración, condiciones y validación guardadas localmente.");
+});
+
+$("#btnImprimir").addEventListener("click",()=>{
+  if (!$("#firmanteNombre").value.trim() || !$("#firmanteProxima").value) {
+    alert("Completa el nombre y la fecha de próxima calibración antes de imprimir.");
+    return;
+  }
+  window.print();
+});
+
+/* ========= SELECTOR DE PUNTOS (NOMINAL EXACTO) ========= */
+async function dialogSelectPuntosExactos(patronId){
+  await ensureSupabase();
+  const dlg=$("#dlgPuntos"), rows=$("#puntosRows"), input=$("#puntoSearchExacto");
+  const btnBuscar=$("#btnBuscarPunto"), btnMas=$("#btnCargarMas");
+  state.puntosPage = { patronId, from:0, size:1000, cache:[] };
+
+  const draw = () => {
+    const puntos = state.puntosPage.cache;
+    rows.innerHTML = puntos.map((p,i)=>`
+      <tr>
+        <td><input type="checkbox" value="${p.id}"></td>
+        <td>${i+1}</td>
+        <td>${fmt(p.valor_nominal)}</td>
+        <td>${fmt(p.u_k2)}</td>
+        <td>${fmt(p.correccion_patron)}</td>
+        <td>${p.caracteristica||"—"}</td>
+      </tr>`).join('');
+  };
+
+  async function loadPage(){
+    if (!supabase){
+      state.puntosPage.cache = [
+        {id:patronId+"_0",valor_nominal:8.000,u_k2:0.002,correccion_patron:0,caracteristica:"Interpolado automático"}
+      ];
+      draw(); return;
+    }
+    const { from, size } = state.puntosPage;
+    const { data, error } = await supabase
+      .from("proc_puntos")
+      .select("*")
+      .eq("patron_id", patronId)
+      .order("valor_nominal",{ascending:true})
+      .range(from, from+size-1);
+    if (error) { console.warn(error); return; }
+    state.puntosPage.from += size;
+    state.puntosPage.cache = (state.puntosPage.cache||[]).concat((data||[]).map(mapPoint));
+    draw();
+  }
+
+  async function buscarExacto(){
+    const str = input.value.trim().replace(',','.');
+    if (!str) return alert("Introduce un nominal exacto (ej. 8.001)");
+    const exact = Number(str);
+    if (!Number.isFinite(exact)) return alert("Valor no válido.");
+    const { data, error } = await supabase
+      .from("proc_puntos")
+      .select("*")
+      .eq("patron_id", patronId)
+      .eq("valor_nominal", exact)
+      .order("valor_nominal",{ascending:true})
+      .limit(50);
+    if (error) { console.warn(error); return; }
+    const list = (data||[]).map(mapPoint);
+    state.puntosPage.cache = list; draw();
+    if (!list.length) alert("No existe ese nominal exacto para este patrón.");
+  }
+
+  dlg.showModal(); rows.innerHTML=""; await loadPage();
+  btnMas.onclick=loadPage; btnBuscar.onclick=buscarExacto;
+
+  return await new Promise(res=>{
+    $("#cancelPuntos").onclick=()=>{ dlg.close(); res(null); };
+    $("#okPuntos").onclick=()=>{
+      const ids = Array.from(rows.querySelectorAll('input[type="checkbox"]:checked')).map(x=>x.value);
+      if (!ids.length) return alert("Selecciona al menos un punto.");
+      const sel = state.puntosPage.cache.filter(p=> ids.includes(String(p.id)));
+      dlg.close(); res(sel);
+    };
+  });
+}
+function mapPoint(p){
+  return {
+    id: p.id || p.uuid || p.pk || uid(),
+    valor_nominal: parseNum(p.valor_nominal ?? p.nominal_mm ?? p.nominal ?? 0),
+    u_k2: parseNum(p.u_k2 ?? p.u_patron ?? 0),
+    correccion_patron: parseNum(p.correccion_patron ?? p.correccion ?? 0),
+    caracteristica: p.caracteristica || p.tipo_medicion || ""
+  };
+}
+
+/* ========= TABS ========= */
+function switchTab(name){
+  $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  $('#tab-plan').classList.toggle('hidden', name!=='plan');
+  $('#tab-medicion').classList.toggle('hidden', name!=='medicion');
+  $('#tab-resultados').classList.toggle('hidden', name!=='resultados');
+}
+$$('.tab').forEach(t=> t.addEventListener('click',()=> switchTab(t.dataset.tab)));
+
+/* ========= FIRMA ========= */
+const sigCanvas = document.getElementById('sigPad');
+const ctx = sigCanvas.getContext('2d');
+ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 2.2; ctx.lineCap='round';
+let drawing=false, last=null;
+function pos(ev){ const r=sigCanvas.getBoundingClientRect(); return {x:(ev.clientX-r.left), y:(ev.clientY-r.top)}; }
+sigCanvas.addEventListener('mousedown', e=>{ drawing=true; last=pos(e); });
+sigCanvas.addEventListener('mousemove', e=>{ if(!drawing) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; });
+sigCanvas.addEventListener('mouseup', ()=>drawing=false);
+sigCanvas.addEventListener('mouseleave', ()=>drawing=false);
+document.getElementById('sigClear').addEventListener('click', ()=>{ ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height); });
+
+/* ========= BOTONES CABECERA ========= */
+$("#btnCargar").addEventListener("click", cargarInstrumento);
+$("#btnLimpiar").addEventListener("click", ()=>location.reload());
+
+/* ========= ARRANQUE ========= */
+setBadge(false); switchTab('plan');
+</script>
+</body>
+</html>
+
