@@ -73,6 +73,22 @@
       border-color: #58a6ff;
       transform: translateX(3px);
     }
+
+    /* Botón volver */
+    .btnVolver {
+      display: inline-block;
+      padding: 10px 16px;
+      background: #238636;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 15px;
+      margin: 10px;
+    }
+
+    .btnVolver:hover {
+      background: #2ea043;
+    }
   </style>
 
 </head>
@@ -100,13 +116,15 @@
     <a class="card" href="movimiento.html">🔄 Movimientos de Instrumentos</a>
     <a class="card" href="alta_instrumento.html">➕ Alta de Instrumento</a>
     <a class="card" href="qr/qr.index.html">🏷 Generador de QR</a>
-
   </div>
+
+  <!-- Botón de volver (para las demás páginas lo mismo)-->
+  <a class="btnVolver" href="home.html">⬅ Volver al Inicio</a>
 
   <script type="module">
     const raw = localStorage.getItem("operario");
     if (!raw) {
-      window.location.href = "login.html";
+      window.location.href = "acceso.html";  // corregido
     }
 
     const operario = JSON.parse(raw);
@@ -134,9 +152,10 @@
     // Logout
     document.getElementById("btnLogout").addEventListener("click", () => {
       localStorage.removeItem("operario");
-      window.location.href = "login.html";
+      window.location.href = "acceso.html"; // corregido
     });
   </script>
 
 </body>
 </html>
+
