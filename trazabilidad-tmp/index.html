@@ -3,158 +3,156 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TMP · Sistema de Trazabilidad</title>
+<title>TMP · Trazabilidad</title>
 
 <style>
+    /* -------------------------------------- */
+    /*            ESTÉTICA GENERAL            */
+    /* -------------------------------------- */
     body {
         margin: 0;
-        padding: 0;
-        background: radial-gradient(circle at center, #0e1a2b, #050b16);
-        font-family: "Inter", Arial, sans-serif;
+        background: #0a0f1a;
+        font-family: "Inter", sans-serif;
         overflow: hidden;
-        height: 100vh;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    /* Fondo animado de partículas */
-    canvas {
-        position: absolute;
-        top: 0; left: 0;
-        z-index: 1;
     }
 
     .center-box {
-        position: relative;
-        z-index: 2;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         text-align: center;
-        animation: fadeIn 1.2s ease-out forwards;
+        color: white;
+        z-index: 10;
     }
 
-    .logo {
+    .center-box img {
         width: 180px;
-        filter: drop-shadow(0 0 12px #3ea8ff88);
-        animation: float 3.5s ease-in-out infinite;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 0 6px #00b7ff);
     }
 
     h1 {
-        margin-top: 20px;
-        font-size: 1.8em;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        text-shadow: 0 0 15px #2d8cffaa;
+        font-size: 2.1em;
+        margin: 0;
+        color: #e7f5ff;
+        text-shadow: 0 0 12px rgba(0,200,255,0.4);
     }
 
-    .btn-enter {
-        margin-top: 30px;
-        padding: 14px 35px;
-        border: none;
-        border-radius: 40px;
+    p {
         font-size: 1.1em;
-        font-weight: 600;
-        cursor: pointer;
-        background: linear-gradient(90deg, #1e88e5, #3ea8ff);
-        color: #ffffff;
-        box-shadow: 0 0 18px rgba(0, 132, 255, .4);
-        transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 10px;
+        color: #9ec7ff;
     }
-    .btn-enter:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 0 28px rgba(0, 132, 255, .7);
+
+    .btn {
+        margin-top: 25px;
+        padding: 12px 28px;
+        background: #00aaff;
+        color: #00111f;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        cursor: pointer;
+        font-weight: 600;
+        box-shadow: 0 0 15px rgba(0,170,255,.4);
+        transition: .2s;
+    }
+
+    .btn:hover {
+        background: #29c3ff;
+        box-shadow: 0 0 22px rgba(0,200,255,.8);
+    }
+
+
+    /* -------------------------------------- */
+    /*         FONDO ANIMADO INDUSTRIAL       */
+    /* -------------------------------------- */
+    .floating {
+        position: absolute;
+        font-weight: bold;
+        font-size: 26px;
+        opacity: 0.18;
+        color: #9bd6ff;
+        animation: float 12s linear infinite;
+        pointer-events: none;
+        user-select: none;
     }
 
     @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-12px); }
-        100% { transform: translateY(0px); }
+        from { transform: translateY(120vh) rotate(0deg); }
+        to   { transform: translateY(-120vh) rotate(360deg); }
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(25px); }
-        to { opacity: 1; transform: translateY(0); }
+    /* Pequeños iconos técnicos */
+    .icon {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #79caff;
+        border-radius: 6px;
+        position: absolute;
+        opacity: 0.15;
+        animation: float 18s linear infinite;
     }
+
+    .icon::after {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border: 2px solid #79caff;
+        border-radius: 3px;
+    }
+
 </style>
-</head>
 
+</head>
 <body>
 
-<canvas id="particles"></canvas>
+<!-- ========================================== -->
+<!--           ELEMENTOS FLOTANTES              -->
+<!-- ========================================== -->
+<script>
+    const symbols = [
+        "⌀", "⌖", "|⟂|", "⟂", "∥", "⌯", "±0.01", "Ra 0.8", 
+        "x̄ = (Σx)/n", "ΔL = Lf − Li", "σ = √(Σ(x−μ)²/n)"
+    ];
 
+    // Generar símbolos animados
+    for (let i = 0; i < 22; i++) {
+        const div = document.createElement("div");
+        div.className = "floating";
+        div.style.left = Math.random()*100 + "vw";
+        div.style.animationDuration = (10 + Math.random()*15) + "s";
+        div.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+        document.body.appendChild(div);
+    }
+
+    // Generar iconos estilo "pie de rey / micrómetro"
+    for (let i = 0; i < 8; i++) {
+        const icon = document.createElement("div");
+        icon.className = "icon";
+        icon.style.left = Math.random()*100 + "vw";
+        icon.style.animationDuration = (18 + Math.random()*10) + "s";
+        icon.style.transform = "rotate(" + (Math.random()*60 - 30) + "deg)";
+        document.body.appendChild(icon);
+    }
+</script>
+
+
+<!-- ========================================== -->
+<!--          CUADRO CENTRAL DE ENTRADA         -->
+<!-- ========================================== -->
 <div class="center-box">
-    <img src="img/tmp-quality.png" class="logo">
-    <h1>Sistema de Trazabilidad TMP</h1>
+    <img src="img/tmp-quality.png">
+    
+    <h1>TMP · Sistema de Trazabilidad</h1>
+    <p>Control metrológico · Laboratorio · Movimientos · QR · Gestión completa</p>
 
-    <button class="btn-enter" onclick="window.location.href='acceso.html'">
-        Entrar al sistema →
+    <button class="btn" onclick="location.href='acceso.html'">
+        Entrar al sistema
     </button>
 </div>
 
-<script>
-/* ANIMACIÓN DE PARTÍCULAS */
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
-
-let particlesArray = [];
-const totalParticles = 60;
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-class Particle {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = (Math.random() * 0.7) - 0.35;
-        this.speedY = (Math.random() * 0.7) - 0.35;
-    }
-
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-    }
-
-    draw() {
-        ctx.fillStyle = "#3ea8ff";
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "#3ea8ff";
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.fill();
-    }
-}
-
-function initParticles() {
-    particlesArray = [];
-    for (let i = 0; i < totalParticles; i++) {
-        particlesArray.push(new Particle());
-    }
-}
-
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particlesArray.forEach(p => {
-        p.update();
-        p.draw();
-    });
-    requestAnimationFrame(animate);
-}
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    initParticles();
-});
-
-initParticles();
-animate();
-</script>
-
 </body>
 </html>
+
