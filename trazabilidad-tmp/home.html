@@ -1,235 +1,168 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TMP · Panel principal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TMP · Trazabilidad Metrológica</title>
 
   <style>
-    :root {
-      --bg: #0d1117;
-      --bg2: #161b22;
-      --text: #f0f6fc;
-      --muted: #8b949e;
-      --border: #30363d;
-      --accent: #3ea8ff;
-      --card-hover: #58a6ff33;
+    :root{
+      --bg:#0d1117;
+      --panel:#161b22;
+      --txt:#f0f6fc;
+      --muted:#8b949e;
+      --border:#30363d;
+      --card-bg:#1c2431;
+      --hover:#263041;
+      --accent:#00b4d8;
     }
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, sans-serif;
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto;
+      background:var(--bg);
+      color:var(--txt);
     }
 
-    /* -------- HEADER -------- */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 20px;
-      background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    header{
+      background:var(--panel);
+      border-bottom:1px solid var(--border);
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
     }
 
-    .logo {
-      height: 42px;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .brand img{
+      height:46px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:20px;
+    }
+    .brand span{
+      font-size:13px;
+      color:var(--muted);
     }
 
-    .userBox {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
+    main{
+      max-width:1100px;
+      margin:26px auto;
+      padding:0 18px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:18px;
     }
 
-    #btnLogout {
-      cursor: pointer;
-      color: #f85149;
-      font-weight: 600;
-      transition: 0.2s;
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:20px 18px;
+      text-decoration:none;
+      color:var(--txt);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      transition:0.15s;
     }
 
-    #btnLogout:hover {
-      color: #ff6b6b;
+    .card:hover{
+      background:var(--hover);
+      transform:translateY(-2px);
     }
 
-    /* -------- BIENVENIDA -------- */
-    #welcomeBox {
-      padding: 24px 20px;
-      font-size: 19px;
-      background: linear-gradient(180deg, var(--bg2), var(--bg));
-      border-bottom: 1px solid var(--border);
+    .card-title{
+      font-size:18px;
+      font-weight:600;
+      color:var(--accent);
     }
 
-    #welcomeBox small {
-      color: var(--muted);
-      font-size: 14px;
+    .card-desc{
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.3;
     }
 
-    /* -------- TARJETAS -------- */
-    .wrap {
-      padding: 22px;
-      max-width: 900px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 18px;
-    }
-
-    .card {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 18px;
-      color: var(--text);
-      text-decoration: none;
-      transition: 0.20s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, .4);
-    }
-
-    .card-icon {
-      font-size: 32px;
-      line-height: 32px;
-    }
-
-    .card-title {
-      font-size: 17px;
-      font-weight: 600;
-    }
-
-    .card-desc {
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    /* Responsive ajustes */
-    @media (max-width: 480px) {
-      #welcomeBox {
-        font-size: 17px;
-        padding: 18px;
-      }
-
-      .wrap {
-        padding: 14px;
-        gap: 14px;
-      }
-
-      .card {
-        padding: 16px;
-      }
+    footer{
+      text-align:center;
+      margin-top:30px;
+      padding-bottom:20px;
+      font-size:13px;
+      color:var(--muted);
     }
   </style>
-
 </head>
-
 <body>
 
-  <header>
-    <img src="img/tmp-quality.png" class="logo">
-
-    <div class="userBox">
-      <span id="userEmail">Cargando…</span>
-      <span id="btnLogout">Salir</span>
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" alt="TMP">
+    <div>
+      <h1>TMP · Control Metrológico</h1>
+      <span>Trazabilidad · Instrumentos · Laboratorio</span>
     </div>
-  </header>
-
-  <div id="welcomeBox">
-    Bienvenido, <b id="welcomeName"></b>  
-    <br>
-    <small id="welcomeRole"></small>
   </div>
+</header>
 
-  <div class="wrap">
+<main>
 
-    <a class="card" href="TMP_Calibraciones_Lab.html">
-      <span class="card-icon">📏</span>
-      <span class="card-title">Calibraciones · Laboratorio</span>
-      <span class="card-desc">Consulta fechas, estados y avisos.</span>
-    </a>
+  <a class="card" href="alta_instrumento.html">
+    <div class="card-title">➕ Alta / Edición</div>
+    <div class="card-desc">Registrar instrumentos, editar fichas, generar QR y gestionar estados.</div>
+  </a>
 
-    <a class="card" href="App_Patrones_TMP.html">
-      <span class="card-icon">📐</span>
-      <span class="card-title">Patrones TMP</span>
-      <span class="card-desc">Control de patrones internos.</span>
-    </a>
+  <a class="card" href="movimiento.html">
+    <div class="card-title">🔄 Movimientos</div>
+    <div class="card-desc">Registrar entradas, salidas, ubicaciones y responsables.</div>
+  </a>
 
-    <a class="card" href="App_Familias_TMP.html">
-      <span class="card-icon">🧩</span>
-      <span class="card-title">Familias de Instrumentos</span>
-      <span class="card-desc">Organización y listado por grupos.</span>
-    </a>
+  <a class="card" href="qr/qr.index.html">
+    <div class="card-title">🏷 Generar QR</div>
+    <div class="card-desc">Crear códigos QR para identificación rápida y trazabilidad.</div>
+  </a>
 
-    <a class="card" href="movimiento.html">
-      <span class="card-icon">🔄</span>
-      <span class="card-title">Movimientos</span>
-      <span class="card-desc">Entradas, salidas y trazabilidad.</span>
-    </a>
+  <a class="card" href="TMP_Calibraciones_Lab.html">
+    <div class="card-title">📏 Calibraciones Lab</div>
+    <div class="card-desc">Gestión de calibraciones internas del laboratorio TMP.</div>
+  </a>
 
-    <a class="card" href="alta_instrumento.html">
-      <span class="card-icon">➕</span>
-      <span class="card-title">Alta / Edición de Instrumento</span>
-      <span class="card-desc">Crear, modificar o dar de baja.</span>
-    </a>
+  <a class="card" href="App_Patrones_TMP.html">
+    <div class="card-title">📐 Patrones</div>
+    <div class="card-desc">Inventario y control de patrones del laboratorio.</div>
+  </a>
 
-    <a class="card" href="qr/qr.index.html">
-      <span class="card-icon">🏷</span>
-      <span class="card-title">Generador de QR</span>
-      <span class="card-desc">Crea las etiquetas QR oficiales TMP.</span>
-    </a>
+  <a class="card" href="App_Familias_TMP.html">
+    <div class="card-title">🧩 Familias</div>
+    <div class="card-desc">Clasificación y agrupación de instrumentos TMP.</div>
+  </a>
 
-  </div>
+  <a class="card" href="App_Tipos_TMP.html">
+    <div class="card-title">🗂 Tipos de Instrumentos</div>
+    <div class="card-desc">Gestión de tipos y categorías técnicas.</div>
+  </a>
 
-  <script type="module">
-    const raw = localStorage.getItem("operario");
-    if (!raw) window.location.href = "acceso.html";
+  <!-- NUEVOS ACCESOS IMPORTANTES -->
+  <a class="card" href="criterios.html">
+    <div class="card-title">📘 Criterios de Aceptación</div>
+    <div class="card-desc">Requisitos metrológicos TMP: aceptación interna y externa. Documento clave para auditorías.</div>
+  </a>
 
-    const operario = JSON.parse(raw);
+  <a class="card" href="alcance_kpi.html">
+    <div class="card-title">📊 Alcance Laboratorio & KPIs</div>
+    <div class="card-desc">Magnitudes cubiertas, rangos y panel de indicadores del laboratorio TMP.</div>
+  </a>
 
-    // Header
-    document.getElementById("userEmail").textContent =
-      operario.nombre ?? operario.username;
+</main>
 
-    // Bienvenida
-    document.getElementById("welcomeName").textContent = operario.nombre;
-
-    let rol = "";
-
-    switch (operario.rol) {
-      case "admin":
-        rol = "Administrador de Calidad";
-        break;
-      case "operario":
-        rol = "Operario de Calidad";
-        break;
-      default:
-        rol = operario.rol;
-    }
-
-    document.getElementById("welcomeRole").textContent = rol;
-
-    // Logout
-    document.getElementById("btnLogout").addEventListener("click", () => {
-      localStorage.removeItem("operario");
-      window.location.href = "acceso.html";
-    });
-  </script>
+<footer>
+  Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2025
+</footer>
 
 </body>
 </html>
-
