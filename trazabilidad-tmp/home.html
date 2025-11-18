@@ -15,6 +15,9 @@
       --card-bg:#1c2431;
       --hover:#263041;
       --accent:#00b4d8;
+      --danger:#b91c1c;
+      --warning:#f59e0b;
+      --success:#22c55e;
     }
 
     body{
@@ -59,6 +62,161 @@
       gap:18px;
     }
 
+    /* Bloques de información (KPIs + alertas) ocupan todo el ancho de la grid */
+    .kpi-section,
+    .alerts-section{
+      grid-column:1 / -1;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:18px 18px 16px;
+    }
+
+    .section-title{
+      margin:0 0 8px;
+      font-size:18px;
+      font-weight:600;
+      color:var(--accent);
+    }
+
+    .muted{
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 12px;
+    }
+
+    /* KPIs */
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:10px;
+    }
+
+    .kpi-card{
+      background:var(--card-bg);
+      border-radius:10px;
+      border:1px solid var(--border);
+      padding:10px 12px;
+    }
+
+    .kpi-label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    .kpi-value{
+      font-size:20px;
+      font-weight:700;
+      line-height:1.1;
+    }
+
+    .kpi-extra{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* Alertas */
+    .alerts-columns{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:14px;
+      margin-top:8px;
+    }
+
+    .alerts-box{
+      background:var(--card-bg);
+      border-radius:10px;
+      border:1px solid var(--border);
+      padding:10px 12px 12px;
+    }
+
+    .alerts-title{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      margin:0 0 6px;
+      font-size:15px;
+      font-weight:600;
+    }
+
+    .alerts-title span.badge{
+      font-size:11px;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+
+    .badge-danger{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+    .badge-warning{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+
+    .alerts-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    .alerts-table thead{
+      background:#111827;
+    }
+    .alerts-table th,
+    .alerts-table td{
+      padding:4px 6px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      white-space:nowrap;
+    }
+    .alerts-table tbody tr:nth-child(even){
+      background:#111827;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:1px 6px;
+      border-radius:999px;
+      font-size:11px;
+      border:1px solid var(--border);
+    }
+    .status-pill.danger{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+    .status-pill.warning{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+
+    .link-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-size:11px;
+      color:var(--txt);
+      text-decoration:none;
+      background:#111827;
+    }
+    .link-btn:hover{
+      background:var(--hover);
+    }
+
+    .empty-msg{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    /* Tarjetas de navegación ya existentes */
     .card{
       background:var(--panel);
       border:1px solid var(--border);
@@ -112,6 +270,110 @@
 
 <main>
 
+  <!-- PANEL DE KPIs LABORATORIO -->
+  <section class="kpi-section">
+    <h2 class="section-title">Resumen del laboratorio</h2>
+    <p class="muted">
+      Indicadores calculados en tiempo real a partir de la tabla <code>instrumentos</code> de Supabase.
+    </p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Instrumentos totales</div>
+        <div class="kpi-value" id="kpi-total">–</div>
+        <div class="kpi-extra" id="kpi-total-extra"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">En uso (fuera de laboratorio)</div>
+        <div class="kpi-value" id="kpi-uso">–</div>
+        <div class="kpi-extra" id="kpi-uso-extra"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">En laboratorio</div>
+        <div class="kpi-value" id="kpi-lab">–</div>
+        <div class="kpi-extra" id="kpi-lab-extra"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Calibrados</div>
+        <div class="kpi-value" id="kpi-calibrados">–</div>
+        <div class="kpi-extra" id="kpi-calibrados-extra"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Próximos a calibrar (&lt; 30 días)</div>
+        <div class="kpi-value" id="kpi-proximos">–</div>
+        <div class="kpi-extra" id="kpi-proximos-extra"></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Fuera de calibración</div>
+        <div class="kpi-value" id="kpi-fuera">–</div>
+        <div class="kpi-extra" id="kpi-fuera-extra"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALERTAS OPERATIVAS -->
+  <section class="alerts-section">
+    <h2 class="section-title">Alertas de calibración</h2>
+    <p class="muted">
+      Equipos fuera de calibración y próximos a vencer. Los operarios pueden localizar estos códigos
+      y priorizar su calibración.
+    </p>
+
+    <div class="alerts-columns">
+
+      <!-- Fuera de calibración -->
+      <div class="alerts-box">
+        <h3 class="alerts-title">
+          ❌ Fuera de calibración
+          <span class="badge badge-danger" id="badge-fuera-count">0</span>
+        </h3>
+        <table class="alerts-table">
+          <thead>
+          <tr>
+            <th>Código</th>
+            <th>Ubicación</th>
+            <th>Próxima</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody id="tbody-fuera"></tbody>
+        </table>
+        <div class="empty-msg" id="msg-fuera" style="display:none;">
+          No hay instrumentos fuera de calibración.
+        </div>
+      </div>
+
+      <!-- Próximos -->
+      <div class="alerts-box">
+        <h3 class="alerts-title">
+          ⚠️ Próximos (&lt; 30 días)
+          <span class="badge badge-warning" id="badge-prox-count">0</span>
+        </h3>
+        <table class="alerts-table">
+          <thead>
+          <tr>
+            <th>Código</th>
+            <th>Ubicación</th>
+            <th>Próxima</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody id="tbody-prox"></tbody>
+        </table>
+        <div class="empty-msg" id="msg-prox" style="display:none;">
+          No hay instrumentos con calibración próxima en los próximos 30 días.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TARJETAS / BOTONES EXISTENTES -->
   <a class="card" href="alta_instrumento.html">
     <div class="card-title">➕ Alta / Edición</div>
     <div class="card-desc">Registrar instrumentos, editar fichas, generar QR y gestionar estados.</div>
@@ -147,7 +409,6 @@
     <div class="card-desc">Gestión de tipos y categorías técnicas.</div>
   </a>
 
-  <!-- NUEVOS ACCESOS IMPORTANTES -->
   <a class="card" href="criterios.html">
     <div class="card-title">📘 Criterios de Aceptación</div>
     <div class="card-desc">Requisitos metrológicos TMP: aceptación interna y externa. Documento clave para auditorías.</div>
@@ -163,6 +424,165 @@
 <footer>
   Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2025
 </footer>
+
+<!-- Cliente Supabase -->
+<script type="module" src="config.mjs"></script>
+<script type="module">
+  const supabase = window.supabase;
+
+  const elTotal = document.getElementById('kpi-total');
+  const elTotalExtra = document.getElementById('kpi-total-extra');
+  const elUso = document.getElementById('kpi-uso');
+  const elUsoExtra = document.getElementById('kpi-uso-extra');
+  const elLab = document.getElementById('kpi-lab');
+  const elLabExtra = document.getElementById('kpi-lab-extra');
+  const elCal = document.getElementById('kpi-calibrados');
+  const elCalExtra = document.getElementById('kpi-calibrados-extra');
+  const elProx = document.getElementById('kpi-proximos');
+  const elProxExtra = document.getElementById('kpi-proximos-extra');
+  const elFuera = document.getElementById('kpi-fuera');
+  const elFueraExtra = document.getElementById('kpi-fuera-extra');
+
+  const tbodyFuera = document.getElementById('tbody-fuera');
+  const tbodyProx = document.getElementById('tbody-prox');
+  const badgeFuera = document.getElementById('badge-fuera-count');
+  const badgeProx = document.getElementById('badge-prox-count');
+  const msgFuera = document.getElementById('msg-fuera');
+  const msgProx = document.getElementById('msg-prox');
+
+  function parseDate(dStr) {
+    if (!dStr) return null;
+    const d = new Date(dStr);
+    return isNaN(d) ? null : d;
+  }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
+
+  async function cargarDashboard() {
+    const { data: instrumentos, error } = await supabase
+      .from('instrumentos')
+      .select('codigo_interno, estado, ubicacion, proxima_calibracion_est, fecha_ultima_calibracion_est');
+
+    if (error) {
+      console.error('Error cargando instrumentos', error);
+      return;
+    }
+
+    const hoy = new Date();
+    const en30 = new Date();
+    en30.setDate(hoy.getDate() + 30);
+
+    const total = instrumentos.length;
+
+    let enLab = 0;
+    let enUso = 0;
+    let calibrados = 0;
+    let fueraCal = 0;
+    let proximosCount = 0;
+
+    const fueraLista = [];
+    const proximosLista = [];
+
+    instrumentos.forEach(inst => {
+      const ubic = (inst.ubicacion || '').trim();
+      const estado = (inst.estado || '').trim();
+
+      if (ubic === 'Laboratorio') enLab++;
+      else enUso++;
+
+      if (estado === 'Calibrado') calibrados++;
+      if (estado === 'Fuera de calibración') fueraCal++;
+
+      const prox = parseDate(inst.proxima_calibracion_est);
+      if (prox) {
+        // Si ya está vencida, lo consideramos fuera de calibración también
+        if (prox < hoy) {
+          if (!fueraLista.some(i => i.codigo_interno === inst.codigo_interno)) {
+            fueraLista.push({ ...inst, proxDate: prox });
+          }
+        } else if (prox >= hoy && prox <= en30) {
+          proximosLista.push({ ...inst, proxDate: prox });
+        }
+      }
+    });
+
+    // KPIs numéricos
+    const pct = (parte, total) => total > 0 ? Math.round((parte / total) * 100) : 0;
+
+    elTotal.textContent = total || '0';
+
+    elUso.textContent = enUso;
+    elUsoExtra.textContent = total ? `${pct(enUso, total)}% del total` : '';
+
+    elLab.textContent = enLab;
+    elLabExtra.textContent = total ? `${pct(enLab, total)}% del total` : '';
+
+    elCal.textContent = calibrados;
+    elCalExtra.textContent = total ? `${pct(calibrados, total)}% calibrados` : '';
+
+    // Recalcular fuera / próximos utilizando listas calculadas
+    fueraCal = fueraLista.length;
+    proximosCount = proximosLista.length;
+
+    elProx.textContent = proximosCount;
+    elProxExtra.textContent = total ? `${pct(proximosCount, total)}% del total` : '';
+
+    elFuera.textContent = fueraCal;
+    elFueraExtra.textContent = total ? `${pct(fueraCal, total)}% del total` : '';
+
+    // Alertas - ordenar por fecha
+    fueraLista.sort((a, b) => a.proxDate - b.proxDate);
+    proximosLista.sort((a, b) => a.proxDate - b.proxDate);
+
+    // Pintar tablas
+    tbodyFuera.innerHTML = '';
+    tbodyProx.innerHTML = '';
+
+    fueraLista.forEach(inst => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${inst.codigo_interno || ''}</td>
+        <td>${inst.ubicacion || ''}</td>
+        <td>${formatDate(inst.proxDate)}</td>
+        <td>
+          <a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo_interno || '')}">
+            Ver
+          </a>
+        </td>
+      `;
+      tbodyFuera.appendChild(tr);
+    });
+
+    proximosLista.forEach(inst => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${inst.codigo_interno || ''}</td>
+        <td>${inst.ubicacion || ''}</td>
+        <td>${formatDate(inst.proxDate)}</td>
+        <td>
+          <a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo_interno || '')}">
+            Ver
+          </a>
+        </td>
+      `;
+      tbodyProx.appendChild(tr);
+    });
+
+    badgeFuera.textContent = fueraCal;
+    badgeProx.textContent = proximosCount;
+
+    msgFuera.style.display = fueraCal === 0 ? 'block' : 'none';
+    msgProx.style.display = proximosCount === 0 ? 'block' : 'none';
+  }
+
+  cargarDashboard();
+</script>
 
 </body>
 </html>
