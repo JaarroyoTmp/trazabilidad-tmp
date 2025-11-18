@@ -4,10 +4,8 @@
   <meta charset="UTF-8" />
   <title>TMP · Gestión de Movimientos de Instrumentos</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <link rel="icon" href="img/tmp-quality.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -24,281 +22,265 @@
       --warn:#ffce52;
       --bad:#ff6b6b;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{
-      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
+    * { box-sizing:border-box; margin:0; padding:0; }
+
+    body {
+      font-family: "Inter", sans-serif;
       background:
         radial-gradient(circle at 0% 0%, #182f55 0, transparent 55%),
         radial-gradient(circle at 100% 0%, #1a3b64 0, transparent 55%),
-        linear-gradient(180deg,var(--bg1),var(--bg0));
-      color:var(--txt);
-      -webkit-font-smoothing:antialiased;
-    }
-    .app{
-      max-width:1100px;
-      margin:16px auto 32px;
-      padding:0 14px 40px;
-    }
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .brand-logo{
-      height:34px;
-      width:auto;
-    }
-    .brand-text-title{
-      font-size:17px;
-      font-weight:700;
-      letter-spacing:.03em;
-    }
-    .brand-text-sub{
-      font-size:12px;
-      color:var(--muted);
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      font-size:11px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(9,22,40,.9);
-      color:var(--muted);
-    }
-    .badge-dot{
-      width:7px;height:7px;border-radius:999px;background:#4ade80;
-    }
-    .badge.offline .badge-dot{background:#f97373;}
-    .btn{
-      border:none;
-      border-radius:999px;
-      padding:10px 16px;
-      font-size:13px;
-      font-weight:600;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      background:var(--accent);
-      color:#031321;
-      box-shadow:0 8px 18px rgba(0,0,0,.35);
-      transition:transform .12s ease,box-shadow .12s ease,background .12s ease;
-    }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(0,0,0,.5);}
-    .btn:active{transform:translateY(0);box-shadow:0 4px 10px rgba(0,0,0,.3);}
-    .btn.secondary{
-      background:transparent;
-      color:var(--muted);
-      border:1px solid var(--border);
-      box-shadow:none;
-    }
-    .btn.secondary:hover{
-      background:rgba(17,35,58,.9);
-      border-color:#31639f;
-    }
-    .btn.sm{padding:7px 12px;font-size:12px}
-
-    main{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
-    .card{
-      border-radius:16px;
-      background:linear-gradient(135deg,#0f1f33,#0a1625);
-      border:1px solid rgba(43,78,122,.75);
-      box-shadow:0 18px 40px rgba(0,0,0,.50);
-      padding:16px 16px 14px;
-    }
-    .card-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .card-title{
-      font-size:15px;
-      font-weight:600;
-      letter-spacing:.02em;
-    }
-    .card-sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:3px 9px;
-      font-size:11px;
-      background:rgba(15,36,66,.9);
-      border:1px solid rgba(52,94,145,.9);
-      color:var(--muted);
-    }
-    .pill.ok{background:#07281a;border-color:#18a46d;color:#c9ffe5;}
-    .pill.warn{background:#392a09;border-color:#f9d567;color:#fff2c2;}
-    .pill.bad{background:#3b1010;border-color:#ff7b7b;color:#ffe2e2;}
-    .pill.neutral{background:#101827;border-color:#404b63;color:var(--muted);}
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:10px 14px;
-    }
-    @media (max-width:900px){
-      .grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-    }
-    @media (max-width:640px){
-      header{flex-direction:column;align-items:flex-start;}
-      .grid{grid-template-columns:1fr;}
-      .card{padding:14px 12px;}
-      .card-header{flex-direction:column;align-items:flex-start;}
-      .btn{width:100%;justify-content:center;}
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      color: var(--txt);
+      -webkit-font-smoothing: antialiased;
     }
 
-    label{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      color:var(--muted);
-      margin-bottom:4px;
-      display:block;
+    .app {
+      max-width: 1100px;
+      margin: 16px auto 32px;
+      padding: 0 14px 40px;
     }
-    input,select,textarea{
-      width:100%;
-      font-family:inherit;
-      font-size:13px;
-      color:var(--txt);
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      height: 34px;
+      width: auto;
+    }
+
+    .brand-text-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+
+    .brand-text-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(9,22,40,.9);
+      color: var(--muted);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #4ade80;
+    }
+
+    .badge.offline .badge-dot {
+      background: #f97373;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #031321;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(0,0,0,.5);
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .btn.secondary:hover {
+      background: rgba(17,35,58,.9);
+      border-color: #31639f;
+    }
+
+    .btn.sm {
+      padding: 7px 12px;
+      font-size: 12px;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0f1f33, #0a1625);
+      border: 1px solid rgba(43,78,122,.75);
+      box-shadow: 0 18px 40px rgba(0,0,0,.50);
+      padding: 16px 16px 14px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .pill {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid rgba(52,94,145,.9);
+      background: rgba(15,36,66,.9);
+      color: var(--muted);
+    }
+
+    .pill.ok { background:#07281a; border-color:#18a46d; color:#c9ffe5; }
+    .pill.warn { background:#392a09; border-color:#f9d567; color:#fff2c2; }
+    .pill.bad { background:#3b1010; border-color:#ff7b7b; color:#ffe2e2; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px 14px;
+    }
+
+    @media (max-width:900px) {
+      .grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+
+    @media (max-width:640px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .grid { grid-template-columns: 1fr; }
+      .btn { width: 100%; }
+    }
+
+    /* Inputs */
+    label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    input,select,textarea {
       background:#050d1a;
-      border-radius:10px;
       border:1px solid #253954;
+      border-radius:10px;
       padding:9px 11px;
+      color:var(--txt);
+      width:100%;
+      font-size:13px;
       outline:none;
-      transition:border-color .12s ease,box-shadow .12s ease,background .12s ease;
     }
-    input:focus,select:focus,textarea:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 1px rgba(62,168,255,.55);
-      background:#071425;
-    }
-    input[readonly]{
+
+    input[readonly] {
       opacity:.85;
       background:#060d19;
     }
-    textarea{min-height:70px;resize:vertical;}
 
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-    .row-right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
+    textarea { min-height:70px; resize:vertical; }
 
-    .inline-field{display:flex;gap:8px;align-items:flex-end;}
-
-    .state-tag{
+    .alert {
       font-size:11px;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid rgba(148,163,184,.6);
-      background:#050c17;
-      color:var(--muted);
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-    .state-dot{
-      width:7px;height:7px;border-radius:999px;background:var(--muted);
-    }
-    .state-tag.ok .state-dot{background:var(--ok);}
-    .state-tag.warn .state-dot{background:var(--warn);}
-    .state-tag.bad .state-dot{background:var(--bad);}
-
-    .stats{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:6px;
-    }
-    .stat-badge{
-      font-size:11px;
-      padding:5px 9px;
-      border-radius:999px;
-      border:1px solid rgba(148,163,184,.4);
-      background:#050b16;
-      color:var(--muted);
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
+      padding:6px 9px;
+      border-radius:9px;
+      border:1px solid rgba(248,113,113,.7);
+      color:#fecaca;
+      background:rgba(127,29,29,.4);
       margin-top:8px;
-      font-size:12px;
     }
-    th,td{
-      text-align:left;
-      padding:6px 6px;
-      border-bottom:1px solid #1f3046;
-      white-space:nowrap;
-    }
-    th{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      color:var(--muted);
-      background:#0c1929;
-      position:sticky;
-      top:0;
-      z-index:1;
-    }
-    tbody tr:nth-child(odd){background:#070f1f;}
-    tbody tr:nth-child(even){background:#050b16;}
-    .table-wrap{
+
+    .hidden { display:none !important; }
+
+    .table-wrap {
       border-radius:12px;
       overflow:auto;
       border:1px solid #203552;
       max-height:260px;
     }
 
-    .helper-text{
-      font-size:11px;
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+
+    th,td {
+      padding:6px;
+      border-bottom:1px solid #1f3046;
+      white-space:nowrap;
+    }
+
+    th {
+      background:#0c1929;
+      text-transform:uppercase;
       color:var(--muted);
-      margin-top:4px;
-    }
-    .alert{
       font-size:11px;
-      color:#fecaca;
-      background:rgba(127,29,29,.4);
-      border-radius:9px;
-      padding:6px 9px;
-      border:1px solid rgba(248,113,113,.7);
-      margin-top:8px;
+      position:sticky;
+      top:0;
     }
-    .hidden{display:none !important;}
   </style>
 </head>
+
 <body>
 <div class="app">
+
   <header>
     <div class="brand">
-      <img src="img/tmp-quality.png" alt="TMP calidad" class="brand-logo">
+      <img src="img/tmp-quality.png" class="brand-logo">
       <div>
         <div class="brand-text-title">TMP · Movimientos de Instrumentos</div>
-        <div class="brand-text-sub">Control diario de entrada / salida · Laboratorio de Calidad</div>
+        <div class="brand-text-sub">Trazabilidad — Entradas / Salidas / Estados</div>
       </div>
     </div>
+
     <div class="row-right">
-      <button class="btn secondary" onclick="window.location.href='home.html'">← Volver al panel principal</button>
+      <button class="btn secondary" onclick="window.location.href='home.html'">
+        ← Volver al panel principal
+      </button>
+
       <div id="onlineBadge" class="badge offline">
         <span class="badge-dot"></span>
         <span id="onlineText">Offline (sin conexión Supabase)</span>
@@ -308,92 +290,90 @@
 
   <main>
 
-    <!-- Instrumento -->
+    <!-- ●●● INSTRUMENTO ●●● -->
     <section class="card">
       <div class="card-header">
         <div>
           <div class="card-title">Instrumento</div>
           <div class="card-sub">
-            Introduce el <strong>código exacto</strong> del instrumento.
+            Introduce el <b>código exacto</b> para cargar sus datos.
           </div>
         </div>
-        <div id="estadoChip" class="pill neutral">Esperando selección de instrumento</div>
+        <div id="estadoChip" class="pill neutral">Esperando instrumento</div>
       </div>
 
       <div class="grid">
-        <div class="inline-field" style="grid-column:1/-1">
-          <div style="flex:1">
-            <label for="codigoInput">Código del instrumento</label>
-            <input id="codigoInput" type="text" placeholder="Ej. 11217" autocomplete="off" />
+        <div style="grid-column:1/-1">
+          <label>Código del instrumento</label>
+          <div class="row">
+            <input id="codigoInput" placeholder="Ej. 11217">
+            <button id="btnCargarInstrumento" class="btn sm">Cargar</button>
           </div>
-          <button id="btnCargarInstrumento" class="btn sm" style="margin-bottom:2px">Cargar instrumento</button>
         </div>
 
         <div>
           <label>Descripción</label>
-          <input id="descInstrumento" type="text" readonly />
+          <input id="descInstrumento" readonly>
         </div>
         <div>
-          <label>Fabricante / Tipo</label>
-          <input id="fabInstrumento" type="text" readonly />
+          <label>Fabricante</label>
+          <input id="fabInstrumento" readonly>
         </div>
         <div>
           <label>Rango</label>
-          <input id="rangoInstrumento" type="text" readonly />
+          <input id="rangoInstrumento" readonly>
         </div>
 
         <div>
-          <label>Unidad base</label>
-          <input id="unidadInstrumento" type="text" readonly />
+          <label>Unidad</label>
+          <input id="unidadInstrumento" readonly>
         </div>
         <div>
           <label>Precisión</label>
-          <input id="precisionInstrumento" type="text" readonly />
+          <input id="precisionInstrumento" readonly>
         </div>
         <div>
           <label>Ubicación actual</label>
-          <input id="ubicacionInstrumento" type="text" readonly />
+          <input id="ubicacionInstrumento" readonly>
         </div>
 
         <div>
           <label>Última calibración</label>
-          <input id="ultimaCal" type="text" readonly />
+          <input id="ultimaCal" readonly>
         </div>
         <div>
           <label>Próxima calibración</label>
-          <input id="proximaCal" type="text" readonly />
+          <input id="proximaCal" readonly>
         </div>
         <div>
-          <label>Tipo de calibración</label>
-          <input id="tipoCal" type="text" readonly />
+          <label>Tipo calibración</label>
+          <input id="tipoCal" readonly>
         </div>
       </div>
 
       <div class="stats">
         <div id="statEstado" class="stat-badge">Estado: —</div>
         <div id="statDias" class="stat-badge">Días hasta próxima: —</div>
-        <div id="statUso" class="stat-badge">Movimientos registrados: —</div>
+        <div id="statUso" class="stat-badge">Movimientos: —</div>
       </div>
 
       <div id="alertInstrumento" class="alert hidden"></div>
     </section>
 
-    <!-- Registrar movimiento -->
+    <!-- ●●● REGISTRAR MOVIMIENTO ●●● -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Registrar nuevo movimiento</div>
-          <div class="card-sub">
-            El movimiento quedará vinculado al instrumento seleccionado.
-          </div>
+          <div class="card-title">Registrar movimiento</div>
+          <div class="card-sub">El registro se añadirá automáticamente.</div>
         </div>
       </div>
 
       <div class="grid">
         <div>
-          <label for="tipoMovimiento">Tipo de movimiento</label>
+          <label>Tipo de movimiento</label>
           <select id="tipoMovimiento">
-            <option value="">Selecciona una opción…</option>
+            <option value="">Selecciona...</option>
             <option value="Entrada">Entrada</option>
             <option value="Salida">Salida</option>
             <option value="Préstamo externo">Préstamo externo</option>
@@ -401,41 +381,43 @@
             <option value="Envío a calibración externa">Envío a calibración externa</option>
           </select>
         </div>
+
         <div>
-          <label for="responsable">Responsable / Operario</label>
-          <input id="responsable" type="text" placeholder="Nombre del responsable" />
+          <label>Responsable</label>
+          <input id="responsable" placeholder="Nombre del responsable">
         </div>
+
         <div>
-          <label for="destino">Destino / ubicación</label>
-          <input id="destino" type="text" placeholder="Ej. Producción línea 2, Laboratorio…" />
+          <label>Destino</label>
+          <input id="destino" placeholder="Ej: Laboratorio, línea 2...">
         </div>
+
         <div style="grid-column:1/-1">
-          <label for="observaciones">Observaciones</label>
-          <textarea id="observaciones" placeholder="Comentarios relevantes (nº de orden, incidencias, etc.)"></textarea>
+          <label>Observaciones</label>
+          <textarea id="observaciones" placeholder="Opcional"></textarea>
           <p class="helper-text">
-            El estado de calibración del instrumento se añadirá automáticamente al registro.
+            El estado de calibración se añadirá automáticamente.
           </p>
         </div>
       </div>
 
-      <div class="row" style="margin-top:10px;justify-content:flex-end">
-        <button id="btnLimpiar" class="btn secondary">Limpiar campos</button>
-        <button id="btnRegistrar" class="btn">Registrar movimiento</button>
+      <div class="row" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn secondary" id="btnLimpiar">Limpiar</button>
+        <button class="btn" id="btnRegistrar">Registrar</button>
       </div>
 
-      <div id="alertMovimiento" class="alert hidden" style="margin-top:10px"></div>
+      <div id="alertMovimiento" class="alert hidden"></div>
     </section>
 
-    <!-- Histórico -->
+    <!-- ●●● HISTORIAL ●●● -->
     <section class="card">
       <div class="card-header">
         <div>
           <div class="card-title">Histórico reciente</div>
-          <div class="card-sub">
-            Últimos movimientos (máx. 20), en orden del más reciente al más antiguo.
-          </div>
+          <div class="card-sub">Últimos 20 movimientos</div>
         </div>
       </div>
+
       <div class="table-wrap">
         <table>
           <thead>
@@ -447,356 +429,323 @@
               <th>Observaciones</th>
             </tr>
           </thead>
+
           <tbody id="tablaMovimientos">
-            <tr><td colspan="5">Selecciona un instrumento para ver su historial.</td></tr>
+            <tr><td colspan="5">Introduce un código para ver movimientos</td></tr>
           </tbody>
         </table>
       </div>
     </section>
+
   </main>
 </div>
 
-<!-- Config -->
 <script type="module" src="config.js"></script>
 
-<script>
-(function(){
+<script type="module">
+/* ===========================================================
+   CLIENTE SUPABASE DESDE config.js
+=========================================================== */
+const sb = window.supabase;
 
-  // ============================================
-  // UTILIDADES
-  // ============================================
+/* Si Supabase no cargó → Modo Offline */
+function setOnlineStatus(ok) {
+  const badge = document.getElementById("onlineBadge");
+  const dot = badge.querySelector(".badge-dot");
+  const txt = document.getElementById("onlineText");
 
-  const $ = (sel) => document.querySelector(sel);
-
-  const fmtDate = (iso) => {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (isNaN(d)) return "—";
-    return d.toISOString().replace("T"," ").slice(0,16) + " UTC";
-  };
-
-  const fmtDateShort = (iso) => {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (isNaN(d)) return "—";
-    const y=d.getUTCFullYear();
-    const m=String(d.getUTCMonth()+1).padStart(2,"0");
-    const day=String(d.getUTCDate()).padStart(2,"0");
-    return `${day}/${m}/${y}`;
-  };
-
-  const daysDiffFromToday = (dateStr) => {
-    if (!dateStr) return null;
-    const d = new Date(dateStr + "T00:00:00");
-    if (isNaN(d)) return null;
-    const now = new Date();
-    const diffMs = d.getTime() - now.getTime();
-    return Math.round(diffMs / (24*60*60*1000));
-  };
-
-  function computeEstado(proxima){
-    const dias = daysDiffFromToday(proxima);
-    if (dias === null) return {estado:"SIN FECHA", clase:"warn"};
-    if (dias < 0) return {estado:"FUERA DE CALIBRACIÓN", clase:"bad"};
-    if (dias <= 30) return {estado:"PRÓXIMA CALIBRACIÓN", clase:"warn"};
-    return {estado:"EN CALIBRACIÓN", clase:"ok"};
-  }
-
-  // ============================================
-  // ESTADO GLOBAL
-  // ============================================
-
-  let instrumentoActual = null;
-  let movimientosCount = 0;
-  let online = false;
-
-  // ============================================
-  // CONEXIÓN
-  // ============================================
-
-  if (typeof supabase === "undefined") {
-    console.warn("Supabase no está definido…");
-    online = false;
+  if (ok) {
+    badge.classList.remove("offline");
+    dot.style.background = "#4ade80";
+    txt.textContent = "Online (Supabase conectado)";
   } else {
-    online = true;
+    badge.classList.add("offline");
+    dot.style.background = "#f97373";
+    txt.textContent = "Offline (sin conexión)";
+  }
+}
+
+if (!sb) {
+  console.error("Supabase no cargó. Revisa config.js");
+  setOnlineStatus(false);
+} else {
+  setOnlineStatus(true);
+}
+
+/* ===========================================================
+   UTILIDADES
+=========================================================== */
+const $ = sel => document.querySelector(sel);
+
+const fmtDate = iso => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return "—";
+  return d.toISOString().replace("T"," ").slice(0,16) + " UTC";
+};
+
+const fmtISOshort = iso => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return "—";
+  return `${String(d.getUTCDate()).padStart(2,"0")}/${
+          String(d.getUTCMonth()+1).padStart(2,"0")}/${
+          d.getUTCFullYear()}`;
+};
+
+const daysDiff = dateStr => {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + "T00:00:00");
+  if (isNaN(d)) return null;
+  const now = new Date();
+  return Math.round((d-now)/(86400000));
+};
+
+function computeEstado(prox) {
+  const dias = daysDiff(prox);
+  if (dias === null) return {estado:"SIN FECHA", clase:"warn"};
+
+  if (dias < 0) return {estado:"FUERA DE CALIBRACIÓN", clase:"bad"};
+
+  if (dias <= 30) return {estado:"PRÓXIMA CALIBRACIÓN", clase:"warn"};
+
+  return {estado:"EN CALIBRACIÓN", clase:"ok"};
+}
+
+/* ===========================================================
+   ESTADO GLOBAL
+=========================================================== */
+let instrumentoActual = null;
+let movimientosCount = 0;
+
+/* ===========================================================
+   CARGAR INSTRUMENTO
+=========================================================== */
+async function cargarInstrumento() {
+  const codigo = $("#codigoInput").value.trim();
+  const alertBox = $("#alertInstrumento");
+  alertBox.classList.add("hidden");
+
+  if (!codigo) {
+    alertBox.textContent = "Introduce un código";
+    alertBox.classList.remove("hidden");
+    return;
   }
 
-  function setOnlineStatus(ok){
-    const badge = $("#onlineBadge");
-    const dot = badge.querySelector(".badge-dot");
-    const txt = $("#onlineText");
-    if (ok){
-      badge.classList.remove("offline");
-      dot.style.background = "#4ade80";
-      txt.textContent = "Online (Supabase conectado)";
-    } else {
-      badge.classList.add("offline");
-      dot.style.background = "#f97373";
-      txt.textContent = "Offline (sin Supabase)";
-    }
+  if (!sb) {
+    alertBox.textContent = "Sin conexión con Supabase";
+    alertBox.classList.remove("hidden");
+    return;
   }
 
-  setOnlineStatus(online);
+  try {
+    const { data, error } = await sb
+      .from("instrumentos")
+      .select("*")
+      .eq("codigo", codigo)
+      .maybeSingle();
 
-  // ============================================
-  // CARGAR INSTRUMENTO
-  // ============================================
-
-  async function cargarInstrumento(){
-    const codigo = $("#codigoInput").value.trim();
-    const alertBox = $("#alertInstrumento");
-
-    alertBox.classList.add("hidden");
-    alertBox.textContent = "";
-
-    if (!codigo){
-      alertBox.textContent = "Introduce un código.";
+    if (error) {
+      console.error(error);
+      alertBox.textContent = "Error consultando Supabase";
       alertBox.classList.remove("hidden");
       return;
     }
 
-    if (!online){
-      alertBox.textContent = "Sin conexión con Supabase.";
+    if (!data) {
+      alertBox.textContent = `No existe instrumento con código "${codigo}"`;
       alertBox.classList.remove("hidden");
+      instrumentoActual = null;
+      pintarInstrumento(null);
+      pintarMovimientos([]);
       return;
     }
 
-    try{
-      const { data, error } = await supabase
-        .from("instrumentos")
-        .select("*")
-        .eq("codigo", codigo)
-        .maybeSingle();
+    instrumentoActual = data;
+    pintarInstrumento(data);
 
-      if (error){
-        console.error(error);
-        alertBox.textContent = "Error al consultar Supabase.";
-        alertBox.classList.remove("hidden");
-        return;
-      }
+    await cargarMovimientos(codigo);
 
-      if (!data){
-        alertBox.textContent = `No existe instrumento con código "${codigo}".`;
-        alertBox.classList.remove("hidden");
-        instrumentoActual = null;
-        pintarInstrumento(null);
-        pintarMovimientos([]);
-        return;
-      }
+  } catch (e) {
+    console.error(e);
+    alertBox.textContent = "Error inesperado";
+    alertBox.classList.remove("hidden");
+  }
+}
 
-      instrumentoActual = data;
-      pintarInstrumento(data);
-      await cargarMovimientos(data.codigo);
-
-    } catch(e){
-      console.error(e);
-      alertBox.textContent = "Error inesperado.";
-      alertBox.classList.remove("hidden");
-    }
+/* ===========================================================
+   PINTAR DATOS DE INSTRUMENTO
+=========================================================== */
+function pintarInstrumento(inst) {
+  if (!inst) {
+    $("#descInstrumento").value = "";
+    $("#fabInstrumento").value = "";
+    $("#rangoInstrumento").value = "";
+    $("#unidadInstrumento").value = "";
+    $("#precisionInstrumento").value = "";
+    $("#ubicacionInstrumento").value = "";
+    $("#ultimaCal").value = "";
+    $("#proximaCal").value = "";
+    $("#tipoCal").value = "";
+    return;
   }
 
-  function pintarInstrumento(inst){
-    const estadoChip = $("#estadoChip");
-    const statEstado = $("#statEstado");
-    const statDias = $("#statDias");
-    const statUso = $("#statUso");
+  $("#descInstrumento").value = inst.descripcion || "";
+  $("#fabInstrumento").value = inst.fabricante || "";
+  $("#rangoInstrumento").value = inst.rango || "";
+  $("#unidadInstrumento").value = inst.unidad_base || "";
+  $("#precisionInstrumento").value = inst.precision || "";
+  $("#ubicacionInstrumento").value = inst.ubicacion_actual || "";
 
-    if (!inst){
-      $("#descInstrumento").value = "";
-      $("#fabInstrumento").value = "";
-      $("#rangoInstrumento").value = "";
-      $("#unidadInstrumento").value = "";
-      $("#precisionInstrumento").value = "";
-      $("#ubicacionInstrumento").value = "";
-      $("#ultimaCal").value = "";
-      $("#proximaCal").value = "";
-      $("#tipoCal").value = "";
-      estadoChip.textContent = "Esperando selección de instrumento";
-      estadoChip.className = "pill neutral";
-      statEstado.textContent = "Estado: —";
-      statDias.textContent = "Días hasta próxima: —";
-      statUso.textContent = "Movimientos registrados: —";
+  $("#ultimaCal").value = fmtISOshort(inst.ultima_calibracion);
+  $("#proximaCal").value = fmtISOshort(inst.proxima_calibracion);
+  $("#tipoCal").value = inst.tipo_calibracion || "";
+
+  const estado = computeEstado(inst.proxima_calibracion);
+  $("#estadoChip").textContent = estado.estado;
+  $("#estadoChip").className = "pill " + estado.clase;
+
+  $("#statEstado").textContent = "Estado: " + estado.estado;
+
+  const dias = daysDiff(inst.proxima_calibracion);
+  $("#statDias").textContent = "Días hasta próxima: " + (dias ?? "—");
+
+  $("#statUso").textContent = "Movimientos: " + movimientosCount;
+}
+
+/* ===========================================================
+   CARGAR HISTORIAL
+=========================================================== */
+async function cargarMovimientos(codigo) {
+  const tbody = $("#tablaMovimientos");
+
+  try {
+    const { data, error } = await sb
+      .from("movimientos")
+      .select("*")
+      .eq("codigo_instrumento", codigo)
+      .order("fecha", { ascending:false })
+      .limit(20);
+
+    if (error) {
+      console.error(error);
+      tbody.innerHTML = `<tr><td colspan="5">Error al cargar histórico</td></tr>`;
       return;
     }
 
-    $("#descInstrumento").value = inst.descripcion || "";
-    $("#fabInstrumento").value = inst.fabricante || "";
-    $("#rangoInstrumento").value = inst.rango || "";
-    $("#unidadInstrumento").value = inst.unidad_base || inst.unidad || "";
-    $("#precisionInstrumento").value = inst.precision || "";
-    $("#ubicacionInstrumento").value = inst.ubicacion_actual || "";
-    $("#ultimaCal").value = fmtDateShort(inst.fecha_calibracion);
-    $("#proximaCal").value = fmtDateShort(inst.fecha_proxima_calibracion);
-    $("#tipoCal").value = inst.tipo_calibracion || "";
-
-    const prox = inst.fecha_proxima_calibracion;
-    const e = computeEstado(prox);
-
-    estadoChip.textContent = e.estado;
-    estadoChip.className = "pill " + e.clase;
-
-    statEstado.textContent = "Estado: " + e.estado;
-    statDias.textContent = "Días hasta próxima: " + (daysDiffFromToday(prox) ?? "—");
-    statUso.textContent = "Movimientos registrados: " + movimientosCount;
-  }
-
-  // ============================================
-  // CARGAR HISTÓRICO
-  // ============================================
-
-  async function cargarMovimientos(codigo){
-    const tbody = $("#tablaMovimientos");
-
-    if (!online){
-      tbody.innerHTML = `<tr><td colspan="5">Sin conexión</td></tr>`;
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5">No hay movimientos</td></tr>`;
       movimientosCount = 0;
       return;
     }
 
-    try{
-      const { data, error } = await supabase
-        .from("movimientos")
-        .select("*")
-        .eq("codigo_instrumento", codigo)
-        .order("fecha",{ascending:false})
-        .limit(20);
+    movimientosCount = data.length;
 
-      if (error){
-        console.error(error);
-        tbody.innerHTML = `<tr><td colspan="5">Error al cargar histórico</td></tr>`;
-        return;
-      }
-
-      movimientosCount = data.length;
-
-      if (!data.length){
-        tbody.innerHTML = `<tr><td colspan="5">No existen movimientos.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(m=>`
-        <tr>
-          <td>${fmtDate(m.fecha)}</td>
-          <td>${m.tipo_movimiento || ""}</td>
-          <td>${m.responsable || ""}</td>
-          <td>${m.destino || ""}</td>
-          <td style="white-space:normal;max-width:320px;">${(m.observaciones || "").replace(/\n/g,"<br>")}</td>
-        </tr>
-      `).join("");
-
-    } catch(e){
-      console.error(e);
-      tbody.innerHTML = `<tr><td colspan="5">Error inesperado</td></tr>`;
-    }
+    tbody.innerHTML = data.map(m => `
+      <tr>
+        <td>${fmtDate(m.fecha)}</td>
+        <td>${m.tipo_movimiento}</td>
+        <td>${m.responsable}</td>
+        <td>${m.destino}</td>
+        <td style="white-space:normal;max-width:320px;">${(m.observaciones||"").replace(/\n/g,"<br>")}</td>
+      </tr>
+    `).join("");
 
     pintarInstrumento(instrumentoActual);
+
+  } catch (e) {
+    console.error(e);
+    tbody.innerHTML = `<tr><td colspan="5">Error inesperado</td></tr>`;
+  }
+}
+
+/* ===========================================================
+   REGISTRAR MOVIMIENTO
+=========================================================== */
+async function registrarMovimiento() {
+  const alertBox = $("#alertMovimiento");
+  alertBox.classList.add("hidden");
+
+  if (!instrumentoActual) {
+    alertBox.textContent = "Primero carga un instrumento";
+    alertBox.classList.remove("hidden");
+    return;
   }
 
-  // ============================================
-  // REGISTRAR MOVIMIENTO
-  // ============================================
+  const tipo = $("#tipoMovimiento").value;
+  const responsable = $("#responsable").value.trim();
+  const destino = $("#destino").value.trim();
+  const obsUser = $("#observaciones").value.trim();
 
-  async function registrarMovimiento(){
-    const alertBox = $("#alertMovimiento");
-    alertBox.classList.add("hidden");
-    alertBox.textContent = "";
+  if (!tipo) {
+    alertBox.textContent = "Selecciona un tipo de movimiento";
+    alertBox.classList.remove("hidden");
+    return;
+  }
+  if (!responsable) {
+    alertBox.textContent = "Introduce un responsable";
+    alertBox.classList.remove("hidden");
+    return;
+  }
 
-    if (!instrumentoActual){
-      alertBox.textContent = "Primero carga un instrumento.";
-      alertBox.classList.remove("hidden");
-      return;
-    }
+  const estado = computeEstado(instrumentoActual.proxima_calibracion);
+  const obsFinal = (obsUser ? obsUser + "\n" : "") +
+                   `Estado calibración: ${estado.estado}`;
 
-    if (!online){
-      alertBox.textContent = "Sin conexión con Supabase.";
-      alertBox.classList.remove("hidden");
-      return;
-    }
-
-    const tipo = $("#tipoMovimiento").value.trim();
-    const responsable = $("#responsable").value.trim();
-    const destino = $("#destino").value.trim();
-    const obsUser = $("#observaciones").value.trim();
-
-    if (!tipo){
-      alertBox.textContent = "Selecciona un tipo de movimiento.";
-      alertBox.classList.remove("hidden");
-      return;
-    }
-    if (!responsable){
-      alertBox.textContent = "Indica el responsable.";
-      alertBox.classList.remove("hidden");
-      return;
-    }
-
-    const prox = instrumentoActual.fecha_proxima_calibracion;
-    const e = computeEstado(prox);
-
-    const obsFinal =
-      (obsUser ? obsUser + "\n" : "") +
-      `Estado en el momento del movimiento: ${e.estado}.`;
-
-    const payload = {
+  try {
+    const { error } = await sb.from("movimientos").insert({
       codigo_instrumento: instrumentoActual.codigo,
       fecha: new Date().toISOString(),
       tipo_movimiento: tipo,
       responsable,
       destino,
       observaciones: obsFinal
-    };
+    });
 
-    try{
-      const { error } = await supabase.from("movimientos").insert(payload);
-
-      if (error){
-        console.error(error);
-        alertBox.textContent = "Error al registrar movimiento.";
-        alertBox.classList.remove("hidden");
-        return;
-      }
-
-      alertBox.textContent = "Movimiento registrado correctamente.";
+    if (error) {
+      console.error(error);
+      alertBox.textContent = "Error al guardar movimiento";
       alertBox.classList.remove("hidden");
-      alertBox.style.background = "rgba(22,101,52,.5)";
-      alertBox.style.borderColor = "#4ade80";
-      alertBox.style.color = "#dcfce7";
-
-      await cargarMovimientos(instrumentoActual.codigo);
-      limpiarCamposMovimiento(false);
-
-    } catch(e){
-      console.error(e);
-      alertBox.textContent = "Error inesperado.";
-      alertBox.classList.remove("hidden");
+      return;
     }
-  }
 
-  function limpiarCamposMovimiento(borrar){
+    alertBox.textContent = "Movimiento registrado con éxito";
+    alertBox.style.background = "rgba(22,101,52,.5)";
+    alertBox.style.borderColor = "#4ade80";
+    alertBox.style.color = "#dcfce7";
+    alertBox.classList.remove("hidden");
+
+    await cargarMovimientos(instrumentoActual.codigo);
+
     $("#tipoMovimiento").value = "";
     $("#responsable").value = "";
     $("#destino").value = "";
     $("#observaciones").value = "";
-    if (borrar){
-      $("#alertMovimiento").classList.add("hidden");
-      $("#alertMovimiento").textContent = "";
-    }
+
+  } catch (e) {
+    console.error(e);
+    alertBox.textContent = "Error inesperado";
+    alertBox.classList.remove("hidden");
   }
+}
 
-  // ============================================
-  // EVENTOS
-  // ============================================
-
-  $("#btnCargarInstrumento").addEventListener("click", cargarInstrumento);
-  $("#codigoInput").addEventListener("keydown", (e)=>{
-    if (e.key === "Enter"){
-      e.preventDefault();
-      cargarInstrumento();
-    }
-  });
-  $("#btnRegistrar").addEventListener("click", registrarMovimiento);
-  $("#btnLimpiar").addEventListener("click", ()=>limpiarCamposMovimiento(true));
-
-})();
+/* ===========================================================
+   EVENTOS
+=========================================================== */
+$("#btnCargarInstrumento").onclick = cargarInstrumento;
+$("#btnRegistrar").onclick = registrarMovimiento;
+$("#btnLimpiar").onclick = () => {
+  $("#tipoMovimiento").value = "";
+  $("#responsable").value = "";
+  $("#destino").value = "";
+  $("#observaciones").value = "";
+};
+$("#codigoInput").onkeydown = e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    cargarInstrumento();
+  }
+};
 </script>
 
 </body>
