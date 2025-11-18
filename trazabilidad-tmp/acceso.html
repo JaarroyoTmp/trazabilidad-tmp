@@ -127,14 +127,14 @@
         </form>
     </div>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
+    <!-- Cargar Supabase + Configuración -->
+    <script type="module" src="config.js"></script>
 
     <script type="module">
-
         const form = document.getElementById("loginForm");
         const msg = document.getElementById("loginMessage");
+
+        const supabase = window.supabase;
 
         function showMessage(text, type) {
             msg.textContent = text;
