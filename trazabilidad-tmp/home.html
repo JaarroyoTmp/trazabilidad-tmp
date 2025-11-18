@@ -15,10 +15,13 @@
       --card-bg:#1c2431;
       --hover:#263041;
       --accent:#00b4d8;
-      --danger:#b91c1c;
+
+      --danger:#dc2626;
       --warning:#f59e0b;
       --success:#22c55e;
     }
+
+    *{box-sizing:border-box;}
 
     body{
       margin:0;
@@ -27,6 +30,7 @@
       color:var(--txt);
     }
 
+    /* HEADER */
     header{
       background:var(--panel);
       border-bottom:1px solid var(--border);
@@ -53,6 +57,32 @@
       color:var(--muted);
     }
 
+    .header-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn-refresh{
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#111827;
+      color:var(--txt);
+      font-size:12px;
+      padding:7px 12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .btn-refresh:hover{background:var(--hover);}
+
+    .small-badge{
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    /* GRID PRINCIPAL */
     main{
       max-width:1100px;
       margin:26px auto;
@@ -62,7 +92,7 @@
       gap:18px;
     }
 
-    /* Bloques de información (KPIs + alertas) ocupan todo el ancho de la grid */
+    /* SECCIONES GRANDES */
     .kpi-section,
     .alerts-section{
       grid-column:1 / -1;
@@ -70,10 +100,19 @@
       border:1px solid var(--border);
       border-radius:14px;
       padding:18px 18px 16px;
+      animation:fadeIn .5s ease both;
+    }
+
+    .section-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:4px;
     }
 
     .section-title{
-      margin:0 0 8px;
+      margin:0;
       font-size:18px;
       font-weight:600;
       color:var(--accent);
@@ -97,6 +136,7 @@
       border-radius:10px;
       border:1px solid var(--border);
       padding:10px 12px;
+      animation:fadeInUp .4s ease both;
     }
 
     .kpi-label{
@@ -106,7 +146,7 @@
     }
 
     .kpi-value{
-      font-size:20px;
+      font-size:22px;
       font-weight:700;
       line-height:1.1;
     }
@@ -117,7 +157,7 @@
       color:var(--muted);
     }
 
-    /* Alertas */
+    /* ALERTAS */
     .alerts-columns{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -177,23 +217,6 @@
       background:#111827;
     }
 
-    .status-pill{
-      display:inline-flex;
-      align-items:center;
-      padding:1px 6px;
-      border-radius:999px;
-      font-size:11px;
-      border:1px solid var(--border);
-    }
-    .status-pill.danger{
-      border-color:var(--danger);
-      color:var(--danger);
-    }
-    .status-pill.warning{
-      border-color:var(--warning);
-      color:var(--warning);
-    }
-
     .link-btn{
       display:inline-flex;
       align-items:center;
@@ -216,7 +239,7 @@
       margin-top:2px;
     }
 
-    /* Tarjetas de navegación ya existentes */
+    /* TARJETAS / MENÚ PRINCIPAL */
     .card{
       background:var(--panel);
       border:1px solid var(--border);
@@ -228,6 +251,7 @@
       flex-direction:column;
       gap:8px;
       transition:0.15s;
+      animation:fadeInUp .5s ease both;
     }
 
     .card:hover{
@@ -254,6 +278,87 @@
       font-size:13px;
       color:var(--muted);
     }
+
+    /* TOASTS */
+    #toast-container{
+      position:fixed;
+      top:16px;
+      right:16px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      z-index:9999;
+    }
+    .toast{
+      min-width:220px;
+      max-width:320px;
+      padding:10px 14px;
+      border-radius:10px;
+      font-size:13px;
+      color:#f9fafb;
+      box-shadow:0 10px 20px rgba(0,0,0,.45);
+      opacity:0;
+      transform:translateX(16px);
+      animation:toastIn .25s ease forwards;
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+    }
+    .toast-info{background:#0ea5e9;}
+    .toast-success{background:#16a34a;}
+    .toast-warning{background:#facc15;color:#111827;}
+    .toast-danger{background:#b91c1c;}
+
+    .toast-close{
+      margin-left:auto;
+      cursor:pointer;
+      font-weight:bold;
+      font-size:14px;
+      opacity:.8;
+    }
+    .toast-close:hover{opacity:1;}
+
+    /* ANIMACIONES */
+    @keyframes fadeIn {
+      from {opacity:0; transform:translateY(6px);}
+      to   {opacity:1; transform:translateY(0);}
+    }
+    @keyframes fadeInUp {
+      from {opacity:0; transform:translateY(18px);}
+      to   {opacity:1; transform:translateY(0);}
+    }
+    @keyframes toastIn {
+      from {opacity:0; transform:translateX(16px);}
+      to   {opacity:1; transform:translateX(0);}
+    }
+
+    /* Parpadeo filas críticas */
+    .row-danger{
+      animation:blinkDanger 1.2s infinite;
+    }
+    .row-warning{
+      animation:blinkWarn 1.6s infinite;
+    }
+    @keyframes blinkDanger{
+      0%,100%{background:transparent;}
+      50%{background:rgba(220,38,38,0.22);}
+    }
+    @keyframes blinkWarn{
+      0%,100%{background:transparent;}
+      50%{background:rgba(234,179,8,0.18);}
+    }
+
+    @media (max-width:640px){
+      header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+      }
+      .header-actions{
+        width:100%;
+        justify-content:space-between;
+      }
+    }
   </style>
 </head>
 <body>
@@ -266,15 +371,24 @@
       <span>Trazabilidad · Instrumentos · Laboratorio</span>
     </div>
   </div>
+  <div class="header-actions">
+    <button class="btn-refresh" id="btn-refresh">
+      🔄 Actualizar ahora
+    </button>
+    <span class="small-badge" id="last-update">Última actualización: —</span>
+  </div>
 </header>
 
 <main>
 
   <!-- PANEL DE KPIs LABORATORIO -->
   <section class="kpi-section">
-    <h2 class="section-title">Resumen del laboratorio</h2>
+    <div class="section-header">
+      <h2 class="section-title">Resumen del laboratorio</h2>
+    </div>
     <p class="muted">
       Indicadores calculados en tiempo real a partir de la tabla <code>instrumentos</code> de Supabase.
+      Un equipo se considera <b>en uso</b> si su ubicación actual es distinta de <code>Laboratorio</code>.
     </p>
 
     <div class="kpi-grid">
@@ -297,7 +411,7 @@
       </div>
 
       <div class="kpi-card">
-        <div class="kpi-label">Calibrados</div>
+        <div class="kpi-label">Calibrados (estado = “Calibrado”)</div>
         <div class="kpi-value" id="kpi-calibrados">–</div>
         <div class="kpi-extra" id="kpi-calibrados-extra"></div>
       </div>
@@ -318,10 +432,12 @@
 
   <!-- ALERTAS OPERATIVAS -->
   <section class="alerts-section">
-    <h2 class="section-title">Alertas de calibración</h2>
+    <div class="section-header">
+      <h2 class="section-title">Alertas de calibración</h2>
+    </div>
     <p class="muted">
-      Equipos fuera de calibración y próximos a vencer. Los operarios pueden localizar estos códigos
-      y priorizar su calibración.
+      Equipos fuera de calibración y próximos a vencer. Desde aquí se puede ir directo a la ficha del instrumento
+      para planificar su calibración o retirada de uso.
     </p>
 
     <div class="alerts-columns">
@@ -334,12 +450,12 @@
         </h3>
         <table class="alerts-table">
           <thead>
-          <tr>
-            <th>Código</th>
-            <th>Ubicación</th>
-            <th>Próxima</th>
-            <th></th>
-          </tr>
+            <tr>
+              <th>Código</th>
+              <th>Ubicación</th>
+              <th>Próxima</th>
+              <th></th>
+            </tr>
           </thead>
           <tbody id="tbody-fuera"></tbody>
         </table>
@@ -356,17 +472,17 @@
         </h3>
         <table class="alerts-table">
           <thead>
-          <tr>
-            <th>Código</th>
-            <th>Ubicación</th>
-            <th>Próxima</th>
-            <th></th>
-          </tr>
+            <tr>
+              <th>Código</th>
+              <th>Ubicación</th>
+              <th>Próxima</th>
+              <th></th>
+            </tr>
           </thead>
           <tbody id="tbody-prox"></tbody>
         </table>
         <div class="empty-msg" id="msg-prox" style="display:none;">
-          No hay instrumentos con calibración próxima en los próximos 30 días.
+          No hay instrumentos próximos a calibrar en los próximos 30 días.
         </div>
       </div>
 
@@ -425,6 +541,9 @@
   Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2025
 </footer>
 
+<!-- Contenedor de notificaciones -->
+<div id="toast-container"></div>
+
 <!-- Cliente Supabase -->
 <script type="module" src="config.mjs"></script>
 <script type="module">
@@ -450,27 +569,90 @@
   const msgFuera = document.getElementById('msg-fuera');
   const msgProx = document.getElementById('msg-prox');
 
-  function parseDate(dStr) {
+  const btnRefresh = document.getElementById('btn-refresh');
+  const lastUpdateEl = document.getElementById('last-update');
+
+  /* ========== TOASTS ========== */
+  function showToast(message, type="info", timeout=3500){
+    const cont = document.getElementById('toast-container');
+    const div = document.createElement('div');
+    div.className = `toast toast-${type}`;
+    div.innerHTML = `<span>${message}</span><span class="toast-close">×</span>`;
+    cont.appendChild(div);
+
+    const closer = div.querySelector('.toast-close');
+    closer.onclick = () => {
+      div.style.opacity = '0';
+      div.style.transform = 'translateX(16px)';
+      setTimeout(()=>div.remove(), 250);
+    };
+
+    setTimeout(()=>{
+      if (!document.body.contains(div)) return;
+      div.style.opacity = '0';
+      div.style.transform = 'translateX(16px)';
+      setTimeout(()=>div.remove(), 250);
+    }, timeout);
+  }
+
+  /* ========== UTILIDADES FECHAS / PORCENTAJE ========== */
+  function parseDate(dStr){
     if (!dStr) return null;
     const d = new Date(dStr);
     return isNaN(d) ? null : d;
   }
 
-  function formatDate(d) {
+  function formatDate(d){
     if (!d) return '—';
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
     const yy = d.getFullYear();
     return `${dd}/${mm}/${yy}`;
   }
 
-  async function cargarDashboard() {
+  function pct(part, total){
+    return total > 0 ? Math.round((part/total)*100) : 0;
+  }
+
+  function animateCount(el, value){
+    const end = Number(value) || 0;
+    let current = 0;
+    const step = Math.max(1, Math.round(end / 30));
+    const interval = setInterval(()=>{
+      current += step;
+      if (current >= end){
+        current = end;
+        clearInterval(interval);
+      }
+      el.textContent = current;
+    }, 20);
+  }
+
+  function updateLastUpdate(){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const ss = String(now.getSeconds()).padStart(2,'0');
+    lastUpdateEl.textContent = `Última actualización: ${formatDate(now)} ${hh}:${mm}:${ss}`;
+  }
+
+  /* ========== DASHBOARD ========== */
+  async function cargarDashboard(showToasts=true){
+    if (!supabase){
+      console.error("Supabase no está disponible (revisa config.mjs)");
+      if (showToasts) showToast("Supabase no está disponible", "danger");
+      return;
+    }
+
+    if (showToasts) showToast("Actualizando datos del laboratorio…","info",2500);
+
     const { data: instrumentos, error } = await supabase
       .from('instrumentos')
-      .select('codigo_interno, estado, ubicacion, proxima_calibracion_est, fecha_ultima_calibracion_est');
+      .select('codigo, descripcion, estado, ubicacion_actual, proxima_calibracion, fecha_ultima_calibracion');
 
-    if (error) {
-      console.error('Error cargando instrumentos', error);
+    if (error){
+      console.error(error);
+      if (showToasts) showToast("Error consultando instrumentos en Supabase","danger");
       return;
     }
 
@@ -479,110 +661,111 @@
     en30.setDate(hoy.getDate() + 30);
 
     const total = instrumentos.length;
-
     let enLab = 0;
     let enUso = 0;
     let calibrados = 0;
-    let fueraCal = 0;
-    let proximosCount = 0;
-
     const fueraLista = [];
     const proximosLista = [];
 
-    instrumentos.forEach(inst => {
-      const ubic = (inst.ubicacion || '').trim();
+    instrumentos.forEach(inst=>{
+      const ubic = (inst.ubicacion_actual || '').trim();
       const estado = (inst.estado || '').trim();
+      const prox = parseDate(inst.proxima_calibracion);
 
+      // Regla: Laboratorio => NO en uso
       if (ubic === 'Laboratorio') enLab++;
       else enUso++;
 
       if (estado === 'Calibrado') calibrados++;
-      if (estado === 'Fuera de calibración') fueraCal++;
 
-      const prox = parseDate(inst.proxima_calibracion_est);
-      if (prox) {
-        // Si ya está vencida, lo consideramos fuera de calibración también
-        if (prox < hoy) {
-          if (!fueraLista.some(i => i.codigo_interno === inst.codigo_interno)) {
-            fueraLista.push({ ...inst, proxDate: prox });
-          }
-        } else if (prox >= hoy && prox <= en30) {
+      if (prox){
+        if (prox < hoy){
+          fueraLista.push({ ...inst, proxDate: prox });
+        }else if (prox >= hoy && prox <= en30){
           proximosLista.push({ ...inst, proxDate: prox });
         }
       }
     });
 
-    // KPIs numéricos
-    const pct = (parte, total) => total > 0 ? Math.round((parte / total) * 100) : 0;
+    // KPIs
+    animateCount(elTotal, total);
+    elTotalExtra.textContent = total ? 'Instrumentos registrados en el sistema' : '';
 
-    elTotal.textContent = total || '0';
+    animateCount(elUso, enUso);
+    elUsoExtra.textContent = total ? `${pct(enUso,total)}% del total` : '';
 
-    elUso.textContent = enUso;
-    elUsoExtra.textContent = total ? `${pct(enUso, total)}% del total` : '';
+    animateCount(elLab, enLab);
+    elLabExtra.textContent = total ? `${pct(enLab,total)}% del total` : '';
 
-    elLab.textContent = enLab;
-    elLabExtra.textContent = total ? `${pct(enLab, total)}% del total` : '';
+    animateCount(elCal, calibrados);
+    elCalExtra.textContent = total ? `${pct(calibrados,total)}% con estado "Calibrado"` : '';
 
-    elCal.textContent = calibrados;
-    elCalExtra.textContent = total ? `${pct(calibrados, total)}% calibrados` : '';
+    animateCount(elProx, proximosLista.length);
+    elProxExtra.textContent = total ? `${pct(proximosLista.length,total)}% del total` : '';
 
-    // Recalcular fuera / próximos utilizando listas calculadas
-    fueraCal = fueraLista.length;
-    proximosCount = proximosLista.length;
+    animateCount(elFuera, fueraLista.length);
+    elFueraExtra.textContent = total ? `${pct(fueraLista.length,total)}% del total` : '';
 
-    elProx.textContent = proximosCount;
-    elProxExtra.textContent = total ? `${pct(proximosCount, total)}% del total` : '';
-
-    elFuera.textContent = fueraCal;
-    elFueraExtra.textContent = total ? `${pct(fueraCal, total)}% del total` : '';
-
-    // Alertas - ordenar por fecha
-    fueraLista.sort((a, b) => a.proxDate - b.proxDate);
-    proximosLista.sort((a, b) => a.proxDate - b.proxDate);
-
-    // Pintar tablas
+    // Tablas de alertas
     tbodyFuera.innerHTML = '';
     tbodyProx.innerHTML = '';
 
-    fueraLista.forEach(inst => {
+    fueraLista.sort((a,b)=>a.proxDate - b.proxDate);
+    proximosLista.sort((a,b)=>a.proxDate - b.proxDate);
+
+    fueraLista.forEach(inst=>{
       const tr = document.createElement('tr');
+      tr.classList.add('row-danger');
       tr.innerHTML = `
-        <td>${inst.codigo_interno || ''}</td>
-        <td>${inst.ubicacion || ''}</td>
+        <td>${inst.codigo || ''}</td>
+        <td>${inst.ubicacion_actual || ''}</td>
         <td>${formatDate(inst.proxDate)}</td>
-        <td>
-          <a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo_interno || '')}">
-            Ver
-          </a>
-        </td>
+        <td><a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || '')}">Ver</a></td>
       `;
       tbodyFuera.appendChild(tr);
     });
 
-    proximosLista.forEach(inst => {
+    proximosLista.forEach(inst=>{
       const tr = document.createElement('tr');
+      tr.classList.add('row-warning');
       tr.innerHTML = `
-        <td>${inst.codigo_interno || ''}</td>
-        <td>${inst.ubicacion || ''}</td>
+        <td>${inst.codigo || ''}</td>
+        <td>${inst.ubicacion_actual || ''}</td>
         <td>${formatDate(inst.proxDate)}</td>
-        <td>
-          <a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo_interno || '')}">
-            Ver
-          </a>
-        </td>
+        <td><a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || '')}">Ver</a></td>
       `;
       tbodyProx.appendChild(tr);
     });
 
-    badgeFuera.textContent = fueraCal;
-    badgeProx.textContent = proximosCount;
+    badgeFuera.textContent = fueraLista.length;
+    badgeProx.textContent = proximosLista.length;
 
-    msgFuera.style.display = fueraCal === 0 ? 'block' : 'none';
-    msgProx.style.display = proximosCount === 0 ? 'block' : 'none';
+    msgFuera.style.display = fueraLista.length === 0 ? 'block' : 'none';
+    msgProx.style.display = proximosLista.length === 0 ? 'block' : 'none';
+
+    updateLastUpdate();
+
+    if (showToasts){
+      showToast("Panel actualizado correctamente","success");
+      if (fueraLista.length > 0){
+        showToast(`Hay ${fueraLista.length} instrumento(s) fuera de calibración`,"danger",4000);
+      }
+      if (proximosLista.length > 0){
+        showToast(`Hay ${proximosLista.length} instrumento(s) próximos a calibrar`,"warning",4000);
+      }
+    }
   }
 
-  cargarDashboard();
+  // Eventos
+  btnRefresh.addEventListener('click', ()=>cargarDashboard(true));
+
+  // Primera carga
+  cargarDashboard(true);
+
+  // Auto-refresco cada 60 segundos
+  setInterval(()=>cargarDashboard(false), 60000);
 </script>
 
 </body>
 </html>
+
