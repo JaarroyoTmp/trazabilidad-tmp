@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>TMP · Alcance del laboratorio y KPIs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/tmp-quality.png" />
+
+  <!-- Chart.js para los gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu;
+      background:#0d1117;
+      color:#f0f6fc;
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 18px;
+      background:#161b22;
+      border-bottom:1px solid #30363d;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand img{height:42px;}
+    .brand h1{margin:0;font-size:18px;}
+    .brand span{font-size:12px;color:#8b949e;}
+    .btn{
+      border-radius:999px;
+      border:1px solid #30363d;
+      background:transparent;
+      color:#f0f6fc;
+      padding:8px 14px;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .btn:hover{background:#1f2937;}
+
+    main{
+      max-width:1100px;
+      margin:20px auto 40px;
+      padding:0 16px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .card{
+      background:#161b22;
+      border-radius:16px;
+      border:1px solid #30363d;
+      padding:18px 18px 14px;
+    }
+    h2{
+      margin:0 0 10px;
+      font-size:17px;
+      color:#58a6ff;
+    }
+    h3{
+      margin:10px 0 6px;
+      font-size:15px;
+      color:#e2e8f0;
+    }
+    p{margin:4px 0 6px;font-size:14px;color:#c9d1d9;}
+    ul{margin:4px 0 8px 18px;font-size:14px;color:#c9d1d9;}
+    li{margin-bottom:3px;}
+    .muted{font-size:12px;color:#8b949e;margin-top:4px;}
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+    }
+    @media (max-width:900px){
+      .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+    @media (max-width:600px){
+      .kpi-grid{grid-template-columns:1fr;}
+    }
+    .kpi-card{
+      background:#0b1627;
+      border:1px solid #30363d;
+      border-radius:12px;
+      padding:10px 12px;
+    }
+    .kpi-label{
+      font-size:12px;
+      color:#8b949e;
+      margin-bottom:4px;
+    }
+    .kpi-value{
+      font-size:20px;
+      font-weight:700;
+    }
+
+    .charts{
+      display:grid;
+      grid-template-columns:1.2fr 1fr;
+      gap:12px;
+    }
+    @media (max-width:960px){
+      .charts{grid-template-columns:1fr;}
+    }
+    canvas{max-height:320px;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" alt="TMP">
+    <div>
+      <h1>Alcance del laboratorio TMP y KPIs</h1>
+      <span>Visión global de capacidad y carga de trabajo</span>
+    </div>
+  </div>
+  <button class="btn" onclick="window.location.href='home.html'">🏠 Volver al panel</button>
+</header>
+
+<main>
+
+  <!-- Alcance del laboratorio (texto estático editable) -->
+  <section class="card">
+    <h2>1. Alcance del laboratorio interno</h2>
+
+    <h3>Magnitudes cubiertas</h3>
+    <ul>
+      <li><b>Longitud</b>: equipos de medida y control dimensional (pie de rey, micrómetros, tampones P/NP, anillos roscados...).</li>
+      <li><b>Ángulo y planitud</b>: escuadras, reglas, mármoles de control.</li>
+      <li><b>Comparadores y relogería</b>: relojes comparadores, palpadores indicadores, soportes.</li>
+      <!-- Ajusta / amplía según vuestro alcance real -->
+    </ul>
+
+    <h3>Rangos típicos de trabajo</h3>
+    <ul>
+      <li>0 – 1000 mm para instrumentos de mano.</li>
+      <li>Resoluciones habituales: 0,01 mm / 0,001 mm según instrumento.</li>
+      <li>Patrones internos trazables a laboratorios externos acreditados.</li>
+    </ul>
+
+    <p class="muted">
+      Puedes adaptar este texto exactamente a lo que figure en tu “Alcance del laboratorio interno”
+      para mostrarlo en auditoría tal cual.
+    </p>
+  </section>
+
+  <!-- KPIs numéricos -->
+  <section class="card">
+    <h2>2. KPIs del laboratorio (últimos 30 días)</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Instrumentos activos</div>
+        <div class="kpi-value" id="kpiTotalInstrumentos">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Calibraciones próximas (&lt; 30 días)</div>
+        <div class="kpi-value" id="kpiProx">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Fuera de calibración</div>
+        <div class="kpi-value" id="kpiFuera">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Movimientos registrados (30 días)</div>
+        <div class="kpi-value" id="kpiMovimientos">–</div>
+      </div>
+    </div>
+    <p class="muted">
+      Los datos se calculan en tiempo real a partir de las tablas <code>instrumentos</code> y
+      <code>movimientos</code> de Supabase.
+    </p>
+  </section>
+
+  <!-- Gráficos -->
+  <section class="card">
+    <h2>3. Distribución de estado y carga por familia</h2>
+    <div class="charts">
+      <div>
+        <h3>Estado de calibración de los instrumentos</h3>
+        <canvas id="chartEstado"></canvas>
+      </div>
+      <div>
+        <h3>Instrumentos por estado (resumen)</h3>
+        <canvas id="chartPie"></canvas>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Cliente Supabase -->
+<script type="module" src="config.mjs"></script>
+<script type="module">
+  const supabase = window.supabase;
+
+  const elTotal = document.getElementById("kpiTotalInstrumentos");
+  const elProx  = document.getElementById("kpiProx");
+  const elFuera = document.getElementById("kpiFuera");
+  const elMov   = document.getElementById("kpiMovimientos");
+
+  let chartEstado, chartPie;
+
+  function parseDate(dStr){
+    if (!dStr) return null;
+    const d = new Date(dStr);
+    return isNaN(d) ? null : d;
+  }
+
+  async function cargarKPIs(){
+    // 1) Datos de instrumentos
+    const { data: instrumentos, error: errInst } = await supabase
+      .from("instrumentos")
+      .select("codigo, estado, fecha_proxima_calibracion");
+
+    if (errInst){
+      console.error(errInst);
+      return;
+    }
+
+    const hoy = new Date();
+    const en30 = new Date();
+    en30.setDate(hoy.getDate() + 30);
+
+    let total = 0;
+    let proximas = 0;
+    let fuera = 0;
+    const estadoCounts = {};
+
+    instrumentos.forEach(inst => {
+      total++;
+      const est = (inst.estado || "Sin estado").trim();
+      estadoCounts[est] = (estadoCounts[est] || 0) + 1;
+
+      const prox = parseDate(inst.fecha_proxima_calibracion);
+      if (prox){
+        if (prox < hoy) fuera++;
+        else if (prox <= en30) proximas++;
+      }
+    });
+
+    elTotal.textContent = total;
+    elProx.textContent  = proximas;
+    elFuera.textContent = fuera;
+
+    // 2) Movimientos últimos 30 días
+    const hace30 = new Date();
+    hace30.setDate(hoy.getDate() - 30);
+
+    const { data: movs, error: errMov } = await supabase
+      .from("movimientos")
+      .select("id, fecha")
+      .gte("fecha", hace30.toISOString());
+
+    if (!errMov && movs){
+      elMov.textContent = movs.length;
+    }
+
+    // 3) Gráficos
+    const estados = Object.keys(estadoCounts);
+    const valores = estados.map(e => estadoCounts[e]);
+
+    const ctxBar = document.getElementById("chartEstado").getContext("2d");
+    const ctxPie = document.getElementById("chartPie").getContext("2d");
+
+    if (chartEstado) chartEstado.destroy();
+    if (chartPie) chartPie.destroy();
+
+    chartEstado = new Chart(ctxBar, {
+      type: "bar",
+      data: {
+        labels: estados,
+        datasets: [{
+          label: "Instrumentos por estado",
+          data: valores
+        }]
+      },
+      options: {
+        responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{ticks:{color:"#c9d1d9"}},
+          y:{ticks:{color:"#c9d1d9",precision:0},beginAtZero:true}
+        }
+      }
+    });
+
+    chartPie = new Chart(ctxPie, {
+      type: "pie",
+      data: {
+        labels: estados,
+        datasets: [{
+          data: valores
+        }]
+      },
+      options: {
+        responsive:true,
+        plugins:{
+          legend:{labels:{color:"#c9d1d9"}}
+        }
+      }
+    });
+  }
+
+  cargarKPIs();
+</script>
+
+</body>
+</html>
