@@ -3,24 +3,38 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TMP · Panel principal</title>
 
   <style>
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --text: #f0f6fc;
+      --muted: #8b949e;
+      --border: #30363d;
+      --accent: #3ea8ff;
+      --card-hover: #58a6ff33;
+    }
+
     body {
       margin: 0;
-      background: #0d1117;
-      color: #f0f6fc;
+      background: var(--bg);
+      color: var(--text);
       font-family: system-ui, sans-serif;
     }
 
+    /* -------- HEADER -------- */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 14px 20px;
-      background: #161b22;
-      border-bottom: 1px solid #30363d;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .logo {
@@ -38,56 +52,87 @@
       cursor: pointer;
       color: #f85149;
       font-weight: 600;
+      transition: 0.2s;
     }
 
+    #btnLogout:hover {
+      color: #ff6b6b;
+    }
+
+    /* -------- BIENVENIDA -------- */
     #welcomeBox {
-      padding: 16px 20px;
-      font-size: 17px;
-      background: #0d1117;
-      color: #f0f6fc;
-      border-bottom: 1px solid #30363d;
-      font-weight: 500;
+      padding: 24px 20px;
+      font-size: 19px;
+      background: linear-gradient(180deg, var(--bg2), var(--bg));
+      border-bottom: 1px solid var(--border);
     }
 
+    #welcomeBox small {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* -------- TARJETAS -------- */
     .wrap {
-      padding: 20px;
-      max-width: 800px;
+      padding: 22px;
+      max-width: 900px;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
     }
 
-    a.card {
-      display: block;
-      background: #161b22;
-      border: 1px solid #30363d;
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-      color: #f0f6fc;
+      padding: 20px 18px;
+      color: var(--text);
       text-decoration: none;
+      transition: 0.20s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .4);
+    }
+
+    .card-icon {
+      font-size: 32px;
+      line-height: 32px;
+    }
+
+    .card-title {
       font-size: 17px;
-      font-weight: 500;
-      transition: border 0.2s, transform 0.15s;
+      font-weight: 600;
     }
 
-    a.card:hover {
-      border-color: #58a6ff;
-      transform: translateX(3px);
+    .card-desc {
+      font-size: 14px;
+      color: var(--muted);
     }
 
-    /* Botón volver */
-    .btnVolver {
-      display: inline-block;
-      padding: 10px 16px;
-      background: #238636;
-      color: white;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 15px;
-      margin: 10px;
-    }
+    /* Responsive ajustes */
+    @media (max-width: 480px) {
+      #welcomeBox {
+        font-size: 17px;
+        padding: 18px;
+      }
 
-    .btnVolver:hover {
-      background: #2ea043;
+      .wrap {
+        padding: 14px;
+        gap: 14px;
+      }
+
+      .card {
+        padding: 16px;
+      }
     }
   </style>
 
@@ -105,54 +150,83 @@
   </header>
 
   <div id="welcomeBox">
-    Bienvenido, <b id="welcomeName"></b> <span id="welcomeRole" style="color:#8b949e"></span>
+    Bienvenido, <b id="welcomeName"></b>  
+    <br>
+    <small id="welcomeRole"></small>
   </div>
 
   <div class="wrap">
 
-    <a class="card" href="TMP_Calibraciones_Lab.html">📏 Calibraciones · Laboratorio</a>
-    <a class="card" href="App_Patrones_TMP.html">📐 Patrones TMP</a>
-    <a class="card" href="App_Familias_TMP.html">🧩 Familias de Instrumentos</a>
-    <a class="card" href="movimiento.html">🔄 Movimientos de Instrumentos</a>
-    <a class="card" href="alta_instrumento.html">➕ Alta de Instrumento</a>
-    <a class="card" href="qr/qr.index.html">🏷 Generador de QR</a>
-  </div>
+    <a class="card" href="TMP_Calibraciones_Lab.html">
+      <span class="card-icon">📏</span>
+      <span class="card-title">Calibraciones · Laboratorio</span>
+      <span class="card-desc">Consulta fechas, estados y avisos.</span>
+    </a>
 
-  <!-- Botón de volver (para las demás páginas lo mismo)-->
-  <a class="btnVolver" href="home.html">⬅ Volver al Inicio</a>
+    <a class="card" href="App_Patrones_TMP.html">
+      <span class="card-icon">📐</span>
+      <span class="card-title">Patrones TMP</span>
+      <span class="card-desc">Control de patrones internos.</span>
+    </a>
+
+    <a class="card" href="App_Familias_TMP.html">
+      <span class="card-icon">🧩</span>
+      <span class="card-title">Familias de Instrumentos</span>
+      <span class="card-desc">Organización y listado por grupos.</span>
+    </a>
+
+    <a class="card" href="movimiento.html">
+      <span class="card-icon">🔄</span>
+      <span class="card-title">Movimientos</span>
+      <span class="card-desc">Entradas, salidas y trazabilidad.</span>
+    </a>
+
+    <a class="card" href="alta_instrumento.html">
+      <span class="card-icon">➕</span>
+      <span class="card-title">Alta / Edición de Instrumento</span>
+      <span class="card-desc">Crear, modificar o dar de baja.</span>
+    </a>
+
+    <a class="card" href="qr/qr.index.html">
+      <span class="card-icon">🏷</span>
+      <span class="card-title">Generador de QR</span>
+      <span class="card-desc">Crea las etiquetas QR oficiales TMP.</span>
+    </a>
+
+  </div>
 
   <script type="module">
     const raw = localStorage.getItem("operario");
-    if (!raw) {
-      window.location.href = "acceso.html";  // corregido
-    }
+    if (!raw) window.location.href = "acceso.html";
 
     const operario = JSON.parse(raw);
 
-    // Header (arriba derecha)
+    // Header
     document.getElementById("userEmail").textContent =
       operario.nombre ?? operario.username;
 
-    // Bienvenida grande
+    // Bienvenida
     document.getElementById("welcomeName").textContent = operario.nombre;
 
-    let rolFormateado = "";
+    let rol = "";
+
     switch (operario.rol) {
       case "admin":
-        rolFormateado = "(Administrador de Calidad)";
+        rol = "Administrador de Calidad";
         break;
       case "operario":
-        rolFormateado = "(Operario de Calidad)";
+        rol = "Operario de Calidad";
         break;
       default:
-        rolFormateado = "(" + operario.rol + ")";
+        rol = operario.rol;
     }
-    document.getElementById("welcomeRole").textContent = " " + rolFormateado;
+
+    document.getElementById("welcomeRole").textContent = rol;
 
     // Logout
     document.getElementById("btnLogout").addEventListener("click", () => {
       localStorage.removeItem("operario");
-      window.location.href = "acceso.html"; // corregido
+      window.location.href = "acceso.html";
     });
   </script>
 
