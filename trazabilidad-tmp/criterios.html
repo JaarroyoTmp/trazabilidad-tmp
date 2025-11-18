@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>TMP · Criterios de aceptación metrológica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/tmp-quality.png" />
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:#0d1117;
+      color:#f0f6fc;
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 18px;
+      background:#161b22;
+      border-bottom:1px solid #30363d;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand img{height:42px;}
+    .brand h1{margin:0;font-size:18px;}
+    .brand span{font-size:12px;color:#8b949e;}
+    .btn{
+      border-radius:999px;
+      border:1px solid #30363d;
+      background:transparent;
+      color:#f0f6fc;
+      padding:8px 14px;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .btn:hover{background:#1f2937;}
+    main{
+      max-width:900px;
+      margin:20px auto 40px;
+      padding:0 16px;
+    }
+    section{
+      background:#161b22;
+      border-radius:16px;
+      border:1px solid #30363d;
+      padding:18px 18px 16px;
+      margin-bottom:16px;
+    }
+    h2{
+      margin:0 0 10px;
+      font-size:17px;
+      color:#58a6ff;
+    }
+    h3{
+      margin:14px 0 6px;
+      font-size:15px;
+      color:#e2e8f0;
+    }
+    p{margin:4px 0 8px;font-size:14px;color:#c9d1d9;}
+    ul{margin:4px 0 8px 18px;font-size:14px;color:#c9d1d9;}
+    li{margin-bottom:3px;}
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 10px;
+      border-radius:999px;
+      border:1px solid #30363d;
+      font-size:11px;
+      color:#8b949e;
+      background:#0d1117;
+    }
+    .pill-ok{border-color:#22c55e;color:#bbf7d0;}
+    .pill-bad{border-color:#ef4444;color:#fecaca;}
+    .muted{font-size:12px;color:#8b949e;margin-top:6px;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" alt="TMP">
+    <div>
+      <h1>Criterios TMP de aceptación metrológica</h1>
+      <span>Equipos de medición · Calibración interna y externa</span>
+    </div>
+  </div>
+  <button class="btn" onclick="window.location.href='home.html'">🏠 Volver al panel</button>
+</header>
+
+<main>
+
+  <section>
+    <h2>1. Alcance de aplicación</h2>
+    <p>
+      Estos criterios se aplican a todos los instrumentos de medida utilizados en
+      <b>Talleres Mecánicos Paramio</b> para verificación, ajuste o control de producto,
+      tanto si se calibran internamente como externamente.
+    </p>
+    <ul>
+      <li>Instrumentos de control en línea (pasa/no pasa, galgas, tampones, etc.).</li>
+      <li>Instrumentos de medida dimensional (pie de rey, micrómetros, relojes comparadores...).</li>
+      <li>Patrones de trabajo y patrones de referencia.</li>
+      <li>Equipos de laboratorio de calibración interna.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. Calibración interna · Criterios de aceptación</h2>
+
+    <h3>2.1 Condiciones generales</h3>
+    <ul>
+      <li>El instrumento debe estar identificado con código TMP y estado de calibración.</li>
+      <li>Se compara frente a patrones internos con trazabilidad vigente y conocida.</li>
+      <li>Se aplican procedimientos internos aprobados (instrucciones de calibración TMP).</li>
+    </ul>
+
+    <h3>2.2 Criterio de aceptación metrológica</h3>
+    <p>Se considera el equipo <span class="tag pill-ok">APTO</span> cuando se cumpla:</p>
+    <ul>
+      <li>|Error observado| ≤ Tolerancia de calibración establecida para la magnitud y rango.</li>
+      <li>La deriva respecto a calibraciones anteriores está dentro de los límites definidos.</li>
+      <li>No se detectan daños físicos que afecten a la medición.</li>
+    </ul>
+    <p>Se considera el equipo <span class="tag pill-bad">NO APTO</span> cuando:</p>
+    <ul>
+      <li>|Error observado| &gt; Tolerancia de calibración.</li>
+      <li>Presenta histéresis o repetibilidad fuera de límite.</li>
+      <li>No cumple requisitos de linealidad, resolución o juego mecánico.»</li>
+    </ul>
+
+    <h3>2.3 Acciones en caso de NO APTO</h3>
+    <ul>
+      <li>Bloquear el equipo (etiqueta roja / fuera de servicio).</li>
+      <li>Informar a Calidad y/o Producción de los posibles productos afectados.</li>
+      <li>Evaluar necesidad de reparación, ajuste o baja técnica.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>3. Calibración externa · Criterios de aceptación</h2>
+
+    <h3>3.1 Requisitos del proveedor de calibración</h3>
+    <ul>
+      <li>Laboratorio acreditado o evaluado según ISO/IEC 17025 cuando aplique.</li>
+      <li>Certificados con trazabilidad a patrones nacionales/internacionales.</li>
+      <li>Especificación de incertidumbre expandida y condiciones de calibración.</li>
+    </ul>
+
+    <h3>3.2 Criterio de aceptación del equipo</h3>
+    <p>El instrumento se acepta cuando en el certificado externo:</p>
+    <ul>
+      <li>Los resultados están dentro de la tolerancia definida por TMP.</li>
+      <li>No existen observaciones restrictivas (ej. “uso limitado”, “solo indicativo”).</li>
+      <li>La incertidumbre del laboratorio es adecuada al uso previsto del equipo.</li>
+    </ul>
+
+    <h3>3.3 Revisión de certificados</h3>
+    <ul>
+      <li>Calidad revisa cada certificado y registra el estado final del equipo.</li>
+      <li>Se actualiza el estado en la app de trazabilidad (APTO / NO APTO / Baja técnica).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>4. Estados permitidos de equipo</h2>
+    <ul>
+      <li><span class="tag pill-ok">EN CALIBRACIÓN / APTO</span>: puede utilizarse para liberación de producto.</li>
+      <li><span class="tag">PRÓXIMA CALIBRACIÓN</span>: dentro de plazo, pero cercano al vencimiento.</li>
+      <li><span class="tag pill-bad">FUERA DE CALIBRACIÓN</span>: bloqueado hasta nueva calibración.</li>
+      <li><span class="tag pill-bad">BAJA TÉCNICA</span>: retirado definitivamente del sistema.</li>
+    </ul>
+    <p class="muted">
+      Puedes adaptar textos y valores (tolerancias, estados, referencias a normas, etc.)
+      según los procedimientos internos y las exigencias del cliente / auditoría.
+    </p>
+  </section>
+
+</main>
+
+</body>
+</html>
