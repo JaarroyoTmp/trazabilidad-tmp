@@ -1,4 +1,4 @@
-// config.js — Versión CORRECTA para Vercel
+// config.mjs — Versión CORRECTA para Vercel
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -10,13 +10,12 @@ const SUPABASE_KEY =
 // ---- CREAR CLIENTE SUPABASE ----
 const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Exponerlo globalmente (para todos los HTML)
+// Exponerlo globalmente
 window.supabase = client;
 window.sb = client;
 
-// Config global
 window.APP_CONFIG = {
   CAL_WARNING_DAYS: 30
 };
 
-console.log("✔ config.js cargado correctamente");
+console.log("✔ config.mjs cargado correctamente");
