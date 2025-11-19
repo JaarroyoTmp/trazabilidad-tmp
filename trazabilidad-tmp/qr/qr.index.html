@@ -28,7 +28,7 @@
   header span.sub{font-size:12px;color:#8b949e}
 
   .wrap{
-    max-width:460px;
+    max-width:520px;
     margin:22px auto;
     padding:0 16px 32px;
   }
@@ -129,6 +129,65 @@
   #volverHome:hover{
     background:#2ea043;
   }
+
+  /* Buscador de instrumentos */
+  .search-box{
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid #30363d;
+  }
+
+  .search-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:6px;
+  }
+
+  .search-row input{
+    flex:1;
+    min-width:0;
+  }
+
+  .results{
+    margin-top:10px;
+    max-height:220px;
+    overflow:auto;
+    border-radius:10px;
+    border:1px solid #30363d;
+  }
+
+  .result-item{
+    padding:7px 10px;
+    border-bottom:1px solid #21262d;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .result-item:last-child{
+    border-bottom:none;
+  }
+  .result-item:hover{
+    background:#0d1117;
+  }
+  .res-code{
+    font-size:13px;
+    font-weight:600;
+    color:#f0f6fc;
+  }
+  .res-desc{
+    font-size:12px;
+    color:#8b949e;
+  }
+
+  .msg{
+    font-size:12px;
+    margin-top:6px;
+    color:#8b949e;
+  }
+  .msg.error{color:#f85149;}
+  .msg.ok{color:#3fb950;}
 </style>
 </head>
 
@@ -156,7 +215,6 @@
       <button class="btn-main" onclick="generarQR()">Generar QR</button>
     </div>
 
-    <!-- NUEVOS TAMAÑOS -->
     <div class="sizes">
       <button class="btn-ghost" onclick="setSize(10)">Etiqueta 10 mm</button>
       <button class="btn-ghost" onclick="setSize(13)">Etiqueta 13 mm</button>
@@ -166,21 +224,71 @@
     <div id="qrResult"></div>
 
     <p class="hint">
-      El QR generado apunta a la información del instrumento almacenada en Supabase.
+      El QR generado apunta a la ficha del instrumento en el sistema TMP.
     </p>
+
+    <!-- BUSCADOR DE INSTRUMENTOS (SUPABASE) -->
+    <div class="search-box">
+      <label for="busqueda">Buscar instrumento (código, descripción o fabricante)</label>
+      <div class="search-row">
+        <input id="busqueda" type="text" placeholder="Ej: 11217, pie de rey, Mitutoyo...">
+        <button class="btn-ghost" onclick="buscarInstrumentos()">Buscar</button>
+      </div>
+      <div id="msgBusqueda" class="msg"></div>
+      <div id="resultados" class="results" style="display:none;"></div>
+    </div>
+
   </div>
 </div>
 
+<!-- CONFIG SUPABASE GLOBAL -->
+<script type="module" src="../config.mjs"></script>
 
-<!-- SCRIPT QR MEJORADO -->
+<!-- SCRIPT QR + BUSCADOR -->
 <script>
 let qrSize = 200;
 
-// URL hacia la ficha QR
+// URL a la ficha QR
 const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
+// Cliente Supabase expuesto por config.mjs
+const supabase = window.supabase;
+
 /* =============================
-   IMPRIMIR SOLO EL QR (sin texto)
+   VALIDAR QUE EL CÓDIGO EXISTE
+============================= */
+async function validarCodigoExiste(codigo){
+  if (!supabase){
+    alert("No hay conexión con Supabase.");
+    return false;
+  }
+  try{
+    const { data, error } = await supabase
+      .from("instrumentos")
+      .select("codigo")
+      .eq("codigo", codigo)
+      .maybeSingle();
+
+    if (error){
+      console.error(error);
+      alert("Error comprobando el código en Supabase.");
+      return false;
+    }
+    if (!data){
+      alert("No existe ningún instrumento con ese código en la base de datos.");
+      return false;
+    }
+    return true;
+  }catch(e){
+    console.error(e);
+    alert("Error inesperado validando el código.");
+    return false;
+  }
+}
+
+/* =============================
+   FUNCIÓN PARA IMPRIMIR ETIQUETA
+   (SOLO QR, SIN NÚMERO)
 ============================= */
 function imprimirEtiqueta(url, sizePx){
   const win = window.open("", "_blank", "width=400,height=400");
@@ -195,11 +303,9 @@ function imprimirEtiqueta(url, sizePx){
         align-items:center;
         justify-content:center;
         background:white;
+        font-family:sans-serif;
       }
-      img{
-        width:${sizePx}px;
-        height:${sizePx}px;
-      }
+      img{width:${sizePx}px;height:${sizePx}px;}
     </style>
     </head>
 
@@ -219,32 +325,47 @@ function imprimirEtiqueta(url, sizePx){
 }
 
 /* =============================
-   SET SIZE Y AUTOIMPRIME
+   CAMBIO DE TAMAÑO + IMPRESIÓN
+   (10, 13, 15 mm)
 ============================= */
-function setSize(mm){
+async function setSize(mm){
   const codigo = document.getElementById("codigo").value.trim();
   if (!codigo){
-    alert("Introduce el código primero.");
+    alert("Introduce primero el código del instrumento.");
     return;
   }
 
-  const sizePx = mm * 8;  // mm → px
+  // Validar que el código existe en Supabase
+  const ok = await validarCodigoExiste(codigo);
+  if (!ok) return;
+
+  // Aproximación: 1 mm ~ 8 px
+  const sizePx = mm * 8;
   qrSize = sizePx;
 
   const url = BASE_URL + encodeURIComponent(codigo);
 
-  generarQR();
+  // Muestra QR en pantalla
+  await generarQR(true);   // true: ya está validado
+
+  // Imprime etiqueta
   imprimirEtiqueta(url, sizePx);
 }
 
 /* =============================
-   GENERAR QR EN PANTALLA
+   GENERAR QR EN LA WEB
 ============================= */
-function generarQR(){
+async function generarQR(yaValidado){
   const codigo = document.getElementById("codigo").value.trim();
   if (!codigo){
     alert("Introduce el código del instrumento.");
     return;
+  }
+
+  // Si no viene validado desde setSize, comprobamos aquí
+  if (!yaValidado){
+    const ok = await validarCodigoExiste(codigo);
+    if (!ok) return;
   }
 
   const url = BASE_URL + encodeURIComponent(codigo);
@@ -266,8 +387,82 @@ function generarQR(){
   p.textContent = "URL codificada: " + url;
   cont.appendChild(p);
 }
+
+/* =============================
+   BUSCADOR DE INSTRUMENTOS
+============================= */
+async function buscarInstrumentos(){
+  const term = document.getElementById("busqueda").value.trim();
+  const msg = document.getElementById("msgBusqueda");
+  const cont = document.getElementById("resultados");
+
+  msg.textContent = "";
+  msg.className = "msg";
+  cont.style.display = "none";
+  cont.innerHTML = "";
+
+  if (!term){
+    msg.textContent = "Introduce un término de búsqueda.";
+    msg.classList.add("error");
+    return;
+  }
+
+  if (!supabase){
+    msg.textContent = "Supabase no está disponible.";
+    msg.classList.add("error");
+    return;
+  }
+
+  try{
+    const { data, error } = await supabase
+      .from("instrumentos")
+      .select("codigo, descripcion, fabricante")
+      .or(
+        `codigo.ilike.%${term}%,descripcion.ilike.%${term}%,fabricante.ilike.%${term}%`
+      )
+      .limit(30);
+
+    if (error){
+      console.error(error);
+      msg.textContent = "Error al buscar instrumentos.";
+      msg.classList.add("error");
+      return;
+    }
+
+    if (!data || data.length === 0){
+      msg.textContent = "No se han encontrado instrumentos que coincidan.";
+      msg.classList.add("error");
+      return;
+    }
+
+    cont.style.display = "block";
+    cont.innerHTML = data.map(inst => `
+      <div class="result-item" onclick="seleccionarInstrumento('${String(inst.codigo).replace(/'/g,"\\'")}')">
+        <div class="res-code">${inst.codigo || ""}</div>
+        <div class="res-desc">
+          ${(inst.descripcion || "").slice(0,70)}${(inst.descripcion && inst.descripcion.length>70)?"...":""}
+          ${inst.fabricante ? " · " + inst.fabricante : ""}
+        </div>
+      </div>
+    `).join("");
+
+    msg.textContent = `Encontrados ${data.length} instrumentos. Pulsa sobre uno para usar su código.`;
+    msg.classList.add("ok");
+
+  }catch(e){
+    console.error(e);
+    msg.textContent = "Error inesperado al buscar.";
+    msg.classList.add("error");
+  }
+}
+
+function seleccionarInstrumento(codigo){
+  document.getElementById("codigo").value = codigo;
+  document.getElementById("msgBusqueda").textContent =
+    "Código seleccionado: " + codigo + ". Ahora puedes generar el QR o elegir tamaño de etiqueta.";
+  document.getElementById("msgBusqueda").className = "msg ok";
+}
 </script>
 
 </body>
 </html>
-
