@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>TMP · Alcance del laboratorio y KPIs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --bg:#0d1117;
+      --panel:#161b22;
+      --txt:#f0f6fc;
+      --muted:#8b949e;
+      --border:#30363d;
+      --card-bg:#1c2431;
+      --hover:#263041;
+      --accent:#00b4d8;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --success:#22c55e;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto;
+      background:var(--bg);
+      color:var(--txt);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    header{
+      background:var(--panel);
+      border-bottom:1px solid var(--border);
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .brand img{
+      height:42px;
+    }
+
+    .brand-title{
+      margin:0;
+      font-size:19px;
+      font-weight:600;
+    }
+
+    .brand-sub{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .btn{
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      padding:8px 14px;
+      font-size:13px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      text-decoration:none;
+    }
+
+    .btn:hover{
+      background:var(--hover);
+    }
+
+    /* Toast pequeño de info */
+    .tag-lab{
+      font-size:11px;
+      padding:4px 9px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background:#020617;
+    }
+
+    main{
+      max-width:1100px;
+      margin:22px auto 40px;
+      padding:0 18px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:18px;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px 16px 14px;
+    }
+
+    .card-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    .card-title{
+      font-size:17px;
+      font-weight:600;
+      color:var(--accent);
+      margin:0 0 4px;
+    }
+
+    .card-sub{
+      font-size:13px;
+      color:var(--muted);
+      margin:0;
+    }
+
+    /* Alcance */
+    .scope-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .scope-block h3{
+      margin:0 0 4px;
+      font-size:14px;
+      color:#e5e7eb;
+    }
+
+    .scope-block p,
+    .scope-block ul{
+      margin:2px 0 4px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .scope-block ul{
+      padding-left:18px;
+    }
+
+    .scope-tagline{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+    }
+
+    /* Estado global laboratorio */
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:600;
+      border:1px solid var(--border);
+    }
+
+    .status-ok{
+      border-color:var(--success);
+      color:var(--success);
+    }
+    .status-vigilancia{
+      border-color:var(--accent);
+      color:var(--accent);
+    }
+    .status-atencion{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+    .status-critico{
+      border-color:var(--danger);
+      color:var(--danger);
+      animation:blink 1.6s infinite;
+    }
+
+    @keyframes blink {
+      0%,100%{opacity:1;}
+      50%{opacity:.35;}
+    }
+
+    .status-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .status-item{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .status-item span{
+      color:var(--txt);
+      font-weight:600;
+    }
+
+    /* KPIs */
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:10px;
+      margin-top:4px;
+    }
+
+    .kpi-card{
+      background:var(--card-bg);
+      border-radius:10px;
+      border:1px solid var(--border);
+      padding:10px 12px;
+      position:relative;
+      overflow:hidden;
+      transition:all .25s ease;
+    }
+
+    .kpi-card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      opacity:0;
+      pointer-events:none;
+      background:radial-gradient(circle at 0 0, rgba(0,180,216,.3), transparent 55%);
+      transition:opacity .25s ease;
+    }
+
+    .kpi-card.updated{
+      box-shadow:0 0 16px rgba(0,180,216,.35);
+    }
+    .kpi-card.updated::after{
+      opacity:1;
+    }
+
+    .kpi-label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:3px;
+    }
+
+    .kpi-value{
+      font-size:20px;
+      font-weight:700;
+      line-height:1.1;
+    }
+
+    .kpi-extra{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* Charts */
+    .charts-grid{
+      display:grid;
+      grid-template-columns:1.2fr 1fr;
+      gap:12px;
+      align-items:stretch;
+    }
+
+    @media(max-width:900px){
+      .charts-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .chart-box{
+      background:var(--card-bg);
+      border-radius:12px;
+      border:1px solid var(--border);
+      padding:10px 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .chart-title{
+      font-size:14px;
+      color:#e5e7eb;
+      margin:0;
+    }
+
+    .chart-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin:0;
+    }
+
+    canvas{
+      max-height:320px;
+    }
+
+    footer{
+      grid-column:1 / -1;
+      text-align:center;
+      margin-top:10px;
+      padding-bottom:20px;
+      font-size:13px;
+      color:var(--muted);
+    }
+  </style>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" alt="TMP">
+    <div>
+      <h1 class="brand-title">TMP · Alcance del Laboratorio & KPIs</h1>
+      <div class="brand-sub">Laboratorio interno de metrología · Taller de mecanizado</div>
+    </div>
+  </div>
+  <div>
+    <span class="tag-lab">ISO/IEC 17025 · ILAC-G8 · Laboratorio interno</span>
+    <a class="btn" href="home.html" style="margin-left:8px;">🏠 Volver al panel</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- 1. Alcance del laboratorio -->
+  <section class="card" style="grid-column:1/-1;">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">1. Alcance del laboratorio interno</h2>
+        <p class="card-sub">
+          Resumen de magnitudes, tipos de equipos y rangos típicos de trabajo que cubre el laboratorio TMP.
+          Este bloque está pensado para mostrarlo directamente en auditoría.
+        </p>
+      </div>
+    </div>
+
+    <div class="scope-grid">
+      <div class="scope-block">
+        <h3>Magnitudes y tipos de equipo</h3>
+        <ul>
+          <li><b>Longitud / Dimensional</b>: pies de rey, micrómetros exteriores/interiores, relojes comparadores.</li>
+          <li><b>Verificación GO / NO GO</b>: tampones lisos, anillos roscados, calibres P/NP.</li>
+          <li><b>Planitud, escuadras y ángulos</b>: mármoles, reglas, escuadras de control.</li>
+          <li><b>Peso / Balanzas</b>: balanzas de uso interno para verificación de masa.</li>
+          <li><b>Par de apriete</b>: llaves dinamométricas utilizadas en montaje.</li>
+          <li><b>Dureza</b>: durómetros para control de tratamiento térmico.</li>
+        </ul>
+      </div>
+
+      <div class="scope-block">
+        <h3>Rangos y resolución habituales</h3>
+        <ul>
+          <li><b>Rango de medida</b> típico: 0 – 1000 mm (instrumentos de mano y equipo de taller).</li>
+          <li><b>Resolución</b> habitual: desde 0,001 mm (micrómetros/relos) hasta 0,2 mm (aplicaciones menos críticas).</li>
+          <li><b>Comparadores</b>: recorridos habituales ±1…10 mm según aplicación.</li>
+          <li><b>Llaves dinamométricas</b>: rango según modelo (indicativo: 5–300 N·m).</li>
+          <li><b>Durómetros</b>: rango según escala utilizada (HRC, HRB, etc.).</li>
+        </ul>
+      </div>
+
+      <div class="scope-block">
+        <h3>Trazabilidad y responsabilidades</h3>
+        <ul>
+          <li>Patrones internos trazables a laboratorios externos acreditados.</li>
+          <li>Gestión centralizada de fichas, estados y fechas de calibración en la aplicación TMP.</li>
+          <li>Todo movimiento de instrumentos (entrada/salida) queda registrado en la tabla de <code>movimientos</code>.</li>
+          <li>El laboratorio define criterios de aceptación propios basados en ILAC-G8 e ISO/IEC 17025.</li>
+        </ul>
+        <p class="scope-tagline">
+          Este alcance puede alinearse con el documento oficial de “Alcance del laboratorio interno” para mostrarlo
+          en auditoría tal cual, sin necesidad de editarlo en otro soporte.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Estado global del laboratorio -->
+  <section class="card" style="grid-column:1/-1;">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">2. Estado global del laboratorio (en tiempo real)</h2>
+        <p class="card-sub">
+          Evaluación rápida basada en instrumentos totales, equipos fuera de calibración y próximos a vencer.
+        </p>
+      </div>
+      <div id="estado-pill" class="status-pill status-ok">
+        <span id="estado-pill-icon">🟢</span>
+        <span id="estado-pill-text">Laboratorio en estado OK</span>
+      </div>
+    </div>
+
+    <div class="status-grid">
+      <div class="status-item">
+        Instrumentos gestionados: <span id="status-total">–</span>
+      </div>
+      <div class="status-item">
+        Fuera de calibración: <span id="status-fuera">–</span>
+      </div>
+      <div class="status-item">
+        Próximos (&lt; 30 días): <span id="status-prox">–</span>
+      </div>
+      <div class="status-item">
+        En laboratorio vs en uso: <span id="status-lab-uso">–</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. KPIs del laboratorio -->
+  <section class="card" style="grid-column:1/-1;">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">3. KPIs del laboratorio</h2>
+        <p class="card-sub">
+          Indicadores calculados desde las tablas <code>instrumentos</code> y <code>movimientos</code> de Supabase.
+        </p>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card" id="kpi-card-total">
+        <div class="kpi-label">Instrumentos totales</div>
+        <div class="kpi-value" id="kpi-total">–</div>
+        <div class="kpi-extra" id="kpi-total-extra"></div>
+      </div>
+
+      <div class="kpi-card" id="kpi-card-lab">
+        <div class="kpi-label">En laboratorio</div>
+        <div class="kpi-value" id="kpi-lab">–</div>
+        <div class="kpi-extra" id="kpi-lab-extra"></div>
+      </div>
+
+      <div class="kpi-card" id="kpi-card-uso">
+        <div class="kpi-label">En uso (fuera de laboratorio)</div>
+        <div class="kpi-value" id="kpi-uso">–</div>
+        <div class="kpi-extra" id="kpi-uso-extra"></div>
+      </div>
+
+      <div class="kpi-card" id="kpi-card-cal">
+        <div class="kpi-label">Calibrados</div>
+        <div class="kpi-value" id="kpi-calibrados">–</div>
+        <div class="kpi-extra" id="kpi-calibrados-extra"></div>
+      </div>
+
+      <div class="kpi-card" id="kpi-card-prox">
+        <div class="kpi-label">Próximos (&lt; 30 días)</div>
+        <div class="kpi-value" id="kpi-proximos">–</div>
+        <div class="kpi-extra" id="kpi-proximos-extra"></div>
+      </div>
+
+      <div class="kpi-card" id="kpi-card-fuera">
+        <div class="kpi-label">Fuera de calibración</div>
+        <div class="kpi-value" id="kpi-fuera">–</div>
+        <div class="kpi-extra" id="kpi-fuera-extra"></div>
+      </div>
+
+      <div class="kpi-card" id="kpi-card-mov">
+        <div class="kpi-label">Movimientos (últimos 30 días)</div>
+        <div class="kpi-value" id="kpi-mov">–</div>
+        <div class="kpi-extra" id="kpi-mov-extra"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Gráficos -->
+  <section class="card" style="grid-column:1/-1;">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">4. Distribución de estados y carga por ubicación</h2>
+        <p class="card-sub">
+          Visualización rápida de cómo se reparte el parque de instrumentos por estado de calibración y ubicación.
+        </p>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-box">
+        <h3 class="chart-title">Instrumentos por estado</h3>
+        <p class="chart-sub">Agrupados por el campo <code>estado</code> de la tabla <code>instrumentos</code>.</p>
+        <canvas id="chart-estado"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3 class="chart-title">Instrumentos en laboratorio vs en uso</h3>
+        <p class="chart-sub">Se considera “En laboratorio” cuando <code>ubicacion_actual = "Laboratorio"</code>.</p>
+        <canvas id="chart-ubicacion"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2025
+  </footer>
+
+</main>
+
+<!-- Cliente Supabase (igual que en home) -->
+<script type="module" src="config.mjs"></script>
+<script type="module">
+  const supabase = window.supabase;
+
+  const kpiTotal       = document.getElementById("kpi-total");
+  const kpiLab         = document.getElementById("kpi-lab");
+  const kpiUso         = document.getElementById("kpi-uso");
+  const kpiCalibrados  = document.getElementById("kpi-calibrados");
+  const kpiProx        = document.getElementById("kpi-proximos");
+  const kpiFuera       = document.getElementById("kpi-fuera");
+  const kpiMov         = document.getElementById("kpi-mov");
+
+  const kpiTotalExtra      = document.getElementById("kpi-total-extra");
+  const kpiLabExtra        = document.getElementById("kpi-lab-extra");
+  const kpiUsoExtra        = document.getElementById("kpi-uso-extra");
+  const kpiCalExtra        = document.getElementById("kpi-calibrados-extra");
+  const kpiProxExtra       = document.getElementById("kpi-proximos-extra");
+  const kpiFueraExtra      = document.getElementById("kpi-fuera-extra");
+  const kpiMovExtra        = document.getElementById("kpi-mov-extra");
+
+  const kpiCardTotal = document.getElementById("kpi-card-total");
+  const kpiCardLab   = document.getElementById("kpi-card-lab");
+  const kpiCardUso   = document.getElementById("kpi-card-uso");
+  const kpiCardCal   = document.getElementById("kpi-card-cal");
+  const kpiCardProx  = document.getElementById("kpi-card-prox");
+  const kpiCardFuera = document.getElementById("kpi-card-fuera");
+  const kpiCardMov   = document.getElementById("kpi-card-mov");
+
+  const statusTotal   = document.getElementById("status-total");
+  const statusFuera   = document.getElementById("status-fuera");
+  const statusProx    = document.getElementById("status-prox");
+  const statusLabUso  = document.getElementById("status-lab-uso");
+
+  const estadoPill      = document.getElementById("estado-pill");
+  const estadoPillIcon  = document.getElementById("estado-pill-icon");
+  const estadoPillText  = document.getElementById("estado-pill-text");
+
+  let chartEstado = null;
+  let chartUbic   = null;
+
+  function parseDate(str){
+    if (!str) return null;
+    const d = new Date(str);
+    return isNaN(d) ? null : d;
+  }
+
+  function pct(part, total){
+    if (!total) return "0%";
+    return `${Math.round((part/total)*100)}%`;
+  }
+
+  function animateCard(el){
+    if (!el) return;
+    el.classList.add("updated");
+    setTimeout(() => el.classList.remove("updated"), 900);
+  }
+
+  function actualizarEstadoGlobal(total, fuera, proximos, enLab, enUso){
+    statusTotal.textContent  = total;
+    statusFuera.textContent  = fuera;
+    statusProx.textContent   = proximos;
+    statusLabUso.textContent = `${enLab} en laboratorio / ${enUso} en uso`;
+
+    // Lógica sencilla de semáforo
+    estadoPill.className = "status-pill";
+    let icon = "🟢";
+    let texto = "Laboratorio en estado OK";
+
+    if (fuera === 0 && proximos === 0){
+      estadoPill.classList.add("status-ok");
+      icon = "🟢";
+      texto = "Laboratorio en estado OK";
+    } else if (fuera === 0 && proximos > 0){
+      estadoPill.classList.add("status-vigilancia");
+      icon = "🟡";
+      texto = "Vigilancia: hay instrumentos próximos a calibrar";
+    } else if (fuera > 0 && fuera <= 5){
+      estadoPill.classList.add("status-atencion");
+      icon = "🟠";
+      texto = "Atención: existen equipos fuera de calibración";
+    } else if (fuera > 5){
+      estadoPill.classList.add("status-critico");
+      icon = "🔴";
+      texto = "Crítico: varios equipos fuera de calibración";
+    }
+
+    estadoPillIcon.textContent = icon;
+    estadoPillText.textContent = texto;
+  }
+
+  async function cargarDatos(){
+    if (!supabase){
+      console.error("Supabase no disponible en alcance_kpi.html");
+      return;
+    }
+
+    const hoy = new Date();
+    const en30 = new Date(hoy.getTime() + 30*86400000);
+    const hace30 = new Date(hoy.getTime() - 30*86400000);
+
+    // 1) Instrumentos
+    const { data: instrumentos, error: errInst } = await supabase
+      .from("instrumentos")
+      .select("codigo, estado, ubicacion_actual, proxima_calibracion");
+
+    if (errInst){
+      console.error("Error cargando instrumentos:", errInst);
+      return;
+    }
+
+    const total = instrumentos.length;
+
+    let enLab = 0;
+    let enUso = 0;
+    let calibrados = 0;
+    let fuera = 0;
+    let proximos = 0;
+
+    const estadosCount = {};
+    let ubicLab = 0;
+    let ubicUso = 0;
+
+    instrumentos.forEach(inst => {
+      const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
+      if (ubic === "laboratorio"){
+        enLab++;
+        ubicLab++;
+      } else {
+        enUso++;
+        ubicUso++;
+      }
+
+      const estado = (inst.estado || "Sin estado").trim() || "Sin estado";
+      estadosCount[estado] = (estadosCount[estado] || 0) + 1;
+      if (estado.toLowerCase() === "calibrado"){
+        calibrados++;
+      }
+
+      const prox = parseDate(inst.proxima_calibracion);
+      if (prox){
+        if (prox < hoy){
+          fuera++;
+        } else if (prox >= hoy && prox <= en30){
+          proximos++;
+        }
+      }
+    });
+
+    // 2) Movimientos últimos 30 días
+    const { data: movs, error: errMov } = await supabase
+      .from("movimientos")
+      .select("id, fecha")
+      .gte("fecha", hace30.toISOString());
+
+    let movCount = 0;
+    if (!errMov && movs){
+      movCount = movs.length;
+    }
+
+    // KPIs
+    kpiTotal.textContent      = total;
+    kpiLab.textContent        = enLab;
+    kpiUso.textContent        = enUso;
+    kpiCalibrados.textContent = calibrados;
+    kpiProx.textContent       = proximos;
+    kpiFuera.textContent      = fuera;
+    kpiMov.textContent        = movCount;
+
+    kpiTotalExtra.textContent      = "";
+    kpiLabExtra.textContent        = total ? `${pct(enLab,total)} del total` : "";
+    kpiUsoExtra.textContent        = total ? `${pct(enUso,total)} del total` : "";
+    kpiCalExtra.textContent        = total ? `${pct(calibrados,total)} calibrados` : "";
+    kpiProxExtra.textContent       = total ? `${pct(proximos,total)} del total` : "";
+    kpiFueraExtra.textContent      = total ? `${pct(fuera,total)} del total` : "";
+    kpiMovExtra.textContent        = "Movimientos registrados en los últimos 30 días";
+
+    animateCard(kpiCardTotal);
+    animateCard(kpiCardLab);
+    animateCard(kpiCardUso);
+    animateCard(kpiCardCal);
+    animateCard(kpiCardProx);
+    animateCard(kpiCardFuera);
+    animateCard(kpiCardMov);
+
+    // Estado global
+    actualizarEstadoGlobal(total, fuera, proximos, enLab, enUso);
+
+    // 3) Gráficos
+    const estados = Object.keys(estadosCount);
+    const valores = estados.map(e => estadosCount[e]);
+
+    const ctxEstado = document.getElementById("chart-estado").getContext("2d");
+    const ctxUbic   = document.getElementById("chart-ubicacion").getContext("2d");
+
+    if (chartEstado) chartEstado.destroy();
+    if (chartUbic)   chartUbic.destroy();
+
+    chartEstado = new Chart(ctxEstado, {
+      type:"bar",
+      data:{
+        labels:estados,
+        datasets:[{
+          label:"Instrumentos",
+          data:valores
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{
+            ticks:{color:"#cbd5f5"}
+          },
+          y:{
+            ticks:{color:"#cbd5f5", precision:0},
+            beginAtZero:true
+          }
+        }
+      }
+    });
+
+    chartUbic = new Chart(ctxUbic, {
+      type:"doughnut",
+      data:{
+        labels:["En laboratorio","En uso / otros"],
+        datasets:[{
+          data:[ubicLab, ubicUso]
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{
+          legend:{labels:{color:"#cbd5f5"}}
+        },
+        cutout:"55%"
+      }
+    });
+  }
+
+  cargarDatos();
+  // Si quieres refresco periódico, puedes descomentar:
+  // setInterval(cargarDatos, 60000);
+</script>
+
+</body>
+</html>
