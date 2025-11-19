@@ -1,140 +1,289 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TMP · Generador de Códigos QR</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TMP · Generador de Códigos QR</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://esm.sh/@supabase/supabase-js@2"></script>
+  <!-- Librería QR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<style>
-  body{
-    margin:0;
-    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    background:#0d1117;
-    color:#f0f6fc;
-  }
-  header{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    padding:14px 16px;
-    background:#161b22;
-    border-bottom:1px solid #30363d;
-  }
-  header img.logo{height:40px}
-  header h1{margin:0;font-size:18px}
-  header span.sub{font-size:12px;color:#8b949e}
+  <style>
+    :root{
+      --bg:#0d1117;
+      --panel:#161b22;
+      --border:#30363d;
+      --txt:#f0f6fc;
+      --muted:#8b949e;
+      --accent:#58a6ff;
+      --ok:#238636;
+    }
 
-  .wrap{
-    max-width:800px;
-    margin:22px auto;
-    padding:0 16px 32px;
-  }
+    *{box-sizing:border-box;}
 
-  .card{
-    background:#161b22;
-    border-radius:16px;
-    border:1px solid #30363d;
-    padding:20px 16px;
-    margin-bottom:20px;
-  }
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--txt);
+    }
 
-  h2{margin:0 0 10px;font-size:16px}
-  label{display:block;font-size:13px;color:#8b949e;margin-bottom:4px}
+    header{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:14px 16px;
+      background:var(--panel);
+      border-bottom:1px solid var(--border);
+    }
+    header img.logo{height:40px}
+    header h1{margin:0;font-size:18px}
+    header span.sub{font-size:12px;color:var(--muted)}
 
-  input{
-    width:100%;
-    padding:10px 12px;
-    border-radius:10px;
-    border:1px solid #30363d;
-    background:#0d1117;
-    color:#f0f6fc;
-    font-size:14px;
-    outline:none;
-  }
+    .wrap{
+      max-width:980px;
+      margin:22px auto;
+      padding:0 16px 32px;
+      display:grid;
+      grid-template-columns: minmax(0,420px) minmax(0,1fr);
+      gap:18px;
+    }
 
-  input:focus{border-color:#58a6ff;}
+    @media (max-width:900px){
+      .wrap{
+        grid-template-columns:1fr;
+      }
+    }
 
-  button{
-    border:none;
-    border-radius:999px;
-    padding:9px 16px;
-    font-size:14px;
-    cursor:pointer;
-    font-weight:600;
-  }
+    .card{
+      background:var(--panel);
+      border-radius:16px;
+      border:1px solid var(--border);
+      padding:18px 16px 16px;
+    }
 
-  .btn-main{background:#238636;color:#fff;}
-  .btn-main:hover{background:#2ea043;}
+    h2{margin:0 0 8px;font-size:16px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
 
-  .btn-ghost{
-    background:transparent;
-    color:#58a6ff;
-    border:1px solid #30363d;
-  }
-  .btn-ghost:hover{border-color:#58a6ff;}
+    input{
+      width:100%;
+      padding:9px 11px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#0d1117;
+      color:var(--txt);
+      font-size:14px;
+      outline:none;
+    }
 
-  .list{
-    background:#0f172a;
-    border:1px solid #30363d;
-    border-radius:12px;
-    max-height:260px;
-    overflow:auto;
-    margin-top:10px;
-  }
+    input:focus{border-color:var(--accent);}
 
-  .item{
-    padding:10px;
-    border-bottom:1px solid #1e293b;
-    cursor:pointer;
-  }
-  .item:hover{
-    background:#1e293b;
-  }
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:8px;
+      align-items:center;
+    }
 
-  .sizes{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    margin-top:8px
-  }
+    button{
+      border:none;
+      border-radius:999px;
+      padding:9px 16px;
+      font-size:13px;
+      cursor:pointer;
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
 
-  .sizes button{
-    font-size:12px;
-    padding:7px 12px
-  }
+    .btn-main{
+      background:var(--ok);
+      color:#fff;
+    }
+    .btn-main:hover{background:#2ea043;}
 
-  #qrResult{
-    margin-top:20px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
+    .btn-ghost{
+      background:transparent;
+      color:var(--accent);
+      border:1px solid var(--border);
+    }
+    .btn-ghost:hover{border-color:var(--accent);}
 
-  #qrResult canvas{
-    background:#ffffff;
-    padding:10px;
-    border-radius:12px;
-  }
+    .sizes{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px
+    }
 
-  #volverHome{
-    position:fixed;
-    bottom:18px;
-    right:18px;
-    background:#238636;
-    padding:12px 18px;
-    font-size:14px;
-    border-radius:12px;
-    border:1px solid #2ea043;
-    cursor:pointer;
-    color:white;
-    box-shadow:0 0 10px rgba(0,0,0,.4);
-  }
-</style>
+    .sizes button{
+      font-size:12px;
+      padding:7px 12px
+    }
+
+    .sizes button.active{
+      background:var(--accent);
+      color:#0d1117;
+      border-color:var(--accent);
+    }
+
+    #qrResult{
+      margin-top:20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-height:120px;
+    }
+
+    #qrResult canvas{
+      background:#ffffff;
+      padding:10px;
+      border-radius:12px;
+    }
+
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:11px;
+      padding:4px 9px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#0d1117;
+      color:var(--muted);
+    }
+
+    .search-box{
+      margin-top:4px;
+    }
+
+    .search-box input{
+      font-size:13px;
+    }
+
+    .list-instrumentos{
+      margin-top:10px;
+      max-height:260px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      overflow:auto;
+      background:#0d1117;
+    }
+
+    .inst-row{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+      padding:6px 8px;
+      border-bottom:1px solid #21262d;
+      font-size:13px;
+      cursor:pointer;
+    }
+
+    .inst-row:last-child{border-bottom:none;}
+
+    .inst-row:hover{
+      background:#111827;
+    }
+
+    .inst-row input[type="checkbox"]{
+      margin-top:2px;
+    }
+
+    .inst-code{
+      font-weight:600;
+      margin-right:4px;
+    }
+
+    .inst-desc{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .panel-footer{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .panel-footer strong{
+      color:#e5e7eb;
+    }
+
+    .btn-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    #volverHome{
+      position:fixed;
+      bottom:18px;
+      right:18px;
+      background:#238636;
+      padding:12px 18px;
+      font-size:14px;
+      border-radius:12px;
+      border:1px solid #2ea043;
+      cursor:pointer;
+      color:white;
+      box-shadow:0 0 10px rgba(0,0,0,.4);
+      z-index:50;
+    }
+    #volverHome:hover{
+      background:#2ea043;
+    }
+
+    .preview-sheet{
+      margin-top:10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0d1117;
+      padding:10px;
+    }
+
+    .preview-grid{
+      display:grid;
+      gap:3px;
+      justify-content:flex-start;
+      align-content:flex-start;
+      max-height:260px;
+      overflow:auto;
+      background:#02040a;
+      padding:6px;
+    }
+
+    .preview-cell{
+      width:16px;
+      height:16px;
+      border-radius:3px;
+      background:#1f2937;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:9px;
+      color:#9ca3af;
+    }
+
+    .preview-cell.filled{
+      background:#22c55e;
+      color:#022c22;
+      font-weight:700;
+    }
+  </style>
 </head>
-
 
 <body>
 
@@ -149,254 +298,454 @@
 </header>
 
 <div class="wrap">
-
-  <!-- BUSCADOR -->
+  <!-- PANEL IZQUIERDO: UN INSTRUMENTO / PRUEBA RÁPIDA -->
   <div class="card">
-    <h2>Buscar instrumentos</h2>
-    <input id="buscador" placeholder="Buscar por código, descripción o fabricante..." oninput="filtrarLista()">
+    <h2>Generar QR individual</h2>
 
-    <div class="list" id="listaInstrumentos"></div>
-  </div>
+    <label for="codigo">Código del instrumento</label>
+    <input id="codigo" type="text" placeholder="Ejemplo: 11217">
 
-  <!-- GENERADOR -->
-  <div class="card">
-    <h2>Etiquetas seleccionadas</h2>
-
-    <div id="seleccionados" style="margin-bottom:10px;font-size:14px;color:#8b949e;">
-      Ningún instrumento seleccionado.
+    <div class="row">
+      <button class="btn-main" id="btnGenerar">Generar QR</button>
     </div>
 
-    <h3>Tamaño de etiqueta</h3>
     <div class="sizes">
-      <button class="btn-ghost" onclick="setSize(10)">10 mm</button>
-      <button class="btn-ghost" onclick="setSize(13)">13 mm</button>
-      <button class="btn-ghost" onclick="setSize(15)">15 mm</button>
+      <button class="btn-ghost size-btn active" data-mm="10">Etiqueta 10 mm</button>
+      <button class="btn-ghost size-btn" data-mm="13">Etiqueta 13 mm</button>
+      <button class="btn-ghost size-btn" data-mm="15">Etiqueta 15 mm</button>
     </div>
-
-    <button class="btn-main" onclick="imprimirHoja()" style="margin-top:20px;width:100%;">
-      🖨 Imprimir hoja A4 optimizada
-    </button>
 
     <div id="qrResult"></div>
+
+    <p class="hint">
+      El QR generado apunta a la ficha del instrumento (qr.info_instrumentos) en el sistema TMP.
+      La etiqueta <b>sólo contiene el código QR</b>, sin texto visible.
+    </p>
+  </div>
+
+  <!-- PANEL DERECHO: SELECCIÓN MÚLTIPLE + HOJA A4 -->
+  <div class="card">
+    <h2>Imprimir hoja A4 de etiquetas</h2>
+    <div class="badge" id="badgeEstado">Cargando instrumentos desde Supabase…</div>
+
+    <div class="search-box">
+      <label for="buscador">Buscar instrumentos (código o descripción)</label>
+      <input id="buscador" type="text" placeholder="Ej: 112, micrómetro, tampón…">
+    </div>
+
+    <div class="list-instrumentos" id="listaInstrumentos">
+      <!-- Aquí se cargan los instrumentos desde Supabase -->
+    </div>
+
+    <div class="panel-footer" id="infoCapacidad">
+      <span><strong>Tamaño actual:</strong> <span id="lblTamano">10 mm</span></span>
+      <span><strong>Capacidad estimada hoja A4:</strong> <span id="lblCapacidad">–</span> etiquetas</span>
+      <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
+      <span class="hint">
+        Consejos: selecciona sólo los equipos que vayas a etiquetar ahora.  
+        Si escoges menos de la capacidad, el resto de la hoja quedará en blanco.
+      </span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-main" id="btnImprimirHoja">Imprimir hoja A4</button>
+      <button class="btn-ghost" id="btnLimpiarSeleccion">Limpiar selección</button>
+      <button class="btn-ghost" id="btnRefrescarLista">Recargar lista desde Supabase</button>
+    </div>
+
+    <div class="preview-sheet">
+      <div class="hint">Esquema aproximado de ocupación de la hoja (no escala real):</div>
+      <div id="previewGrid" class="preview-grid"></div>
+    </div>
   </div>
 
 </div>
 
-
+<!-- Cargar Supabase config -->
+<script type="module" src="../config.mjs"></script>
 <script>
-// =======================
-// SUPABASE
-// =======================
-const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+  // ==========================
+  // CONFIGURACIÓN GENERAL
+  // ==========================
+  const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const PAGE_WIDTH_MM  = 210;
+  const PAGE_HEIGHT_MM = 297;
+  const PAGE_MARGIN_MM = 12;  // margen más grande para que NADA se imprima encima
+  const GAP_MM         = 3;   // separación entre etiquetas aumentada
 
-let INSTRUMENTOS = [];
-let selectedCodigos = new Set();
+  let etiquetaMM = 10;
+  let allInstrumentos = [];
+  const selectedCodigos = new Set();
 
-const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
+  const qrResult   = document.getElementById("qrResult");
+  const codigoInput = document.getElementById("codigo");
+  const sizeButtons = document.querySelectorAll(".size-btn");
 
-let etiquetaMM = 10;
+  const badgeEstado = document.getElementById("badgeEstado");
+  const listaInstrumentos = document.getElementById("listaInstrumentos");
+  const buscadorInput = document.getElementById("buscador");
 
+  const lblTamano = document.getElementById("lblTamano");
+  const lblCapacidad = document.getElementById("lblCapacidad");
+  const lblSeleccionados = document.getElementById("lblSeleccionados");
+  const previewGrid = document.getElementById("previewGrid");
 
-// =======================
-// CARGAR LISTA
-// =======================
-async function cargarInstrumentos(){
-  const { data, error } = await supabase
-    .from("instrumentos")
-    .select("codigo, descripcion, fabricante")
-    .order("codigo", { ascending: true });
+  // ==========================
+  // CAPACIDAD POR HOJA A4
+  // ==========================
+  function computeLayout(labelMM){
+    const usableW = PAGE_WIDTH_MM  - 2*PAGE_MARGIN_MM;
+    const usableH = PAGE_HEIGHT_MM - 2*PAGE_MARGIN_MM;
 
-  if(error){ alert("Error cargando instrumentos"); return; }
+    const cellW = labelMM + GAP_MM;
+    const cellH = labelMM + GAP_MM;
 
-  INSTRUMENTOS = data;
-  renderLista(data);
-}
-cargarInstrumentos();
+    const cols = Math.max(1, Math.floor(usableW / cellW));
+    const rows = Math.max(1, Math.floor(usableH / cellH));
 
-
-// =======================
-// MOSTRAR LISTA
-// =======================
-function renderLista(arr){
-  const div = document.getElementById("listaInstrumentos");
-  div.innerHTML = arr.map(i => `
-    <div class="item" onclick="toggleSelect('${i.codigo}')">
-      <b>${i.codigo}</b> — ${i.descripcion || ""}  
-      <br><span style="color:#758195">${i.fabricante || ""}</span>
-    </div>
-  `).join("");
-}
-
-
-// =======================
-// FILTRAR
-// =======================
-function filtrarLista(){
-  const t = document.getElementById("buscador").value.toLowerCase();
-  const f = INSTRUMENTOS.filter(i =>
-    i.codigo.toLowerCase().includes(t) ||
-    (i.descripcion || "").toLowerCase().includes(t) ||
-    (i.fabricante || "").toLowerCase().includes(t)
-  );
-  renderLista(f);
-}
-
-
-// =======================
-// SELECCIONAR INSTRUMENTO
-// =======================
-function toggleSelect(codigo){
-  if(selectedCodigos.has(codigo)) selectedCodigos.delete(codigo);
-  else selectedCodigos.add(codigo);
-
-  actualizarSeleccion();
-}
-
-
-// =======================
-function actualizarSeleccion(){
-  const div = document.getElementById("seleccionados");
-
-  if(selectedCodigos.size === 0){
-    div.textContent = "Ningún instrumento seleccionado.";
-    return;
+    return {
+      cols,
+      rows,
+      perPage: cols * rows
+    };
   }
 
-  div.innerHTML = "<b>Seleccionados:</b> " + 
-    Array.from(selectedCodigos).join(", ");
-}
+  function actualizarCapacidad(){
+    const {cols, rows, perPage} = computeLayout(etiquetaMM);
 
+    lblTamano.textContent = etiquetaMM + " mm";
+    lblCapacidad.textContent = `${perPage} (${cols} columnas x ${rows} filas)`;
+    lblSeleccionados.textContent = selectedCodigos.size;
 
-// =======================
-// TAMAÑO ETIQUETA
-// =======================
-function setSize(mm){
-  etiquetaMM = mm;
-  alert("Tamaño de etiqueta ajustado a " + mm + " mm.");
-}
+    // PREVIEW COMPACTO
+    const maxColsPreview = Math.min(cols, 16);
+    const maxRowsPreview = Math.min(rows, 10);
 
+    const previewCells = maxColsPreview * maxRowsPreview;
 
-// =======================
-// CALCULAR DISTRIBUCIÓN A4
-// =======================
-function computeLayout(mm){
-  const pageW = 210 - 2*15;
-  const pageH = 297 - 2*15;
+    previewGrid.style.gridTemplateColumns = `repeat(${maxColsPreview}, 1fr)`;
+    previewGrid.innerHTML = "";
 
-  const cols = Math.floor((pageW + 2) / (mm + 2));
-  const rows = Math.floor((pageH + 2) / (mm + 2));
+    const usados = Math.min(selectedCodigos.size, previewCells);
 
-  return { cols, rows, perPage: cols*rows };
-}
-
-
-// =======================
-// IMPRESIÓN EN 2 HOJAS
-// =======================
-function imprimirHoja(){
-  if (!selectedCodigos.size){
-    alert("Selecciona al menos un instrumento.");
-    return;
+    for(let i = 0; i < previewCells; i++){
+      const div = document.createElement("div");
+      div.className = "preview-cell";
+      if (i < usados){
+        div.classList.add("filled");
+        div.textContent = i+1;
+      }
+      previewGrid.appendChild(div);
+    }
   }
 
-  const {cols, rows, perPage} = computeLayout(etiquetaMM);
-  const codigos = Array.from(selectedCodigos);
-  const usable = codigos.slice(0, perPage);
+  // ==========================
+  // GENERAR QR INDIVIDUAL
+  // ==========================
+  function generarQR(){
+    const codigo = codigoInput.value.trim();
+    if (!codigo){
+      alert("Introduce el código del instrumento");
+      return;
+    }
 
-  imprimirEtiquetas(usable, cols);
-  imprimirCroquis(usable, cols);
-}
+    const url = BASE_URL + encodeURIComponent(codigo);
 
+    qrResult.innerHTML = "";
+    const qrDiv = document.createElement("div");
+    qrResult.appendChild(qrDiv);
 
-// =======================
-// HOJA 1 — ETIQUETAS
-// =======================
-function imprimirEtiquetas(codigos, cols){
-  const w = etiquetaMM;
+    new QRCode(qrDiv, {
+      text: url,
+      width: etiquetaMM * 8,
+      height: etiquetaMM * 8
+    });
 
-  let html = "";
-  codigos.forEach(c => {
-    const url = BASE_URL + encodeURIComponent(c);
-    html += `
-      <div class="label">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}">
-      </div>`;
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "URL: " + url;
+    qrResult.appendChild(p);
+  }
+
+  // ==========================
+  // GESTIÓN DE TAMAÑO
+  // ==========================
+  sizeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      sizeButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      etiquetaMM = parseInt(btn.dataset.mm, 10);
+      actualizarCapacidad();
+
+      if (codigoInput.value.trim()) generarQR();
+    });
   });
 
-  const win = window.open("", "_blank");
-  win.document.write(`
-    <html><head>
-    <meta charset="utf-8">
-    <style>
-      @page { size:A4; margin:15mm; }
-      body{ margin:0; font-family:sans-serif; }
-      .sheet{
-        display:grid;
-        grid-template-columns:repeat(${cols}, ${w}mm);
-        grid-auto-rows:${w}mm;
-        gap:2mm;
-        justify-content:center;
-      }
-      img{ width:${w}mm;height:${w}mm; }
-    </style>
-    </head><body>
-      <div class="sheet">${html}</div>
-      <script>window.onload = ()=>setTimeout(()=>window.print(),400);<\/script>
-    </body></html>
-  `);
-  win.document.close();
-}
-
-
-// =======================
-// HOJA 2 — CROQUIS
-// =======================
-function imprimirCroquis(codigos, cols){
-  let rows = [];
-
-  codigos.forEach((c, i)=>{
-    const fila = Math.floor(i/cols)+1;
-    const col = (i%cols)+1;
-    rows.push(`<tr><td>${i+1}</td><td>${fila}</td><td>${col}</td><td>${c}</td></tr>`);
+  document.getElementById("btnGenerar").addEventListener("click", generarQR);
+  codigoInput.addEventListener("keydown", e => {
+    if (e.key === "Enter"){
+      e.preventDefault();
+      generarQR();
+    }
   });
 
-  const win = window.open("", "_blank");
-  win.document.write(`
-    <html><head>
-    <meta charset="utf-8">
-    <style>
-      @page { size:A4; margin:15mm; }
-      body{ font-family:sans-serif; }
-      table{
-        width:100%;
-        border-collapse:collapse;
-        font-size:13px;
-      }
-      td,th{
-        border:1px solid #aaa;
-        padding:6px;
-      }
-      th{ background:#eee; }
-    </style>
-    </head><body>
-      <h2>Esquema de colocación de etiquetas</h2>
-      <table>
-        <thead>
-          <tr><th>#</th><th>Fila</th><th>Columna</th><th>Código</th></tr>
-        </thead>
-        <tbody>${rows.join("")}</tbody>
-      </table>
-      <script>window.onload = ()=>setTimeout(()=>window.print(),400);<\/script>
-    </body></html>
-  `);
-  win.document.close();
-}
+  // ==========================
+  // CARGAR INSTRUMENTOS DESDE SUPABASE
+  // ==========================
+  async function cargarInstrumentos(){
+    const supabase = window.supabase;
 
-</script>
+    if (!supabase){
+      badgeEstado.textContent = "Supabase no disponible.";
+      return;
+    }
+
+    badgeEstado.textContent = "Cargando instrumentos…";
+
+    const { data, error } = await supabase
+      .from("instrumentos")
+      .select("codigo, descripcion")
+      .order("codigo", { ascending:true });
+
+    if (error){
+      badgeEstado.textContent = "Error al cargar.";
+      return;
+    }
+
+    allInstrumentos = data || [];
+    badgeEstado.textContent = `Instrumentos cargados: ${allInstrumentos.length}`;
+
+    renderInstrumentList();
+  }
+
+  function renderInstrumentList(filtro = ""){
+    const term = filtro.toLowerCase();
+
+    const filtrados = term
+      ? allInstrumentos.filter(i =>
+          String(i.codigo).toLowerCase().includes(term) ||
+          (i.descripcion || "").toLowerCase().includes(term)
+        )
+      : allInstrumentos;
+
+    listaInstrumentos.innerHTML = "";
+
+    if (!filtrados.length){
+      listaInstrumentos.innerHTML = `<div style="padding:8px;font-size:13px;color:#777;">Sin resultados</div>`;
+      return;
+    }
+
+    filtrados.forEach(inst => {
+      const row = document.createElement("label");
+      row.className = "inst-row";
+
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.dataset.codigo = inst.codigo;
+      check.checked = selectedCodigos.has(inst.codigo);
+
+      check.addEventListener("change", () => {
+        if (check.checked) selectedCodigos.add(inst.codigo);
+        else selectedCodigos.delete(inst.codigo);
+        actualizarCapacidad();
+      });
+
+      const codeSpan = document.createElement("span");
+      codeSpan.className = "inst-code";
+      codeSpan.textContent = inst.codigo;
+
+      const descSpan = document.createElement("span");
+      descSpan.className = "inst-desc";
+      descSpan.textContent = inst.descripcion || "";
+
+      row.appendChild(check);
+      row.appendChild(codeSpan);
+      row.appendChild(descSpan);
+      listaInstrumentos.appendChild(row);
+    });
+
+    actualizarCapacidad();
+  }
+
+  buscadorInput.addEventListener("input", () => {
+    renderInstrumentList(buscadorInput.value);
+  });
+
+  document.getElementById("btnRefrescarLista").addEventListener("click", cargarInstrumentos);
+  document.getElementById("btnLimpiarSeleccion").addEventListener("click", () => {
+    selectedCodigos.clear();
+    renderInstrumentList(buscadorInput.value);
+  });
+  // ==========================
+  // IMPRESIÓN A4 CON MÁRGENES AMPLIOS Y CROQUIS SEPARADO
+  // ==========================
+  function imprimirHoja(){
+    if (!selectedCodigos.size){
+      alert("Selecciona al menos un instrumento.");
+      return;
+    }
+
+    const {cols, rows, perPage} = computeLayout(etiquetaMM);
+    const codigos = Array.from(selectedCodigos);
+    const usable = Math.min(codigos.length, perPage);
+
+    if (codigos.length > perPage){
+      if (!confirm(
+        `Para ${etiquetaMM} mm caben ${perPage} etiquetas por hoja.\n` +
+        `Has seleccionado ${codigos.length}.\n\n` +
+        `Se imprimirán solo las primeras ${perPage}.\n\n` +
+        `¿Continuar?`
+      )){
+        return;
+      }
+    }
+
+    const codigosImpr = codigos.slice(0, usable);
+    let etiquetasHTML = "";
+    let croquisRows = "";
+
+    codigosImpr.forEach((codigo, i) => {
+      const url = BASE_URL + encodeURIComponent(codigo);
+
+      etiquetasHTML += `
+        <div class="label">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}">
+        </div>
+      `;
+
+      croquisRows += `
+        <tr>
+          <td>${i+1}</td>
+          <td>${Math.floor(i/cols) + 1}</td>
+          <td>${(i % cols) + 1}</td>
+          <td>${codigo}</td>
+        </tr>
+      `;
+    });
+
+    // ========================
+    //   HTML COMPLETO A IMPRIMIR
+    // ========================
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Etiquetas TMP</title>
+
+<style>
+  @page {
+    size: A4;
+    margin: ${PAGE_MARGIN_MM}mm;
+  }
+
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+
+  /* HOJA DE ETIQUETAS */
+  .sheet{
+    display:grid;
+    grid-template-columns: repeat(${cols}, ${etiquetaMM}mm);
+    grid-auto-rows: ${etiquetaMM}mm;
+    gap:${GAP_MM}mm;
+    width:100%;
+    justify-content:center;
+    margin-top:0;
+  }
+
+  .label{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+
+  .label img{
+    width:${etiquetaMM}mm;
+    height:${etiquetaMM}mm;
+  }
+
+  /* HOJA CROQUIS (SEPARADA) */
+  .croquis{
+    page-break-before: always;
+    padding: 12mm;
+  }
+
+  h3{
+    margin:0 0 6px;
+    font-size:16px;
+  }
+
+  p{
+    margin:0 0 8px;
+    font-size:13px;
+  }
+
+  table{
+    width:100%;
+    border-collapse: collapse;
+    font-size:12px;
+  }
+  th,td{
+    padding:4px 6px;
+    border:1px solid #aaa;
+  }
+  th{
+    background:#e7e7e7;
+  }
+</style>
+</head>
+
+<body>
+
+  <!-- HOJA 1: ETIQUETAS -->
+  <div class="sheet">${etiquetasHTML}</div>
+
+  <!-- HOJA 2: CROQUIS -->
+  <div class="croquis">
+    <h3>Esquema de colocación</h3>
+    <p>Orden de lectura: filas de arriba abajo, columnas de izquierda a derecha.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fila</th>
+          <th>Columna</th>
+          <th>Código</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${croquisRows}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    window.onload = () => {
+      setTimeout(() => { window.print(); }, 350);
+    };
+  <\/script>
 
 </body>
 </html>
+    `;
 
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+  }
+
+  document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHoja);
+
+  // ==========================
+  // INICIALIZACIÓN
+  // ==========================
+  window.addEventListener("load", () => {
+    actualizarCapacidad();
+    setTimeout(cargarInstrumentos, 350);
+  });
+</script>
