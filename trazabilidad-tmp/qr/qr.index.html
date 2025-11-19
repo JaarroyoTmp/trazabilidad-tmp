@@ -113,7 +113,6 @@
     margin-top:8px
   }
 
-  /* Botón volver */
   #volverHome{
     position:fixed;
     bottom:18px;
@@ -136,7 +135,6 @@
 
 <body>
 
-<!-- Botón volver -->
 <button id="volverHome" onclick="window.location.href='../home.html'">🏠 Volver</button>
 
 <header>
@@ -173,19 +171,76 @@
 </div>
 
 
-<!-- SCRIPT QR CORREGIDO -->
+<!-- SCRIPT QR MEJORADO CON IMPRESIÓN -->
 <script>
 let qrSize = 200;
 
-// ✔ URL correcta para Vercel y para la ficha de instrumentos
+// URL correcta a tu ficha QR
 const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-function setSize(mm){
-  qrSize = mm * 40; 
-  const codigo = document.getElementById("codigo").value.trim();
-  if (codigo) generarQR();
+/* =============================
+   FUNCIÓN PARA IMPRIMIR ETIQUETA
+============================= */
+function imprimirEtiqueta(codigo, url, sizePx){
+  const win = window.open("", "_blank", "width=400,height=400");
+
+  win.document.write(`
+    <html>
+    <head>
+    <style>
+      body{
+        margin:0;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        background:white;
+        font-family:sans-serif;
+      }
+      img{width:${sizePx}px;height:${sizePx}px;}
+      .code{margin-top:6px;font-size:14px;font-weight:bold;}
+    </style>
+    </head>
+
+    <body>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=${sizePx}x${sizePx}&data=${encodeURIComponent(url)}">
+      <div class="code">${codigo}</div>
+
+      <script>
+        window.onload = function(){
+          setTimeout(()=>{ window.print(); }, 300);
+        }
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  win.document.close();
 }
 
+/* =============================
+   CAMBIO DE TAMAÑO + IMPRESIÓN
+============================= */
+function setSize(mm){
+  const codigo = document.getElementById("codigo").value.trim();
+  if (!codigo){
+    alert("Introduce el código primero.");
+    return;
+  }
+
+  // 1 mm = 8 px
+  const sizePx = mm * 8;
+  qrSize = sizePx;
+
+  const url = BASE_URL + encodeURIComponent(codigo);
+
+  generarQR();          // muestra QR en pantalla
+  imprimirEtiqueta(codigo, url, sizePx);   // imprime
+}
+
+/* =============================
+   GENERAR QR EN LA WEB
+============================= */
 function generarQR(){
   const codigo = document.getElementById("codigo").value.trim();
   if (!codigo){
@@ -214,8 +269,6 @@ function generarQR(){
 }
 </script>
 
-
 </body>
 </html>
-
 
