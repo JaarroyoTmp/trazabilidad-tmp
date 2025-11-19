@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TMP · Calibraciones v9.7 (Plan + Medición + Resultados)</title>
+<title>TMP · Calibraciones v10.0 (Plan + Medición + Resultados + Anexo técnico)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -43,12 +43,12 @@
   .btn:hover{transform:translateY(-1px)}
   .btn.secondary{background:#214360}
   .btn.ghost{background:transparent;border:1px solid #2a537a}
-  .tabs{display:flex;gap:8px;margin:14px 0}
-  .tab{background:#12314e;border:1px solid #294d70;color:#cfe6fa;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .tabs{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
+  .tab{background:#12314e;border:1px solid #294d70;color:#cfe6fa;padding:8px 14px;border-radius:999px;cursor:pointer;font-size:13px}
   .tab.active{background:#1a58a4;border-color:#2272d4}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
   .chip{background:var(--chip);border:1px solid #2d4e74;color:#b9d3ea;padding:6px 10px;border-radius:999px;font-size:12px}
-  .status{font-weight:700;padding:6px 10px;border-radius:999px}
+  .status{font-weight:700;padding:6px 10px;border-radius:999px;font-size:12px;text-align:center}
   .status.ok{background:#0e4027;border:1px solid #2bd47c80;color:#baf1d2}
   .status.warn{background:#4a3a16;border:1px solid #ffd15c80;color:#ffe6ad}
   .status.bad{background:#4a1b1b;border:1px solid #ff6b6b80;color:#ffc7c7}
@@ -57,8 +57,8 @@
   thead th{background:#112338;color:#cfe6fa}
   tbody tr:nth-child(odd){background:#11263f80}
   .note{font-size:12px;color:#a7c0d6}
-  .pill{padding:4px 8px;border-radius:999px;background:#104071;color:#bfe0ff;font-weight:600}
-  .danger{background:#5b3a1d;color:#ffe2c0} /* menos agresivo que rojo puro */
+  .pill{padding:4px 8px;border-radius:999px;background:#104071;color:#bfe0ff;font-weight:600;font-size:11px;display:inline-block}
+  .danger{background:#5b3a1d;color:#ffe2c0}
   .success{background:#1c4c2b;color:#bff5d6}
   dialog::backdrop{background:#0008}
   dialog{border:none;border-radius:14px;background:#10243a;color:#e7f2fb;padding:16px 16px 10px;max-width:980px;width:min(96vw,980px)}
@@ -70,7 +70,7 @@
   .hidden{display:none}
   .mt-8{margin-top:8px}
   .right{margin-left:auto}
-  .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700}
+  .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700;font-size:11px}
   .logo{height:22px;width:22px;border-radius:4px;background:linear-gradient(135deg,#3dd2ff,#1bb3ff);display:inline-block}
   canvas.sig{background:#0b2035;border:1px dashed #2a537a;border-radius:10px}
   .mini{font-size:11px;color:#9eb9cf}
@@ -84,13 +84,16 @@
     margin-left:auto;
   }
   .local-banner.show{display:inline-flex;align-items:center;gap:6px}
+  code{background:#0c2237;border-radius:6px;padding:2px 4px;font-size:11px}
+  ul{margin-top:4px;margin-bottom:6px;padding-left:18px}
+  li{margin-bottom:3px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="badge">TMP · Calibraciones v9.7</div>
-    <h1>Plan · Medición · Resultados (Multipatrón)</h1>
+    <div class="badge">TMP · Calibraciones v10.0</div>
+    <h1>Plan · Medición · Resultados · Anexo técnico (Multipatrón)</h1>
     <span id="localBanner" class="local-banner">Modo local: Supabase no guardará cambios.</span>
     <span id="onlineBadge" class="badge offline right">Offline</span>
   </header>
@@ -154,11 +157,12 @@
     </div>
   </div>
 
-  <!-- Tabs -->
+  <!-- Tabs (submódulos) -->
   <div class="tabs">
     <div class="tab active" data-tab="plan">Plan</div>
     <div class="tab" data-tab="medicion">Medición</div>
     <div class="tab" data-tab="resultados">Resultados</div>
+    <div class="tab" data-tab="anexo">Anexo técnico / Fórmulas</div>
   </div>
 
   <!-- PLAN -->
@@ -172,9 +176,13 @@
       <button class="btn ghost" data-addblock="BAL">+ Balanzas</button>
       <button class="btn ghost" data-addblock="DIN">+ Dinamométricas</button>
       <button class="btn ghost" data-addblock="DURO">+ Durómetros</button>
+      <button class="btn ghost" data-addblock="ROSCA">+ Roscas / galgas roscadas</button>
       <button class="btn ghost" data-addblock="PATRON">+ Calibración de patrones</button>
     </div>
-    <p class="help">Añade bloques de plan y selecciona patrón + puntos exactos (0.001). Múltiples patrones permitidos.</p>
+    <p class="help">
+      Añade bloques de plan y selecciona patrón + puntos exactos (0.001). Múltiples patrones permitidos.
+      Este plan sirve como “ruta de ensayo” de la calibración.
+    </p>
     <div id="planBloques"></div>
   </section>
 
@@ -209,10 +217,23 @@
         <input id="tolGlobal" type="text" value="0.010">
       </div>
       <div>
-        <label>U base patrón k=2 (mm)</label>
+        <label>U base patrón (U<sub>patrón</sub>, k=2) [mm]</label>
         <input id="uBase" type="text" value="0.002">
       </div>
+      <div>
+        <label>Resolución instrumento (d) [mm]</label>
+        <input id="resolucion" type="text" placeholder="p.ej. 0.001">
+      </div>
+      <div>
+        <label>Factor de cobertura k</label>
+        <input id="factorK" type="text" value="2">
+      </div>
     </div>
+    <p class="help">
+      El cálculo de la incertidumbre sigue el modelo GUM:
+      <code>u<sub>c</sub> = √(u<sub>patrón</sub>² + u<sub>rep</sub>² + u<sub>res</sub>²)</code> y
+      <code>U = k · u<sub>c</sub></code>, con k normalmente 2 (95&nbsp;% de confianza).
+    </p>
     <div id="medicionBloques"></div>
     <div class="row" style="margin-top:10px;justify-content:flex-end">
       <button id="btnGuardarMed" class="btn">Guardar mediciones</button>
@@ -220,9 +241,36 @@
     </div>
   </section>
 
-  <!-- RESULTADOS / INFORME PREMIUM -->
+  <!-- RESULTADOS / INFORME -->
   <section id="tab-resultados" class="card hidden">
     <h3>Informe de calibración (ILAC-G8 / estilo laboratorio)</h3>
+
+    <!-- Resumen rápido de modelo matemático -->
+    <div class="card" style="margin-top:8px">
+      <h3>0. Modelo de medida y criterio de aceptación</h3>
+      <p class="mini">
+        Para cada punto de calibración se trabaja con:
+      </p>
+      <ul class="mini">
+        <li><strong>Error de indicación:</strong> <code>E = I − R</code>, donde I es la media de las indicaciones del instrumento y R el valor de referencia (patrón o nominal).</li>
+        <li><strong>Incertidumbre combinada:</strong>
+          <code>u<sub>c</sub> = √(u<sub>patrón</sub>² + u<sub>rep</sub>² + u<sub>res</sub>²)</code>, donde:
+          <ul>
+            <li><code>u<sub>patrón</sub> = U<sub>patrón</sub> / k</code> (a partir del certificado del patrón, U(k=2)).</li>
+            <li><code>u<sub>rep</sub> = s / √n</code>, con s la desviación típica de las lecturas y n el número de lecturas válidas.</li>
+            <li><code>u<sub>res</sub> = d / √12</code>, con d la resolución del instrumento.</li>
+          </ul>
+        </li>
+        <li><strong>Incertidumbre expandida:</strong> <code>U = k · u<sub>c</sub></code>, con k configurable (habitualmente k = 2).</li>
+        <li><strong>Criterio ILAC-G8 aplicado:</strong>
+          <ul>
+            <li><code>|E| + U ≤ T</code> → <span class="pill success">APTO</span></li>
+            <li><code>|E| − U &gt; T</code> → <span class="pill danger">NO APTO</span></li>
+            <li>En caso contrario → <span class="pill">INDETERMINADO</span></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
 
     <!-- Ficha instrumento para informe -->
     <div class="card" style="margin-top:8px">
@@ -262,9 +310,10 @@
         La calibración se realiza comparando las indicaciones del instrumento con los valores nominales de un patrón
         materializado trazable. Para cada punto se calcula el error:
         <br><strong>E = I − R</strong>, donde I es la media de las indicaciones y R la referencia (patrón o nominal del instrumento).
-        La incertidumbre expandida U(k=2) se compone de la incertidumbre del patrón y contribuciones del proceso
-        de medida. El criterio de aceptación aplicado es el recomendado en ILAC-G8:
-        <br>|E| + U ≤ T → APTO · |E| − U &gt; T → NO APTO · resto → INDETERMINADO.
+        La incertidumbre combinada <code>u<sub>c</sub></code> incluye la incertidumbre del patrón, la repetibilidad de las lecturas
+        y la resolución del instrumento. La incertidumbre expandida U se calcula como <code>U = k · u<sub>c</sub></code>.
+        <br>El criterio de aceptación aplicado es el recomendado en ILAC-G8:
+        <br><code>|E| + U ≤ T</code> → APTO · <code>|E| − U &gt; T</code> → NO APTO · resto → INDETERMINADO.
       </p>
       <div class="grid g-2" style="margin-top:8px">
         <div>
@@ -275,17 +324,18 @@
         <div>
           <label class="mini">Resumen del método</label>
           <ul class="mini">
-            <li>Lecturas repetidas (hasta 5) por punto para estimar la repetibilidad (σ).</li>
-            <li>Cálculo de la media aritmética de las indicaciones.</li>
-            <li>Cálculo del error E respecto al valor de referencia.</li>
-            <li>Conversión a micras (µm) para la interpretación.</li>
-            <li>Aplicación de U(k=2) global y comparación con la tolerancia T.</li>
+            <li>Lecturas repetidas (hasta 5) por punto para estimar la repetibilidad (<code>σ</code>).</li>
+            <li>Cálculo de la media aritmética de las indicaciones <code>I</code>.</li>
+            <li>Cálculo del error <code>E = I − R</code>.</li>
+            <li>Cálculo de <code>u<sub>patrón</sub></code>, <code>u<sub>rep</sub></code>, <code>u<sub>res</sub></code> y
+                combinación cuadrática <code>u<sub>c</sub></code>.</li>
+            <li>Aplicación de <code>U = k · u<sub>c</sub></code> y comparación con la tolerancia <code>T</code>.</li>
           </ul>
         </div>
       </div>
     </div>
 
-    <!-- Resultados detallados (lo que ya tenías) -->
+    <!-- Resultados detallados -->
     <div class="card" style="margin-top:8px">
       <h3>4. Resultados detallados por bloque y punto</h3>
       <div id="resultadosBox"></div>
@@ -306,8 +356,10 @@
         (Se completará con los patrones utilizados y la situación de calibración.)
       </div>
       <p class="mini" style="margin-top:6px">
-        Referencias normativas utilizadas: ISO/IEC 17025, guía ILAC-G8 para la evaluación de la conformidad y buenas
-        prácticas metrológicas del laboratorio TMP.
+        Referencias normativas consideradas en el modelo: ISO/IEC 17025, guía ILAC-G8 para evaluación de la conformidad,
+        GUM (Guide to the Expression of Uncertainty in Measurement) y normas específicas según tipo de equipo
+        (ej. ISO 3611 para micrómetros, ISO 3599 para calibres pie de rey, ISO 1502 / ISO 965 para galgas de rosca,
+        OIML R76 para balanzas, ISO 6507/6508/6506 para dureza, etc.).
       </p>
     </div>
 
@@ -336,7 +388,168 @@
       <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
       <button id="btnGuardarTodo" class="btn">Guardar todo (local)</button>
     </div>
-    <p class="note">Criterio ILAC-G8: |Error| + U ≤ T → <span class="pill success">APTO</span> · |Error| − U &gt; T → <span class="pill danger">NO APTO</span> · resto → INDETERMINADO</p>
+    <p class="note">
+      Criterio ILAC-G8:
+      <code>|E| + U ≤ T</code> →
+      <span class="pill success">APTO</span> ·
+      <code>|E| − U &gt; T</code> →
+      <span class="pill danger">NO APTO</span> · resto →
+      <span class="pill">INDETERMINADO</span>
+    </p>
+  </section>
+
+  <!-- ANEXO TÉCNICO / FÓRMULAS -->
+  <section id="tab-anexo" class="card hidden">
+    <h3>Anexo técnico · Modelo de cálculo, fórmulas y normas aplicadas</h3>
+
+    <div class="card" style="margin-top:8px">
+      <h3>A. Modelo general de medida</h3>
+      <p class="mini">
+        La calibración de un instrumento consiste en comparar sus indicaciones con los valores de referencia de un
+        patrón trazable. Para cada punto se tiene:
+      </p>
+      <ul class="mini">
+        <li><strong>Valor de referencia R:</strong> valor verdadero convencional del patrón o del nominal del instrumento.</li>
+        <li><strong>Indicaciones I<sub>i</sub>:</strong> lecturas individuales del instrumento.</li>
+        <li><strong>Media de indicaciones:</strong>
+          <code>I = (1/n) · Σ I<sub>i</sub></code>
+        </li>
+        <li><strong>Error de indicación:</strong>
+          <code>E = I − R</code>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h3>B. Estimación de la repetibilidad</h3>
+      <p class="mini">
+        A partir de las lecturas individuales se calcula la desviación típica:
+      </p>
+      <p class="mini">
+        <code>σ = √( Σ (I<sub>i</sub> − I)² / (n − 1) )</code>
+      </p>
+      <p class="mini">
+        La incertidumbre debida a la repetibilidad de la media es:
+        <code>u<sub>rep</sub> = σ / √n</code>.
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h3>C. Resolución del instrumento</h3>
+      <p class="mini">
+        Si la resolución del instrumento es <code>d</code> (por ejemplo 0.01 mm), la incertidumbre típica asociada a
+        la cuantificación por resolución se aproxima por:
+      </p>
+      <p class="mini">
+        <code>u<sub>res</sub> = d / √12</code>
+      </p>
+      <p class="mini">
+        Este término se introduce en el panel de Medición como “Resolución instrumento (d)”.
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h3>D. Incertidumbre del patrón y factor k</h3>
+      <p class="mini">
+        Los patrones utilizados (bloques patrón, bancos de medida, patrones de par, etc.) disponen de un certificado
+        de calibración que declara una incertidumbre expandida <code>U<sub>patrón</sub></code> para un determinado factor
+        de cobertura <code>k<sub>cert</sub></code> (habitualmente k = 2).
+      </p>
+      <p class="mini">
+        El sistema trabaja internamente con incertidumbre típica del patrón:
+      </p>
+      <p class="mini">
+        <code>u<sub>patrón</sub> = U<sub>patrón</sub> / k</code>
+      </p>
+      <p class="mini">
+        En las tablas se muestra U(k=2) del patrón (columna U(k=2)), y en los cálculos se convierte a
+        <code>u<sub>patrón</sub></code> usando el factor <code>k</code> indicado en el formulario (por defecto 2).
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h3>E. Incertidumbre combinada y expandida</h3>
+      <p class="mini">
+        El modelo implementado en la app es:
+      </p>
+      <p class="mini">
+        <code>u<sub>c</sub> = √(u<sub>patrón</sub>² + u<sub>rep</sub>² + u<sub>res</sub>²)</code>
+      </p>
+      <p class="mini">
+        y la incertidumbre expandida:
+      </p>
+      <p class="mini">
+        <code>U = k · u<sub>c</sub></code>
+      </p>
+      <p class="mini">
+        donde <code>k</code> es el factor de cobertura configurable en el módulo de Medición
+        (normalmente k = 2 para ≈95&nbsp;% de nivel de confianza, según GUM e ISO/IEC 17025).
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h3>F. Criterio de conformidad ILAC-G8</h3>
+      <p class="mini">
+        El criterio de aceptación está basado en la guía ILAC-G8 para la toma de decisiones con incertidumbre:
+      </p>
+      <ul class="mini">
+        <li><strong>Conformidad segura (APTO):</strong>
+          <code>|E| + U ≤ T</code> → el error máximo posible sigue dentro de la tolerancia.
+        </li>
+        <li><strong>No conformidad segura (NO APTO):</strong>
+          <code>|E| − U &gt; T</code> → incluso descontando la incertidumbre, el error supera la tolerancia.
+        </li>
+        <li><strong>Zona gris (INDETERMINADO):</strong>
+          el valor verdadero puede estar dentro o fuera de la tolerancia; requiere decisión técnica
+          (experiencia, criticidad del uso, requisitos del cliente, etc.).
+        </li>
+      </ul>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h3>G. Calibraciones de roscas (galgas, tampones, anillos)</h3>
+      <p class="mini">
+        Para instrumentos de rosca (galgas pasa/no pasa, anillos roscados, tampones roscados) se aplican los mismos
+        principios de error e incertidumbre, pero la magnitud de interés suele ser el <strong>diámetro eficaz</strong>,
+        el <strong>paso</strong> y, en algunos casos, el <strong>ángulo</strong>.
+      </p>
+      <ul class="mini">
+        <li>El banco de roscas o equipo de medición proporciona indicaciones de diámetro eficaz
+          que se comparan con los valores de referencia del patrón.</li>
+        <li>Si se utiliza el método de los tres hilos, el diámetro eficaz <code>E</code> se obtiene a partir de la
+          dimensión sobre hilos y la geometría de la rosca (ángulo de filete, paso, etc.).</li>
+        <li>Una vez calculado el valor de referencia <code>R</code> (diámetro eficaz nominal) y el valor medido
+          <code>I</code>, se aplica <code>E = I − R</code> y las mismas fórmulas de incertidumbre <code>u<sub>c</sub></code> y
+          <code>U</code>.</li>
+        <li>Las tolerancias de aceptación de la rosca se basan en ISO 1502 / ISO 965 (clases 6H, 6g, etc.).</li>
+      </ul>
+      <p class="mini">
+        En esta versión, la parte numérica (errores, incertidumbres, ILAC-G8) está preparada para aplicarse también
+        a roscas; la obtención del valor de referencia de diámetro eficaz se realiza según el procedimiento interno
+        del laboratorio (tres hilos, banco de roscas, etc.) y se introduce como valor nominal o como patrón.
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h3>H. Tipos de instrumentos cubiertos por el modelo</h3>
+      <ul class="mini">
+        <li><strong>Dimensional lineal:</strong> calibres pie de rey, micrómetros exteriores/interiores, relojes comparadores,
+          columnas de altura, tampón P/NP, galgas lisas.</li>
+        <li><strong>Instrumentos de atributo (GO/NO&nbsp;GO):</strong> evaluación de tamaños límite con criterio de aceptación
+          ILAC-G8 aplicado sobre el error de tamaño efectivo.</li>
+        <li><strong>Roscas:</strong> galgas, tampones, anillos (diámetro eficaz, paso, ángulo) usando ISO 1502 / ISO 965.</li>
+        <li><strong>Dinamométricas:</strong> llaves de par, bancos de par, según ISO 6789/ISO 5393, aplicando el mismo modelo
+          de error e incertidumbre en N·m.</li>
+        <li><strong>Balanzas:</strong> según OIML R76; el modelo admite errores de indicación por carga, repetibilidad y
+          resolución en gramos.</li>
+        <li><strong>Durometría:</strong> Rockwell, Brinell, Vickers; el modelo numérico se aplica sobre la escala de dureza,
+          con contribuciones de repetibilidad, resolución y patrón de dureza.</li>
+      </ul>
+      <p class="mini">
+        El resultado final APTO/NO APTO es coherente con ISO/IEC 17025 y la guía ILAC-G8, pudiendo documentarse en informes
+        internos o externos a clientes.
+      </p>
+    </div>
   </section>
 </div>
 
@@ -573,7 +786,10 @@ $$('button[data-addblock]').forEach(b=>{
 /* ========= RENDER PLAN ========= */
 function renderPlan(){
   const box=$("#planBloques");
-  if (!state.plan.length){ box.innerHTML=`<p class="note">No hay bloques. Añade alguno con los botones superiores.</p>`; return; }
+  if (!state.plan.length){
+    box.innerHTML=`<p class="note">No hay bloques. Añade alguno con los botones superiores.</p>`;
+    return;
+  }
   box.innerHTML = state.plan.map(b=>`
     <div class="card" style="margin-top:10px">
       <div class="row">
@@ -596,11 +812,14 @@ function renderPlan(){
 /* ========= MEDICION ========= */
 function renderMedicion(){
   const box=$("#medicionBloques");
-  if (!state.plan.length){ box.innerHTML=`<p class="note">Primero define el plan (bloques y puntos).</p>`; return; }
+  if (!state.plan.length){
+    box.innerHTML=`<p class="note">Primero define el plan (bloques y puntos).</p>`;
+    return;
+  }
   box.innerHTML = state.plan.map(b=>{
     const filas = b.puntos.map(p=>{
       const key=`${b.id}|${p.id}`;
-      const med=state.mediciones[key]||{r:[null,null,null,null,null],media:null,s:null};
+      const med=state.mediciones[key]||{r:[null,null,null,null,null],media:null,s:null,n:0};
       return `
         <tr data-key="${key}">
           <td>${p.valor_nominal.toFixed(3)}</td>
@@ -627,9 +846,11 @@ function renderMedicion(){
       const med=state.mediciones[key]||{r:[null,null,null,null,null]};
       med.r[idx]=parseNum(inp.value);
       const vals=med.r.filter(x=>typeof x==='number'&&isFinite(x));
-      const n=vals.length; const media=n? (vals.reduce((a,b)=>a+b,0)/n) : 0;
+      const n=vals.length;
+      const media=n? (vals.reduce((a,b)=>a+b,0)/n) : 0;
       const s=n>1? Math.sqrt(vals.reduce((a,b)=>a+(b-media)**2,0)/(n-1)) : 0;
-      med.media=fmt(media); med.s=fmt(s); state.mediciones[key]=med;
+      med.media=fmt(media); med.s=fmt(s); med.n=n;
+      state.mediciones[key]=med;
       tr.querySelector('.media').textContent=med.media; tr.querySelector('.s').textContent=med.s;
     });
   });
@@ -646,14 +867,18 @@ function calcularResultados(){
   const lado=$("#ladoMed").value;
   const nominalGO=parseNum($("#nominalGO").value);
   const nominalNOGO=parseNum($("#nominalNOGO").value);
-  const ref=$("#refError").value; 
-  const tol=parseNum($("#tolGlobal").value);
-  const uBase=parseNum($("#uBase").value);
+  const ref=$("#refError").value;
+  const tol=parseNum($("#tolGlobal").value);          // mm
+  const uBase=parseNum($("#uBase").value);           // U_patron (mm), k=2 por defecto
+  const resolucion = parseNum($("#resolucion").value); // mm
+  const kFactor = parseNum($("#factorK").value) || 2;
 
   const box=$("#resultadosBox");
-  if (!state.plan.length){ box.innerHTML=`<p class="note">No hay plan definido.</p>`; return; }
+  if (!state.plan.length){
+    box.innerHTML=`<p class="note">No hay plan definido.</p>`;
+    return;
+  }
 
-  // --- 4. Resultados detallados ---
   let html="";
   let maxAbsError = 0;
   let maxAbsErrorPlusU = 0;
@@ -671,34 +896,73 @@ function calcularResultados(){
         </div>
         <div class="table-box mt-8">
           <table>
-            <thead><tr><th>#</th><th>Nominal patrón (mm)</th><th>Corrección (µm)</th><th>Media (mm)</th><th>Error (µm)</th><th>U_total (µm)</th><th>Tolerancia (µm)</th><th>Decisión</th></tr></thead>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nominal patrón (mm)</th>
+                <th>Corrección (µm)</th>
+                <th>Media I (mm)</th>
+                <th>Error E (µm)</th>
+                <th>U<sub>c</sub> (µm)</th>
+                <th>U (µm)</th>
+                <th>Tolerancia T (µm)</th>
+                <th>Decisión</th>
+              </tr>
+            </thead>
             <tbody>
     `;
     b.puntos.forEach((p,i)=>{
-      const key=`${b.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
-      let refVal = (ref==="patron") ? p.valor_nominal : (lado==="GO" ? nominalGO : nominalNOGO);
-      const error = (media - refVal)*1000; 
-      const U = (uBase*1000);           
-      const T = tol*1000;               
-      const absE = Math.abs(error);
-      const absEplusU = Math.abs(error)+U;
+      const key=`${b.id}|${p.id}`;
+      const med=state.mediciones[key]||{};
+      const media=parseNum(med.media);   // mm
+      const s_mm = parseNum(med.s);      // mm
+      const n = med.n || 0;
+
+      let refVal = (ref==="patron") ? p.valor_nominal : (lado==="GO" ? nominalGO : nominalNOGO); // mm
+      const error_um = (media - refVal)*1000;   // µm
+
+      // INCERTIDUMBRES
+      const U_patron_mm = (p.u_k2 && p.u_k2>0) ? p.u_k2 : uBase;   // U del patrón en mm (k≈2)
+      const u_patron_mm = U_patron_mm / (kFactor || 2);            // u_patron en mm
+
+      const u_rep_mm = (n>1) ? (s_mm / Math.sqrt(n)) : 0;          // repetibilidad de la media
+      const u_res_mm = resolucion>0 ? (resolucion / Math.sqrt(12)) : 0;
+
+      const uc_mm = Math.sqrt(
+        u_patron_mm**2 +
+        u_rep_mm**2 +
+        u_res_mm**2
+      );
+      const U_mm = (kFactor || 2) * uc_mm;
+
+      const uc_um = uc_mm*1000;
+      const U_um  = U_mm*1000;
+      const T_um  = tol*1000;
+
+      const absE = Math.abs(error_um);
+      const absEplusU = Math.abs(error_um)+U_um;
       if (absE > maxAbsError) maxAbsError = absE;
       if (absEplusU > maxAbsErrorPlusU) maxAbsErrorPlusU = absEplusU;
       totalPuntos++;
 
-      const decision = (Math.abs(error)+U<=T) ? "APTO" : ((Math.abs(error)-U>T) ? "NO APTO" : "INDETERMINADO");
+      let decision="INDETERMINADO";
+      if (Math.abs(error_um)+U_um <= T_um) decision="APTO";
+      else if (Math.abs(error_um)-U_um > T_um) decision="NO APTO";
+
       if (decision==="NO APTO") hayNoApto = true;
       if (decision==="INDETERMINADO") hayIndeterminado = true;
       const badge = decision==="APTO" ? "success" : (decision==="NO APTO" ? "danger" : "");
+
       html += `
         <tr>
           <td>${i+1}</td>
           <td>${fmt(p.valor_nominal)}</td>
           <td>${fmt(p.correccion_patron*1000,3)}</td>
           <td>${fmt(media)}</td>
-          <td>${fmt(error,1)}</td>
-          <td>${fmt(U,1)}</td>
-          <td>${fmt(T,1)}</td>
+          <td>${fmt(error_um,1)}</td>
+          <td>${fmt(uc_um,1)}</td>
+          <td>${fmt(U_um,1)}</td>
+          <td>${fmt(T_um,1)}</td>
           <td><span class="pill ${badge}">${decision}</span></td>
         </tr>`;
     });
@@ -733,6 +997,7 @@ function calcularResultados(){
       <strong>Máx |E| (µm):</strong> ${fmt(maxAbsError,1)} ·
       <strong>Máx (|E| + U) (µm):</strong> ${fmt(maxAbsErrorPlusU,1)} ·
       <strong>Tolerancia global (µm):</strong> ${fmt(tol*1000,1)}<br>
+      <strong>Factor de cobertura usado:</strong> k = ${kFactor || 2}<br>
       <strong>Decisión global según ILAC-G8:</strong>
       <span class="pill ${decisionGlobal==="APTO"?"success":(decisionGlobal==="NO APTO"?"danger":"")}">
         ${decisionGlobal}
@@ -753,7 +1018,7 @@ function calcularResultados(){
     <p class="mini">
       Los valores indicados de corrección del patrón (columna "Corrección") proceden del certificado de calibración
       o, en puntos intermedios, de la interpolación matemática aplicada por el laboratorio. La incertidumbre informada
-      corresponde a la incertidumbre expandida U(k=2), con un nivel de confianza aproximado del 95 %.
+      corresponde a la incertidumbre expandida U(k) con el factor de cobertura seleccionado en el informe.
     </p>
   `;
   $("#trazabilidadBox").innerHTML = traz;
@@ -780,7 +1045,6 @@ function dibujarGraficaErrores(){
   const nominalGO=parseNum($("#nominalGO").value);
   const nominalNOGO=parseNum($("#nominalNOGO").value);
   const ref=$("#refError").value;
-  const uBase=parseNum($("#uBase").value);
   const tol=parseNum($("#tolGlobal").value);
 
   const puntosGraf = [];
@@ -801,7 +1065,7 @@ function dibujarGraficaErrores(){
   const xs = puntosGraf.map(p=>p.x);
   const ys = puntosGraf.map(p=>p.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const maxAbsY = Math.max(...ys.map(v=>Math.abs(v)), tol*1000, uBase*1000);
+  const maxAbsY = Math.max(...ys.map(v=>Math.abs(v)), tol*1000);
   const minY = -maxAbsY, maxY = maxAbsY;
 
   const sx = v => margin.left + ( (v-minX)/(maxX-minX || 1) ) * (canvas.width - margin.left - margin.right);
@@ -962,6 +1226,7 @@ function switchTab(name){
   $('#tab-plan').classList.toggle('hidden', name!=='plan');
   $('#tab-medicion').classList.toggle('hidden', name!=='medicion');
   $('#tab-resultados').classList.toggle('hidden', name!=='resultados');
+  $('#tab-anexo').classList.toggle('hidden', name!=='anexo');
 }
 $$('.tab').forEach(t=> t.addEventListener('click',()=> switchTab(t.dataset.tab)));
 
@@ -986,4 +1251,5 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
+
 
