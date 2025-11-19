@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMP · Buscar Instrumento</title>
+
+<!-- Estilo TMP -->
+<style>
+    body{
+        margin:0;
+        font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+        background:#0d1117;
+        color:#f0f6fc;
+    }
+    header{
+        padding:14px 18px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        background:#161b22;
+        border-bottom:1px solid #30363d;
+    }
+    .brand{
+        display:flex;
+        align-items:center;
+        gap:12px;
+    }
+    .brand img{height:40px}
+    .brand h1{font-size:18px;margin:0;}
+    .brand span{font-size:12px;color:#8b949e;}
+
+    .btn-back{
+        border-radius:10px;
+        padding:8px 14px;
+        border:1px solid #30363d;
+        background:transparent;
+        color:#f0f6fc;
+        cursor:pointer;
+    }
+    .btn-back:hover{background:#1f2937;}
+
+    .wrap{
+        max-width:900px;
+        margin:22px auto;
+        padding:0 16px;
+    }
+
+    .card{
+        background:#161b22;
+        padding:18px;
+        border-radius:16px;
+        border:1px solid #30363d;
+        margin-bottom:20px;
+    }
+
+    h2{margin:0 0 10px;font-size:17px;color:#58a6ff}
+
+    input{
+        width:100%;
+        padding:12px;
+        border-radius:10px;
+        border:1px solid #30363d;
+        background:#0d1117;
+        color:#f0f6fc;
+        font-size:15px;
+        outline:none;
+    }
+    input:focus{border-color:#58a6ff;}
+
+    .result{
+        padding:14px;
+        border-bottom:1px solid #21262d;
+        cursor:pointer;
+    }
+    .result:hover{
+        background:#0f172a;
+    }
+
+    .r-code{
+        font-size:16px;
+        font-weight:600;
+    }
+    .r-desc{
+        font-size:13px;
+        color:#8b949e;
+    }
+
+    .tag{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:3px 8px;
+        border-radius:999px;
+        font-size:11px;
+        margin-top:6px;
+        color:white;
+    }
+    .ok{background:#238636;}
+    .warn{background:#d29922;}
+    .bad{background:#e53935;}
+    .info{background:#3b82f6;}
+
+    .empty{
+        padding:14px;
+        font-size:14px;
+        color:#8b949e;
+        text-align:center;
+    }
+</style>
+
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <img src="img/tmp-quality.png">
+        <div>
+            <h1>Buscar instrumento</h1>
+            <span>Consulta rápida · Base de datos TMP</span>
+        </div>
+    </div>
+    <button class="btn-back" onclick="window.location.href='home.html'">← Volver</button>
+</header>
+
+<div class="wrap">
+    <div class="card">
+        <h2>Buscar</h2>
+        <input id="buscador" type="text" placeholder="Código o descripción…">
+    </div>
+
+    <div id="resultados" class="card" style="padding:0"></div>
+</div>
+
+<script type="module" src="config.js"></script>
+
+<script type="module">
+    const supabase = window.supabase;
+    const input = document.getElementById("buscador");
+    const box = document.getElementById("resultados");
+
+    function estadoTag(inst){
+        if(!inst.proxima_calibracion)
+            return `<span class='tag info'>Sin datos</span>`;
+
+        const hoy = new Date();
+        const prox = new Date(inst.proxima_calibracion);
+        const diff = (prox - hoy)/(1000*60*60*24);
+
+        if(diff < 0) return `<span class='tag bad'>Fuera de calibración</span>`;
+        if(diff <= 30) return `<span class='tag warn'>Próxima calibración</span>`;
+        return `<span class='tag ok'>En regla</span>`;
+    }
+
+    async function buscar(){
+        const t = input.value.trim().toLowerCase();
+        if(!t){
+            box.innerHTML = "";
+            return;
+        }
+
+        const {data, error} = await supabase
+            .from("instrumentos")
+            .select("*")
+            .or(`codigo.ilike.%${t}%, descripcion.ilike.%${t}%`)
+            .order("codigo",{ascending:true})
+            .limit(50);
+
+        if(error){
+            box.innerHTML = `<div class="empty">Error buscando datos</div>`;
+            return;
+        }
+
+        if(!data.length){
+            box.innerHTML = `<div class="empty">No se encontraron instrumentos</div>`;
+            return;
+        }
+
+        box.innerHTML = data.map(inst => `
+            <div class="result" onclick="window.location.href='qr/qr.info_instrumentos.html?codigo=${inst.codigo}'">
+                <div class="r-code">${inst.codigo}</div>
+                <div class="r-desc">${inst.descripcion || "-"}</div>
+                ${estadoTag(inst)}
+                <div class="r-desc" style="margin-top:4px;">Ubicación: ${inst.ubicacion_actual || "-"}</div>
+            </div>
+        `).join("");
+    }
+
+    input.addEventListener("input", buscar);
+</script>
+
+</body>
+</html>
