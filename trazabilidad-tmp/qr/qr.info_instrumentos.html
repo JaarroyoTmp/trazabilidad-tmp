@@ -4,114 +4,360 @@
 <meta charset="UTF-8">
 <title>TMP · Ficha del instrumento</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+  :root{
+    --bg:#020617;
+    --bg-grad1:#0f172a;
+    --bg-grad2:#020617;
+    --card:#020617;
+    --card-soft:#02081a;
+    --border:#1f2937;
+    --txt:#e5e7eb;
+    --muted:#9ca3af;
+    --accent:#22d3ee;
+    --accent-soft:#0ea5e9;
+    --danger:#fb7185;
+    --warn:#facc15;
+    --ok:#4ade80;
+  }
+
+  *{ box-sizing:border-box; }
+
   body{
     margin:0;
     font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    background:#0d1117;
-    color:#f0f6fc;
+    background:
+      radial-gradient(circle at 0% 0%, #0f172a 0, transparent 55%),
+      radial-gradient(circle at 100% 0%, #0b1120 0, transparent 55%),
+      radial-gradient(circle at 50% 110%, #0f172a 0, transparent 60%),
+      linear-gradient(180deg,var(--bg-grad1),var(--bg-grad2));
+    color:var(--txt);
+    -webkit-font-smoothing:antialiased;
   }
 
   header{
     display:flex;
     align-items:center;
-    gap:14px;
+    gap:12px;
     padding:14px 16px;
-    background:#161b22;
-    border-bottom:1px solid #30363d;
-  }
-  .logo{height:40px}
-  .h-titles{display:flex;flex-direction:column}
-  .h-titles h1{margin:0;font-size:18px}
-  .h-titles span{font-size:12px;color:#8b949e}
-
-  .wrap{max-width:720px;margin:18px auto 32px;padding:0 16px}
-
-  .card{
-    background:#161b22;
-    border-radius:16px;
-    border:1px solid #30363d;
-    padding:16px 14px;
-    margin-bottom:14px;
+    border-bottom:1px solid rgba(148,163,184,.25);
+    background:
+      radial-gradient(circle at 0% 0%, rgba(56,189,248,.22) 0, transparent 60%),
+      radial-gradient(circle at 100% 0%, rgba(59,130,246,.25) 0, transparent 60%),
+      linear-gradient(135deg,#020617,#020617f0);
+    position:sticky;
+    top:0;
+    z-index:20;
+    backdrop-filter:blur(18px);
   }
 
-  .card h2{
-    margin:0 0 10px;
-    font-size:16px;
-    color:#58a6ff;
+  .logo{
+    height:40px;
+    width:auto;
+    filter:drop-shadow(0 0 8px rgba(56,189,248,.45));
   }
 
-  .item{font-size:14px;margin:4px 0}
-  .label{color:#8b949e;}
+  .h-titles{
+    display:flex;
+    flex-direction:column;
+  }
 
-  .status-tag{
+  .h-titles h1{
+    margin:0;
+    font-size:18px;
+    letter-spacing:.04em;
+  }
+
+  .h-titles span{
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  .wrap{
+    max-width:760px;
+    margin:18px auto 32px;
+    padding:0 16px 40px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  /* HERO NEÓN PRINCIPAL */
+  .hero-card{
+    position:relative;
+    border-radius:18px;
+    padding:14px 14px 12px;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(56,189,248,.18) 0, transparent 55%),
+      radial-gradient(circle at 100% 0%, rgba(59,130,246,.20) 0, transparent 60%),
+      linear-gradient(135deg,#020617,#020617);
+    border:1px solid rgba(148,163,184,.35);
+    box-shadow:
+      0 18px 45px rgba(15,23,42,.95),
+      0 0 40px rgba(56,189,248,.18);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .hero-main{
+    max-width:70%;
+  }
+
+  .hero-code{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+
+  .hero-title{
+    font-size:17px;
+    font-weight:700;
+  }
+
+  .hero-sub{
+    font-size:13px;
+    color:var(--muted);
+    margin-top:4px;
+  }
+
+  .hero-status{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+    font-size:12px;
+  }
+
+  .status-pill{
     display:inline-flex;
     align-items:center;
     gap:6px;
     padding:4px 10px;
     border-radius:999px;
-    font-size:12px;
+    font-size:11px;
     font-weight:600;
+    border:1px solid rgba(148,163,184,.5);
+    background:rgba(15,23,42,.8);
+    text-transform:uppercase;
+    letter-spacing:.12em;
   }
-  .dot{
-    width:8px;height:8px;border-radius:50%;
+
+  .status-pill .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
   }
 
-  .ok{background:#12261a;color:#3fb950;}
-  .ok .dot{background:#3fb950;}
+  .status-ok{
+    border-color:rgba(74,222,128,.4);
+    color:#bbf7d0;
+    box-shadow:0 0 12px rgba(74,222,128,.5);
+  }
+  .status-ok .dot{background:var(--ok);}
 
-  .warn{background:#2b2113;color:#d29922;}
-  .warn .dot{background:#d29922;}
+  .status-warn{
+    border-color:rgba(250,204,21,.5);
+    color:#fef3c7;
+    box-shadow:0 0 12px rgba(250,204,21,.55);
+  }
+  .status-warn .dot{background:var(--warn);}
 
-  .bad{background:#2b1517;color:#f85149;}
-  .bad .dot{background:#f85149;}
+  .status-bad{
+    border-color:rgba(248,113,113,.65);
+    color:#fee2e2;
+    box-shadow:0 0 16px rgba(248,113,113,.8);
+  }
+  .status-bad .dot{background:var(--danger);}
+
+  .status-caption{
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  /* TARJETAS SECUNDARIAS */
+  .card{
+    position:relative;
+    background:radial-gradient(circle at 0 0,rgba(56,189,248,.08) 0,transparent 55%), #020617;
+    border-radius:16px;
+    border:1px solid rgba(30,64,175,.6);
+    padding:14px 13px 12px;
+    box-shadow:0 16px 32px rgba(0,0,0,.85);
+    overflow:hidden;
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:-1px;
+    border-radius:inherit;
+    padding:1px;
+    background:radial-gradient(circle at 0 0,rgba(56,189,248,.5),transparent 60%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask-composite:exclude;
+    opacity:.15;
+    pointer-events:none;
+  }
+
+  .card h2{
+    margin:0 0 8px;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    color:var(--accent);
+  }
+
+  .card-sub{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .item{
+    font-size:13px;
+    margin:4px 0;
+  }
+
+  .label{
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    display:block;
+    margin-bottom:2px;
+  }
+
+  .value{
+    font-size:13px;
+  }
 
   .muted{
     font-size:12px;
-    color:#8b949e;
+    color:var(--muted);
     margin-top:4px;
   }
 
+  /* MOVIMIENTOS */
   .mov-item{
-    font-size:13px;
+    font-size:12px;
     margin:6px 0;
-    padding-bottom:6px;
-    border-bottom:1px dashed #30363d;
+    padding:6px 0;
+    border-bottom:1px dashed rgba(55,65,81,.7);
   }
   .mov-item:last-child{
     border-bottom:none;
   }
 
-  .error-box{
-    text-align:center;
-    padding:24px 18px;
+  .mov-header{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:3px;
   }
 
+  .mov-type{
+    font-size:11px;
+    padding:3px 8px;
+    border-radius:999px;
+    border:1px solid rgba(148,163,184,.5);
+    background:rgba(15,23,42,.9);
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:#e5e7eb;
+  }
+
+  .mov-date{
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  .mov-body-line{
+    font-size:12px;
+    margin-top:2px;
+  }
+
+  .mov-body-label{
+    color:var(--muted);
+    font-size:11px;
+    margin-right:4px;
+  }
+
+  /* ERROR */
+  .error-box{
+    text-align:center;
+    padding:18px 14px;
+    background:radial-gradient(circle at 0 0,rgba(248,113,113,.18) 0,transparent 60%), #020617;
+    border-radius:16px;
+    border:1px solid rgba(248,113,113,.6);
+    box-shadow:0 16px 32px rgba(127,29,29,.9);
+  }
+
+  .error-box h2{
+    margin:0 0 8px;
+    font-size:15px;
+    color:#fecaca;
+  }
+
+  .error-box p{
+    margin:3px 0;
+    font-size:13px;
+  }
+
+  /* BOTÓN VOLVER FLOTANTE */
   #volverHome{
     position:fixed;
     bottom:18px;
     right:18px;
-    background:#238636;
-    padding:12px 18px;
-    font-size:14px;
-    border-radius:12px;
-    border:1px solid #2ea043;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    padding:10px 16px;
+    font-size:13px;
+    border-radius:999px;
+    border:1px solid rgba(34,197,94,.7);
     cursor:pointer;
     color:white;
-    box-shadow:0 0 10px rgba(0,0,0,.4);
+    box-shadow:0 12px 28px rgba(0,0,0,.75);
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    z-index:30;
   }
   #volverHome:hover{
-    background:#2ea043;
+    filter:brightness(1.05);
   }
 
+  @media (max-width:640px){
+    header{
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .hero-main{max-width:100%;}
+    .hero-card{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+    .hero-status{
+      align-items:flex-start;
+    }
+    #volverHome{
+      left:12px;
+      right:12px;
+      justify-content:center;
+      border-radius:999px;
+    }
+  }
 </style>
 </head>
 
 <body>
 
-<button id="volverHome" onclick="window.location.href='../home.html'">🏠 Volver</button>
+<button id="volverHome" onclick="window.location.href='../home.html'">
+  🏠 Volver al panel
+</button>
 
 <header>
   <img src="../img/tmp-quality.png" alt="TMP" class="logo">
@@ -123,206 +369,354 @@
 
 <div class="wrap">
 
-  <div id="errorBox" class="card error-box" style="display:none"></div>
+  <!-- Caja de error -->
+  <div id="errorBox" class="error-box" style="display:none"></div>
 
-  <div id="infoCard" class="card" style="display:none">
+  <!-- HERO NEÓN -->
+  <section id="hero" class="hero-card" style="display:none">
+    <div class="hero-main">
+      <div class="hero-code" id="heroCode">CÓDIGO —</div>
+      <div class="hero-title" id="heroTitle">Instrumento</div>
+      <div class="hero-sub" id="heroSub">—</div>
+    </div>
+    <div class="hero-status">
+      <div id="heroStatusPill" class="status-pill">
+        <span class="dot"></span>
+        <span id="heroStatusLabel">—</span>
+      </div>
+      <div class="status-caption" id="heroStatusCaption">Estado de calibración</div>
+    </div>
+  </section>
+
+  <!-- Información básica -->
+  <section id="infoCard" class="card" style="display:none">
     <h2>Información básica</h2>
+    <div class="card-sub">Datos principales del instrumento leído por QR.</div>
     <div id="infoBody"></div>
-  </div>
+  </section>
 
-  <div id="calCard" class="card" style="display:none">
+  <!-- Estado de calibración -->
+  <section id="calCard" class="card" style="display:none">
     <h2>Estado de calibración</h2>
+    <div class="card-sub">Situación actual frente a su plan de calibración.</div>
     <div id="calBody"></div>
-  </div>
+  </section>
 
-  <div id="movCard" class="card" style="display:none">
+  <!-- Historial de movimientos -->
+  <section id="movCard" class="card" style="display:none">
     <h2>Últimos movimientos</h2>
+    <div class="card-sub">Trazabilidad básica de uso y ubicación reciente.</div>
     <div id="movBody"></div>
     <p class="muted" id="movHint"></p>
-  </div>
+  </section>
 
 </div>
 
-<script>
-// ---------------------------
-//   CONFIG SUPABASE
-// ---------------------------
-const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
-const SUPABASE_ANON_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+<!-- Cliente Supabase global (misma config que el resto de la app) -->
+<script type="module" src="../config.mjs"></script>
 
-const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-
-// ---------------------------
-//   OBTENER CÓDIGO DESDE URL
-// ---------------------------
-let codigo = new URLSearchParams(window.location.search).get("codigo");
-
-// patrón /qr/12345
-if (!codigo) {
-  const parts = window.location.pathname.split("/").filter(Boolean);
-  const last = parts[parts.length - 1];
-
-  if (last && !last.includes(".html")) {
-    codigo = decodeURIComponent(last);
-  }
-}
-
-document.getElementById("subTitle").textContent =
-  codigo ? `Código: ${codigo}` : "Código no especificado";
-
-
-// ---------------------------
-//   FUNCIÓN PRINCIPAL
-// ---------------------------
-async function main(){
-
-  if (!codigo){
-    showError("No se ha indicado un código en la URL.");
-    return;
-  }
-
-  // Buscar instrumento
-  const { data: inst, error: e1 } = await supa
-    .from("instrumentos")
-    .select("*")
-    .eq("codigo", codigo)
-    .maybeSingle();
-
-  if (e1){
-    showError("Error consultando la base de datos.");
-    return;
-  }
-
-  if (!inst){
-    showError(`No existe ningún instrumento con código <b>${codigo}</b>`);
-    return;
-  }
-
+<script type="module">
+  const supa = window.supabase;
 
   // ---------------------------
-  //   INFORMACIÓN BÁSICA
+  //   OBTENER CÓDIGO DESDE URL
   // ---------------------------
-  const infoCard = document.getElementById("infoCard");
-  const infoBody = document.getElementById("infoBody");
-  infoCard.style.display = "block";
+  let codigo = new URLSearchParams(window.location.search).get("codigo");
 
-  infoBody.innerHTML = `
-    <div class="item"><span class="label">Descripción:</span> ${inst.descripcion || "-"}</div>
-    <div class="item"><span class="label">Fabricante:</span> ${inst.fabricante || "-"}</div>
-    <div class="item"><span class="label">Rango:</span> ${inst.rango || "-"}</div>
-    <div class="item"><span class="label">Ubicación actual:</span> ${inst.ubicacion_actual || "-"}</div>
-    <div class="item"><span class="label">Tipo de calibración:</span> ${inst.tipo_calibracion || "-"}</div>
-  `;
-
-
-  // ---------------------------
-  //   ESTADO DE CALIBRACIÓN
-  // ---------------------------
-  const calCard = document.getElementById("calCard");
-  const calBody = document.getElementById("calBody");
-  calCard.style.display = "block";
-
-  const ult = inst.fecha_calibracion;
-  const prox = inst.fecha_proxima_calibracion;
-
-  let estadoClase = "";
-  let estadoTexto = "";
-  let detalle = "";
-
-  if (!prox){
-    estadoClase = "warn";
-    estadoTexto = "Sin próxima calibración";
-    detalle = "Este instrumento no tiene fecha futura asignada.";
-  } else {
-    const hoy = new Date();
-    const fProx = new Date(prox);
-    const diff = (fProx - hoy) / (1000*60*60*24);
-
-    if (diff < 0){
-      estadoClase = "bad";
-      estadoTexto = "FUERA DE CALIBRACIÓN";
-      detalle = "El equipo debe inmovilizarse hasta nueva calibración.";
-    } else if (diff <= 30){
-      estadoClase = "warn";
-      estadoTexto = "Próxima a vencer";
-      detalle = "Planificar calibración en breve.";
-    } else {
-      estadoClase = "ok";
-      estadoTexto = "En regla";
-      detalle = "Instrumento dentro del plazo de calibración.";
+  // patrón /qr/12345
+  if (!codigo) {
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    const last = parts[parts.length - 1];
+    if (last && !last.includes(".html")) {
+      codigo = decodeURIComponent(last);
     }
   }
 
-  calBody.innerHTML = `
-    <div class="item"><span class="label">Última calibración:</span> ${ult || "-"}</div>
-    <div class="item"><span class="label">Próxima calibración:</span> ${prox || "-"}</div>
-    <div class="item" style="margin-top:8px">
-      <span class="status-tag ${estadoClase}">
-        <span class="dot"></span>
-        ${estadoTexto}
-      </span>
-    </div>
-    <p class="muted">${detalle}</p>
-  `;
-
+  const subTitle = document.getElementById("subTitle");
+  subTitle.textContent = codigo ? `Código: ${codigo}` : "Código no especificado";
 
   // ---------------------------
-  //   HISTÓRICO MOVIMIENTOS
+  //   HELPERS
   // ---------------------------
-  const movCard = document.getElementById("movCard");
-  const movBody = document.getElementById("movBody");
-  const movHint = document.getElementById("movHint");
-
-  movCard.style.display = "block";
-
-  const { data: movs, error: e2 } = await supa
-    .from("movimientos")
-    .select("*")
-    .eq("codigo_instrumento", codigo)
-    .order("fecha", { ascending:false })
-    .limit(10);
-
-  if (e2){
-    movBody.innerHTML = `<div class="muted">No se han podido cargar movimientos.</div>`;
-    return;
+  function showError(msg){
+    const box = document.getElementById("errorBox");
+    box.style.display = "block";
+    box.innerHTML = `
+      <h2>Error</h2>
+      <p>${msg}</p>
+      <p class="muted">Verifica el código o contacta con Metrología.</p>
+    `;
   }
 
-  if (!movs.length){
-    movBody.innerHTML = `<div class="muted">No existen movimientos para este instrumento.</div>`;
-  } else {
+  function formatDateShort(iso){
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(d)) return "—";
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
 
-    movBody.innerHTML = movs.map(m => `
-      <div class="mov-item">
-        <div><span class="label">Fecha:</span> ${new Date(m.fecha).toLocaleString()}</div>
-        <div><span class="label">Tipo:</span> ${m.tipo_movimiento || "-"}</div>
-        <div><span class="label">Responsable:</span> ${m.responsable || "-"}</div>
-        <div><span class="label">Destino:</span> ${m.destino || "-"}</div>
-        ${m.observaciones ? `<div><span class="label">Obs.:</span> ${m.observaciones}</div>` : ""}
+  function formatDateTime(iso){
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(d)) return "—";
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const yy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mi = String(d.getMinutes()).padStart(2,"0");
+    return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+  }
+
+  function daysDiffToToday(iso){
+    if (!iso) return null;
+    const target = new Date(iso);
+    if (isNaN(target)) return null;
+    const today = new Date();
+    const MS = 86400000;
+    return Math.round((target - today)/MS);
+  }
+
+  function computeEstado(proxISO){
+    const dias = daysDiffToToday(proxISO);
+    if (dias === null){
+      return {
+        clase: "status-warn",
+        texto: "Sin próxima calibración",
+        detalle: "Este instrumento no tiene fecha futura asignada.",
+        dias: null
+      };
+    }
+
+    if (dias < 0){
+      return {
+        clase: "status-bad",
+        texto: "FUERA DE CALIBRACIÓN",
+        detalle: "El equipo debe inmovilizarse hasta nueva calibración.",
+        dias
+      };
+    }
+
+    if (dias <= 30){
+      return {
+        clase: "status-warn",
+        texto: "Próxima a vencer",
+        detalle: "Planificar calibración en breve.",
+        dias
+      };
+    }
+
+    return {
+      clase: "status-ok",
+      texto: "En regla",
+      detalle: "Instrumento dentro del plazo de calibración.",
+      dias
+    };
+  }
+
+  // ---------------------------
+  //   FUNCIÓN PRINCIPAL
+  // ---------------------------
+  async function main(){
+    if (!codigo){
+      showError("No se ha indicado un código en la URL.");
+      return;
+    }
+
+    if (!supa){
+      showError("Supabase no está disponible en esta página.");
+      return;
+    }
+
+    // Buscar instrumento
+    const { data: inst, error: e1 } = await supa
+      .from("instrumentos")
+      .select("*")
+      .eq("codigo", codigo)
+      .maybeSingle();
+
+    if (e1){
+      console.error(e1);
+      showError("Error consultando la base de datos.");
+      return;
+    }
+
+    if (!inst){
+      showError(`No existe ningún instrumento con código <b>${codigo}</b>.`);
+      return;
+    }
+
+    // ---------------------------
+    //   HERO NEÓN
+    // ---------------------------
+    const hero = document.getElementById("hero");
+    const heroCode = document.getElementById("heroCode");
+    const heroTitle = document.getElementById("heroTitle");
+    const heroSub = document.getElementById("heroSub");
+    const heroStatusPill = document.getElementById("heroStatusPill");
+    const heroStatusLabel = document.getElementById("heroStatusLabel");
+    const heroStatusCaption = document.getElementById("heroStatusCaption");
+
+    hero.style.display = "flex";
+    heroCode.textContent = `CÓDIGO · ${codigo}`;
+    heroTitle.textContent = inst.descripcion || "Instrumento sin descripción";
+    heroSub.textContent =
+      `${inst.fabricante || "Fabricante N/D"} · ` +
+      `Ubicación: ${inst.ubicacion_actual || "N/D"}`;
+
+    const est = computeEstado(inst.fecha_proxima_calibracion);
+    heroStatusPill.className = "status-pill " + est.clase;
+    heroStatusLabel.textContent = est.texto;
+
+    if (est.dias === null){
+      heroStatusCaption.textContent = est.detalle;
+    } else if (est.dias < 0){
+      const abs = Math.abs(est.dias);
+      heroStatusCaption.textContent = `Vencida hace ${abs} día${abs===1?"":"s"}.`;
+    } else {
+      heroStatusCaption.textContent = `Faltan ${est.dias} día${est.dias===1?"":"s"} para la próxima calibración.`;
+    }
+
+    // ---------------------------
+    //   INFORMACIÓN BÁSICA
+    // ---------------------------
+    const infoCard = document.getElementById("infoCard");
+    const infoBody = document.getElementById("infoBody");
+    infoCard.style.display = "block";
+
+    infoBody.innerHTML = `
+      <div class="item">
+        <span class="label">Descripción</span>
+        <span class="value">${inst.descripcion || "-"}</span>
       </div>
-    `).join("");
+      <div class="item">
+        <span class="label">Fabricante</span>
+        <span class="value">${inst.fabricante || "-"}</span>
+      </div>
+      <div class="item">
+        <span class="label">Rango / Especificación</span>
+        <span class="value">${inst.rango || "-"}</span>
+      </div>
+      <div class="item">
+        <span class="label">Precisión</span>
+        <span class="value">${inst.precision || "-"}</span>
+      </div>
+      <div class="item">
+        <span class="label">Ubicación nominal</span>
+        <span class="value">${inst.ubicacion || "-"}</span>
+      </div>
+      <div class="item">
+        <span class="label">Ubicación actual</span>
+        <span class="value">${inst.ubicacion_actual || "-"}</span>
+      </div>
+      <div class="item">
+        <span class="label">Tipo de calibración</span>
+        <span class="value">${inst.tipo_calibracion || "-"}</span>
+      </div>
+      ${inst.observaciones ? `
+        <div class="item">
+          <span class="label">Observaciones</span>
+          <span class="value">${inst.observaciones}</span>
+        </div>` : ""
+      }
+    `;
+
+    // ---------------------------
+    //   ESTADO DE CALIBRACIÓN
+    // ---------------------------
+    const calCard = document.getElementById("calCard");
+    const calBody = document.getElementById("calBody");
+    calCard.style.display = "block";
+
+    const ult = inst.fecha_calibracion;
+    const prox = inst.fecha_proxima_calibracion;
+    const est2 = computeEstado(prox);
+
+    let detalleExtra = est2.detalle;
+    if (est2.dias !== null){
+      if (est2.dias < 0){
+        const abs = Math.abs(est2.dias);
+        detalleExtra += ` Vencida hace ${abs} día${abs===1?"":"s"}.`;
+      } else {
+        detalleExtra += ` Faltan ${est2.dias} día${est2.dias===1?"":"s"}.`;
+      }
+    }
+
+    calBody.innerHTML = `
+      <div class="item">
+        <span class="label">Última calibración</span>
+        <span class="value">${ult ? formatDateShort(ult) : "-"}</span>
+      </div>
+      <div class="item">
+        <span class="label">Próxima calibración</span>
+        <span class="value">${prox ? formatDateShort(prox) : "-"}</span>
+      </div>
+      <div class="item" style="margin-top:8px;">
+        <span class="status-pill ${est2.clase}">
+          <span class="dot"></span>
+          ${est2.texto}
+        </span>
+      </div>
+      <p class="muted">${detalleExtra}</p>
+    `;
+
+    // ---------------------------
+    //   HISTÓRICO MOVIMIENTOS
+    // ---------------------------
+    const movCard = document.getElementById("movCard");
+    const movBody = document.getElementById("movBody");
+    const movHint = document.getElementById("movHint");
+
+    movCard.style.display = "block";
+
+    const { data: movs, error: e2 } = await supa
+      .from("movimientos")
+      .select("*")
+      .eq("codigo_instrumento", codigo)
+      .order("fecha", { ascending:false })
+      .limit(10);
+
+    if (e2){
+      console.error(e2);
+      movBody.innerHTML = `<div class="muted">No se han podido cargar movimientos.</div>`;
+      movHint.textContent = "";
+      return;
+    }
+
+    if (!movs || movs.length === 0){
+      movBody.innerHTML = `<div class="muted">No existen movimientos para este instrumento.</div>`;
+      movHint.textContent = "";
+    } else {
+      movBody.innerHTML = movs.map(m => `
+        <div class="mov-item">
+          <div class="mov-header">
+            <div class="mov-type">${m.tipo_movimiento || "Movimiento"}</div>
+            <div class="mov-date">${formatDateTime(m.fecha)}</div>
+          </div>
+          <div class="mov-body-line">
+            <span class="mov-body-label">Responsable</span>
+            <span>${m.responsable || "-"}</span>
+          </div>
+          <div class="mov-body-line">
+            <span class="mov-body-label">Destino</span>
+            <span>${m.destino || "-"}</span>
+          </div>
+          ${m.observaciones ? `
+            <div class="mov-body-line">
+              <span class="mov-body-label">Obs.</span>
+              <span>${m.observaciones.replace(/\n/g,"<br>")}</span>
+            </div>` : ""
+          }
+        </div>
+      `).join("");
+
+      movHint.textContent = "Se muestran los 10 movimientos más recientes registrados en la base de datos.";
+    }
   }
 
-  movHint.textContent = "Se muestran los 10 movimientos más recientes.";
-
-}
-
-
-// ---------------------------
-//   ERROR
-// ---------------------------
-function showError(msg){
-  const box = document.getElementById("errorBox");
-  box.style.display = "block";
-  box.innerHTML = `
-    <h2>Error</h2>
-    <p>${msg}</p>
-    <p class="muted">Verifica el código o contacta con Metrología.</p>
-  `;
-}
-
-main();
+  main();
 </script>
 
 </body>
