@@ -386,14 +386,14 @@
 
     <div class="row" style="margin-top:10px;justify-content:flex-end">
       <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
-      <button id="btnGuardarTodo" class="btn">Guardar todo (local)</button>
+      <button id="btnGuardarTodo" class="btn">Guardar todo (local + Supabase)</button>
     </div>
     <p class="note">
       Criterio ILAC-G8:
       <code>|E| + U ≤ T</code> →
       <span class="pill success">APTO</span> ·
-      <code>|E| − U &gt; T</code> →
-      <span class="pill danger">NO APTO</span> · resto →
+      <code>|E| − U &gt; T</code> → 
+      <span class="pill danger">NO APTO</span> · resto → 
       <span class="pill">INDETERMINADO</span>
     </p>
   </section>
@@ -482,7 +482,7 @@
         <code>U = k · u<sub>c</sub></code>
       </p>
       <p class="mini">
-        donde <code>k</code> es el factor de cobertura configurable en el módulo de Medición
+        donde <code>k</code> es el factor de cobertura configurable en el modelo de Medición
         (normalmente k = 2 para ≈95&nbsp;% de nivel de confianza, según GUM e ISO/IEC 17025).
       </p>
     </div>
@@ -656,6 +656,30 @@ async function ensureSupabase(){
   }
   setBadge(!!supabase);
   return supabase;
+}
+
+/* ========= ACTUALIZAR FECHAS EN SUPABASE ========= */
+async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal) {
+  await ensureSupabase();
+  if (!supabase) {
+    alert("No se pudo conectar con Supabase (modo offline).");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("instrumentos")
+    .update({
+      fecha_ultima_cal: fechaCal,
+      proxima_cal: proxCal
+    })
+    .eq("codigo", codigoInstrumento);
+
+  if (error) {
+    console.error("Error al actualizar Supabase:", error);
+    alert("Error subiendo las fechas a Supabase.");
+  } else {
+    console.log("Fechas de calibración actualizadas en Supabase.");
+  }
 }
 
 /* ========= CARGA INSTRUMENTO ========= */
@@ -1105,10 +1129,24 @@ function dibujarGraficaErrores(){
   });
 }
 
-/* ========= GUARDADO LOCAL + VALIDACIÓN ========= */
-$("#btnGuardarTodo").addEventListener("click",()=>{
+/* ========= GUARDADO LOCAL + VALIDACIÓN (MODIFICADO) ========= */
+const sigCanvas = document.getElementById('sigPad');
+const ctx = sigCanvas.getContext('2d');
+ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 2.2; ctx.lineCap='round';
+let drawing=false, last=null;
+function pos(ev){ const r=sigCanvas.getBoundingClientRect(); return {x:(ev.clientX-r.left), y:(ev.clientY-r.top)}; }
+sigCanvas.addEventListener('mousedown', e=>{ drawing=true; last=pos(e); });
+sigCanvas.addEventListener('mousemove', e=>{ if(!drawing) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; });
+sigCanvas.addEventListener('mouseup', ()=>drawing=false);
+sigCanvas.addEventListener('mouseleave', ()=>drawing=false);
+document.getElementById('sigClear').addEventListener('click', ()=>{ ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height); });
+
+$("#btnGuardarTodo").addEventListener("click", async ()=>{
   const codigo=$("#insCodigo").value.trim();
+  const fechaCal = $("#condFechaCal").value;
+  const proxCal = $("#firmanteProxima").value;
   const sigData = sigCanvas.toDataURL("image/png");
+
   const payload = {
     instrumento: state.instrumento,
     patronesSeleccionados: state.patronesSeleccionados,
@@ -1117,20 +1155,24 @@ $("#btnGuardarTodo").addEventListener("click",()=>{
     condiciones: {
       temp: $("#condTemp").value,
       hum: $("#condHum").value,
-      fechaCal: $("#condFechaCal").value,
+      fechaCal,
       obs: $("#condObs").value
     },
     validacion: {
       firmante: $("#firmanteNombre").value.trim(),
-      proxima: $("#firmanteProxima").value,
+      proxima: proxCal,
       firma_png: sigData
     },
     ts: new Date().toISOString()
   };
   localStorage.setItem(`calibracion:${codigo}`, JSON.stringify(payload));
-  alert("Calibración, condiciones y validación guardadas localmente.");
+
+  await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
+
+  alert("Calibración, condiciones y fechas guardadas (local + Supabase).");
 });
 
+/* ========= IMPRESIÓN ========= */
 $("#btnImprimir").addEventListener("click",()=>{
   if (!$("#firmanteNombre").value.trim() || !$("#firmanteProxima").value) {
     alert("Completa el nombre y la fecha de próxima calibración antes de imprimir.");
@@ -1230,18 +1272,6 @@ function switchTab(name){
 }
 $$('.tab').forEach(t=> t.addEventListener('click',()=> switchTab(t.dataset.tab)));
 
-/* ========= FIRMA ========= */
-const sigCanvas = document.getElementById('sigPad');
-const ctx = sigCanvas.getContext('2d');
-ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 2.2; ctx.lineCap='round';
-let drawing=false, last=null;
-function pos(ev){ const r=sigCanvas.getBoundingClientRect(); return {x:(ev.clientX-r.left), y:(ev.clientY-r.top)}; }
-sigCanvas.addEventListener('mousedown', e=>{ drawing=true; last=pos(e); });
-sigCanvas.addEventListener('mousemove', e=>{ if(!drawing) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; });
-sigCanvas.addEventListener('mouseup', ()=>drawing=false);
-sigCanvas.addEventListener('mouseleave', ()=>drawing=false);
-document.getElementById('sigClear').addEventListener('click', ()=>{ ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height); });
-
 /* ========= BOTONES CABECERA ========= */
 $("#btnCargar").addEventListener("click", cargarInstrumento);
 $("#btnLimpiar").addEventListener("click", ()=>location.reload());
@@ -1251,5 +1281,4 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
-
 
