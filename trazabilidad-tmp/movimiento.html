@@ -194,7 +194,6 @@
       .btn { width: 100%; }
     }
 
-    /* Inputs */
     label {
       font-size: 11px;
       text-transform: uppercase;
@@ -440,12 +439,16 @@
   </main>
 </div>
 
-<script type="module" src="config.js"></script>
+<!-- 🔥 SUPABASE CORRECTO: config.mjs -->
+<script type="module" src="config.mjs"></script>
 
 <script type="module">
-/* ===========================================================
-   CLIENTE SUPABASE DESDE config.js
-=========================================================== */
+  import { supabase } from "./config.mjs";
+  window.supabase = supabase;
+</script>
+
+<!-- 🔥 LÓGICA MOVIMIENTO -->
+<script type="module">
 const sb = window.supabase;
 
 /* Si Supabase no cargó → Modo Offline */
@@ -466,7 +469,7 @@ function setOnlineStatus(ok) {
 }
 
 if (!sb) {
-  console.error("Supabase no cargó. Revisa config.js");
+  console.error("Supabase no cargó. Revisa config.mjs");
   setOnlineStatus(false);
 } else {
   setOnlineStatus(true);
@@ -574,7 +577,7 @@ async function cargarInstrumento() {
 }
 
 /* ===========================================================
-   PINTAR DATOS DE INSTRUMENTO
+   PINTAR INSTRUMENTO
 =========================================================== */
 function pintarInstrumento(inst) {
   if (!inst) {
