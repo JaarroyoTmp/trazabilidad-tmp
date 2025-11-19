@@ -156,10 +156,11 @@
       <button class="btn-main" onclick="generarQR()">Generar QR</button>
     </div>
 
+    <!-- NUEVOS TAMAÑOS -->
     <div class="sizes">
-      <button class="btn-ghost" onclick="setSize(5)">Etiqueta 5 mm</button>
-      <button class="btn-ghost" onclick="setSize(7)">Etiqueta 7 mm</button>
       <button class="btn-ghost" onclick="setSize(10)">Etiqueta 10 mm</button>
+      <button class="btn-ghost" onclick="setSize(13)">Etiqueta 13 mm</button>
+      <button class="btn-ghost" onclick="setSize(15)">Etiqueta 15 mm</button>
     </div>
 
     <div id="qrResult"></div>
@@ -171,17 +172,17 @@
 </div>
 
 
-<!-- SCRIPT QR MEJORADO CON IMPRESIÓN -->
+<!-- SCRIPT QR MEJORADO -->
 <script>
 let qrSize = 200;
 
-// URL correcta a tu ficha QR
+// URL hacia la ficha QR
 const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
 /* =============================
-   FUNCIÓN PARA IMPRIMIR ETIQUETA
+   IMPRIMIR SOLO EL QR (sin texto)
 ============================= */
-function imprimirEtiqueta(codigo, url, sizePx){
+function imprimirEtiqueta(url, sizePx){
   const win = window.open("", "_blank", "width=400,height=400");
 
   win.document.write(`
@@ -191,20 +192,19 @@ function imprimirEtiqueta(codigo, url, sizePx){
       body{
         margin:0;
         display:flex;
-        flex-direction:column;
         align-items:center;
         justify-content:center;
         background:white;
-        font-family:sans-serif;
       }
-      img{width:${sizePx}px;height:${sizePx}px;}
-      .code{margin-top:6px;font-size:14px;font-weight:bold;}
+      img{
+        width:${sizePx}px;
+        height:${sizePx}px;
+      }
     </style>
     </head>
 
     <body>
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=${sizePx}x${sizePx}&data=${encodeURIComponent(url)}">
-      <div class="code">${codigo}</div>
 
       <script>
         window.onload = function(){
@@ -219,7 +219,7 @@ function imprimirEtiqueta(codigo, url, sizePx){
 }
 
 /* =============================
-   CAMBIO DE TAMAÑO + IMPRESIÓN
+   SET SIZE Y AUTOIMPRIME
 ============================= */
 function setSize(mm){
   const codigo = document.getElementById("codigo").value.trim();
@@ -228,18 +228,17 @@ function setSize(mm){
     return;
   }
 
-  // 1 mm = 8 px
-  const sizePx = mm * 8;
+  const sizePx = mm * 8;  // mm → px
   qrSize = sizePx;
 
   const url = BASE_URL + encodeURIComponent(codigo);
 
-  generarQR();          // muestra QR en pantalla
-  imprimirEtiqueta(codigo, url, sizePx);   // imprime
+  generarQR();
+  imprimirEtiqueta(url, sizePx);
 }
 
 /* =============================
-   GENERAR QR EN LA WEB
+   GENERAR QR EN PANTALLA
 ============================= */
 function generarQR(){
   const codigo = document.getElementById("codigo").value.trim();
