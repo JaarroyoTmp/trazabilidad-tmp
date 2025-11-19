@@ -15,10 +15,12 @@
       --card-bg:#1c2431;
       --hover:#263041;
       --accent:#00b4d8;
-      --danger:#b91c1c;
+      --danger:#ef4444;
       --warning:#f59e0b;
       --success:#22c55e;
     }
+
+    *{box-sizing:border-box;}
 
     body{
       margin:0;
@@ -56,7 +58,7 @@
     main{
       max-width:1100px;
       margin:26px auto;
-      padding:0 18px;
+      padding:0 18px 40px;
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
       gap:18px;
@@ -98,11 +100,25 @@
       border:1px solid var(--border);
       padding:10px 12px;
       transition:all .3s ease;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .kpi-card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      opacity:0;
+      pointer-events:none;
+      background:radial-gradient(circle at 0 0, rgba(0,180,216,.35), transparent 55%);
+      transition:opacity .3s ease;
     }
 
     .kpi-card.updated {
-      background:#113344;
-      box-shadow:0 0 12px rgba(0,180,216,.4);
+      box-shadow:0 0 16px rgba(0,180,216,.35);
+    }
+    .kpi-card.updated::after{
+      opacity:1;
     }
 
     .kpi-label{
@@ -123,36 +139,54 @@
       color:var(--muted);
     }
 
-    /* Alertas */
-    .alerts-columns{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-      gap:14px;
-      margin-top:8px;
+    /* ALERTAS RESUMIDAS */
+    .alerts-header{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:6px;
     }
 
-    .alerts-box{
+    .alert-summary-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:12px;
+    }
+
+    .alert-summary-card{
       background:var(--card-bg);
       border-radius:10px;
       border:1px solid var(--border);
       padding:10px 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
     }
 
-    .alerts-title{
+    .alert-title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+    }
+
+    .alert-title-main{
       display:flex;
       align-items:center;
       gap:6px;
-      margin:0 0 6px;
       font-size:15px;
       font-weight:600;
     }
 
-    .alerts-title span.badge{
+    .badge{
       font-size:11px;
-      padding:2px 6px;
+      padding:2px 8px;
       border-radius:999px;
       border:1px solid var(--border);
       color:var(--muted);
+      white-space:nowrap;
     }
 
     .badge-danger{
@@ -164,47 +198,96 @@
       border-color:var(--warning);
       color:var(--warning);
     }
+    .badge-soft{
+      border-color:var(--accent);
+      color:var(--accent);
+    }
 
     @keyframes blink {
       0%, 100% { opacity:1; }
-      50% { opacity:.35; }
+      50% { opacity:.3; }
     }
 
-    .alerts-table{
+    .alert-meta{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .alert-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:4px;
+    }
+
+    .btn{
+      border-radius:999px;
+      font-size:11px;
+      padding:4px 10px;
+      border:1px solid var(--border);
+      background:#111827;
+      color:var(--txt);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+    }
+    .btn:hover{
+      background:var(--hover);
+    }
+
+    .btn-primary{
+      border-color:var(--accent);
+      background:linear-gradient(135deg,#00b4d8,#0891b2);
+      color:#ecfeff;
+    }
+    .btn-primary:hover{
+      filter:brightness(1.05);
+    }
+
+    .mini-table{
       width:100%;
       border-collapse:collapse;
       font-size:12px;
+      margin-top:4px;
     }
 
-    .alerts-table th,
-    .alerts-table td{
-      padding:4px 6px;
+    .mini-table th,
+    .mini-table td{
+      padding:3px 4px;
       border-bottom:1px solid var(--border);
       text-align:left;
       white-space:nowrap;
     }
 
-    .alerts-table thead{
+    .mini-table thead{
       background:#111827;
     }
 
-    .alerts-table tbody tr:nth-child(even){
+    .mini-table tbody tr:nth-child(even){
       background:#111827;
     }
 
-    .link-btn{
+    .chip-severity{
       display:inline-flex;
-      padding:3px 8px;
+      align-items:center;
+      padding:1px 6px;
       border-radius:999px;
+      font-size:10px;
       border:1px solid var(--border);
-      font-size:11px;
-      text-decoration:none;
-      background:#111827;
-      color:var(--txt);
     }
-
-    .link-btn:hover{
-      background:var(--hover);
+    .chip-critical{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+    .chip-high{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+    .chip-info{
+      border-color:var(--accent);
+      color:var(--accent);
     }
 
     /* Tarjetas de navegación (como antes) */
@@ -246,6 +329,123 @@
       font-size:13px;
       color:var(--muted);
     }
+
+    /* DIALOGOS (ver todos) */
+    dialog::backdrop{
+      background:rgba(15,23,42,.85);
+    }
+    dialog{
+      border:none;
+      border-radius:14px;
+      background:#020617;
+      color:var(--txt);
+      max-width:900px;
+      width:min(96vw,900px);
+      padding:14px 16px 12px;
+    }
+    .dialog-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .dialog-title{
+      font-size:15px;
+      font-weight:600;
+    }
+    .dialog-sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .dialog-table-wrap{
+      max-height:420px;
+      overflow:auto;
+      border-radius:10px;
+      border:1px solid var(--border);
+    }
+    .dialog-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    .dialog-table th,
+    .dialog-table td{
+      padding:5px 6px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+      text-align:left;
+    }
+    .dialog-table thead{
+      background:#020617;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    .dialog-footer{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:8px;
+      gap:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* TOAST / NOTIFICACIÓN SUPERIOR */
+    .toast{
+      position:fixed;
+      top:14px;
+      right:16px;
+      background:#111827;
+      border-radius:999px;
+      border:1px solid var(--border);
+      padding:8px 12px;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 8px 24px rgba(0,0,0,.65);
+      z-index:50;
+      opacity:0;
+      transform:translateY(-8px);
+      pointer-events:none;
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+      pointer-events:auto;
+    }
+    .toast-icon{
+      font-size:16px;
+    }
+    .toast-msg-main{
+      font-weight:600;
+    }
+    .toast-msg-sub{
+      color:var(--muted);
+    }
+    .toast-close{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    @media (max-width:640px){
+      header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:8px;
+      }
+      .toast{
+        left:10px;
+        right:10px;
+        border-radius:12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -259,6 +459,16 @@
     </div>
   </div>
 </header>
+
+<!-- TOAST DE ALERTA GLOBAL -->
+<div id="toast" class="toast">
+  <div class="toast-icon">🚨</div>
+  <div>
+    <div class="toast-msg-main" id="toast-main">Atención metrológica requerida</div>
+    <div class="toast-msg-sub" id="toast-sub">Hay equipos que requieren calibración prioritaria.</div>
+  </div>
+  <button class="toast-close" id="toast-close">✕</button>
+</div>
 
 <main>
 
@@ -308,49 +518,76 @@
     </div>
   </section>
 
-  <!-- ALERTAS -->
+  <!-- ALERTAS COMPACTAS -->
   <section class="alerts-section">
-    <h2 class="section-title">Alertas de calibración</h2>
-    <p class="muted">Estados críticos detectados automáticamente.</p>
+    <div class="alerts-header">
+      <div>
+        <h2 class="section-title">Alertas de calibración</h2>
+        <p class="muted">Vista compacta de lo realmente crítico. Detalle completo disponible bajo demanda.</p>
+      </div>
+      <div class="badge badge-soft" id="badge-resumen-global">Sin alertas críticas</div>
+    </div>
 
-    <div class="alerts-columns">
+    <div class="alert-summary-grid">
 
-      <div class="alerts-box">
-        <h3 class="alerts-title">
-          ❌ Fuera de calibración
-          <span class="badge badge-danger" id="badge-fuera-count">0</span>
-        </h3>
+      <!-- Fuera de calibración -->
+      <div class="alert-summary-card">
+        <div class="alert-title-row">
+          <div class="alert-title-main">
+            <span>❌ Fuera de calibración</span>
+            <span class="badge badge-danger" id="badge-fuera-count">0</span>
+          </div>
+        </div>
+        <div class="alert-meta" id="meta-fuera">
+          No hay instrumentos fuera de calibración.
+        </div>
 
-        <table class="alerts-table">
+        <table class="mini-table" id="table-fuera-top" style="display:none;">
           <thead>
             <tr>
               <th>Código</th>
               <th>Ubicación</th>
-              <th>Próxima</th>
-              <th></th>
+              <th>Vencido (días)</th>
+              <th>Severidad</th>
             </tr>
           </thead>
-          <tbody id="tbody-fuera"></tbody>
+          <tbody id="tbody-fuera-top"></tbody>
         </table>
+
+        <div class="alert-actions">
+          <button class="btn btn-primary" id="btn-fuera-ver-todos" style="display:none;">Ver todos</button>
+          <a href="TMP_Calibraciones_Lab.html" class="btn">Ir a Calibraciones Lab</a>
+        </div>
       </div>
 
-      <div class="alerts-box">
-        <h3 class="alerts-title">
-          ⚠️ Próximos (&lt; 30 días)
-          <span class="badge badge-warning" id="badge-prox-count">0</span>
-        </h3>
+      <!-- Próximos a calibrar -->
+      <div class="alert-summary-card">
+        <div class="alert-title-row">
+          <div class="alert-title-main">
+            <span>⚠️ Próximos (&lt; 30 días)</span>
+            <span class="badge badge-warning" id="badge-prox-count">0</span>
+          </div>
+        </div>
+        <div class="alert-meta" id="meta-prox">
+          No hay instrumentos con calibración próxima en los próximos 30 días.
+        </div>
 
-        <table class="alerts-table">
+        <table class="mini-table" id="table-prox-top" style="display:none;">
           <thead>
             <tr>
               <th>Código</th>
               <th>Ubicación</th>
-              <th>Próxima</th>
-              <th></th>
+              <th>Faltan (días)</th>
+              <th>Severidad</th>
             </tr>
           </thead>
-          <tbody id="tbody-prox"></tbody>
+          <tbody id="tbody-prox-top"></tbody>
         </table>
+
+        <div class="alert-actions">
+          <button class="btn btn-primary" id="btn-prox-ver-todos" style="display:none;">Ver todos</button>
+          <a href="TMP_Calibraciones_Lab.html" class="btn">Planificar calibración</a>
+        </div>
       </div>
 
     </div>
@@ -408,17 +645,68 @@
 
 </main>
 
-<!-- CARGAR SUPABASE -->
+<!-- DIALOGOS: LISTA COMPLETA FUERA / PRÓXIMOS -->
+<dialog id="dialog-fuera">
+  <div class="dialog-header">
+    <div>
+      <div class="dialog-title">Equipos fuera de calibración</div>
+      <div class="dialog-sub" id="dialog-fuera-sub">Listado completo de instrumentos vencidos.</div>
+    </div>
+    <button class="btn" id="dialog-fuera-cerrar">Cerrar</button>
+  </div>
+  <div class="dialog-table-wrap">
+    <table class="dialog-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Ubicación</th>
+          <th>Próxima calibración</th>
+          <th>Vencido (días)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-fuera-modal"></tbody>
+    </table>
+  </div>
+  <div class="dialog-footer">
+    <span>Revisa estos equipos con prioridad. Puedes abrir su ficha desde la columna “Ver”.</span>
+  </div>
+</dialog>
+
+<dialog id="dialog-prox">
+  <div class="dialog-header">
+    <div>
+      <div class="dialog-title">Equipos próximos a calibrar (&lt; 30 días)</div>
+      <div class="dialog-sub" id="dialog-prox-sub">Listado completo de instrumentos cuya calibración vence pronto.</div>
+    </div>
+    <button class="btn" id="dialog-prox-cerrar">Cerrar</button>
+  </div>
+  <div class="dialog-table-wrap">
+    <table class="dialog-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Ubicación</th>
+          <th>Próxima calibración</th>
+          <th>Faltan (días)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-prox-modal"></tbody>
+    </table>
+  </div>
+  <div class="dialog-footer">
+    <span>Úsalos para planificar el trabajo del laboratorio y evitar acumulaciones.</span>
+  </div>
+</dialog>
+
+<!-- CARGAR SUPABASE (ya lo tienes funcionando con config.mjs) -->
 <script type="module" src="config.mjs"></script>
 
 <script type="module">
   const supabase = window.supabase;
 
-  if (!supabase) {
-    console.error("Supabase no disponible en home.html");
-  }
-
-  // Referencias DOM (en módulos NO se crean variables globales por id)
+  // Helpers DOM
   const kpi_total          = document.getElementById("kpi-total");
   const kpi_uso            = document.getElementById("kpi-uso");
   const kpi_lab            = document.getElementById("kpi-lab");
@@ -426,12 +714,12 @@
   const kpi_proximos       = document.getElementById("kpi-proximos");
   const kpi_fuera          = document.getElementById("kpi-fuera");
 
-  const kpi_total_extra    = document.getElementById("kpi-total-extra");
-  const kpi_uso_extra      = document.getElementById("kpi-uso-extra");
-  const kpi_lab_extra      = document.getElementById("kpi-lab-extra");
+  const kpi_total_extra      = document.getElementById("kpi-total-extra");
+  const kpi_uso_extra        = document.getElementById("kpi-uso-extra");
+  const kpi_lab_extra        = document.getElementById("kpi-lab-extra");
   const kpi_calibrados_extra = document.getElementById("kpi-calibrados-extra");
-  const kpi_proximos_extra = document.getElementById("kpi-proximos-extra");
-  const kpi_fuera_extra    = document.getElementById("kpi-fuera-extra");
+  const kpi_proximos_extra   = document.getElementById("kpi-proximos-extra");
+  const kpi_fuera_extra      = document.getElementById("kpi-fuera-extra");
 
   const kpi_card_total = document.getElementById("kpi-card-total");
   const kpi_card_uso   = document.getElementById("kpi-card-uso");
@@ -440,11 +728,35 @@
   const kpi_card_prox  = document.getElementById("kpi-card-prox");
   const kpi_card_fuera = document.getElementById("kpi-card-fuera");
 
-  const tbody_fuera        = document.getElementById("tbody-fuera");
-  const tbody_prox         = document.getElementById("tbody-prox");
-  const badge_fuera_count  = document.getElementById("badge-fuera-count");
-  const badge_prox_count   = document.getElementById("badge-prox-count");
+  const badgeResumenGlobal = document.getElementById("badge-resumen-global");
 
+  const badge_fuera_count = document.getElementById("badge-fuera-count");
+  const badge_prox_count  = document.getElementById("badge-prox-count");
+
+  const meta_fuera = document.getElementById("meta-fuera");
+  const meta_prox  = document.getElementById("meta-prox");
+
+  const table_fuera_top = document.getElementById("table-fuera-top");
+  const table_prox_top  = document.getElementById("table-prox-top");
+  const tbody_fuera_top = document.getElementById("tbody-fuera-top");
+  const tbody_prox_top  = document.getElementById("tbody-prox-top");
+
+  const btn_fuera_ver_todos = document.getElementById("btn-fuera-ver-todos");
+  const btn_prox_ver_todos  = document.getElementById("btn-prox-ver-todos");
+
+  const dlgFuera = document.getElementById("dialog-fuera");
+  const dlgProx  = document.getElementById("dialog-prox");
+  const dlgFueraCerrar = document.getElementById("dialog-fuera-cerrar");
+  const dlgProxCerrar  = document.getElementById("dialog-prox-cerrar");
+  const tbody_fuera_modal = document.getElementById("tbody-fuera-modal");
+  const tbody_prox_modal  = document.getElementById("tbody-prox-modal");
+
+  const toast      = document.getElementById("toast");
+  const toastMain  = document.getElementById("toast-main");
+  const toastSub   = document.getElementById("toast-sub");
+  const toastClose = document.getElementById("toast-close");
+
+  // Utilidades
   function parseDate(str) {
     if (!str) return null;
     const d = new Date(str);
@@ -453,7 +765,15 @@
 
   function formatDate(d){
     if (!d) return "—";
-    return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth() + 1).padStart(2,"0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
+
+  function daysBetween(a,b){
+    const MS = 86400000;
+    return Math.floor((a - b)/MS);
   }
 
   function animateCard(el){
@@ -467,8 +787,40 @@
     return `${Math.round((part/total)*100)}%`;
   }
 
+  function severityChip(days, mode){
+    // mode: "vencido" (negativo) o "futuro"
+    let cls = "chip-severity chip-info";
+    let txt = "Info";
+
+    if (mode === "vencido"){
+      if (days > 60){ cls = "chip-severity chip-critical"; txt = "CRÍTICO"; }
+      else if (days > 30){ cls = "chip-severity chip-high"; txt = "ALTA"; }
+      else { cls = "chip-severity chip-info"; txt = "MEDIA"; }
+    } else {
+      if (days <= 7){ cls = "chip-severity chip-high"; txt = "ALTA"; }
+      else if (days <= 15){ cls = "chip-severity chip-info"; txt = "MEDIA"; }
+      else { cls = "chip-severity chip-info"; txt = "BAJA"; }
+    }
+    return `<span class="${cls}">${txt}</span>`;
+  }
+
+  function showToast(main, sub){
+    toastMain.textContent = main;
+    toastSub.textContent  = sub;
+    toast.classList.add("show");
+    setTimeout(()=>toast.classList.remove("show"), 10000);
+  }
+
+  toastClose.addEventListener("click", () => {
+    toast.classList.remove("show");
+  });
+
+  // LÓGICA PRINCIPAL
   async function cargarDashboard() {
-    if (!supabase) return;
+    if (!supabase) {
+      console.error("Supabase no disponible en home.html");
+      return;
+    }
 
     const { data: instrumentos, error } = await supabase
       .from("instrumentos")
@@ -481,8 +833,7 @@
 
     const total = instrumentos.length;
     const hoy = new Date();
-    const mas30 = new Date();
-    mas30.setDate(hoy.getDate() + 30);
+    const mas30 = new Date(hoy.getTime() + 30*86400000);
 
     let enLab = 0;
     let enUso = 0;
@@ -531,45 +882,142 @@
     animateCard(kpi_card_prox);
     animateCard(kpi_card_fuera);
 
-    // Tablas
-    tbody_fuera.innerHTML = fueraLista
-      .sort((a,b) => new Date(a.proxima_calibracion) - new Date(b.proxima_calibracion))
-      .map(i => `
-        <tr>
-          <td>${i.codigo || ""}</td>
-          <td>${i.ubicacion_actual || ""}</td>
-          <td>${formatDate(parseDate(i.proxima_calibracion))}</td>
-          <td>
-            <a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(i.codigo || "")}">
-              Ver
-            </a>
-          </td>
-        </tr>
-      `)
-      .join("");
+    // Resumen global de alertas
+    const totalAlertas = fueraLista.length + proxLista.length;
+    if (fueraLista.length > 0) {
+      badgeResumenGlobal.textContent = `⚠ ${totalAlertas} equipos requieren atención (prioridad fuera de calibración)`;
+      badgeResumenGlobal.classList.remove("badge-soft");
+      badgeResumenGlobal.classList.add("badge-danger");
+      showToast(
+        "Equipos fuera de calibración",
+        `Tienes ${fueraLista.length} equipos vencidos y ${proxLista.length} próximos.`
+      );
+    } else if (proxLista.length > 0) {
+      badgeResumenGlobal.textContent = `⏳ ${proxLista.length} equipos próximos a calibrar (<30 días)`;
+      badgeResumenGlobal.classList.remove("badge-soft");
+      badgeResumenGlobal.classList.add("badge-warning");
+    } else {
+      badgeResumenGlobal.textContent = "Sin equipos vencidos ni próximos en 30 días";
+      badgeResumenGlobal.classList.add("badge-soft");
+    }
 
-    tbody_prox.innerHTML = proxLista
-      .sort((a,b) => new Date(a.proxima_calibracion) - new Date(b.proxima_calibracion))
-      .map(i => `
-        <tr>
-          <td>${i.codigo || ""}</td>
-          <td>${i.ubicacion_actual || ""}</td>
-          <td>${formatDate(parseDate(i.proxima_calibracion))}</td>
-          <td>
-            <a class="link-btn" href="alta_instrumento.html?codigo=${encodeURIComponent(i.codigo || "")}">
-              Ver
-            </a>
-          </td>
-        </tr>
-      `)
-      .join("");
-
+    // ---- FUERA: TOP + MODAL ----
     badge_fuera_count.textContent = fueraLista.length;
-    badge_prox_count.textContent  = proxLista.length;
+    if (fueraLista.length === 0) {
+      meta_fuera.textContent = "No hay instrumentos fuera de calibración. Mantén esta situación bajo control.";
+      table_fuera_top.style.display = "none";
+      btn_fuera_ver_todos.style.display = "none";
+    } else {
+      // Ordenar por más vencidos primero
+      const ordenados = [...fueraLista].sort((a,b) => {
+        const da = parseDate(a.proxima_calibracion);
+        const db = parseDate(b.proxima_calibracion);
+        return da - db; // más antiguo (más vencido) primero
+      });
+
+      const MAX_TOP = 3;
+      const top = ordenados.slice(0, MAX_TOP);
+      const masVencido = top[0] ? daysBetween(hoy, parseDate(top[0].proxima_calibracion)) : 0;
+
+      meta_fuera.textContent = `${fueraLista.length} equipos vencidos. Mostrando los ${top.length} más críticos (más días de retraso).`;
+      table_fuera_top.style.display = "table";
+      btn_fuera_ver_todos.style.display = "inline-flex";
+
+      tbody_fuera_top.innerHTML = top.map(inst => {
+        const dProx = parseDate(inst.proxima_calibracion);
+        const dias = dProx ? daysBetween(hoy, dProx) : 0;
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${dias}</td>
+            <td>${severityChip(dias,"vencido")}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Modal completo
+      tbody_fuera_modal.innerHTML = ordenados.map(inst => {
+        const dProx = parseDate(inst.proxima_calibracion);
+        const dias = dProx ? daysBetween(hoy, dProx) : 0;
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${formatDate(dProx)}</td>
+            <td>${dias}</td>
+            <td>
+              <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || "")}">
+                Ver ficha
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // ---- PRÓXIMOS: TOP + MODAL ----
+    badge_prox_count.textContent = proxLista.length;
+    if (proxLista.length === 0) {
+      meta_prox.textContent = "No hay instrumentos cuya calibración venza en los próximos 30 días.";
+      table_prox_top.style.display = "none";
+      btn_prox_ver_todos.style.display = "none";
+    } else {
+      const ordenadosProx = [...proxLista].sort((a,b) => {
+        const da = parseDate(a.proxima_calibracion);
+        const db = parseDate(b.proxima_calibracion);
+        return da - db; // más cercano primero
+      });
+
+      const MAX_TOP = 3;
+      const topProx = ordenadosProx.slice(0, MAX_TOP);
+
+      meta_prox.textContent = `${proxLista.length} equipos con calibración próxima. Mostrando los ${topProx.length} más urgentes.`;
+      table_prox_top.style.display = "table";
+      btn_prox_ver_todos.style.display = "inline-flex";
+
+      tbody_prox_top.innerHTML = topProx.map(inst => {
+        const dProx = parseDate(inst.proxima_calibracion);
+        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0; // días que faltan (positivo)
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${dias}</td>
+            <td>${severityChip(dias,"futuro")}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Modal completo
+      tbody_prox_modal.innerHTML = ordenadosProx.map(inst => {
+        const dProx = parseDate(inst.proxima_calibracion);
+        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0;
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${formatDate(dProx)}</td>
+            <td>${dias}</td>
+            <td>
+              <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || "")}">
+                Ver ficha
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
   }
 
+  // Eventos diálogos
+  btn_fuera_ver_todos.addEventListener("click", () => dlgFuera.showModal());
+  btn_prox_ver_todos.addEventListener("click", () => dlgProx.showModal());
+  dlgFueraCerrar.addEventListener("click", () => dlgFuera.close());
+  dlgProxCerrar.addEventListener("click", () => dlgProx.close());
+
+  // Cargar al inicio + refresco periódico
   cargarDashboard();
-  // Auto-refresco cada 30s (puedes subirlo/bajarlo)
   setInterval(cargarDashboard, 30000);
 </script>
 
