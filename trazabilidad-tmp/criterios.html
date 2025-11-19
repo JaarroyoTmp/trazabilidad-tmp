@@ -2,81 +2,319 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>TMP · Criterios de aceptación metrológica</title>
+  <title>TMP · Criterios de aceptación y uso metrológico</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="img/tmp-quality.png" />
+
   <style>
+    :root{
+      --bg:#020617;
+      --panel:#0b1120;
+      --panel-soft:#020617;
+      --border:#1f2937;
+      --txt:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#38bdf8;
+      --accent-soft:#0f172a;
+      --ok:#22c55e;
+      --warn:#facc15;
+      --bad:#f97373;
+      --info:#38bdf8;
+    }
+
+    *{box-sizing:border-box;}
+
     body{
       margin:0;
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:#0d1117;
-      color:#f0f6fc;
+      background:
+        radial-gradient(circle at 0 0, rgba(56,189,248,.25) 0, transparent 55%),
+        radial-gradient(circle at 100% 0, rgba(52,211,153,.18) 0, transparent 50%),
+        linear-gradient(to bottom,#020617,#020617 220px,#020617);
+      color:var(--txt);
     }
+
     header{
       display:flex;
       justify-content:space-between;
       align-items:center;
+      gap:12px;
       padding:14px 18px;
-      background:#161b22;
-      border-bottom:1px solid #30363d;
+      background:rgba(15,23,42,.96);
+      border-bottom:1px solid var(--border);
+      backdrop-filter:blur(10px);
+      position:sticky;
+      top:0;
+      z-index:10;
     }
+
     .brand{
       display:flex;
       align-items:center;
       gap:10px;
     }
-    .brand img{height:42px;}
-    .brand h1{margin:0;font-size:18px;}
-    .brand span{font-size:12px;color:#8b949e;}
+    .brand img{
+      height:42px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.03em;
+    }
+    .brand span{
+      font-size:12px;
+      color:var(--muted);
+    }
+
     .btn{
       border-radius:999px;
-      border:1px solid #30363d;
-      background:transparent;
-      color:#f0f6fc;
+      border:1px solid #1d4ed8;
+      background:radial-gradient(circle at 0 0,#38bdf8 0,transparent 55%);
+      background-color:#0b1120;
+      color:#e5f2ff;
       padding:8px 14px;
       font-size:13px;
       cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      box-shadow:0 0 0 1px rgba(37,99,235,.4),0 12px 25px rgba(15,23,42,.9);
     }
-    .btn:hover{background:#1f2937;}
+    .btn:hover{
+      filter:brightness(1.04);
+      transform:translateY(-1px);
+    }
+
     main{
-      max-width:900px;
+      max-width:950px;
       margin:20px auto 40px;
-      padding:0 16px;
+      padding:0 16px 40px;
+      display:flex;
+      flex-direction:row;
+      gap:16px;
     }
+
+    /* Índice lateral */
+    .toc{
+      flex:0 0 230px;
+      position:sticky;
+      top:78px;
+      align-self:flex-start;
+      background:rgba(15,23,42,.96);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:12px 12px 10px;
+      font-size:13px;
+      box-shadow:0 16px 40px rgba(0,0,0,.7);
+    }
+    .toc-title{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .toc ul{
+      list-style:none;
+      padding-left:0;
+      margin:0;
+    }
+    .toc li{
+      margin:3px 0;
+    }
+    .toc a{
+      color:var(--muted);
+      text-decoration:none;
+      font-size:13px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 4px;
+      border-radius:8px;
+    }
+    .toc a:hover{
+      background:#020617;
+      color:var(--accent);
+    }
+    .toc a span.dot{
+      width:6px;height:6px;border-radius:999px;
+      background:#1f2937;
+    }
+
+    @media(max-width:860px){
+      main{flex-direction:column;}
+      .toc{position:static;max-width:100%;order:-1;}
+    }
+
+    /* Secciones */
+    .content{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
     section{
-      background:#161b22;
+      background:rgba(15,23,42,.96);
       border-radius:16px;
-      border:1px solid #30363d;
-      padding:18px 18px 16px;
-      margin-bottom:16px;
+      border:1px solid var(--border);
+      padding:18px 18px 14px;
+      box-shadow:0 16px 40px rgba(0,0,0,.65);
     }
+
     h2{
-      margin:0 0 10px;
+      margin:0 0 8px;
       font-size:17px;
-      color:#58a6ff;
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    h2 span.idx{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid #1d4ed8;
+      background:#020617;
+      color:#bfdbfe;
+      text-transform:uppercase;
+      letter-spacing:.12em;
     }
     h3{
       margin:14px 0 6px;
       font-size:15px;
-      color:#e2e8f0;
+      color:#e5e7eb;
     }
-    p{margin:4px 0 8px;font-size:14px;color:#c9d1d9;}
-    ul{margin:4px 0 8px 18px;font-size:14px;color:#c9d1d9;}
+    p{
+      margin:4px 0 8px;
+      font-size:14px;
+      color:#d1d5db;
+      line-height:1.45;
+    }
+    ul{
+      margin:4px 0 8px 20px;
+      font-size:14px;
+      color:#d1d5db;
+    }
     li{margin-bottom:3px;}
+
     .tag{
       display:inline-flex;
       align-items:center;
       gap:6px;
       padding:3px 10px;
       border-radius:999px;
-      border:1px solid #30363d;
+      border:1px solid #1f2937;
       font-size:11px;
-      color:#8b949e;
-      background:#0d1117;
+      color:#9ca3af;
+      background:#020617;
+      white-space:nowrap;
     }
-    .pill-ok{border-color:#22c55e;color:#bbf7d0;}
-    .pill-bad{border-color:#ef4444;color:#fecaca;}
-    .muted{font-size:12px;color:#8b949e;margin-top:6px;}
+    .pill-ok{
+      border-color:var(--ok);
+      color:#bbf7d0;
+      background:rgba(22,163,74,.12);
+    }
+    .pill-warn{
+      border-color:var(--warn);
+      color:#fef9c3;
+      background:rgba(234,179,8,.12);
+    }
+    .pill-bad{
+      border-color:var(--bad);
+      color:#fee2e2;
+      background:rgba(248,113,113,.12);
+    }
+    .pill-info{
+      border-color:var(--info);
+      color:#bfdbfe;
+      background:rgba(56,189,248,.08);
+    }
+
+    .muted{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    .callout{
+      border-radius:12px;
+      padding:9px 10px;
+      border:1px solid #1e293b;
+      background:rgba(15,23,42,.9);
+      font-size:13px;
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      margin:6px 0 4px;
+    }
+    .callout-icon{
+      font-size:15px;
+      margin-top:1px;
+    }
+
+    .callout.ok{
+      border-color:#15803d;
+      background:rgba(22,163,74,.12);
+      color:#bbf7d0;
+    }
+    .callout.warn{
+      border-color:#ca8a04;
+      background:rgba(234,179,8,.1);
+      color:#fef3c7;
+    }
+    .callout.bad{
+      border-color:#b91c1c;
+      background:rgba(248,113,113,.1);
+      color:#fee2e2;
+    }
+    .callout.info{
+      border-color:#0369a1;
+      background:rgba(37,99,235,.08);
+      color:#bfdbfe;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin:4px 0 2px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      margin:6px 0 4px;
+    }
+    th,td{
+      padding:6px 6px;
+      border-bottom:1px solid #1f2937;
+      text-align:left;
+      white-space:nowrap;
+    }
+    th{
+      background:#020617;
+      color:#9ca3af;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    tr:nth-child(even) td{
+      background:#020617;
+    }
+    code{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:12px;
+      background:#020617;
+      padding:2px 4px;
+      border-radius:6px;
+      border:1px solid #1f2937;
+    }
+
+    .status-bad{color:#fecaca;}
+    .status-ok{color:#bbf7d0;}
+    .status-warn{color:#fef9c3;}
   </style>
 </head>
 <body>
@@ -85,101 +323,455 @@
   <div class="brand">
     <img src="img/tmp-quality.png" alt="TMP">
     <div>
-      <h1>Criterios TMP de aceptación metrológica</h1>
-      <span>Equipos de medición · Calibración interna y externa</span>
+      <h1>Sistema metrológico TMP · Criterios de aceptación</h1>
+      <span>Calibración, aptitud para uso y relación con tolerancias</span>
     </div>
   </div>
-  <button class="btn" onclick="window.location.href='home.html'">🏠 Volver al panel</button>
+  <button class="btn" onclick="window.location.href='home.html'">
+    🏠 Volver al panel
+  </button>
 </header>
 
 <main>
 
-  <section>
-    <h2>1. Alcance de aplicación</h2>
-    <p>
-      Estos criterios se aplican a todos los instrumentos de medida utilizados en
-      <b>Talleres Mecánicos Paramio</b> para verificación, ajuste o control de producto,
-      tanto si se calibran internamente como externamente.
-    </p>
+  <!-- ÍNDICE LATERAL -->
+  <aside class="toc">
+    <div class="toc-title">Índice rápido</div>
     <ul>
-      <li>Instrumentos de control en línea (pasa/no pasa, galgas, tampones, etc.).</li>
-      <li>Instrumentos de medida dimensional (pie de rey, micrómetros, relojes comparadores...).</li>
-      <li>Patrones de trabajo y patrones de referencia.</li>
-      <li>Equipos de laboratorio de calibración interna.</li>
+      <li><a href="#s1"><span class="dot"></span>1. Propósito y alcance</a></li>
+      <li><a href="#s2"><span class="dot"></span>2. Marco normativo y definiciones</a></li>
+      <li><a href="#s3"><span class="dot"></span>3. Calibración interna TMP</a></li>
+      <li><a href="#s4"><span class="dot"></span>4. Calibración externa</a></li>
+      <li><a href="#s5"><span class="dot"></span>5. Adecuación a la tolerancia (4:1 / 10:1)</a></li>
+      <li><a href="#s6"><span class="dot"></span>6. Criterios por tipo de instrumento</a></li>
+      <li><a href="#s7"><span class="dot"></span>7. Estados metrológicos TMP</a></li>
+      <li><a href="#s8"><span class="dot"></span>8. Equipos NO APTOS y trazabilidad</a></li>
     </ul>
-  </section>
+  </aside>
 
-  <section>
-    <h2>2. Calibración interna · Criterios de aceptación</h2>
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="content">
 
-    <h3>2.1 Condiciones generales</h3>
-    <ul>
-      <li>El instrumento debe estar identificado con código TMP y estado de calibración.</li>
-      <li>Se compara frente a patrones internos con trazabilidad vigente y conocida.</li>
-      <li>Se aplican procedimientos internos aprobados (instrucciones de calibración TMP).</li>
-    </ul>
+    <!-- 1. Propósito y alcance -->
+    <section id="s1">
+      <h2><span class="idx">1</span> Propósito y alcance</h2>
+      <p>
+        Este documento define el <b>sistema metrológico de Talleres Mecánicos Paramio (TMP)</b>:
+        criterios de calibración, aceptación y uso de los instrumentos de medida, así como su relación
+        con las tolerancias de los productos fabricados.
+      </p>
+      <p>
+        Aplica a todos los equipos de medida y control utilizados para:
+      </p>
+      <ul>
+        <li>Verificación y aceptación de producto frente a plano / especificación.</li>
+        <li>Ajuste de procesos en taller de mecanizado.</li>
+        <li>Ensayos y medidas en el laboratorio interno TMP.</li>
+        <li>Patrones de trabajo y patrones de referencia.</li>
+      </ul>
 
-    <h3>2.2 Criterio de aceptación metrológica</h3>
-    <p>Se considera el equipo <span class="tag pill-ok">APTO</span> cuando se cumpla:</p>
-    <ul>
-      <li>|Error observado| ≤ Tolerancia de calibración establecida para la magnitud y rango.</li>
-      <li>La deriva respecto a calibraciones anteriores está dentro de los límites definidos.</li>
-      <li>No se detectan daños físicos que afecten a la medición.</li>
-    </ul>
-    <p>Se considera el equipo <span class="tag pill-bad">NO APTO</span> cuando:</p>
-    <ul>
-      <li>|Error observado| &gt; Tolerancia de calibración.</li>
-      <li>Presenta histéresis o repetibilidad fuera de límite.</li>
-      <li>No cumple requisitos de linealidad, resolución o juego mecánico.»</li>
-    </ul>
+      <div class="callout info">
+        <div class="callout-icon">ℹ️</div>
+        <div>
+          <b>Idea clave:</b>  
+          <br>Primero se verifica que el equipo está <b>correctamente calibrado</b> (interna o externamente),
+          y <b>después</b> se decide si es <b>adecuado para la tolerancia</b> del producto donde se usará.
+        </div>
+      </div>
+    </section>
 
-    <h3>2.3 Acciones en caso de NO APTO</h3>
-    <ul>
-      <li>Bloquear el equipo (etiqueta roja / fuera de servicio).</li>
-      <li>Informar a Calidad y/o Producción de los posibles productos afectados.</li>
-      <li>Evaluar necesidad de reparación, ajuste o baja técnica.</li>
-    </ul>
-  </section>
+    <!-- 2. Marco normativo y definiciones -->
+    <section id="s2">
+      <h2><span class="idx">2</span> Marco normativo y definiciones básicas</h2>
 
-  <section>
-    <h2>3. Calibración externa · Criterios de aceptación</h2>
+      <h3>2.1 Referencias</h3>
+      <p>El sistema metrológico TMP toma como referencia, entre otras:</p>
+      <ul>
+        <li>Requisitos de gestión de la medición de sistemas de calidad (ej. ISO 9001).</li>
+        <li>Buenas prácticas de laboratorios de calibración (ej. ISO/IEC 17025).</li>
+        <li>Recomendaciones de gestión de equipos de medida (ej. ISO 10012, VIM).</li>
+        <li>Especificaciones de clientes y normas internas de TMP.</li>
+      </ul>
 
-    <h3>3.1 Requisitos del proveedor de calibración</h3>
-    <ul>
-      <li>Laboratorio acreditado o evaluado según ISO/IEC 17025 cuando aplique.</li>
-      <li>Certificados con trazabilidad a patrones nacionales/internacionales.</li>
-      <li>Especificación de incertidumbre expandida y condiciones de calibración.</li>
-    </ul>
+      <h3>2.2 Conceptos utilizados en este documento</h3>
+      <ul>
+        <li><b>Error de indicación</b>: diferencia entre el valor indicado por el instrumento y el valor
+          de referencia del patrón.</li>
+        <li><b>Incertidumbre de medida</b>: parámetro que caracteriza la dispersión de valores atribuidos
+          a un mensurando. En certificados se expresa normalmente como
+          <code>U (k = 2)</code> (95 % aprox.).</li>
+        <li><b>Tolerancia del producto (Tpieza)</b>: campo de aceptación en plano (ej. 20,00 ± 0,01 mm → T = 0,02 mm).</li>
+        <li><b>Capacidad del instrumento</b>: aptitud del equipo, considerando su error e incertidumbre,
+          para decidir aceptación/rechazo de pieza sin comprometer la calidad.</li>
+        <li><b>Relación instrumento / tolerancia</b>: cociente entre la tolerancia de pieza y la
+          incertidumbre o error máximo permitido del instrumento.</li>
+      </ul>
 
-    <h3>3.2 Criterio de aceptación del equipo</h3>
-    <p>El instrumento se acepta cuando en el certificado externo:</p>
-    <ul>
-      <li>Los resultados están dentro de la tolerancia definida por TMP.</li>
-      <li>No existen observaciones restrictivas (ej. “uso limitado”, “solo indicativo”).</li>
-      <li>La incertidumbre del laboratorio es adecuada al uso previsto del equipo.</li>
-    </ul>
+      <div class="callout info">
+        <div class="callout-icon">📏</div>
+        <div>
+          A efectos prácticos, en TMP se utilizan reglas sencillas para relacionar
+          <b>tolerancia de pieza</b> e <b>incertidumbre / error del instrumento</b> (reglas 4:1, 5:1, 10:1).
+        </div>
+      </div>
+    </section>
 
-    <h3>3.3 Revisión de certificados</h3>
-    <ul>
-      <li>Calidad revisa cada certificado y registra el estado final del equipo.</li>
-      <li>Se actualiza el estado en la app de trazabilidad (APTO / NO APTO / Baja técnica).</li>
-    </ul>
-  </section>
+    <!-- 3. Calibración interna -->
+    <section id="s3">
+      <h2><span class="idx">3</span> Calibración interna TMP · Criterios de aceptación</h2>
 
-  <section>
-    <h2>4. Estados permitidos de equipo</h2>
-    <ul>
-      <li><span class="tag pill-ok">EN CALIBRACIÓN / APTO</span>: puede utilizarse para liberación de producto.</li>
-      <li><span class="tag">PRÓXIMA CALIBRACIÓN</span>: dentro de plazo, pero cercano al vencimiento.</li>
-      <li><span class="tag pill-bad">FUERA DE CALIBRACIÓN</span>: bloqueado hasta nueva calibración.</li>
-      <li><span class="tag pill-bad">BAJA TÉCNICA</span>: retirado definitivamente del sistema.</li>
-    </ul>
-    <p class="muted">
-      Puedes adaptar textos y valores (tolerancias, estados, referencias a normas, etc.)
-      según los procedimientos internos y las exigencias del cliente / auditoría.
-    </p>
-  </section>
+      <h3>3.1 Condiciones generales</h3>
+      <ul>
+        <li>El instrumento debe estar <b>identificado</b> con:
+          código TMP, descripción y estado de calibración.</li>
+        <li>Se calibra contra <b>patrones internos</b> con trazabilidad vigente
+          (certificados en plazo y aceptados).</li>
+        <li>Se siguen instrucciones internas de calibración TMP
+          (puntos de medida, procedimiento, condiciones ambientales, etc.).</li>
+        <li>Los resultados se registran en el sistema TMP y se emite
+          <b>informe o ficha de calibración interno</b>.</li>
+      </ul>
 
+      <h3>3.2 Criterio de aceptación metrológica (calibración interna)</h3>
+      <p>
+        Un instrumento se considera <span class="tag pill-ok">APTO (calibración interna)</span> cuando:
+      </p>
+      <ul>
+        <li>En todos los puntos ensayados se cumple:
+          <br><code>|Error observado| ≤ Error máximo permitido (EMP TMP)</code></li>
+        <li>La <b>deriva</b> respecto a la calibración anterior está dentro de un límite definido
+          (ejemplo típico: ≤ 70 % del EMP o según criterio interno TMP).</li>
+        <li>La repetibilidad e histéresis están dentro de los límites fijados en el procedimiento.</li>
+        <li>No se observan daños mecánicos, holguras o defectos que comprometan la medida.</li>
+      </ul>
+
+      <p>
+        Se considera <span class="tag pill-bad">NO APTO (calibración interna)</span> cuando:
+      </p>
+      <ul>
+        <li>En algún punto de calibración:
+          <br><code>|Error observado| &gt; EMP TMP</code></li>
+        <li>La deriva es superior al límite establecido o se observa
+          comportamiento inestable (saltos, holguras, histéresis excesiva).</li>
+        <li>Se detectan golpes, deterioro o cualquier defecto que pueda
+          afectar al uso en producción.</li>
+      </ul>
+
+      <h3>3.3 Acciones en caso de NO APTO (calibración interna)</h3>
+      <ul>
+        <li>Marcar el equipo como
+          <span class="tag pill-bad">FUERA DE CALIBRACIÓN / NO UTILIZAR</span>
+          en la app y físicamente.</li>
+        <li>Evaluar:
+          <ul>
+            <li>Ajuste / reparación y nueva calibración.</li>
+            <li>Restricción de uso a determinados rangos (si se justifica).</li>
+            <li><b>Baja técnica</b> si no es viable la recuperación.</li>
+          </ul>
+        </li>
+        <li>Analizar si es necesario revisar producto medido anteriormente
+          con ese equipo (ver sección 8).</li>
+      </ul>
+    </section>
+
+    <!-- 4. Calibración externa -->
+    <section id="s4">
+      <h2><span class="idx">4</span> Calibración externa · Revisión de certificados</h2>
+
+      <h3>4.1 Requisitos del laboratorio externo</h3>
+      <ul>
+        <li>Laboratorio acreditado o evaluado según criterios equivalentes
+          (ej. ISO/IEC 17025) cuando aplique.</li>
+        <li>Certificados con:
+          <ul>
+            <li>Identificación del instrumento (código TMP si es posible).</li>
+            <li><b>Resultados de calibración</b> (errores) por punto.</li>
+            <li><b>Incertidumbre expandida</b> y factor de cobertura <code>k</code>.</li>
+            <li>Condiciones de calibración y trazabilidad declarada.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>4.2 Criterio de aceptación del instrumento (certificado externo)</h3>
+      <p>
+        Al recibir un certificado externo, Calidad / Metrología realiza una
+        revisión y decide el estado TMP:
+      </p>
+      <div class="pill-row">
+        <span class="tag pill-ok">Certificado aceptado → Equipo APTO</span>
+        <span class="tag pill-warn">Certificado aceptado con restricciones</span>
+        <span class="tag pill-bad">Certificado NO aceptado → Equipo NO APTO</span>
+      </div>
+
+      <p>Se acepta el equipo cuando se cumple:</p>
+      <ul>
+        <li>Los errores declarados están dentro del <b>EMP TMP</b> para ese instrumento.</li>
+        <li>La incertidumbre del laboratorio es coherente con el uso previsto
+          (se revisa en el punto 5).</li>
+        <li>No existen observaciones limitantes del tipo:
+          “solo indicativo”, “no apto para aceptación de producto”, etc.</li>
+      </ul>
+
+      <p>No se acepta el equipo cuando:</p>
+      <ul>
+        <li>El certificado indica claramente que el instrumento <b>no es apto</b> para su uso normal.</li>
+        <li>Los errores están fuera de los límites internos TMP.</li>
+        <li>La incertidumbre es excesiva para las tolerancias donde se usa
+          (ver criterio 4:1 / 10:1 en sección 5).</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-icon">⚠️</div>
+        <div>
+          Un certificado externo puede estar técnicamente correcto,
+          pero el instrumento <b>no ser adecuado</b> para ciertas tolerancias exigentes.
+          En ese caso, se acepta la calibración pero se <b>restringe el uso</b> del equipo.
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Adecuación instrumento/tolerancia -->
+    <section id="s5">
+      <h2><span class="idx">5</span> Adecuación del instrumento a la tolerancia (4:1 / 10:1)</h2>
+
+      <h3>5.1 Regla general TMP</h3>
+      <p>
+        Además de estar calibrado, un equipo debe ser <b>adecuado a la tolerancia</b> del producto.
+        TMP adopta la siguiente regla general:
+      </p>
+
+      <table>
+        <thead>
+        <tr>
+          <th>Relación Tpieza / Uinstrumento</th>
+          <th>Criterio TMP</th>
+          <th>Uso recomendado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>&ge; 10 : 1</td>
+          <td><span class="status-ok">Óptimo</span></td>
+          <td>Uso sin restricciones para aceptación de producto.</td>
+        </tr>
+        <tr>
+          <td>entre 4 : 1 y 10 : 1</td>
+          <td><span class="status-warn">Aceptable</span></td>
+          <td>Uso permitido; considerar margen de seguridad y método de control.</td>
+        </tr>
+        <tr>
+          <td>&lt; 4 : 1</td>
+          <td><span class="status-bad">No recomendado</span></td>
+          <td>En principio NO apto para liberar producto; solo uso condicionado / ajustes.</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Donde:
+      </p>
+      <ul>
+        <li><b>Tpieza</b>: tolerancia total de la cota (ej. ±0,01 → T = 0,02 mm).</li>
+        <li><b>Uinstrumento</b>: incertidumbre expandida del sistema de medida
+          (calibración + métodos internos), aproximada por la incertidumbre del certificado
+          más el efecto de uso.</li>
+      </ul>
+
+      <h3>5.2 Ejemplo práctico TMP (dimensional)</h3>
+
+      <p>
+        Pieza con cota 20,00 ± 0,01 mm → <b>Tpieza = 0,02 mm</b>.
+      </p>
+      <ul>
+        <li>Micrómetro A: certificado con <b>U = 0,002 mm</b>  
+          → Tpieza / U = 0,02 / 0,002 = 10 → <b>Relación 10:1 (Óptimo)</b>.</li>
+        <li>Micrómetro B: certificado con <b>U = 0,005 mm</b>  
+          → Tpieza / U = 0,02 / 0,005 = 4 → <b>Relación 4:1 (Aceptable pero ajustado)</b>.</li>
+        <li>Pie de rey C: certificado con <b>U = 0,01 mm</b>  
+          → Tpieza / U = 0,02 / 0,01 = 2 → <b>Relación 2:1 (No recomendado para aceptación)</b>.</li>
+      </ul>
+
+      <div class="callout info">
+        <div class="callout-icon">🧠</div>
+        <div>
+          En TMP, para cotas críticas o piezas de cliente exigente,
+          se priorizarán relaciones cercanas a <b>10:1</b> y se evitará trabajar por debajo de <b>4:1</b>
+          salvo justificación explícita.
+        </div>
+      </div>
+
+      <h3>5.3 Uso condicionado</h3>
+      <p>
+        En algunos casos puede aceptarse un instrumento con relación <b>&lt; 4:1</b> siempre que:
+      </p>
+      <ul>
+        <li>Se utilice como <b>equipo de preajuste</b> o control no vinculante a liberación final.</li>
+        <li>Exista un <b>control reforzado</b> posterior con equipo más preciso
+          (por ejemplo en laboratorio).</li>
+        <li>Exista una <b>justificación documentada</b> y aceptada por Calidad / cliente.</li>
+      </ul>
+    </section>
+
+    <!-- 6. Criterios por tipo -->
+    <section id="s6">
+      <h2><span class="idx">6</span> Criterios por tipo de instrumento (orientativo TMP)</h2>
+
+      <h3>6.1 Instrumentos dimensionales en taller</h3>
+      <ul>
+        <li><b>Pies de rey</b>:
+          <ul>
+            <li>Uso general para tolerancias medias / amplias.</li>
+            <li>Evitar utilizarlos para decisiones finales de cotas muy ajustadas
+              (&lt; 0,02 mm) salvo confirmación con micrómetro.</li>
+          </ul>
+        </li>
+        <li><b>Micrómetros</b>:
+          <ul>
+            <li>Equipo preferente para tolerancias finas.</li>
+            <li>Se comprobará que la relación Tpieza / U es
+              &ge; 4:1 (ideal &ge; 10:1) para cotas críticas.</li>
+          </ul>
+        </li>
+        <li><b>Relojes comparadores, palpadores, etc.</b>:
+          <ul>
+            <li>Se utilizarán principalmente como comparadores respecto a un patrón o útil.</li>
+            <li>Importa tanto su resolución como su error y linealidad.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>6.2 Elementos P/NP, tampones, anillos, galgas</h3>
+      <ul>
+        <li>Se consideran <b>equipos de verificación directa de tolerancia</b>:
+          el fabricante define ya una parte del criterio.</li>
+        <li>La calibración interna/externa verificará la cota nominal y los desvíos
+          según plano de fabricación de la galga/tampón.</li>
+        <li>Si los desvíos de la galga están fuera de lo permitido,
+          el útil se marcará como <b>NO APTO</b> y no se utilizará para aceptar producto.</li>
+      </ul>
+
+      <h3>6.3 Llaves dinamométricas</h3>
+      <ul>
+        <li>Se define un campo de trabajo (por ejemplo 20–200 Nm).</li>
+        <li>El EMP TMP se fija como un porcentaje del valor (ej. ±4 %).</li>
+        <li>La relación tolerancia / incertidumbre se verificará en función
+          de la tolerancia exigida al par de apriete de la unión.</li>
+        <li>Para uniones críticas, se recomendará trabajar con llaves cuya discrepancia
+          máxima sea significativamente inferior a la tolerancia de par permitida por el cliente.</li>
+      </ul>
+
+      <h3>6.4 Balanzas / básculas</h3>
+      <ul>
+        <li>Se verifica:
+          <ul>
+            <li>Error en varios puntos de carga.</li>
+            <li>Repetibilidad en cargas representativas.</li>
+          </ul>
+        </li>
+        <li>La relación Tpieza / U se evaluará en función de la tolerancia de masa
+          permitida en plano o especificación (ej. piezas por peso).</li>
+        <li>Para pesadas críticas, se utilizarán equipos con resolución e incertidumbre
+          claramente por debajo de la tolerancia de producto.</li>
+      </ul>
+
+      <h3>6.5 Durometros / equipos de dureza</h3>
+      <ul>
+        <li>La aceptación se basará en:
+          <ul>
+            <li>Resultados con bloque patrón (o bloques) dentro de tolerancia.</li>
+            <li>Repetibilidad aceptable en varias penetraciones.</li>
+          </ul>
+        </li>
+        <li>Para validación de producto se considerará la tolerancia de dureza especificada
+          y la incertidumbre del ensayo para valorar si el equipo es adecuado.</li>
+      </ul>
+
+      <div class="callout info">
+        <div class="callout-icon">📌</div>
+        <div>
+          Estos criterios por tipo son orientativos. TMP puede desarrollar,
+          si lo considera necesario, anexos específicos por familia de instrumentos
+          con valores numéricos y ejemplos concretos.
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Estados metrológicos -->
+    <section id="s7">
+      <h2><span class="idx">7</span> Estados metrológicos TMP y relación con la app</h2>
+
+      <p>Los estados del equipo que aparecen en la aplicación de trazabilidad TMP se interpretan así:</p>
+
+      <ul>
+        <li><span class="tag pill-ok">CALIBRADO / APTO</span>  
+          → Equipo calibrado dentro de límites y considerado adecuado para el uso previsto.</li>
+        <li><span class="tag pill-warn">PRÓXIMA CALIBRACIÓN</span>  
+          → Dentro de plazo, pero la fecha de próxima calibración está próxima
+          (gestión de alertas en el dashboard).</li>
+        <li><span class="tag pill-bad">FUERA DE CALIBRACIÓN</span>  
+          → Plazo vencido o calibración NO APTO → no se puede utilizar para aceptar producto.</li>
+        <li><span class="tag pill-bad">BAJA TÉCNICA</span>  
+          → Equipo retirado definitivamente (solo puede mantenerse para usos no metrológicos claramente marcados).</li>
+      </ul>
+
+      <div class="callout info">
+        <div class="callout-icon">🖥️</div>
+        <div>
+          El <b>home</b> y las distintas pantallas de la app TMP muestran estos estados y alertas
+          de forma visual para que los operarios identifiquen rápidamente
+          qué equipos pueden utilizar y cuáles deben bloquear.
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. No aptos y trazabilidad -->
+    <section id="s8">
+      <h2><span class="idx">8</span> Equipos NO APTOS y trazabilidad al producto</h2>
+
+      <h3>8.1 Gestión de equipos NO APTOS</h3>
+      <ul>
+        <li>Cuando un equipo pase a estado
+          <span class="tag pill-bad">FUERA DE CALIBRACIÓN</span> o
+          <span class="tag pill-bad">NO APTO</span>:
+          <ul>
+            <li>Se identifica físicamente (etiqueta / precinto).</li>
+            <li>Se actualiza su estado en la app TMP.</li>
+            <li>Se retira de los puestos de trabajo donde pudiera utilizarse por error.</li>
+          </ul>
+        </li>
+        <li>Se evalúa si el equipo ha sido utilizado en el período afectado
+          y si es necesario revisar producto o revalidar lotes.</li>
+      </ul>
+
+      <h3>8.2 Trazabilidad con la app TMP</h3>
+      <p>
+        La app de trazabilidad TMP, a través de los movimientos y estados,
+        permite responder a preguntas típicas de auditoría:
+      </p>
+      <ul>
+        <li>¿Qué equipo se utilizó para medir un lote concreto?</li>
+        <li>¿Ese equipo estaba calibrado y era adecuado a la tolerancia en ese momento?</li>
+        <li>Si un equipo resultó NO APTO, ¿qué productos podrían verse afectados?</li>
+      </ul>
+
+      <div class="callout ok">
+        <div class="callout-icon">✅</div>
+        <div>
+          La combinación de:
+          <b>criterios definidos</b> + <b>calibraciones registradas</b> +
+          <b>trazabilidad en la app TMP</b> constituye el núcleo del
+          <b>sistema metrológico de TMP</b> y su defensa ante clientes y auditorías.
+        </div>
+      </div>
+
+      <p class="muted">
+        Este documento puede complementarse con anexos numéricos específicos
+        (valores de EMP por instrumento, tablas de relación Tpieza/U, ejemplos
+        por cliente, etc.) según crezca el sistema metrológico de TMP.
+      </p>
+    </section>
+
+  </div>
 </main>
 
 </body>
