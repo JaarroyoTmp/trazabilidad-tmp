@@ -733,8 +733,8 @@ async function subirCertificadoASupabase(codigoInstrumento, pdfBlob) {
   if (!client) return null;
 
   try {
-    const bucket = "certificados";
-    const path = `certificados/certificado_${codigoInstrumento}.pdf`;
+    const bucket = "Certificados";
+    const path = `instrumentos/certificado_${codigoInstrumento}.pdf`;
 
     const { error } = await client
       .storage
@@ -1383,4 +1383,5 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
+
 
