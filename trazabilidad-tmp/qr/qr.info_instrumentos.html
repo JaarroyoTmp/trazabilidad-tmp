@@ -178,178 +178,6 @@
     font-size:11px;
     color:var(--muted);
   }
-
-  /* TARJETAS SECUNDARIAS */
-  .card{
-    position:relative;
-    background:radial-gradient(circle at 0 0,rgba(56,189,248,.08) 0,transparent 55%), #020617;
-    border-radius:16px;
-    border:1px solid rgba(30,64,175,.6);
-    padding:14px 13px 12px;
-    box-shadow:0 16px 32px rgba(0,0,0,.85);
-    overflow:hidden;
-  }
-
-  .card::before{
-    content:"";
-    position:absolute;
-    inset:-1px;
-    border-radius:inherit;
-    padding:1px;
-    background:radial-gradient(circle at 0 0,rgba(56,189,248,.5),transparent 60%);
-    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;
-            mask-composite:exclude;
-    opacity:.15;
-    pointer-events:none;
-  }
-
-  .card h2{
-    margin:0 0 8px;
-    font-size:14px;
-    text-transform:uppercase;
-    letter-spacing:.16em;
-    color:var(--accent);
-  }
-
-  .card-sub{
-    font-size:11px;
-    color:var(--muted);
-    margin-bottom:6px;
-  }
-
-  .item{
-    font-size:13px;
-    margin:4px 0;
-  }
-
-  .label{
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.12em;
-    display:block;
-    margin-bottom:2px;
-  }
-
-  .value{
-    font-size:13px;
-  }
-
-  .muted{
-    font-size:12px;
-    color:var(--muted);
-    margin-top:4px;
-  }
-
-  /* MOVIMIENTOS */
-  .mov-item{
-    font-size:12px;
-    margin:6px 0;
-    padding:6px 0;
-    border-bottom:1px dashed rgba(55,65,81,.7);
-  }
-  .mov-item:last-child{
-    border-bottom:none;
-  }
-
-  .mov-header{
-    display:flex;
-    justify-content:space-between;
-    gap:8px;
-    margin-bottom:3px;
-  }
-
-  .mov-type{
-    font-size:11px;
-    padding:3px 8px;
-    border-radius:999px;
-    border:1px solid rgba(148,163,184,.5);
-    background:rgba(15,23,42,.9);
-    text-transform:uppercase;
-    letter-spacing:.14em;
-    color:#e5e7eb;
-  }
-
-  .mov-date{
-    font-size:11px;
-    color:var(--muted);
-  }
-
-  .mov-body-line{
-    font-size:12px;
-    margin-top:2px;
-  }
-
-  .mov-body-label{
-    color:var(--muted);
-    font-size:11px;
-    margin-right:4px;
-  }
-
-  /* ERROR */
-  .error-box{
-    text-align:center;
-    padding:18px 14px;
-    background:radial-gradient(circle at 0 0,rgba(248,113,113,.18) 0,transparent 60%), #020617;
-    border-radius:16px;
-    border:1px solid rgba(248,113,113,.6);
-    box-shadow:0 16px 32px rgba(127,29,29,.9);
-  }
-
-  .error-box h2{
-    margin:0 0 8px;
-    font-size:15px;
-    color:#fecaca;
-  }
-
-  .error-box p{
-    margin:3px 0;
-    font-size:13px;
-  }
-
-  /* BOTÓN VOLVER FLOTANTE */
-  #volverHome{
-    position:fixed;
-    bottom:18px;
-    right:18px;
-    background:linear-gradient(135deg,#22c55e,#16a34a);
-    padding:10px 16px;
-    font-size:13px;
-    border-radius:999px;
-    border:1px solid rgba(34,197,94,.7);
-    cursor:pointer;
-    color:white;
-    box-shadow:0 12px 28px rgba(0,0,0,.75);
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    z-index:30;
-  }
-  #volverHome:hover{
-    filter:brightness(1.05);
-  }
-
-  @media (max-width:640px){
-    header{
-      align-items:flex-start;
-      flex-wrap:wrap;
-    }
-    .hero-main{max-width:100%;}
-    .hero-card{
-      flex-direction:column;
-      align-items:flex-start;
-    }
-    .hero-status{
-      align-items:flex-start;
-    }
-    #volverHome{
-      left:12px;
-      right:12px;
-      justify-content:center;
-      border-radius:999px;
-    }
-  }
 </style>
 </head>
 
@@ -379,6 +207,7 @@
       <div class="hero-title" id="heroTitle">Instrumento</div>
       <div class="hero-sub" id="heroSub">—</div>
     </div>
+
     <div class="hero-status">
       <div id="heroStatusPill" class="status-pill">
         <span class="dot"></span>
@@ -387,7 +216,6 @@
       <div class="status-caption" id="heroStatusCaption">Estado de calibración</div>
     </div>
   </section>
-
   <!-- Información básica -->
   <section id="infoCard" class="card" style="display:none">
     <h2>Información básica</h2>
@@ -412,7 +240,7 @@
 
 </div>
 
-<!-- Cliente Supabase global (misma config que el resto de la app) -->
+<!-- Cliente Supabase global -->
 <script type="module" src="../config.mjs"></script>
 
 <script type="module">
@@ -423,7 +251,7 @@
   // ---------------------------
   let codigo = new URLSearchParams(window.location.search).get("codigo");
 
-  // patrón /qr/12345
+  // Permite URLs tipo /qr/12345
   if (!codigo) {
     const parts = window.location.pathname.split("/").filter(Boolean);
     const last = parts[parts.length - 1];
@@ -481,6 +309,7 @@
 
   function computeEstado(proxISO){
     const dias = daysDiffToToday(proxISO);
+
     if (dias === null){
       return {
         clase: "status-warn",
@@ -530,7 +359,7 @@
       return;
     }
 
-    // Buscar instrumento
+    // Obtener instrumento desde Supabase
     const { data: inst, error: e1 } = await supa
       .from("instrumentos")
       .select("*")
@@ -549,7 +378,7 @@
     }
 
     // ---------------------------
-    //   HERO NEÓN
+    //   HERO CON FECHAS CORRECTAS
     // ---------------------------
     const hero = document.getElementById("hero");
     const heroCode = document.getElementById("heroCode");
@@ -560,13 +389,15 @@
     const heroStatusCaption = document.getElementById("heroStatusCaption");
 
     hero.style.display = "flex";
+
     heroCode.textContent = `CÓDIGO · ${codigo}`;
     heroTitle.textContent = inst.descripcion || "Instrumento sin descripción";
+
     heroSub.textContent =
       `${inst.fabricante || "Fabricante N/D"} · ` +
       `Ubicación: ${inst.ubicacion_actual || "N/D"}`;
 
-    const est = computeEstado(inst.fecha_proxima_calibracion);
+    const est = computeEstado(inst.proxima_cal);
     heroStatusPill.className = "status-pill " + est.clase;
     heroStatusLabel.textContent = est.texto;
 
@@ -574,11 +405,12 @@
       heroStatusCaption.textContent = est.detalle;
     } else if (est.dias < 0){
       const abs = Math.abs(est.dias);
-      heroStatusCaption.textContent = `Vencida hace ${abs} día${abs===1?"":"s"}.`;
+      heroStatusCaption.textContent =
+        `Vencida hace ${abs} día${abs===1?"":"s"}.`;
     } else {
-      heroStatusCaption.textContent = `Faltan ${est.dias} día${est.dias===1?"":"s"} para la próxima calibración.`;
+      heroStatusCaption.textContent =
+        `Faltan ${est.dias} día${est.dias===1?"":"s"} para la próxima calibración.`;
     }
-
     // ---------------------------
     //   INFORMACIÓN BÁSICA
     // ---------------------------
@@ -624,14 +456,16 @@
     `;
 
     // ---------------------------
-    //   ESTADO DE CALIBRACIÓN
+    //   ESTADO DE CALIBRACIÓN (CORREGIDO)
     // ---------------------------
     const calCard = document.getElementById("calCard");
     const calBody = document.getElementById("calBody");
     calCard.style.display = "block";
 
-    const ult = inst.fecha_calibracion;
-    const prox = inst.fecha_proxima_calibracion;
+    // Nombres correctos de columnas en Supabase:
+    const ult = inst.fecha_ultima_cal ?? inst.fecha_calibracion ?? null;
+    const prox = inst.proxima_cal ?? inst.fecha_proxima_calibracion ?? null;
+
     const est2 = computeEstado(prox);
 
     let detalleExtra = est2.detalle;
@@ -649,21 +483,23 @@
         <span class="label">Última calibración</span>
         <span class="value">${ult ? formatDateShort(ult) : "-"}</span>
       </div>
+
       <div class="item">
         <span class="label">Próxima calibración</span>
         <span class="value">${prox ? formatDateShort(prox) : "-"}</span>
       </div>
+
       <div class="item" style="margin-top:8px;">
         <span class="status-pill ${est2.clase}">
           <span class="dot"></span>
           ${est2.texto}
         </span>
       </div>
+
       <p class="muted">${detalleExtra}</p>
     `;
-
     // ---------------------------
-    //   HISTÓRICO MOVIMIENTOS
+    //   HISTÓRICO DE MOVIMIENTOS
     // ---------------------------
     const movCard = document.getElementById("movCard");
     const movBody = document.getElementById("movBody");
@@ -695,14 +531,17 @@
             <div class="mov-type">${m.tipo_movimiento || "Movimiento"}</div>
             <div class="mov-date">${formatDateTime(m.fecha)}</div>
           </div>
+
           <div class="mov-body-line">
             <span class="mov-body-label">Responsable</span>
             <span>${m.responsable || "-"}</span>
           </div>
+
           <div class="mov-body-line">
             <span class="mov-body-label">Destino</span>
             <span>${m.destino || "-"}</span>
           </div>
+
           ${m.observaciones ? `
             <div class="mov-body-line">
               <span class="mov-body-label">Obs.</span>
@@ -712,7 +551,8 @@
         </div>
       `).join("");
 
-      movHint.textContent = "Se muestran los 10 movimientos más recientes registrados en la base de datos.";
+      movHint.textContent =
+        "Se muestran los 10 movimientos más recientes registrados en la base de datos.";
     }
   }
 
