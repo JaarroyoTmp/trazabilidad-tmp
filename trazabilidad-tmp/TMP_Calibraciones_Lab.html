@@ -645,7 +645,7 @@ async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
       .from("instrumentos")
       .update({
         fecha_calibracion: fechaCal || null,
-        proxima_cal:      proxCal  || null
+        fecha_proxima_calibracion:      proxCal  || null
       })
       .eq("codigo", codigoInstrumento);
 
@@ -1228,4 +1228,5 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
+
 
