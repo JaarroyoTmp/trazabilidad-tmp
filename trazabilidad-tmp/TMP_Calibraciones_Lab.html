@@ -639,20 +639,23 @@ async function ensureSupabase(){
 async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
   const client = await ensureSupabase();
   if (!client) return false;
+
   try {
     const { error } = await client
       .from("instrumentos")
       .update({
         fecha_calibracion: fechaCal || null,
-        proxima_cal: proxCal || null
+        proxima_cal:      proxCal  || null
       })
       .eq("codigo", codigoInstrumento);
-    return !error;
-  } catch(e){ return false; }
-}
+
+    if (error) {
+      console.error("Error Supabase al actualizar fechas:", error);
+      return false;
+    }
     return true;
-  } catch (e) {
-    console.error("Excepción al actualizar fechas/informe en Supabase:", e);
+  } catch(e){
+    console.error("Excepción al actualizar fechas en Supabase:", e);
     return false;
   }
 }
@@ -1225,3 +1228,4 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
+
