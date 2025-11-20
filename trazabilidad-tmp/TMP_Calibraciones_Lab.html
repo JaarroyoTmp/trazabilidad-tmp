@@ -629,29 +629,26 @@ async function ensureSupabase(){
   return supabase;
 }
 
-/* ========= ACTUALIZAR FECHAS EN SUPABASE ========= */
-async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal) {
-  await ensureSupabase();
-  if (!supabase) {
-    console.warn("Supabase no disponible; sólo se realiza guardado local.");
-    return false;
-  }
+async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
+  const client = await ensureSupabase();
+  if (!client) return false;
+
   try {
-    const { error } = await supabase
+    const { error } = await client
       .from("instrumentos")
       .update({
-        fecha_ultima_cal: fechaCal || null,
-        proxima_cal: proxCal || null
+        fecha_calibracion: fechaCal || null,
+        proxima_calibracion: proxCal || null
       })
       .eq("codigo", codigoInstrumento);
 
     if (error) {
-      console.error("Error al actualizar Supabase:", error);
+      console.error("Error al actualizar fechas en Supabase:", error);
       return false;
     }
     return true;
   } catch (e) {
-    console.error("Excepción al actualizar Supabase:", e);
+    console.error("Excepción al actualizar fechas en Supabase:", e);
     return false;
   }
 }
@@ -669,7 +666,7 @@ async function cargarInstrumento(){
     if (error) console.warn(error);
     inst=data;
   } else {
-    inst={ codigo, descripcion:"Tampón liso P/NP", fabricante_tipo:"N/A", rango:"Ø8 H7", unidad_base:"mm", fecha_ultima_cal:"2024-11-03", proxima_cal:"2025-11-03" };
+    inst={ codigo, descripcion:"Tampón liso P/NP", fabricante_tipo:"N/A", rango:"Ø8 H7", unidad_base:"mm", fecha_calibracion:"2024-11-03", proxima_calibracion:"2025-11-03" };
   }
 
   state.instrumento = inst;
@@ -692,12 +689,15 @@ function pintarInstrumento(){
   $("#insFabTipo").value = ins.fabricante_tipo||"";
   $("#insRango").value = ins.rango||"";
   $("#unidadBase").value = ins.unidad_base||"mm";
-  $("#insUltima").value = ins.fecha_ultima_cal || "—";
-  $("#insProx").value = ins.proxima_cal || "—";
+  const fechaCal = ins.fecha_calibracion ?? ins.fecha_ultima_cal ?? null;
+  const proxCal = ins.proxima_calibracion ?? ins.proxima_cal ?? null;
+
+  $("#insUltima").value = fechaCal || "—";
+  $("#insProx").value = proxCal || "—";
 
   const est = $("#insEstado");
   let cl="ok", txt="OK";
-  const prox = fechaISO(ins.proxima_cal);
+  const prox = fechaISO(proxCal);
   const hoy = new Date();
   if (prox && hoy>prox){ cl="bad"; txt="FUERA"; }
   else if (prox && (+prox - +hoy) < 1000*60*60*24*30){ cl="warn"; txt="PRÓXIMA"; }
@@ -1089,32 +1089,24 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
     mediciones: state.mediciones,
     condiciones: {
       temp: $("#condTemp").value,
-      hum:  $("#condHum").value,
+      hum: $("#condHum").value,
       fechaCal,
-      obs:  $("#condObs").value
+      obs: $("#condObs").value
     },
     validacion: {
       firmante: $("#firmanteNombre").value.trim(),
-      proxima:  proxCal,
+      proxima: proxCal,
       firma_png: sigData
     },
     ts: new Date().toISOString()
   };
 
-  // Siempre guardamos localmente
   localStorage.setItem(`calibracion:${codigo}`, JSON.stringify(payload));
 
-  // Intentamos actualizar fechas en Supabase; si falla, al menos queda el guardado local
-  let ok = false;
-  try {
-    ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
-  } catch (e) {
-    console.error("Error inesperado al actualizar Supabase:", e);
-    ok = false;
-  }
+  const ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
 
   if (ok) {
-    alert("Calibración, condiciones y fechas guardadas (local + Supabase).");
+    alert("Calibración, condiciones y fechas guardadas (local + Supabase) correctamente.");
   } else {
     alert("Calibración y condiciones guardadas localmente. No se pudieron actualizar las fechas en Supabase (offline o error).");
   }
