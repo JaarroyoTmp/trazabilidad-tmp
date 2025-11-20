@@ -629,6 +629,34 @@ async function ensureSupabase(){
   return supabase;
 }
 
+/* ========= ACTUALIZAR FECHAS EN SUPABASE ========= */
+async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal) {
+  await ensureSupabase();
+  if (!supabase) {
+    console.warn("Supabase no disponible; sólo se realiza guardado local.");
+    return false;
+  }
+  try {
+    const { error } = await supabase
+      .from("instrumentos")
+      .update({
+        fecha_ultima_cal: fechaCal || null,
+        proxima_cal: proxCal || null
+      })
+      .eq("codigo", codigoInstrumento);
+
+    if (error) {
+      console.error("Error al actualizar Supabase:", error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("Excepción al actualizar Supabase:", e);
+    return false;
+  }
+}
+
+
 /* ========= CARGA INSTRUMENTO ========= */
 async function cargarInstrumento(){
   const codigo = $("#insCodigo").value.trim();
@@ -1061,24 +1089,34 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
     mediciones: state.mediciones,
     condiciones: {
       temp: $("#condTemp").value,
-      hum: $("#condHum").value,
+      hum:  $("#condHum").value,
       fechaCal,
-      obs: $("#condObs").value
+      obs:  $("#condObs").value
     },
     validacion: {
       firmante: $("#firmanteNombre").value.trim(),
-      proxima: proxCal,
+      proxima:  proxCal,
       firma_png: sigData
     },
     ts: new Date().toISOString()
   };
 
+  // Siempre guardamos localmente
   localStorage.setItem(`calibracion:${codigo}`, JSON.stringify(payload));
 
-  const ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
+  // Intentamos actualizar fechas en Supabase; si falla, al menos queda el guardado local
+  let ok = false;
+  try {
+    ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
+  } catch (e) {
+    console.error("Error inesperado al actualizar Supabase:", e);
+    ok = false;
+  }
 
   if (ok) {
-    alert("Guardado (local + Supabase) correctamente.");
+    alert("Calibración, condiciones y fechas guardadas (local + Supabase).");
+  } else {
+    alert("Calibración y condiciones guardadas localmente. No se pudieron actualizar las fechas en Supabase (offline o error).");
   }
 });
 
@@ -1203,4 +1241,5 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
+
 
