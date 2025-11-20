@@ -97,9 +97,6 @@
   }
 }
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -350,7 +347,6 @@
 
     <div class="row" style="margin-top:10px;justify-content:flex-end">
       <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
-      <button id="btnDescargarPdf" class="btn secondary">Guardar PDF en PC</button>
       <button id="btnGuardarTodo" class="btn">Guardar todo (local + Supabase)</button>
     </div>
     <p class="note">Criterio ILAC-G8: |Error| + U ≤ T → <span class="pill success">APTO</span> · |Error| − U &gt; T → <span class="pill danger">NO APTO</span> · resto → INDETERMINADO</p>
@@ -639,122 +635,24 @@ async function ensureSupabase(){
  *  - proxima_cal
  *  - informe_calibracion (JSON del informe completo)
  */
-async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal, informeJson, informeUrl){
+async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
   const client = await ensureSupabase();
   if (!client) return false;
-
   try {
     const { error } = await client
       .from("instrumentos")
       .update({
         fecha_calibracion: fechaCal || null,
-        proxima_cal: proxCal || null,
-        informe_calibracion: informeJson || null,
-        informe_calibracion_url: informeUrl || null
+        proxima_cal: proxCal || null
       })
       .eq("codigo", codigoInstrumento);
-
-    if (error) {
-      console.error("Error al actualizar fechas/informe en Supabase:", error);
-      return false;
-    }
+    return !error;
+  } catch(e){ return false; }
+}
     return true;
   } catch (e) {
     console.error("Excepción al actualizar fechas/informe en Supabase:", e);
     return false;
-  }
-}
-
-
-/* ========= PDF + STORAGE: Generar informe y subir a Supabase ========= */
-async function generarPdfInforme(options = { download:false }) {
-  const codigo = $("#insCodigo").value.trim() || "sin_codigo";
-
-  if (!window.html2canvas || !window.jspdf) {
-    alert("No se han cargado las librerías de PDF (html2canvas / jsPDF). Revisa la conexión.");
-    return null;
-  }
-
-  const activeTab = document.querySelector('.tab.active');
-  const prevTab = activeTab ? activeTab.dataset.tab : 'plan';
-  if (prevTab !== 'resultados') {
-    switchTab('resultados');
-  }
-
-  // Pausa pequeña para que el layout se actualice
-  await new Promise(r => setTimeout(r, 200));
-
-  const section = document.getElementById('tab-resultados');
-  if (!section) {
-    alert("No se ha encontrado la sección de resultados para generar el PDF.");
-    return null;
-  }
-
-  const canvas = await window.html2canvas(section, { scale: 2 });
-  const imgData = canvas.toDataURL("image/png");
-
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
-
-  const imgWidth = pdfWidth;
-  const imgHeight = canvas.height * pdfWidth / canvas.width;
-
-  let heightLeft = imgHeight;
-  let position = 0;
-
-  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-  heightLeft -= pdfHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pdfHeight;
-  }
-
-  const filename = `certificado_${codigo}.pdf`;
-
-  if (options.download) {
-    pdf.save(filename);
-  }
-
-  if (prevTab !== 'resultados') {
-    switchTab(prevTab);
-  }
-
-  const blob = pdf.output('blob');
-  return { blob, filename };
-}
-
-async function subirCertificadoASupabase(codigoInstrumento, pdfBlob) {
-  const client = await ensureSupabase();
-  if (!client) return null;
-
-  try {
-    const bucket = "Certificados";
-    const path = `instrumentos/certificado_${codigoInstrumento}.pdf`;
-
-    const { error } = await client
-      .storage
-      .from(bucket)
-      .upload(path, pdfBlob, { upsert: true, contentType: "application/pdf" });
-
-    if (error) {
-      console.error("Error al subir el PDF a Supabase Storage:", error);
-      return null;
-    }
-
-    const { data } = client
-      .storage
-      .from(bucket)
-      .getPublicUrl(path);
-
-    return data?.publicUrl || null;
-  } catch (e) {
-    console.error("Excepción al subir el PDF a Supabase Storage:", e);
-    return null;
   }
 }
 
@@ -1189,78 +1087,21 @@ function dibujarGraficaErrores(){
 /* ========= GUARDADO LOCAL + SUPABASE ========= */
 $("#btnGuardarTodo").addEventListener("click", async () => {
   const codigo = $("#insCodigo").value.trim();
-  if (!codigo) {
-    alert("Introduce el código del instrumento antes de guardar.");
-    return;
-  }
+  if (!codigo) { alert("Introduce el código del instrumento."); return; }
 
   const fechaCal = $("#condFechaCal").value;
   const proxCal  = $("#firmanteProxima").value;
 
-  const sigData = sigCanvas.toDataURL("image/png");
+  const c1 = confirm("¿Ha guardado el PDF EN SU ORDENADOR?");
+  if (!c1) return;
+  const c2 = confirm("¿Seguro que ha archivado el PDF en la carpeta interna?");
+  if (!c2) return;
 
-  const payload = {
-    instrumento: state.instrumento,
-    patronesSeleccionados: state.patronesSeleccionados,
-    plan: state.plan,
-    mediciones: state.mediciones,
-    condiciones: {
-      temp: $("#condTemp").value,
-      hum: $("#condHum").value,
-      fechaCal,
-      obs: $("#condObs").value
-    },
-    validacion: {
-      firmante: $("#firmanteNombre").value.trim(),
-      proxima: proxCal,
-      firma_png: sigData
-    },
-    ts: new Date().toISOString()
-  };
-
-  // Guarda en localStorage (copia completa del informe)
-  localStorage.setItem(`calibracion:${codigo}`, JSON.stringify(payload));
-
-  // Genera el PDF del informe (solo pestaña Resultados)
-  let informeUrl = null;
-  let pdfBlob = null;
-  try {
-    const pdfResult = await generarPdfInforme({ download:false });
-    if (pdfResult && pdfResult.blob) {
-      pdfBlob = pdfResult.blob;
-    }
-  } catch (e) {
-    console.error("Error al generar el PDF:", e);
-  }
-
-  // Sube el PDF a Supabase Storage (si es posible)
-  if (pdfBlob) {
-    const url = await subirCertificadoASupabase(codigo, pdfBlob);
-    if (url) {
-      informeUrl = url;
-    }
-  }
-
-  // Guarda fechas + informe JSON + URL del certificado en Supabase
-  const informeJson = JSON.stringify(payload);
-  const ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal, informeJson, informeUrl);
-
-  if (ok && informeUrl) {
-    alert("Calibración guardada (local + Supabase) y certificado PDF actualizado correctamente.");
-  } else if (ok && !informeUrl) {
-    alert("Calibración y fechas guardadas en Supabase. No se pudo subir/actualizar el PDF (offline o error en Storage).");
-  } else {
-    alert("Calibración y condiciones guardadas localmente. No se pudieron actualizar datos en Supabase (offline o error).");
-  }
+  const ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
+  if (ok) alert("Fechas actualizadas en Supabase correctamente.");
+  else alert("No se pudieron actualizar fechas en Supabase (offline/error).");
 });
 
-$("#btnDescargarPdf").addEventListener("click", async () => {
-  if (!$("#firmanteNombre").value.trim() || !$("#firmanteProxima").value) {
-    alert("Completa el nombre y la fecha de próxima calibración antes de generar el PDF.");
-    return;
-  }
-  await generarPdfInforme({ download:true });
-});
 
 $("#btnImprimir").addEventListener("click",()=>{
   if (!$("#firmanteNombre").value.trim() || !$("#firmanteProxima").value) {
