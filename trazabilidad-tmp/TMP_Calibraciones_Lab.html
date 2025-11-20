@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TMP · Calibraciones v9.7 (Plan + Medición + Resultados)</title>
+<title>TMP · Calibraciones v9.8 (Plan + Medición + Resultados)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@
   tbody tr:nth-child(odd){background:#11263f80}
   .note{font-size:12px;color:#a7c0d6}
   .pill{padding:4px 8px;border-radius:999px;background:#104071;color:#bfe0ff;font-weight:600}
-  .danger{background:#5b3a1d;color:#ffe2c0} /* menos agresivo que rojo puro */
+  .danger{background:#5b3a1d;color:#ffe2c0}
   .success{background:#1c4c2b;color:#bff5d6}
   dialog::backdrop{background:#0008}
   dialog{border:none;border-radius:14px;background:#10243a;color:#e7f2fb;padding:16px 16px 10px;max-width:980px;width:min(96vw,980px)}
@@ -96,13 +96,12 @@
     display: block;
   }
 }
-
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="badge">TMP · Calibraciones v9.7</div>
+    <div class="badge">TMP · Calibraciones v9.8</div>
     <h1>Plan · Medición · Resultados (Multipatrón)</h1>
     <span id="localBanner" class="local-banner">Modo local: Supabase no guardará cambios.</span>
     <span id="onlineBadge" class="badge offline right">Offline</span>
@@ -299,7 +298,7 @@
       </div>
     </div>
 
-    <!-- Resultados detallados (lo que ya tenías) -->
+    <!-- Resultados detallados -->
     <div class="card" style="margin-top:8px">
       <h3>4. Resultados detallados por bloque y punto</h3>
       <div id="resultadosBox"></div>
@@ -348,21 +347,22 @@
 
     <div class="row" style="margin-top:10px;justify-content:flex-end">
       <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
-      <button id="btnGuardarTodo" class="btn">Guardar todo (local)</button>
+      <button id="btnGuardarTodo" class="btn">Guardar todo (local + Supabase)</button>
     </div>
     <p class="note">Criterio ILAC-G8: |Error| + U ≤ T → <span class="pill success">APTO</span> · |Error| − U &gt; T → <span class="pill danger">NO APTO</span> · resto → INDETERMINADO</p>
   </section>
+
   <!-- ANEXO TÉCNICO / FÓRMULAS -->
-  <section id=\"tab-anexo\" class=\"card hidden\">
+  <section id="tab-anexo" class="card hidden">
     <h3>Anexo técnico · Modelo de cálculo, fórmulas y normas aplicadas</h3>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>A. Modelo general de medida</h3>
-      <p class=\"mini\">
+      <p class="mini">
         La calibración de un instrumento consiste en comparar sus indicaciones con los valores de referencia de un
         patrón trazable. Para cada punto se tiene:
       </p>
-      <ul class=\"mini\">
+      <ul class="mini">
         <li><strong>Valor de referencia R:</strong> valor verdadero convencional del patrón o del nominal del instrumento.</li>
         <li><strong>Indicaciones I<sub>i</sub>:</strong> lecturas individuales del instrumento.</li>
         <li><strong>Media de indicaciones:</strong>
@@ -374,91 +374,91 @@
       </ul>
     </div>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>B. Estimación de la repetibilidad</h3>
-      <p class=\"mini\">
+      <p class="mini">
         A partir de las lecturas individuales se calcula la desviación típica:
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         <code>σ = √( Σ (I<sub>i</sub> − I)² / (n − 1) )</code>
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         La incertidumbre debida a la repetibilidad de la media es:
         <code>u<sub>rep</sub> = σ / √n</code>.
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         En la práctica, una repetibilidad alta (σ grande) indica que el instrumento no es estable y puede requerir ajuste
         o mantenimiento antes incluso de evaluar la conformidad.
       </p>
     </div>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>C. Resolución del instrumento</h3>
-      <p class=\"mini\">
+      <p class="mini">
         Si la resolución del instrumento es <code>d</code> (por ejemplo 0.01 mm), la incertidumbre típica asociada a
         la cuantificación por resolución se aproxima por:
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         <code>u<sub>res</sub> = d / √12</code>
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         Esta expresión proviene de suponer que el error de redondeo se distribuye uniformemente en el intervalo
         [−d/2, +d/2]. La desviación típica de una distribución rectangular de semiancho a es:
         <code>a / √3</code>, y como a = d/2, queda <code>d / √12</code>.
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         Este término se introduce en el panel de Medición como “Resolución instrumento (d)”.
       </p>
     </div>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>D. Incertidumbre del patrón y factor k</h3>
-      <p class=\"mini\">
+      <p class="mini">
         Los patrones utilizados (bloques patrón, bancos de medida, patrones de par, etc.) disponen de un certificado
         de calibración que declara una incertidumbre expandida <code>U<sub>patrón</sub></code> para un determinado factor
         de cobertura <code>k<sub>cert</sub></code> (habitualmente k = 2).
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         El sistema trabaja internamente con incertidumbre típica del patrón:
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         <code>u<sub>patrón</sub> = U<sub>patrón</sub> / k</code>
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         Además, el usuario puede cambiar el factor de cobertura global <code>k</code> en la pestaña de Medición.
         Siempre que se cambie ese factor, la incertidumbre expandida calculada en los resultados se ajustará a dicho valor.
       </p>
     </div>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>E. Incertidumbre combinada y expandida</h3>
-      <p class=\"mini\">
+      <p class="mini">
         El modelo implementado en la app es:
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         <code>u<sub>c</sub> = √(u<sub>patrón</sub>² + u<sub>rep</sub>² + u<sub>res</sub>²)</code>
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         y la incertidumbre expandida:
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         <code>U = k · u<sub>c</sub></code>
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         donde <code>k</code> es el factor de cobertura configurable en el modelo de Medición
         (normalmente k = 2 para ≈95&nbsp;% de nivel de confianza, según GUM e ISO/IEC 17025).
       </p>
-      <p class=\"mini\">
+      <p class="mini">
         Este enfoque permite adaptar el nivel de confianza si se requiere un criterio más exigente (k &gt; 2) o más laxo.
       </p>
     </div>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>F. Criterio de conformidad ILAC-G8</h3>
-      <p class=\"mini\">
+      <p class="mini">
         El criterio de aceptación está basado en la guía ILAC-G8 para la toma de decisiones con incertidumbre:
       </p>
-      <ul class=\"mini\">
+      <ul class="mini">
         <li><strong>Conformidad segura (APTO):</strong>
           <code>|E| + U ≤ T</code> → el error máximo posible sigue dentro de la tolerancia.
         </li>
@@ -470,20 +470,20 @@
           (experiencia, criticidad del uso, requisitos del cliente, etc.).
         </li>
       </ul>
-      <p class=\"mini\">
+      <p class="mini">
         Este criterio evita aceptar instrumentos que estén claramente fuera de tolerancia o rechazar instrumentos
         que claramente cumplen, teniendo en cuenta la incertidumbre de medida.
       </p>
     </div>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>G. Calibraciones de roscas (galgas, tampones, anillos)</h3>
-      <p class=\"mini\">
+      <p class="mini">
         Para instrumentos de rosca (galgas pasa/no pasa, anillos roscados, tampones roscados) se aplican los mismos
         principios de error e incertidumbre, pero la magnitud de interés suele ser el <strong>diámetro eficaz</strong>,
         el <strong>paso</strong> y, en algunos casos, el <strong>ángulo</strong>.
       </p>
-      <ul class=\"mini\">
+      <ul class="mini">
         <li>El banco de roscas o equipo de medición proporciona indicaciones de diámetro eficaz
           que se comparan con los valores de referencia del patrón.</li>
         <li>Si se utiliza el método de los tres hilos, el diámetro eficaz <code>E</code> se obtiene a partir de la
@@ -493,16 +493,16 @@
           <code>U</code>.</li>
         <li>Las tolerancias de aceptación de la rosca se basan en ISO 1502 / ISO 965 (clases 6H, 6g, etc.).</li>
       </ul>
-      <p class=\"mini\">
+      <p class="mini">
         En esta versión, la parte numérica (errores, incertidumbres, ILAC-G8) está preparada para aplicarse también
         a roscas; la obtención del valor de referencia de diámetro eficaz se realiza según el procedimiento interno
         del laboratorio (tres hilos, banco de roscas, etc.) y se introduce como valor nominal o como patrón.
       </p>
     </div>
 
-    <div class=\"card\" style=\"margin-top:8px\">
+    <div class="card" style="margin-top:8px">
       <h3>H. Tipos de instrumentos cubiertos por el modelo</h3>
-      <ul class=\"mini\">
+      <ul class="mini">
         <li><strong>Dimensional lineal:</strong> calibres pie de rey, micrómetros exteriores/interiores, relojes comparadores,
           columnas de altura, tampón P/NP, galgas lisas.</li>
         <li><strong>Instrumentos de atributo (GO/NO&nbsp;GO):</strong> evaluación de tamaños límite con criterio de aceptación
@@ -515,7 +515,7 @@
         <li><strong>Durometría:</strong> Rockwell, Brinell, Vickers; el modelo numérico se aplica sobre la escala de dureza,
           con contribuciones de repetibilidad, resolución y patrón de dureza.</li>
       </ul>
-      <p class=\"mini\">
+      <p class="mini">
         El resultado final APTO/NO APTO es coherente con ISO/IEC 17025 y la guía ILAC-G8, pudiendo documentarse en informes
         internos o externos a clientes.
       </p>
@@ -629,7 +629,13 @@ async function ensureSupabase(){
   return supabase;
 }
 
-async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
+/**
+ * Guarda en la tabla instrumentos:
+ *  - fecha_calibracion
+ *  - proxima_cal
+ *  - informe_calibracion (JSON del informe completo)
+ */
+async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal, informeJson){
   const client = await ensureSupabase();
   if (!client) return false;
 
@@ -638,21 +644,21 @@ async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
       .from("instrumentos")
       .update({
         fecha_calibracion: fechaCal || null,
-        proxima_calibracion: proxCal || null
+        proxima_cal: proxCal || null,
+        informe_calibracion: informeJson || null
       })
       .eq("codigo", codigoInstrumento);
 
     if (error) {
-      console.error("Error al actualizar fechas en Supabase:", error);
+      console.error("Error al actualizar fechas/informe en Supabase:", error);
       return false;
     }
     return true;
   } catch (e) {
-    console.error("Excepción al actualizar fechas en Supabase:", e);
+    console.error("Excepción al actualizar fechas/informe en Supabase:", e);
     return false;
   }
 }
-
 
 /* ========= CARGA INSTRUMENTO ========= */
 async function cargarInstrumento(){
@@ -666,7 +672,16 @@ async function cargarInstrumento(){
     if (error) console.warn(error);
     inst=data;
   } else {
-    inst={ codigo, descripcion:"Tampón liso P/NP", fabricante_tipo:"N/A", rango:"Ø8 H7", unidad_base:"mm", fecha_calibracion:"2024-11-03", proxima_calibracion:"2025-11-03" };
+    // Modo demo/offline
+    inst={
+      codigo,
+      descripcion:"Tampón liso P/NP",
+      fabricante_tipo:"N/A",
+      rango:"Ø8 H7",
+      unidad_base:"mm",
+      fecha_calibracion:"2024-11-03",
+      proxima_cal:"2025-11-03"
+    };
   }
 
   state.instrumento = inst;
@@ -689,8 +704,9 @@ function pintarInstrumento(){
   $("#insFabTipo").value = ins.fabricante_tipo||"";
   $("#insRango").value = ins.rango||"";
   $("#unidadBase").value = ins.unidad_base||"mm";
+
   const fechaCal = ins.fecha_calibracion ?? ins.fecha_ultima_cal ?? null;
-  const proxCal = ins.proxima_calibracion ?? ins.proxima_cal ?? null;
+  const proxCal = ins.proxima_cal ?? ins.proxima_calibracion ?? null;
 
   $("#insUltima").value = fechaCal || "—";
   $("#insProx").value = proxCal || "—";
@@ -812,14 +828,12 @@ function renderPlan(){
     </div>
   `).join('');
 
-  // Sincroniza los cambios de lado GO/NO GO por bloque con el estado
   $$('#planBloques select.lado-bloque').forEach(sel => {
     sel.addEventListener('change', () => {
       const bloque = state.plan.find(b => b.id === sel.dataset.bid);
       if (bloque) bloque.lado = sel.value;
     });
   });
-
 }
 
 /* ========= MEDICION ========= */
@@ -863,6 +877,7 @@ function renderMedicion(){
     });
   });
 }
+
 $("#btnGuardarMed").addEventListener("click",()=>{
   const codigo=$("#insCodigo").value.trim();
   localStorage.setItem(`mediciones:${codigo}`, JSON.stringify(state.mediciones));
@@ -891,7 +906,7 @@ function calcularResultados(){
   let hayIndeterminado = false;
 
   for (const b of state.plan){
-    const ladoBloque = b.lado || lado;
+    const ladoBloque = b.lado || ladoGlobal;
     const nominalBloque = (ladoBloque === "GO" ? nominalGO : nominalNOGO);
     html += `
       <div class="card" style="margin-top:12px">
@@ -908,9 +923,9 @@ function calcularResultados(){
     b.puntos.forEach((p,i)=>{
       const key=`${b.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
       let refVal = (ref==="patron") ? p.valor_nominal : nominalBloque;
-      const error = (media - refVal)*1000; 
-      const U = (uBase*1000);           
-      const T = tol*1000;               
+      const error = (media - refVal)*1000; // µm
+      const U = (uBase*1000);            // µm
+      const T = tol*1000;                // µm
       const absE = Math.abs(error);
       const absEplusU = Math.abs(error)+U;
       if (absE > maxAbsError) maxAbsError = absE;
@@ -946,8 +961,8 @@ function calcularResultados(){
       <strong>Fabricante / Tipo:</strong> ${ins.fabricante_tipo || "-"}<br>
       <strong>Rango de medida:</strong> ${ins.rango || "-"} ·
       <strong>Unidad base:</strong> ${ins.unidad_base || "mm"}<br>
-      <strong>Última calibración registrada:</strong> ${ins.fecha_ultima_cal || "-"} ·
-      <strong>Próxima calibración registrada:</strong> ${ins.proxima_cal || "-"}
+      <strong>Última calibración registrada:</strong> ${ins.fecha_ultima_cal || ins.fecha_calibracion || "-"} ·
+      <strong>Próxima calibración registrada:</strong> ${ins.proxima_cal || ins.proxima_calibracion || "-"}
     </p>
   `;
   $("#resumenInstrumento").innerHTML = resumenInst;
@@ -1073,9 +1088,13 @@ function dibujarGraficaErrores(){
   });
 }
 
-/* ========= GUARDADO LOCAL + VALIDACIÓN ========= */
+/* ========= GUARDADO LOCAL + SUPABASE ========= */
 $("#btnGuardarTodo").addEventListener("click", async () => {
   const codigo = $("#insCodigo").value.trim();
+  if (!codigo) {
+    alert("Introduce el código del instrumento antes de guardar.");
+    return;
+  }
 
   const fechaCal = $("#condFechaCal").value;
   const proxCal  = $("#firmanteProxima").value;
@@ -1101,14 +1120,17 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
     ts: new Date().toISOString()
   };
 
+  // Guarda en localStorage
   localStorage.setItem(`calibracion:${codigo}`, JSON.stringify(payload));
 
-  const ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
+  // Guarda fechas + informe JSON en Supabase (columna informe_calibracion)
+  const informeJson = JSON.stringify(payload);
+  const ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal, informeJson);
 
   if (ok) {
-    alert("Calibración, condiciones y fechas guardadas (local + Supabase) correctamente.");
+    alert("Calibración, condiciones y fechas/informe guardados (local + Supabase) correctamente.");
   } else {
-    alert("Calibración y condiciones guardadas localmente. No se pudieron actualizar las fechas en Supabase (offline o error).");
+    alert("Calibración y condiciones guardadas localmente. No se pudieron actualizar fechas/informe en Supabase (offline o error).");
   }
 });
 
@@ -1233,5 +1255,4 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
-
 
