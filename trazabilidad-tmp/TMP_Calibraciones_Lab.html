@@ -84,6 +84,19 @@
     margin-left:auto;
   }
   .local-banner.show{display:inline-flex;align-items:center;gap:6px}
+
+@media print {
+  canvas {
+    display: block;
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+  .no-print-overlap {
+    margin-top: 40px !important;
+    display: block;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -159,6 +172,7 @@
     <div class="tab active" data-tab="plan">Plan</div>
     <div class="tab" data-tab="medicion">Medición</div>
     <div class="tab" data-tab="resultados">Resultados</div>
+    <div class="tab" data-tab="anexo">Anexo técnico / Fórmulas</div>
   </div>
 
   <!-- PLAN -->
@@ -338,6 +352,176 @@
     </div>
     <p class="note">Criterio ILAC-G8: |Error| + U ≤ T → <span class="pill success">APTO</span> · |Error| − U &gt; T → <span class="pill danger">NO APTO</span> · resto → INDETERMINADO</p>
   </section>
+  <!-- ANEXO TÉCNICO / FÓRMULAS -->
+  <section id=\"tab-anexo\" class=\"card hidden\">
+    <h3>Anexo técnico · Modelo de cálculo, fórmulas y normas aplicadas</h3>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>A. Modelo general de medida</h3>
+      <p class=\"mini\">
+        La calibración de un instrumento consiste en comparar sus indicaciones con los valores de referencia de un
+        patrón trazable. Para cada punto se tiene:
+      </p>
+      <ul class=\"mini\">
+        <li><strong>Valor de referencia R:</strong> valor verdadero convencional del patrón o del nominal del instrumento.</li>
+        <li><strong>Indicaciones I<sub>i</sub>:</strong> lecturas individuales del instrumento.</li>
+        <li><strong>Media de indicaciones:</strong>
+          <code>I = (1/n) · Σ I<sub>i</sub></code>
+        </li>
+        <li><strong>Error de indicación:</strong>
+          <code>E = I − R</code>
+        </li>
+      </ul>
+    </div>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>B. Estimación de la repetibilidad</h3>
+      <p class=\"mini\">
+        A partir de las lecturas individuales se calcula la desviación típica:
+      </p>
+      <p class=\"mini\">
+        <code>σ = √( Σ (I<sub>i</sub> − I)² / (n − 1) )</code>
+      </p>
+      <p class=\"mini\">
+        La incertidumbre debida a la repetibilidad de la media es:
+        <code>u<sub>rep</sub> = σ / √n</code>.
+      </p>
+      <p class=\"mini\">
+        En la práctica, una repetibilidad alta (σ grande) indica que el instrumento no es estable y puede requerir ajuste
+        o mantenimiento antes incluso de evaluar la conformidad.
+      </p>
+    </div>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>C. Resolución del instrumento</h3>
+      <p class=\"mini\">
+        Si la resolución del instrumento es <code>d</code> (por ejemplo 0.01 mm), la incertidumbre típica asociada a
+        la cuantificación por resolución se aproxima por:
+      </p>
+      <p class=\"mini\">
+        <code>u<sub>res</sub> = d / √12</code>
+      </p>
+      <p class=\"mini\">
+        Esta expresión proviene de suponer que el error de redondeo se distribuye uniformemente en el intervalo
+        [−d/2, +d/2]. La desviación típica de una distribución rectangular de semiancho a es:
+        <code>a / √3</code>, y como a = d/2, queda <code>d / √12</code>.
+      </p>
+      <p class=\"mini\">
+        Este término se introduce en el panel de Medición como “Resolución instrumento (d)”.
+      </p>
+    </div>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>D. Incertidumbre del patrón y factor k</h3>
+      <p class=\"mini\">
+        Los patrones utilizados (bloques patrón, bancos de medida, patrones de par, etc.) disponen de un certificado
+        de calibración que declara una incertidumbre expandida <code>U<sub>patrón</sub></code> para un determinado factor
+        de cobertura <code>k<sub>cert</sub></code> (habitualmente k = 2).
+      </p>
+      <p class=\"mini\">
+        El sistema trabaja internamente con incertidumbre típica del patrón:
+      </p>
+      <p class=\"mini\">
+        <code>u<sub>patrón</sub> = U<sub>patrón</sub> / k</code>
+      </p>
+      <p class=\"mini\">
+        Además, el usuario puede cambiar el factor de cobertura global <code>k</code> en la pestaña de Medición.
+        Siempre que se cambie ese factor, la incertidumbre expandida calculada en los resultados se ajustará a dicho valor.
+      </p>
+    </div>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>E. Incertidumbre combinada y expandida</h3>
+      <p class=\"mini\">
+        El modelo implementado en la app es:
+      </p>
+      <p class=\"mini\">
+        <code>u<sub>c</sub> = √(u<sub>patrón</sub>² + u<sub>rep</sub>² + u<sub>res</sub>²)</code>
+      </p>
+      <p class=\"mini\">
+        y la incertidumbre expandida:
+      </p>
+      <p class=\"mini\">
+        <code>U = k · u<sub>c</sub></code>
+      </p>
+      <p class=\"mini\">
+        donde <code>k</code> es el factor de cobertura configurable en el modelo de Medición
+        (normalmente k = 2 para ≈95&nbsp;% de nivel de confianza, según GUM e ISO/IEC 17025).
+      </p>
+      <p class=\"mini\">
+        Este enfoque permite adaptar el nivel de confianza si se requiere un criterio más exigente (k &gt; 2) o más laxo.
+      </p>
+    </div>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>F. Criterio de conformidad ILAC-G8</h3>
+      <p class=\"mini\">
+        El criterio de aceptación está basado en la guía ILAC-G8 para la toma de decisiones con incertidumbre:
+      </p>
+      <ul class=\"mini\">
+        <li><strong>Conformidad segura (APTO):</strong>
+          <code>|E| + U ≤ T</code> → el error máximo posible sigue dentro de la tolerancia.
+        </li>
+        <li><strong>No conformidad segura (NO APTO):</strong>
+          <code>|E| − U &gt; T</code> → incluso descontando la incertidumbre, el error supera la tolerancia.
+        </li>
+        <li><strong>Zona gris (INDETERMINADO):</strong>
+          el valor verdadero puede estar dentro o fuera de la tolerancia; requiere decisión técnica
+          (experiencia, criticidad del uso, requisitos del cliente, etc.).
+        </li>
+      </ul>
+      <p class=\"mini\">
+        Este criterio evita aceptar instrumentos que estén claramente fuera de tolerancia o rechazar instrumentos
+        que claramente cumplen, teniendo en cuenta la incertidumbre de medida.
+      </p>
+    </div>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>G. Calibraciones de roscas (galgas, tampones, anillos)</h3>
+      <p class=\"mini\">
+        Para instrumentos de rosca (galgas pasa/no pasa, anillos roscados, tampones roscados) se aplican los mismos
+        principios de error e incertidumbre, pero la magnitud de interés suele ser el <strong>diámetro eficaz</strong>,
+        el <strong>paso</strong> y, en algunos casos, el <strong>ángulo</strong>.
+      </p>
+      <ul class=\"mini\">
+        <li>El banco de roscas o equipo de medición proporciona indicaciones de diámetro eficaz
+          que se comparan con los valores de referencia del patrón.</li>
+        <li>Si se utiliza el método de los tres hilos, el diámetro eficaz <code>E</code> se obtiene a partir de la
+          dimensión sobre hilos y la geometría de la rosca (ángulo de filete, paso, etc.).</li>
+        <li>Una vez calculado el valor de referencia <code>R</code> (diámetro eficaz nominal) y el valor medido
+          <code>I</code>, se aplica <code>E = I − R</code> y las mismas fórmulas de incertidumbre <code>u<sub>c</sub></code> y
+          <code>U</code>.</li>
+        <li>Las tolerancias de aceptación de la rosca se basan en ISO 1502 / ISO 965 (clases 6H, 6g, etc.).</li>
+      </ul>
+      <p class=\"mini\">
+        En esta versión, la parte numérica (errores, incertidumbres, ILAC-G8) está preparada para aplicarse también
+        a roscas; la obtención del valor de referencia de diámetro eficaz se realiza según el procedimiento interno
+        del laboratorio (tres hilos, banco de roscas, etc.) y se introduce como valor nominal o como patrón.
+      </p>
+    </div>
+
+    <div class=\"card\" style=\"margin-top:8px\">
+      <h3>H. Tipos de instrumentos cubiertos por el modelo</h3>
+      <ul class=\"mini\">
+        <li><strong>Dimensional lineal:</strong> calibres pie de rey, micrómetros exteriores/interiores, relojes comparadores,
+          columnas de altura, tampón P/NP, galgas lisas.</li>
+        <li><strong>Instrumentos de atributo (GO/NO&nbsp;GO):</strong> evaluación de tamaños límite con criterio de aceptación
+          ILAC-G8 aplicado sobre el error de tamaño efectivo.</li>
+        <li><strong>Roscas:</strong> galgas, tampones, anillos (diámetro eficaz, paso, ángulo) usando ISO 1502 / ISO 965.</li>
+        <li><strong>Dinamométricas:</strong> llaves de par, bancos de par, según ISO 6789/ISO 5393, aplicando el mismo modelo
+          de error e incertidumbre en N·m.</li>
+        <li><strong>Balanzas:</strong> según OIML R76; el modelo admite errores de indicación por carga, repetibilidad y
+          resolución en gramos.</li>
+        <li><strong>Durometría:</strong> Rockwell, Brinell, Vickers; el modelo numérico se aplica sobre la escala de dureza,
+          con contribuciones de repetibilidad, resolución y patrón de dureza.</li>
+      </ul>
+      <p class=\"mini\">
+        El resultado final APTO/NO APTO es coherente con ISO/IEC 17025 y la guía ILAC-G8, pudiendo documentarse en informes
+        internos o externos a clientes.
+      </p>
+    </div>
+  </section>
+
 </div>
 
 <!-- DIALOGO: Seleccionar patrón(es) -->
@@ -563,7 +747,8 @@ $$('button[data-addblock]').forEach(b=>{
       tipo: b.dataset.addblock,
       patron,
       puntos,
-      nombrePatron: `${patron.codigo||patron.id} · ${patron.descripcion}`
+      nombrePatron: `${patron.codigo||patron.id} · ${patron.descripcion}`,
+      lado: ($("#ladoMed") ? $("#ladoMed").value : "GO")
     };
     state.plan.push(bloque);
     renderPlan(); renderMedicion();
@@ -579,6 +764,13 @@ function renderPlan(){
       <div class="row">
         <div class="pill">${b.tipo}</div>
         <div class="chip">${b.nombrePatron}</div>
+        <div class="chip">
+          Lado GO/NO GO:
+          <select class="lado-bloque" data-bid="${b.id}">
+            <option value="GO" ${(b.lado||"GO")==="GO" ? "selected" : ""}>GO</option>
+            <option value="NOGO" ${(b.lado||"GO")==="NOGO" ? "selected" : ""}>NO GO</option>
+          </select>
+        </div>
         <span class="right mini muted">${b.puntos.length} punto(s) seleccionados</span>
       </div>
       <div class="table-box mt-8">
@@ -591,6 +783,15 @@ function renderPlan(){
       </div>
     </div>
   `).join('');
+
+  // Sincroniza los cambios de lado GO/NO GO por bloque con el estado
+  $$('#planBloques select.lado-bloque').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const bloque = state.plan.find(b => b.id === sel.dataset.bid);
+      if (bloque) bloque.lado = sel.value;
+    });
+  });
+
 }
 
 /* ========= MEDICION ========= */
@@ -643,7 +844,7 @@ $("#goResultados").addEventListener("click",()=>{ calcularResultados(); switchTa
 
 /* ========= RESULTADOS + INFORME ========= */
 function calcularResultados(){
-  const lado=$("#ladoMed").value;
+  const ladoGlobal=$("#ladoMed").value;
   const nominalGO=parseNum($("#nominalGO").value);
   const nominalNOGO=parseNum($("#nominalNOGO").value);
   const ref=$("#refError").value; 
@@ -662,12 +863,14 @@ function calcularResultados(){
   let hayIndeterminado = false;
 
   for (const b of state.plan){
+    const ladoBloque = b.lado || lado;
+    const nominalBloque = (ladoBloque === "GO" ? nominalGO : nominalNOGO);
     html += `
       <div class="card" style="margin-top:12px">
         <div class="row">
           <div class="pill">${b.tipo}</div>
           <div class="chip">${b.nombrePatron}</div>
-          <span class="right mini muted">Nominal bloque (${lado}): ${lado==='GO'?fmt(nominalGO):fmt(nominalNOGO)} mm</span>
+          <span class="right mini muted">Nominal bloque (${ladoBloque}): ${fmt(nominalBloque)} mm</span>
         </div>
         <div class="table-box mt-8">
           <table>
@@ -676,7 +879,7 @@ function calcularResultados(){
     `;
     b.puntos.forEach((p,i)=>{
       const key=`${b.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
-      let refVal = (ref==="patron") ? p.valor_nominal : (lado==="GO" ? nominalGO : nominalNOGO);
+      let refVal = (ref==="patron") ? p.valor_nominal : nominalBloque;
       const error = (media - refVal)*1000; 
       const U = (uBase*1000);           
       const T = tol*1000;               
@@ -776,17 +979,18 @@ function dibujarGraficaErrores(){
     return;
   }
 
-  const lado=$("#ladoMed").value;
+  const ladoGlobal=$("#ladoMed").value;
   const nominalGO=parseNum($("#nominalGO").value);
   const nominalNOGO=parseNum($("#nominalNOGO").value);
   const ref=$("#refError").value;
   const uBase=parseNum($("#uBase").value);
   const tol=parseNum($("#tolGlobal").value);
+  const ladoBloque = bloque.lado || ladoGlobal;
 
   const puntosGraf = [];
   bloque.puntos.forEach(p=>{
     const key=`${bloque.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
-    let refVal = (ref==="patron") ? p.valor_nominal : (lado==="GO" ? nominalGO : nominalNOGO);
+    let refVal = (ref==="patron") ? p.valor_nominal : (ladoBloque==="GO" ? nominalGO : nominalNOGO);
     const error = (media - refVal)*1000;
     puntosGraf.push({x:p.valor_nominal, y:error});
   });
@@ -973,6 +1177,8 @@ function switchTab(name){
   $('#tab-plan').classList.toggle('hidden', name!=='plan');
   $('#tab-medicion').classList.toggle('hidden', name!=='medicion');
   $('#tab-resultados').classList.toggle('hidden', name!=='resultados');
+  const anexo = $('#tab-anexo');
+  if (anexo) anexo.classList.toggle('hidden', name!=='anexo');
 }
 $$('.tab').forEach(t=> t.addEventListener('click',()=> switchTab(t.dataset.tab)));
 
