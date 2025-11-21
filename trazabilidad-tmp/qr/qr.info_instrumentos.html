@@ -550,12 +550,15 @@
       `<strong>${fabricanteTxt}</strong><br>` +
       `<span style="color:#7dd3fc">📍 Ubicación actual:</span> ${ubicActual}`;
 
-    // Observaciones: visibles pero secundarias (fuera del hero principal)
-    if (inst.observaciones){
-      heroObserv.style.display = "block";
-      heroObserv.innerHTML =
-        `<span class="label">📝 Observaciones</span>${inst.observaciones}`;
+    // Observaciones: siempre mostrar algo
+    let obs = inst.observaciones;
+    if (!obs || obs === "null" || (typeof obs === "string" && obs.trim() === "")) {
+      obs = "Propiedad de Talleres Mecánicos Paramio";
     }
+
+    heroObserv.style.display = "block";
+    heroObserv.innerHTML =
+      `<span class="label">📝 Observaciones</span>${obs}`;
 
     // Próxima calibración: usar siempre fecha_proxima_calibracion primero
     const proxCalHero = inst.fecha_proxima_calibracion ?? inst.proxima_cal ?? null;
@@ -611,12 +614,10 @@
         <span class="label">Tipo de calibración</span>
         <span class="value">${inst.tipo_calibracion || "-"}</span>
       </div>
-      ${inst.observaciones ? `
-        <div class="item">
-          <span class="label">Observaciones (detalle)</span>
-          <span class="value">${inst.observaciones}</span>
-        </div>` : ""
-      }
+      <div class="item">
+        <span class="label">Observaciones (detalle)</span>
+        <span class="value">${obs}</span>
+      </div>
     `;
 
     // ---------------------------
@@ -725,4 +726,3 @@
 
 </body>
 </html>
-
