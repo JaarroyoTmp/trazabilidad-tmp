@@ -1,184 +1,324 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>TMP · Ficha del instrumento</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>TMP · Ficha del instrumento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-  :root{
-    --bg:#020617;
-    --bg-grad1:#0f172a;
-    --bg-grad2:#020617;
-    --card:#020617;
-    --card-soft:#02081a;
-    --border:#1f2937;
-    --txt:#e5e7eb;
-    --muted:#9ca3af;
-    --accent:#22d3ee;
-    --accent-soft:#0ea5e9;
-    --danger:#fb7185;
-    --warn:#facc15;
-    --ok:#4ade80;
-  }
+  <style>
+    :root{
+      --bg:#020617;
+      --bg-grad1:#0f172a;
+      --bg-grad2:#020617;
+      --card:#020617;
+      --card-soft:#02081a;
+      --border:#1f2937;
+      --txt:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#22d3ee;
+      --accent-soft:#0ea5e9;
+      --danger:#fb7185;
+      --warn:#facc15;
+      --ok:#4ade80;
+    }
 
-  *{ box-sizing:border-box; }
+    *{ box-sizing:border-box; }
 
-  body{
-    margin:0;
-    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    background:
-      radial-gradient(circle at 0% 0%, #0f172a 0, transparent 55%),
-      radial-gradient(circle at 100% 0%, #0b1120 0, transparent 55%),
-      radial-gradient(circle at 50% 110%, #0f172a 0, transparent 60%),
-      linear-gradient(180deg,var(--bg-grad1),var(--bg-grad2));
-    color:var(--txt);
-    -webkit-font-smoothing:antialiased;
-  }
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, #0f172a 0, transparent 55%),
+        radial-gradient(circle at 100% 0%, #0b1120 0, transparent 55%),
+        radial-gradient(circle at 50% 110%, #0f172a 0, transparent 60%),
+        linear-gradient(180deg,var(--bg-grad1),var(--bg-grad2));
+      color:var(--txt);
+      -webkit-font-smoothing:antialiased;
+    }
 
-  header{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:14px 16px;
-    border-bottom:1px solid rgba(148,163,184,.25);
-    background:
-      radial-gradient(circle at 0% 0%, rgba(56,189,248,.22) 0, transparent 60%),
-      radial-gradient(circle at 100% 0%, rgba(59,130,246,.25) 0, transparent 60%),
-      linear-gradient(135deg,#020617,#020617f0);
-    position:sticky;
-    top:0;
-    z-index:20;
-    backdrop-filter:blur(18px);
-  }
+    /* Botón volver */
+    #volverHome{
+      position:fixed;
+      right:14px;
+      bottom:16px;
+      z-index:40;
+      border:none;
+      border-radius:999px;
+      padding:8px 16px;
+      font-size:14px;
+      cursor:pointer;
+      background:#0f172a;
+      color:#e5e7eb;
+      border:1px solid rgba(148,163,184,.4);
+      box-shadow:0 10px 25px rgba(15,23,42,.9);
+    }
+    #volverHome:hover{
+      background:#111827;
+    }
 
-  .logo{
-    height:40px;
-    width:auto;
-    filter:drop-shadow(0 0 8px rgba(56,189,248,.45));
-  }
+    header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(148,163,184,.25);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,.22) 0, transparent 60%),
+        radial-gradient(circle at 100% 0%, rgba(59,130,246,.25) 0, transparent 60%),
+        linear-gradient(135deg,#020617,#020617f0);
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(18px);
+    }
 
-  .h-titles{
-    display:flex;
-    flex-direction:column;
-  }
+    .logo{
+      height:40px;
+      width:auto;
+      filter:drop-shadow(0 0 8px rgba(56,189,248,.45));
+    }
 
-  .h-titles h1{
-    margin:0;
-    font-size:18px;
-    letter-spacing:.04em;
-  }
+    .h-titles{
+      display:flex;
+      flex-direction:column;
+    }
 
-  .h-titles span{
-    font-size:12px;
-    color:var(--muted);
-  }
+    .h-titles h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.04em;
+    }
 
-  .wrap{
-    max-width:760px;
-    margin:18px auto 32px;
-    padding:0 16px 40px;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
+    .h-titles span{
+      font-size:12px;
+      color:var(--muted);
+    }
 
-  /* HERO NEÓN PRINCIPAL */
-  .hero-card{
-    position:relative;
-    border-radius:18px;
-    padding:14px 14px 12px;
-    background:
-      radial-gradient(circle at 0% 0%, rgba(56,189,248,.18) 0, transparent 55%),
-      radial-gradient(circle at 100% 0%, rgba(59,130,246,.20) 0, transparent 60%),
-      linear-gradient(135deg,#020617,#020617);
-    border:1px solid rgba(148,163,184,.35);
-    box-shadow:
-      0 18px 45px rgba(15,23,42,.95),
-      0 0 40px rgba(56,189,248,.18);
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:10px;
-  }
+    .wrap{
+      max-width:760px;
+      margin:18px auto 32px;
+      padding:0 16px 40px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
 
-  .hero-main{
-    max-width:70%;
-  }
+    /* HERO NEÓN PRINCIPAL */
+    .hero-card{
+      position:relative;
+      border-radius:18px;
+      padding:14px 14px 12px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,.18) 0, transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(59,130,246,.20) 0, transparent 60%),
+        linear-gradient(135deg,#020617,#020617);
+      border:1px solid rgba(148,163,184,.35);
+      box-shadow:
+        0 18px 45px rgba(15,23,42,.95),
+        0 0 40px rgba(56,189,248,.18);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
 
-  .hero-code{
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:.18em;
-    color:var(--muted);
-    margin-bottom:2px;
-  }
+    .hero-main{
+      max-width:70%;
+    }
 
-  .hero-title{
-    font-size:17px;
-    font-weight:700;
-  }
+    .hero-code{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:var(--muted);
+      margin-bottom:2px;
+    }
 
-  .hero-sub{
-    font-size:13px;
-    color:var(--muted);
-    margin-top:4px;
-  }
+    .hero-title{
+      font-size:17px;
+      font-weight:700;
+    }
 
-  .hero-status{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-end;
-    gap:4px;
-    font-size:12px;
-  }
+    .hero-sub{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.45;
+    }
 
-  .status-pill{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:4px 10px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:600;
-    border:1px solid rgba(148,163,184,.5);
-    background:rgba(15,23,42,.8);
-    text-transform:uppercase;
-    letter-spacing:.12em;
-  }
+    .hero-status{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+      font-size:12px;
+    }
 
-  .status-pill .dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-  }
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      border:1px solid rgba(148,163,184,.5);
+      background:rgba(15,23,42,.9);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
 
-  .status-ok{
-    border-color:rgba(74,222,128,.4);
-    color:#bbf7d0;
-    box-shadow:0 0 12px rgba(74,222,128,.5);
-  }
-  .status-ok .dot{background:var(--ok);}
+    .status-pill .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+    }
 
-  .status-warn{
-    border-color:rgba(250,204,21,.5);
-    color:#fef3c7;
-    box-shadow:0 0 12px rgba(250,204,21,.55);
-  }
-  .status-warn .dot{background:var(--warn);}
+    .status-ok{
+      border-color:rgba(74,222,128,.4);
+      color:#bbf7d0;
+      box-shadow:0 0 14px rgba(74,222,128,.55);
+    }
+    .status-ok .dot{background:var(--ok);}
 
-  .status-bad{
-    border-color:rgba(248,113,113,.65);
-    color:#fee2e2;
-    box-shadow:0 0 16px rgba(248,113,113,.8);
-  }
-  .status-bad .dot{background:var(--danger);}
+    .status-warn{
+      border-color:rgba(250,204,21,.5);
+      color:#fef3c7;
+      box-shadow:0 0 14px rgba(250,204,21,.55);
+    }
+    .status-warn .dot{background:var(--warn);}
 
-  .status-caption{
-    font-size:11px;
-    color:var(--muted);
-  }
-</style>
+    .status-bad{
+      border-color:rgba(248,113,113,.7);
+      color:#fee2e2;
+      box-shadow:0 0 18px rgba(248,113,113,.85);
+    }
+    .status-bad .dot{background:var(--danger);}
+
+    .status-info{
+      border-color:rgba(56,189,248,.6);
+      color:#e0f2fe;
+      box-shadow:0 0 14px rgba(56,189,248,.6);
+    }
+    .status-info .dot{background:#38bdf8;}
+
+    .status-caption{
+      font-size:11px;
+      color:var(--muted);
+      max-width:200px;
+      text-align:right;
+    }
+
+    /* Observaciones bajo HERO */
+    .hero-observ{
+      margin-top:6px;
+      border-radius:12px;
+      padding:8px 10px;
+      background:rgba(15,23,42,.9);
+      border:1px solid rgba(148,163,184,.25);
+      font-size:12px;
+      color:#e5e7eb;
+    }
+    .hero-observ span.label{
+      color:#a5b4fc;
+      font-weight:600;
+      margin-right:4px;
+    }
+
+    /* Tarjetas generales */
+    .card{
+      border-radius:16px;
+      padding:14px 14px 12px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(15,118,110,.15) 0, transparent 55%),
+        linear-gradient(135deg,#020617,#02081a);
+      border:1px solid rgba(31,41,55,.9);
+      box-shadow:0 16px 35px rgba(15,23,42,.95);
+    }
+
+    h2{
+      margin:0 0 6px;
+      font-size:16px;
+    }
+
+    .card-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .item{
+      display:flex;
+      flex-direction:column;
+      margin-bottom:6px;
+      font-size:13px;
+    }
+    .item .label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:2px;
+    }
+    .item .value{
+      font-size:13px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* Error box */
+    .error-box{
+      border-radius:14px;
+      padding:12px 14px;
+      background:#3f1d1d;
+      border:1px solid #7f1d1d;
+      color:#fee2e2;
+      box-shadow:0 12px 30px rgba(0,0,0,.65);
+      font-size:14px;
+    }
+    .error-box h2{
+      margin-top:0;
+      margin-bottom:6px;
+      font-size:16px;
+    }
+
+    /* Movimientos */
+    .mov-item{
+      border-radius:12px;
+      padding:10px 11px;
+      background:#020617;
+      border:1px solid rgba(31,41,55,.8);
+      margin-bottom:8px;
+      font-size:12px;
+    }
+    .mov-header{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:4px;
+    }
+    .mov-type{
+      font-weight:600;
+      color:#e5e7eb;
+    }
+    .mov-date{
+      color:var(--muted);
+      font-size:11px;
+    }
+    .mov-body-line{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-size:12px;
+    }
+    .mov-body-label{
+      color:var(--muted);
+      min-width:70px;
+    }
+  </style>
 </head>
 
 <body>
@@ -216,6 +356,10 @@
       <div class="status-caption" id="heroStatusCaption">Estado de calibración</div>
     </div>
   </section>
+
+  <!-- Observaciones destacadas (pero secundarias) -->
+  <section id="heroObserv" class="hero-observ" style="display:none"></section>
+
   <!-- Información básica -->
   <section id="infoCard" class="card" style="display:none">
     <h2>Información básica</h2>
@@ -312,19 +456,21 @@
 
     if (dias === null){
       return {
-        clase: "status-warn",
+        clase: "status-info",
         texto: "Sin próxima calibración",
         detalle: "Este instrumento no tiene fecha futura asignada.",
-        dias: null
+        dias: null,
+        icono: "🛈"
       };
     }
 
     if (dias < 0){
       return {
         clase: "status-bad",
-        texto: "FUERA DE CALIBRACIÓN",
+        texto: "Fuera de calibración",
         detalle: "El equipo debe inmovilizarse hasta nueva calibración.",
-        dias
+        dias,
+        icono: "⛔"
       };
     }
 
@@ -333,7 +479,8 @@
         clase: "status-warn",
         texto: "Próxima a vencer",
         detalle: "Planificar calibración en breve.",
-        dias
+        dias,
+        icono: "⚠"
       };
     }
 
@@ -341,7 +488,8 @@
       clase: "status-ok",
       texto: "En regla",
       detalle: "Instrumento dentro del plazo de calibración.",
-      dias
+      dias,
+      icono: "✔"
     };
   }
 
@@ -378,7 +526,7 @@
     }
 
     // ---------------------------
-    //   HERO CON FECHAS CORRECTAS
+    //   HERO CON DATOS ESENCIALES
     // ---------------------------
     const hero = document.getElementById("hero");
     const heroCode = document.getElementById("heroCode");
@@ -387,30 +535,46 @@
     const heroStatusPill = document.getElementById("heroStatusPill");
     const heroStatusLabel = document.getElementById("heroStatusLabel");
     const heroStatusCaption = document.getElementById("heroStatusCaption");
+    const heroObserv = document.getElementById("heroObserv");
 
     hero.style.display = "flex";
 
     heroCode.textContent = `CÓDIGO · ${codigo}`;
     heroTitle.textContent = inst.descripcion || "Instrumento sin descripción";
 
-    heroSub.textContent =
-      `${inst.fabricante || "Fabricante N/D"} · ` +
-      `Ubicación: ${inst.ubicacion_actual || "N/D"}`;
+    // Texto principal: fabricante + ubicación actual muy visible
+    const fabricanteTxt = inst.fabricante || "Fabricante N/D";
+    const ubicActual = inst.ubicacion_actual || "No especificada";
 
-    const est = computeEstado(inst.proxima_cal);
-    heroStatusPill.className = "status-pill " + est.clase;
-    heroStatusLabel.textContent = est.texto;
+    heroSub.innerHTML =
+      `<strong>${fabricanteTxt}</strong><br>` +
+      `<span style="color:#7dd3fc">📍 Ubicación actual:</span> ${ubicActual}`;
 
-    if (est.dias === null){
-      heroStatusCaption.textContent = est.detalle;
-    } else if (est.dias < 0){
-      const abs = Math.abs(est.dias);
+    // Observaciones: visibles pero secundarias (fuera del hero principal)
+    if (inst.observaciones){
+      heroObserv.style.display = "block";
+      heroObserv.innerHTML =
+        `<span class="label">📝 Observaciones</span>${inst.observaciones}`;
+    }
+
+    // Próxima calibración: usar siempre fecha_proxima_calibracion primero
+    const proxCalHero = inst.fecha_proxima_calibracion ?? inst.proxima_cal ?? null;
+    const estadoHero = computeEstado(proxCalHero);
+
+    heroStatusPill.className = "status-pill " + estadoHero.clase;
+    heroStatusLabel.textContent = `${estadoHero.icono} ${estadoHero.texto}`;
+
+    if (estadoHero.dias === null){
+      heroStatusCaption.textContent = estadoHero.detalle;
+    } else if (estadoHero.dias < 0){
+      const abs = Math.abs(estadoHero.dias);
       heroStatusCaption.textContent =
-        `Vencida hace ${abs} día${abs===1?"":"s"}.`;
+        `${estadoHero.detalle} Vencida hace ${abs} día${abs===1?"":"s"}.`;
     } else {
       heroStatusCaption.textContent =
-        `Faltan ${est.dias} día${est.dias===1?"":"s"} para la próxima calibración.`;
+        `${estadoHero.detalle} Faltan ${estadoHero.dias} día${estadoHero.dias===1?"":"s"}.`;
     }
+
     // ---------------------------
     //   INFORMACIÓN BÁSICA
     // ---------------------------
@@ -449,22 +613,21 @@
       </div>
       ${inst.observaciones ? `
         <div class="item">
-          <span class="label">Observaciones</span>
+          <span class="label">Observaciones (detalle)</span>
           <span class="value">${inst.observaciones}</span>
         </div>` : ""
       }
     `;
 
     // ---------------------------
-    //   ESTADO DE CALIBRACIÓN (CORREGIDO)
+    //   ESTADO DE CALIBRACIÓN
     // ---------------------------
     const calCard = document.getElementById("calCard");
     const calBody = document.getElementById("calBody");
     calCard.style.display = "block";
 
-    // Nombres correctos de columnas en Supabase:
     const ult = inst.fecha_ultima_cal ?? inst.fecha_calibracion ?? null;
-    const prox = inst.proxima_cal ?? inst.fecha_proxima_calibracion ?? null;
+    const prox = inst.fecha_proxima_calibracion ?? inst.proxima_cal ?? null;
 
     const est2 = computeEstado(prox);
 
@@ -492,12 +655,13 @@
       <div class="item" style="margin-top:8px;">
         <span class="status-pill ${est2.clase}">
           <span class="dot"></span>
-          ${est2.texto}
+          ${est2.icono} ${est2.texto}
         </span>
       </div>
 
       <p class="muted">${detalleExtra}</p>
     `;
+
     // ---------------------------
     //   HISTÓRICO DE MOVIMIENTOS
     // ---------------------------
@@ -561,3 +725,4 @@
 
 </body>
 </html>
+
