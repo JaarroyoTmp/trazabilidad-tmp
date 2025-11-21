@@ -97,6 +97,15 @@
     display: block;
   }
 }
+
+@media print {
+  #insProx,
+  #insUltima,
+  #insEstado {
+    display: none !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -645,7 +654,8 @@ async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
       .from("instrumentos")
       .update({
         fecha_calibracion: fechaCal || null,
-        fecha_proxima_calibracion:      proxCal  || null
+        fecha_proxima_calibracion:      proxCal  || null,
+        estado: "calibrado"
       })
       .eq("codigo", codigoInstrumento);
 
