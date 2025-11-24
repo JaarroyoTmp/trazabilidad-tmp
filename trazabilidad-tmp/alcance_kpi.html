@@ -758,18 +758,12 @@
   let chartEstados = null;
   let chartUbic    = null;
 
+  // Igual que en home: admite YYYY_MM_DD
   function parseDate(str){
     if (!str) return null;
-    const d = new Date(str);
+    const norm = String(str).replace(/_/g,"-");
+    const d = new Date(norm);
     return isNaN(d) ? null : d;
-  }
-
-  function formatDate(d){
-    if (!d) return "—";
-    const dd = String(d.getDate()).padStart(2,"0");
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const yy = d.getFullYear();
-    return `${dd}/${mm}/${yy}`;
   }
 
   function pct(p, t){
@@ -786,7 +780,8 @@
     try{
       const { data: instrumentos, error } = await supabase
         .from("instrumentos")
-        .select("codigo, estado, ubicacion_actual, proxima_calibracion");
+        // usamos ambas columnas de fecha por compatibilidad
+        .select("codigo, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
 
       if (error){
         console.error("Error cargando instrumentos para alcance_kpi:", error);
@@ -804,11 +799,11 @@
 
       let enLab = 0;
       let enUso = 0;
-      let calibrados = 0;
+      let calibrados = 0; // EN VIGOR (no vencidos)
       let fuera = 0;
-      let prox = 0;
+      let prox  = 0;
 
-      const estadosMap = {}; // estado -> count
+      const estadosMap = {}; // estado -> count (para el gráfico)
 
       instrumentos.forEach(inst => {
         const estado = (inst.estado || "Sin estado").trim();
@@ -818,12 +813,20 @@
         if (ubic === "laboratorio") enLab++;
         else enUso++;
 
-        if (estado.toLowerCase() === "calibrado") calibrados++;
-
-        const dProx = parseDate(inst.proxima_calibracion);
+        // Fecha próxima: nueva + antigua
+        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
         if (dProx){
-          if (dProx < hoy) fuera++;
-          else if (dProx >= hoy && dProx <= mas30) prox++;
+          if (dProx < hoy){
+            // fuera de calibración
+            fuera++;
+          } else {
+            // en vigor (calibrado)
+            calibrados++;
+            // y además próximos si están dentro de 30 días
+            if (dProx <= mas30){
+              prox++;
+            }
+          }
         }
       });
 
@@ -838,13 +841,13 @@
       kActivosNote.textContent = total ? "100% de la flota controlada en Supabase" : "";
       kLabNote.textContent     = total ? `${pct(enLab,total)} en laboratorio` : "";
       kUsoNote.textContent     = total ? `${pct(enUso,total)} en uso (taller / otras áreas)` : "";
-      kCalNote.textContent     = total ? `${pct(calibrados,total)} con estado “Calibrado”` : "";
+      kCalNote.textContent     = total ? `${pct(calibrados,total)} en vigor (no vencidos)` : "";
 
       if (total){
         kProxNote.textContent  = prox ? `${pct(prox,total)} vencen en menos de 30 días` : "Sin vencimientos en 30 días";
         kFueraNote.textContent = fuera ? `${pct(fuera,total)} ya fuera de plazo` : "Objetivo: 0 equipos vencidos (actualmente alcanzado)";
       } else {
-        kProxNote.textContent = "";
+        kProxNote.textContent  = "";
         kFueraNote.textContent = "";
       }
 
@@ -928,4 +931,3 @@
 
 </body>
 </html>
-
