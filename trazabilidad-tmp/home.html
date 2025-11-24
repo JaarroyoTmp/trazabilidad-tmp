@@ -916,7 +916,7 @@
   async function cargarDashboard() {
     const { data: instrumentos, error } = await supabase
       .from("instrumentos")
-      .select("codigo, estado, ubicacion_actual, fecha_proxima_calibracion");
+      .select("codigo, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
 
     if (error) {
       console.error("Error cargando instrumentos:", error);
@@ -943,7 +943,7 @@
       else enUso++;
 
       // Fechas
-      const prox = parseDate(inst.fecha_proxima_calibracion);
+      const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
 
       if (prox) {
         if (prox < hoy) {
