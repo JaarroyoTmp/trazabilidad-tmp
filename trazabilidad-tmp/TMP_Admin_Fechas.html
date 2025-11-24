@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TMP · Admin Fechas de Calibración</title>
+  <title>TMP · Revisión documental</title>
+
+  <!-- Supabase config compartida -->
+  <script type="module" src="config.mjs"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,10 +16,9 @@
     :root{
       --bg0:#020617;
       --bg1:#020c1a;
-      --bg2:#071422;
-      --panel:#0b1624;
-      --card:#111827;
-      --border:#24334a;
+      --panel:#020817;
+      --card:#020617;
+      --border:#1f2937;
       --accent:#38bdf8;
       --accent-soft:#0ea5e9;
       --danger:#f97373;
@@ -46,7 +48,7 @@
 
     header{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       gap:14px;
       padding:10px 0 16px;
       border-bottom:1px solid #1f2937;
@@ -85,10 +87,18 @@
       color:#fecaca;
     }
 
+    .badge-note{
+      background:#1e293b;
+      border-color:#334155;
+      color:#e5e7eb;
+      font-size:11px;
+      margin-top:4px;
+    }
+
     .main-grid{
       margin-top:18px;
       display:grid;
-      grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
+      grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
       gap:16px;
     }
 
@@ -120,7 +130,7 @@
       transition:opacity .25s ease;
     }
     .card:hover::before{
-      opacity:.22;
+      opacity:.15;
     }
     .card > *{position:relative;z-index:1;}
 
@@ -154,12 +164,12 @@
       margin-bottom:4px;
     }
 
-    input,button,select{
+    input,button,select,textarea{
       font-family:inherit;
       color:inherit;
     }
 
-    input[type="text"], input[type="date"]{
+    input[type="text"], input[type="date"], textarea{
       width:100%;
       border-radius:10px;
       border:1px solid #1f2937;
@@ -171,9 +181,15 @@
       transition:border-color .15s ease, box-shadow .15s ease;
     }
     input[type="text"]:focus,
-    input[type="date"]:focus{
+    input[type="date"]:focus,
+    textarea:focus{
       border-color:var(--accent);
       box-shadow:0 0 0 1px rgba(56,189,248,.4);
+    }
+
+    textarea{
+      min-height:60px;
+      resize:vertical;
     }
 
     .row{
@@ -206,6 +222,10 @@
       border-color:#fecaca;
       color:#fecaca;
       background:#450a0a;
+    }
+    .btn-ghost{
+      background:transparent;
+      border-color:#1f2937;
     }
     .btn:disabled{
       opacity:.5;
@@ -258,32 +278,6 @@
       background:#04101e;
       cursor:pointer;
     }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      padding:3px 8px;
-      border-radius:999px;
-      border:1px solid #1f2937;
-      background:#020617;
-      font-size:11px;
-      color:var(--muted);
-    }
-    .chip-ok{
-      border-color:#22c55e;
-      color:#bbf7d0;
-      background:#052e16;
-    }
-    .chip-alert{
-      border-color:#f97373;
-      color:#fecaca;
-      background:#450a0a;
-    }
-    .chip-warn{
-      border-color:#fbbf24;
-      color:#fef9c3;
-      background:#422006;
-    }
 
     .status-pill{
       font-size:11px;
@@ -315,6 +309,18 @@
       background:#020617;
     }
 
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid #1f2937;
+      background:#020617;
+      font-size:11px;
+      color:var(--muted);
+    }
+
     .detail-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -331,7 +337,7 @@
       color:var(--muted);
     }
 
-    .highlight{
+    .highlight-row{
       box-shadow:0 0 0 1px rgba(56,189,248,.7);
     }
 
@@ -382,8 +388,13 @@
 <div class="wrap">
   <header>
     <div>
-      <div class="brand-title">TMP · Admin Fechas de Calibración</div>
-      <div class="brand-sub">Edición rápida de fechas de calibración y próximas calibraciones (solo instrumentos).</div>
+      <div class="brand-title">TMP · Revisión documental</div>
+      <div class="brand-sub">
+        Corrección administrativa de fechas de calibración por revisión documental.
+      </div>
+      <div class="badge badge-note">
+        Uso restringido al responsable metrológico. Cada corrección queda registrada (antes/después, motivo, fecha y usuario).
+      </div>
     </div>
     <span id="badgeOnline" class="badge badge-offline" style="margin-left:auto;">Offline</span>
   </header>
@@ -397,7 +408,7 @@
           <span class="emoji">📋</span>
           <span>Instrumentos</span>
         </div>
-        <div class="card-sub">Buscar por código o descripción y seleccionar el equipo a editar.</div>
+        <div class="card-sub">Busca el instrumento que quieres revisar y corrige las fechas si hay discrepancias documentales.</div>
       </div>
 
       <div class="search-bar">
@@ -409,11 +420,13 @@
           <button id="btnBuscar" class="btn btn-primary">
             <span class="icon">🔍</span> Buscar
           </button>
-          <button id="btnLimpiarFiltro" class="btn">
+          <button id="btnLimpiarFiltro" class="btn btn-ghost">
             Limpiar
           </button>
         </div>
-        <p class="mini">Se consultan los datos en Supabase en tiempo real. Puedes introducir solo parte del código (ej. “402”) o un texto de la descripción.</p>
+        <p class="mini">
+          Ejemplos de uso: corrección de errores de carga inicial, discrepancias entre informe papel y sistema, migraciones de datos, etc.
+        </p>
       </div>
 
       <div style="margin-top:10px;max-height:390px;overflow:auto;border-radius:12px;border:1px solid #111827;">
@@ -434,7 +447,7 @@
       </div>
 
       <p class="mini" style="margin-top:6px;">
-        Haz clic en una fila para cargar el instrumento en el panel derecho y editar sus fechas.
+        Haz clic en una fila para cargar el instrumento en el panel derecho y registrar la corrección documental de fechas.
       </p>
     </section>
 
@@ -443,9 +456,9 @@
       <div class="card-title-row">
         <div class="card-title">
           <span class="emoji">🛠</span>
-          <span>Edición de fechas</span>
+          <span>Corrección de fechas</span>
         </div>
-        <div class="card-sub">Modifica fechas de calibración sin restricciones (pasado / futuro).</div>
+        <div class="card-sub">Las correcciones quedan registradas en la tabla <code>correcciones_fechas</code> con motivo obligatorio.</div>
       </div>
 
       <div id="detalleVacio" class="mini muted">
@@ -491,17 +504,27 @@
 
         <div class="divider"></div>
 
+        <div>
+          <label>Motivo de la corrección (obligatorio)</label>
+          <textarea id="detMotivo" placeholder="Ej.: Error de transcripción en la fecha de próxima calibración detectado en revisión documental."></textarea>
+        </div>
+        <p class="mini" style="margin-top:4px;">
+          Este texto aparecerá en el registro de <code>correcciones_fechas</code> junto con el antes/después.
+        </p>
+
+        <div class="divider"></div>
+
         <div class="row" style="justify-content:flex-end;margin-top:4px;">
           <button id="btnResetFechas" class="btn btn-danger">
             <span class="icon">🧹</span> Vaciar fechas
           </button>
-          <button id="btnGuardarFechas" class="btn btn-primary">
-            <span class="icon">💾</span> Guardar en Supabase
+          <button id="btnGuardarRevision" class="btn btn-primary">
+            <span class="icon">💾</span> Guardar revisión
           </button>
         </div>
 
         <p id="detInfoMsg" class="mini muted" style="margin-top:6px;">
-          Cambios pendientes sin guardar.
+          Sin cambios pendientes.
         </p>
       </div>
     </section>
@@ -519,15 +542,7 @@
 </div>
 
 <script type="module">
-  // ========= SUPABASE CONFIG =========
-  const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
-
-  let supabase = null;
-  const state = {
-    instrumentos: [],
-    seleccionado: null
-  };
+  const supabase = window.supabase;
 
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
@@ -546,8 +561,9 @@
   const detUbicacion = $("#detUbicacion");
   const detFechaCal = $("#detFechaCal");
   const detFechaProx = $("#detFechaProx");
+  const detMotivo = $("#detMotivo");
   const detInfoMsg = $("#detInfoMsg");
-  const btnGuardarFechas = $("#btnGuardarFechas");
+  const btnGuardarRevision = $("#btnGuardarRevision");
   const btnResetFechas = $("#btnResetFechas");
 
   const toast = $("#toast");
@@ -555,8 +571,13 @@
   const toastSub = $("#toastSub");
   const toastClose = $("#toastClose");
 
-  function setOnline(ok){
-    if (ok){
+  const state = {
+    instrumentos: [],
+    seleccionado: null
+  };
+
+  function setOnlineBadge() {
+    if (supabase) {
       badgeOnline.textContent = "Online (Supabase)";
       badgeOnline.classList.add("badge-online");
       badgeOnline.classList.remove("badge-offline");
@@ -566,20 +587,7 @@
       badgeOnline.classList.add("badge-offline");
     }
   }
-
-  async function ensureSupabase(){
-    if (!supabase){
-      try{
-        const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.5");
-        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      }catch(e){
-        console.error("No se pudo crear el cliente Supabase:", e);
-        supabase = null;
-      }
-    }
-    setOnline(!!supabase);
-    return supabase;
-  }
+  setOnlineBadge();
 
   function showToast(main, sub){
     toastMain.textContent = main;
@@ -621,7 +629,7 @@
       const sel = state.seleccionado && state.seleccionado.id === inst.id;
       const {cls,txt} = estadoPill(inst.estado, inst.fecha_proxima_calibracion);
       return `
-        <tr data-id="${inst.id}" class="${sel ? "highlight" : ""}">
+        <tr data-id="${inst.id}" class="${sel ? "highlight-row" : ""}">
           <td>${inst.codigo || "—"}</td>
           <td>${inst.descripcion || "—"}</td>
           <td><span class="status-pill ${cls}">${txt}</span></td>
@@ -655,19 +663,15 @@
 
     detFechaCal.value = inst.fecha_calibracion || "";
     detFechaProx.value = inst.fecha_proxima_calibracion || "";
+    detMotivo.value = "";
 
     detInfoMsg.textContent = "Sin cambios pendientes.";
-    detInfoMsg.classList.remove("muted");
-    detInfoMsg.classList.add("muted");
-
-    renderTabla();
   }
 
   async function buscarInstrumentos(){
     const term = txtBuscar.value.trim();
-    await ensureSupabase();
     if (!supabase){
-      showToast("Supabase no disponible","Revisa la conexión o la URL/KEY.");
+      showToast("Supabase no disponible","Revisa config.mjs o la conexión.");
       return;
     }
     if (!term){
@@ -705,54 +709,83 @@
     }
   }
 
-  async function guardarFechas(){
+  async function guardarRevision(){
     if (!state.seleccionado){
       alert("Selecciona primero un instrumento en la tabla.");
       return;
     }
-    await ensureSupabase();
     if (!supabase){
       showToast("Supabase no disponible","No se pueden guardar cambios ahora.");
       return;
     }
 
-    const fechaCal = detFechaCal.value || null;
-    const fechaProx = detFechaProx.value || null;
+    const fechaCalNueva = detFechaCal.value || null;
+    const fechaProxNueva = detFechaProx.value || null;
+    const motivo = detMotivo.value.trim();
 
-    if (!confirm("¿Deseas guardar estas fechas en Supabase?")) return;
+    if (!motivo){
+      alert("El motivo de la corrección es obligatorio.");
+      detMotivo.focus();
+      return;
+    }
 
-    btnGuardarFechas.disabled = true;
-    btnGuardarFechas.textContent = "Guardando…";
+    const inst = state.seleccionado;
+    const fechaCalAntes = inst.fecha_calibracion || null;
+    const fechaProxAntes = inst.fecha_proxima_calibracion || null;
+
+    if (!confirm("¿Deseas registrar esta revisión documental y actualizar las fechas del instrumento?")) return;
+
+    btnGuardarRevision.disabled = true;
+    btnGuardarRevision.textContent = "Guardando…";
 
     try{
-      const { error } = await supabase
+      // 1) Actualizar instrumento
+      const { error: errUpdate } = await supabase
         .from("instrumentos")
         .update({
-          fecha_calibracion: fechaCal,
-          fecha_proxima_calibracion: fechaProx
+          fecha_calibracion: fechaCalNueva,
+          fecha_proxima_calibracion: fechaProxNueva
         })
-        .eq("id", state.seleccionado.id);
+        .eq("id", inst.id);
 
-      if (error){
-        console.error(error);
-        showToast("Error al guardar", error.message || "No se pudieron actualizar las fechas.");
+      if (errUpdate){
+        console.error(errUpdate);
+        showToast("Error al actualizar instrumento", errUpdate.message || "No se pudieron actualizar las fechas.");
         return;
       }
 
+      // 2) Registrar corrección en la tabla de log
+      const { error: errLog } = await supabase
+        .from("correcciones_fechas")
+        .insert({
+          instrumento_codigo: inst.codigo || "",
+          fecha_calibracion_antes: fechaCalAntes,
+          fecha_calibracion_despues: fechaCalNueva,
+          fecha_proxima_antes: fechaProxAntes,
+          fecha_proxima_despues: fechaProxNueva,
+          motivo: motivo,
+          usuario: "Administrador TMP"
+        });
+
+      if (errLog){
+        console.error(errLog);
+        showToast("Fechas actualizadas, pero sin log", "Se actualizaron las fechas, pero no se pudo guardar el registro en correcciones_fechas.");
+      } else {
+        showToast("Revisión registrada","Fechas actualizadas y corrección documentada en correcciones_fechas.");
+      }
+
       // Actualizar copia local
-      state.seleccionado.fecha_calibracion = fechaCal;
-      state.seleccionado.fecha_proxima_calibracion = fechaProx;
-      const idx = state.instrumentos.findIndex(x=>x.id===state.seleccionado.id);
-      if (idx>=0) state.instrumentos[idx] = {...state.seleccionado};
-
+      inst.fecha_calibracion = fechaCalNueva;
+      inst.fecha_proxima_calibracion = fechaProxNueva;
+      const idx = state.instrumentos.findIndex(x=>x.id===inst.id);
+      if (idx>=0) state.instrumentos[idx] = {...inst};
+      seleccionarInstrumento(inst);
       renderTabla();
-      seleccionarInstrumento(state.seleccionado);
 
-      showToast("Fechas actualizadas","Los cambios se han guardado correctamente en Supabase.");
-      detInfoMsg.textContent = "Cambios guardados en Supabase.";
+      detInfoMsg.textContent = "Revisión guardada en Supabase (instrumentos + correcciones_fechas).";
     } finally {
-      btnGuardarFechas.disabled = false;
-      btnGuardarFechas.textContent = "Guardar en Supabase";
+      btnGuardarRevision.disabled = false;
+      btnGuardarRevision.textContent = "Guardar revisión";
     }
   }
 
@@ -761,10 +794,10 @@
       alert("Selecciona primero un instrumento.");
       return;
     }
-    if (!confirm("Esto dejará ambas fechas en blanco (NULL) en Supabase. ¿Seguro?")) return;
+    if (!confirm("Esto dejará ambas fechas en blanco (NULL) cuando guardes la revisión documental. ¿Seguro?")) return;
     detFechaCal.value = "";
     detFechaProx.value = "";
-    detInfoMsg.textContent = "Fechas vaciadas localmente. Pulsa “Guardar en Supabase” para aplicar.";
+    detInfoMsg.textContent = "Fechas vaciadas localmente. Pulsa “Guardar revisión” para registrar el cambio.";
   }
 
   // Eventos
@@ -781,7 +814,7 @@
     if (e.key === "Enter") buscarInstrumentos();
   });
 
-  btnGuardarFechas.addEventListener("click", guardarFechas);
+  btnGuardarRevision.addEventListener("click", guardarRevision);
   btnResetFechas.addEventListener("click", resetFechas);
 
   detFechaCal.addEventListener("change", ()=>{
@@ -790,9 +823,9 @@
   detFechaProx.addEventListener("change", ()=>{
     detInfoMsg.textContent = "Hay cambios pendientes sin guardar.";
   });
-
-  // Arranque
-  (async ()=>{ await ensureSupabase(); })();
+  detMotivo.addEventListener("input", ()=>{
+    detInfoMsg.textContent = "Hay cambios pendientes sin guardar.";
+  });
 </script>
 </body>
 </html>
