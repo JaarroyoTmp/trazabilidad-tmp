@@ -591,6 +591,25 @@
         border-radius:12px;
       }
     }
+
+/* ====== KPI CARDS CLICABLES ====== */
+
+.kpi-card.kpi-clickable {
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.kpi-card.kpi-clickable:hover {
+  background: #263041;
+  box-shadow: 0 0 12px rgba(0,180,216,0.35);
+  transform: translateY(-2px);
+}
+
+.kpi-card.kpi-clickable:active {
+  transform: scale(0.97);
+}
+
+    
   </style>
 </head>
 <body>
@@ -630,23 +649,30 @@
         <div class="kpi-extra" id="kpi-total-extra"></div>
       </div>
 
-      <div class="kpi-card" id="kpi-card-uso">
-        <div class="kpi-label">En uso (fuera de laboratorio)</div>
-        <div class="kpi-value" id="kpi-uso">–</div>
-        <div class="kpi-extra" id="kpi-uso-extra"></div>
-      </div>
+     <a href="listado_instrumentos.html?filtro=uso" class="kpi-link">
+  <div class="kpi-card" id="kpi-card-uso">
+      <div class="kpi-label">En uso (fuera de laboratorio)</div>
+      <div class="kpi-value" id="kpi-uso">–</div>
+      <div class="kpi-extra" id="kpi-uso-extra"></div>
+  </div>
+</a>
+   
+     <a href="listado_instrumentos.html?filtro=laboratorio" class="kpi-link">
+  <div class="kpi-card" id="kpi-card-lab">
+      <div class="kpi-label">En laboratorio</div>
+      <div class="kpi-value" id="kpi-lab">–</div>
+      <div class="kpi-extra" id="kpi-lab-extra"></div>
+  </div>
+</a>
 
-      <div class="kpi-card" id="kpi-card-lab">
-        <div class="kpi-label">En laboratorio</div>
-        <div class="kpi-value" id="kpi-lab">–</div>
-        <div class="kpi-extra" id="kpi-lab-extra"></div>
-      </div>
+      <a href="listado_instrumentos.html?filtro=calibrados" class="kpi-link">
+  <div class="kpi-card" id="kpi-card-cal">
+      <div class="kpi-label">Calibrados</div>
+      <div class="kpi-value" id="kpi-calibrados">–</div>
+      <div class="kpi-extra" id="kpi-calibrados-extra"></div>
+  </div>
+</a>
 
-      <div class="kpi-card" id="kpi-card-cal">
-        <div class="kpi-label">Calibrados</div>
-        <div class="kpi-value" id="kpi-calibrados">–</div>
-        <div class="kpi-extra" id="kpi-calibrados-extra"></div>
-      </div>
 
       <div class="kpi-card" id="kpi-card-prox">
         <div class="kpi-label">Próximos (&lt; 30 días)</div>
