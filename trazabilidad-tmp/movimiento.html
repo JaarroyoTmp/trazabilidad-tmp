@@ -365,7 +365,9 @@
       background:#020617;
     }
 
-    #qrReader video { border-radius: 10px; }
+    #qrReader video {
+      border-radius: 10px;
+    }
   </style>
 </head>
 
@@ -515,12 +517,12 @@
 
         <!-- NUEVOS CAMPOS -->
         <div>
-          <label>Operario 1 (obligatorio)</label>
-          <input id="operario1" placeholder="Nombre del operario principal">
+          <label>Operario 1</label>
+          <input id="operario1" placeholder="Nombre del operario principal (solo en salidas)">
         </div>
 
         <div>
-          <label>Operario 2 (opcional)</label>
+          <label>Operario 2</label>
           <input id="operario2" placeholder="Segundo operario (si existe)">
         </div>
 
@@ -923,11 +925,6 @@ async function registrarMovimiento() {
     alertBox.classList.remove("hidden");
     return;
   }
-  if (!operario1) {
-    alertBox.textContent = "Introduce Operario 1";
-    alertBox.classList.remove("hidden");
-    return;
-  }
 
   const estado = computeEstado(instrumentoActual.fecha_proxima_calibracion);
 
@@ -953,17 +950,26 @@ async function registrarMovimiento() {
     nuevaUbicacion = destino;
   }
 
+  const esSalida = (tipo === "Salida");
+
+  const datosMovimiento = {
+    codigo_instrumento: instrumentoActual.codigo,
+    fecha: new Date().toISOString(),
+    tipo_movimiento: tipo,
+    responsable,
+    destino,
+    observaciones: obsFinal,
+    operario1: null,
+    operario2: null
+  };
+
+  if (esSalida) {
+    if (operario1) datosMovimiento.operario1 = operario1;
+    if (operario2) datosMovimiento.operario2 = operario2;
+  }
+
   try {
-    const { error: errorMov } = await sb.from("movimientos").insert({
-      codigo_instrumento: instrumentoActual.codigo,
-      fecha: new Date().toISOString(),
-      tipo_movimiento: tipo,
-      responsable,
-      operario1,
-      operario2: operario2 || null,
-      destino,
-      observaciones: obsFinal
-    });
+    const { error: errorMov } = await sb.from("movimientos").insert(datosMovimiento);
 
     if (errorMov) {
       console.error(errorMov);
@@ -1064,7 +1070,10 @@ async function abrirQR() {
 
   html5QrCodeInstance.start(
     { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 250 } },
+    {
+      fps: 10,
+      qrbox: { width: 250, height: 250 }
+    },
     decodedText => {
       const codigo = extraerCodigoDesdeQR(decodedText);
       if (codigo) {
@@ -1153,4 +1162,3 @@ actualizarBotonRegistrar();
 
 </body>
 </html>
-
