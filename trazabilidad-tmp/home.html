@@ -592,24 +592,123 @@
       }
     }
 
-/* ====== KPI CARDS CLICABLES ====== */
+    /* ====== KPI CARDS CLICABLES ====== */
 
-.kpi-card.kpi-clickable {
-  cursor: pointer;
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
+    .kpi-card.kpi-clickable {
+      cursor: pointer;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
 
-.kpi-card.kpi-clickable:hover {
-  background: #263041;
-  box-shadow: 0 0 12px rgba(0,180,216,0.35);
-  transform: translateY(-2px);
-}
+    .kpi-card.kpi-clickable:hover {
+      background: #263041;
+      box-shadow: 0 0 12px rgba(0,180,216,0.35);
+      transform: translateY(-2px);
+    }
 
-.kpi-card.kpi-clickable:active {
-  transform: scale(0.97);
-}
+    .kpi-card.kpi-clickable:active {
+      transform: scale(0.97);
+    }
 
-    
+    /* ====== ÚLTIMOS MOVIMIENTOS ====== */
+
+    .mov-section{
+      grid-column:1 / -1;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 16px 40px rgba(0,0,0,.4);
+    }
+
+    .mov-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:6px;
+    }
+
+    .mov-toolbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .mov-toolbar input,
+    .mov-toolbar select{
+      background:#0b1627;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--txt);
+      outline:none;
+    }
+
+    .mov-toolbar input:focus,
+    .mov-toolbar select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(0,180,216,.4);
+    }
+
+    .mov-pagination{
+      margin-top:8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .mov-pagination .btn{
+      padding:4px 12px;
+    }
+
+    .mov-row-in{
+      color:var(--accent);
+      font-weight:600;
+    }
+    .mov-row-out{
+      color:var(--danger);
+      font-weight:600;
+    }
+    .mov-row-ok{
+      color:var(--success);
+      font-weight:600;
+    }
+
+    .calib-chip{
+      display:inline-flex;
+      align-items:center;
+      padding:1px 6px;
+      border-radius:999px;
+      font-size:10px;
+      border:1px solid var(--border);
+    }
+    .calib-ok{
+      border-color:var(--success);
+      color:var(--success);
+    }
+    .calib-warn{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+    .calib-bad{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+
+    @media (max-width:720px){
+      .mov-header{
+        align-items:flex-start;
+      }
+      .mov-toolbar{
+        width:100%;
+        justify-content:flex-start;
+      }
+    }
   </style>
 </head>
 <body>
@@ -649,30 +748,29 @@
         <div class="kpi-extra" id="kpi-total-extra"></div>
       </div>
 
-     <a href="listado_instrumentos.html?filtro=uso" class="kpi-link">
-  <div class="kpi-card" id="kpi-card-uso">
-      <div class="kpi-label">En uso (fuera de laboratorio)</div>
-      <div class="kpi-value" id="kpi-uso">–</div>
-      <div class="kpi-extra" id="kpi-uso-extra"></div>
-  </div>
-</a>
+      <a href="listado_instrumentos.html?filtro=uso" class="kpi-link">
+        <div class="kpi-card" id="kpi-card-uso">
+          <div class="kpi-label">En uso (fuera de laboratorio)</div>
+          <div class="kpi-value" id="kpi-uso">–</div>
+          <div class="kpi-extra" id="kpi-uso-extra"></div>
+        </div>
+      </a>
    
-     <a href="listado_instrumentos.html?filtro=laboratorio" class="kpi-link">
-  <div class="kpi-card" id="kpi-card-lab">
-      <div class="kpi-label">En laboratorio</div>
-      <div class="kpi-value" id="kpi-lab">–</div>
-      <div class="kpi-extra" id="kpi-lab-extra"></div>
-  </div>
-</a>
+      <a href="listado_instrumentos.html?filtro=laboratorio" class="kpi-link">
+        <div class="kpi-card" id="kpi-card-lab">
+          <div class="kpi-label">En laboratorio</div>
+          <div class="kpi-value" id="kpi-lab">–</div>
+          <div class="kpi-extra" id="kpi-lab-extra"></div>
+        </div>
+      </a>
 
       <a href="listado_instrumentos.html?filtro=calibrados" class="kpi-link">
-  <div class="kpi-card" id="kpi-card-cal">
-      <div class="kpi-label">Calibrados</div>
-      <div class="kpi-value" id="kpi-calibrados">–</div>
-      <div class="kpi-extra" id="kpi-calibrados-extra"></div>
-  </div>
-</a>
-
+        <div class="kpi-card" id="kpi-card-cal">
+          <div class="kpi-label">Calibrados</div>
+          <div class="kpi-value" id="kpi-calibrados">–</div>
+          <div class="kpi-extra" id="kpi-calibrados-extra"></div>
+        </div>
+      </a>
 
       <div class="kpi-card" id="kpi-card-prox">
         <div class="kpi-label">Próximos (&lt; 30 días)</div>
@@ -761,6 +859,52 @@
         </div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- ÚLTIMOS MOVIMIENTOS -->
+  <section class="mov-section">
+    <div class="mov-header">
+      <div>
+        <h2 class="section-title">Últimos movimientos</h2>
+        <p class="muted">Entradas, salidas y otros movimientos registrados recientemente.</p>
+      </div>
+      <div class="mov-toolbar">
+        <input id="mov-search" type="text" placeholder="Buscar por código, destino o responsable...">
+        <select id="mov-tipo">
+          <option value="">Todos los tipos</option>
+          <option value="Entrada">Entrada</option>
+          <option value="Salida">Salida</option>
+          <option value="Préstamo externo">Préstamo externo</option>
+          <option value="Revisión / reparación">Revisión / reparación</option>
+          <option value="Envío a calibración externa">Envío a calibración externa</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="mini-table" id="table-movimientos">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Código</th>
+          <th>Tipo</th>
+          <th>Destino</th>
+          <th>Responsable</th>
+          <th>Calibración</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-movimientos">
+        <tr><td colspan="7">Cargando movimientos...</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mov-pagination">
+      <div>
+        <button class="btn" id="mov-prev">&lt; Anterior</button>
+        <button class="btn" id="mov-next">Siguiente &gt;</button>
+      </div>
+      <div id="mov-page-info">–</div>
     </div>
   </section>
 
@@ -951,6 +1095,18 @@
   const toastSub   = document.getElementById("toast-sub");
   const toastClose = document.getElementById("toast-close");
 
+  // MOVIMIENTOS DOM
+  const tbodyMov       = document.getElementById("tbody-movimientos");
+  const movSearch      = document.getElementById("mov-search");
+  const movTipoSelect  = document.getElementById("mov-tipo");
+  const movPrevBtn     = document.getElementById("mov-prev");
+  const movNextBtn     = document.getElementById("mov-next");
+  const movPageInfo    = document.getElementById("mov-page-info");
+
+  let cacheMovimientos = [];
+  const MOV_POR_PAG = 8;
+  let movPaginaActual = 1;
+
   // Utilidades
   function parseDate(str) {
     if (!str) return null;
@@ -1011,7 +1167,7 @@
     toast.classList.remove("show");
   });
 
-  // LÓGICA PRINCIPAL (con lógica C corregida)
+  // LÓGICA PRINCIPAL DASHBOARD
   async function cargarDashboard() {
     if (!supabase) {
       console.error("Supabase no disponible en home.html");
@@ -1224,15 +1380,191 @@
     }
   }
 
+  // ====== LÓGICA ÚLTIMOS MOVIMIENTOS ======
+
+  function estadoCalibracionFromInstrumento(inst){
+    const hoy = new Date();
+    const prox = parseDate(inst?.fecha_proxima_calibracion) || parseDate(inst?.proxima_calibracion);
+    if (!prox) return {estado:"SIN FECHA", clase:"calib-warn"};
+    if (prox < hoy) return {estado:"FUERA", clase:"calib-bad"};
+    const mas30 = new Date(hoy.getTime() + 30*86400000);
+    if (prox <= mas30) return {estado:"PRÓXIMA", clase:"calib-warn"};
+    return {estado:"OK", clase:"calib-ok"};
+  }
+
+  function aplicarFiltrosMovimientos(){
+    const q = (movSearch.value || "").toLowerCase();
+    const tipo = movTipoSelect.value;
+
+    return cacheMovimientos.filter(mov => {
+      if (tipo && mov.tipo_movimiento !== tipo) return false;
+
+      if (q){
+        const hay =
+          (mov.codigo_instrumento || "").toLowerCase().includes(q) ||
+          (mov.destino || "").toLowerCase().includes(q) ||
+          (mov.responsable || "").toLowerCase().includes(q);
+        if (!hay) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderMovimientos(){
+    const filtrados = aplicarFiltrosMovimientos();
+    const total = filtrados.length;
+
+    if (total === 0){
+      tbodyMov.innerHTML = `<tr><td colspan="7">No hay movimientos que coincidan con el filtro.</td></tr>`;
+      movPageInfo.textContent = "0 de 0";
+      movPrevBtn.disabled = true;
+      movNextBtn.disabled = true;
+      return;
+    }
+
+    const totalPaginas = Math.max(1, Math.ceil(total / MOV_POR_PAG));
+    if (movPaginaActual > totalPaginas) movPaginaActual = totalPaginas;
+    if (movPaginaActual < 1) movPaginaActual = 1;
+
+    const inicio = (movPaginaActual - 1) * MOV_POR_PAG;
+    const fin    = inicio + MOV_POR_PAG;
+    const pageItems = filtrados.slice(inicio, fin);
+
+    const hoy = new Date();
+
+    tbodyMov.innerHTML = pageItems.map(mov => {
+      const fecha = mov.fecha ? new Date(mov.fecha) : null;
+      const fechaTxt = fecha
+        ? fecha.toLocaleString("es-ES", { dateStyle:"short", timeStyle:"short" })
+        : "—";
+
+      let icon = "✚";
+      let claseTipo = "mov-row-ok";
+      if (mov.tipo_movimiento === "Entrada"){ icon = "⬅"; claseTipo = "mov-row-in"; }
+      else if (mov.tipo_movimiento === "Salida"){ icon = "➡"; claseTipo = "mov-row-out"; }
+      else if (mov.tipo_movimiento === "Préstamo externo"){ icon = "🔁"; }
+      else if (mov.tipo_movimiento === "Revisión / reparación"){ icon = "🛠"; }
+      else if (mov.tipo_movimiento === "Envío a calibración externa"){ icon = "📦"; }
+
+      const estadoCal = mov.estadoCal || {estado:"", clase:""};
+      const chip = estadoCal.estado
+        ? `<span class="calib-chip ${estadoCal.clase}">${estadoCal.estado}</span>`
+        : "";
+
+      return `
+        <tr>
+          <td>${fechaTxt}</td>
+          <td>${mov.codigo_instrumento || ""}</td>
+          <td class="${claseTipo}">${icon} ${mov.tipo_movimiento}</td>
+          <td>${mov.destino || "-"}</td>
+          <td>${mov.responsable || "-"}</td>
+          <td>${chip}</td>
+          <td>
+            <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
+              Ver ficha
+            </a>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    movPageInfo.textContent = `Página ${movPaginaActual} de ${totalPaginas} · ${total} movimientos`;
+    movPrevBtn.disabled = movPaginaActual <= 1;
+    movNextBtn.disabled = movPaginaActual >= totalPaginas;
+  }
+
+  async function cargarMovimientos(){
+    if (!supabase){
+      console.error("Supabase no disponible en home.html para movimientos");
+      return;
+    }
+
+    // 1) Últimos 100 movimientos
+    const { data: movs, error: errMov } = await supabase
+      .from("movimientos")
+      .select("fecha, codigo_instrumento, tipo_movimiento, destino, responsable")
+      .order("fecha", { ascending:false })
+      .limit(100);
+
+    if (errMov){
+      console.error("Error cargando movimientos:", errMov);
+      tbodyMov.innerHTML = `<tr><td colspan="7">Error al cargar movimientos.</td></tr>`;
+      return;
+    }
+
+    if (!movs || movs.length === 0){
+      tbodyMov.innerHTML = `<tr><td colspan="7">Todavía no hay movimientos registrados.</td></tr>`;
+      movPageInfo.textContent = "0 de 0";
+      movPrevBtn.disabled = true;
+      movNextBtn.disabled = true;
+      return;
+    }
+
+    // 2) Traer estado de calibración de los instrumentos implicados
+    const codigos = Array.from(new Set(movs.map(m => m.codigo_instrumento).filter(Boolean)));
+
+    let mapaInst = {};
+    if (codigos.length > 0){
+      const { data: insts, error: errInst } = await supabase
+        .from("instrumentos")
+        .select("codigo, fecha_proxima_calibracion, proxima_calibracion")
+        .in("codigo", codigos);
+
+      if (!errInst && insts){
+        insts.forEach(inst => {
+          mapaInst[inst.codigo] = inst;
+        });
+      }
+    }
+
+    cacheMovimientos = movs.map(m => {
+      const inst = mapaInst[m.codigo_instrumento];
+      const estadoCal = inst ? estadoCalibracionFromInstrumento(inst) : {estado:"", clase:""};
+      return {
+        ...m,
+        estadoCal
+      };
+    });
+
+    movPaginaActual = 1;
+    renderMovimientos();
+  }
+
   // Eventos diálogos
   btn_fuera_ver_todos.addEventListener("click", () => dlgFuera.showModal());
   btn_prox_ver_todos.addEventListener("click", () => dlgProx.showModal());
   dlgFueraCerrar.addEventListener("click", () => dlgFuera.close());
   dlgProxCerrar.addEventListener("click", () => dlgProx.close());
 
+  // Eventos filtros movimientos
+  movSearch.addEventListener("input", () => {
+    movPaginaActual = 1;
+    renderMovimientos();
+  });
+
+  movTipoSelect.addEventListener("change", () => {
+    movPaginaActual = 1;
+    renderMovimientos();
+  });
+
+  movPrevBtn.addEventListener("click", () => {
+    movPaginaActual--;
+    renderMovimientos();
+  });
+
+  movNextBtn.addEventListener("click", () => {
+    movPaginaActual++;
+    renderMovimientos();
+  });
+
   // Cargar al inicio + refresco periódico
   cargarDashboard();
-  setInterval(cargarDashboard, 30000);
+  cargarMovimientos();
+
+  setInterval(() => {
+    cargarDashboard();
+    cargarMovimientos();
+  }, 30000);
 </script>
 
 </body>
