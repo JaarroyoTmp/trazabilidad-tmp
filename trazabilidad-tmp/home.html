@@ -14,7 +14,8 @@
       --border:#30363d;
       --card-bg:#1c2431;
       --hover:#263041;
-      --accent:#00b4d8;
+      /* Color principal: verde */
+      --accent:#22c55e;
       --danger:#ef4444;
       --warning:#f59e0b;
       --success:#22c55e;
@@ -91,11 +92,11 @@
       border-radius:inherit;
       background:conic-gradient(
         from 140deg,
-        rgba(0,180,216,.7),
+        rgba(34,197,94,.7),
         transparent 40%,
         transparent 60%,
-        rgba(56,189,248,.6),
-        rgba(0,180,216,.7)
+        rgba(34,197,94,.6),
+        rgba(34,197,94,.7)
       );
       opacity:0.12;
       pointer-events:none;
@@ -141,11 +142,11 @@
       border-radius:inherit;
       background:conic-gradient(
         from 200deg,
-        rgba(0,180,216,.9),
+        rgba(34,197,94,.9),
         transparent 45%,
         transparent 55%,
-        rgba(56,189,248,.7),
-        rgba(0,180,216,.9)
+        rgba(34,197,94,.7),
+        rgba(34,197,94,.9)
       );
       opacity:0;
       transition:opacity .25s ease;
@@ -164,7 +165,7 @@
     }
 
     .kpi-card.updated {
-      box-shadow:0 0 24px rgba(0,180,216,.55);
+      box-shadow:0 0 24px rgba(34,197,94,.55);
     }
     .kpi-card.updated::before{
       opacity:1;
@@ -336,7 +337,7 @@
 
     .btn-primary{
       border-color:var(--accent);
-      background:linear-gradient(135deg,#00b4d8,#0891b2);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
       color:#ecfeff;
     }
     .btn-primary:hover{
@@ -410,11 +411,11 @@
       border-radius:inherit;
       background:conic-gradient(
         from 180deg,
-        rgba(0,180,216,.9),
+        rgba(34,197,94,.9),
         transparent 35%,
         transparent 65%,
-        rgba(56,189,248,.8),
-        rgba(0,180,216,.9)
+        rgba(34,197,94,.8),
+        rgba(34,197,94,.9)
       );
       opacity:0;
       transition:opacity .25s ease;
@@ -601,7 +602,7 @@
 
     .kpi-card.kpi-clickable:hover {
       background: #263041;
-      box-shadow: 0 0 12px rgba(0,180,216,0.35);
+      box-shadow: 0 0 12px rgba(34,197,94,0.35);
       transform: translateY(-2px);
     }
 
@@ -649,7 +650,7 @@
     .mov-toolbar input:focus,
     .mov-toolbar select:focus{
       border-color:var(--accent);
-      box-shadow:0 0 0 1px rgba(0,180,216,.4);
+      box-shadow:0 0 0 1px rgba(34,197,94,.4);
     }
 
     .mov-pagination{
@@ -708,6 +709,24 @@
         width:100%;
         justify-content:flex-start;
       }
+    }
+
+    /* Operarios: chips */
+    .op-chip {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:600;
+      white-space:nowrap;
+    }
+    .op1 {
+      background:#0ea5e9;   /* azul */
+      color:#ffffff;
+    }
+    .op2 {
+      background:#f97316;   /* naranja */
+      color:#ffffff;
     }
   </style>
 </head>
@@ -867,10 +886,10 @@
     <div class="mov-header">
       <div>
         <h2 class="section-title">Últimos movimientos</h2>
-        <p class="muted">Entradas, salidas y otros movimientos registrados recientemente.</p>
+        <p class="muted">Entradas, salidas y movimientos recientes. Incluye responsables y operarios asignados.</p>
       </div>
       <div class="mov-toolbar">
-        <input id="mov-search" type="text" placeholder="Buscar por código, destino o responsable...">
+        <input id="mov-search" type="text" placeholder="Buscar por código, destino, responsable u operarios...">
         <select id="mov-tipo">
           <option value="">Todos los tipos</option>
           <option value="Entrada">Entrada</option>
@@ -888,6 +907,8 @@
           <th>Fecha</th>
           <th>Código</th>
           <th>Tipo</th>
+          <th>Operario 1</th>
+          <th>Operario 2</th>
           <th>Destino</th>
           <th>Responsable</th>
           <th>Calibración</th>
@@ -895,7 +916,7 @@
         </tr>
       </thead>
       <tbody id="tbody-movimientos">
-        <tr><td colspan="7">Cargando movimientos...</td></tr>
+        <tr><td colspan="9">Cargando movimientos...</td></tr>
       </tbody>
     </table>
 
@@ -1386,9 +1407,12 @@
     const hoy = new Date();
     const prox = parseDate(inst?.fecha_proxima_calibracion) || parseDate(inst?.proxima_calibracion);
     if (!prox) return {estado:"SIN FECHA", clase:"calib-warn"};
+
     if (prox < hoy) return {estado:"FUERA", clase:"calib-bad"};
+
     const mas30 = new Date(hoy.getTime() + 30*86400000);
     if (prox <= mas30) return {estado:"PRÓXIMA", clase:"calib-warn"};
+
     return {estado:"OK", clase:"calib-ok"};
   }
 
@@ -1403,7 +1427,10 @@
         const hay =
           (mov.codigo_instrumento || "").toLowerCase().includes(q) ||
           (mov.destino || "").toLowerCase().includes(q) ||
-          (mov.responsable || "").toLowerCase().includes(q);
+          (mov.responsable || "").toLowerCase().includes(q) ||
+          (mov.operario1 || "").toLowerCase().includes(q) ||
+          (mov.operario2 || "").toLowerCase().includes(q);
+
         if (!hay) return false;
       }
       return true;
@@ -1415,7 +1442,7 @@
     const total = filtrados.length;
 
     if (total === 0){
-      tbodyMov.innerHTML = `<tr><td colspan="7">No hay movimientos que coincidan con el filtro.</td></tr>`;
+      tbodyMov.innerHTML = `<tr><td colspan="9">No hay movimientos que coincidan con el filtro.</td></tr>`;
       movPageInfo.textContent = "0 de 0";
       movPrevBtn.disabled = true;
       movNextBtn.disabled = true;
@@ -1430,9 +1457,8 @@
     const fin    = inicio + MOV_POR_PAG;
     const pageItems = filtrados.slice(inicio, fin);
 
-    const hoy = new Date();
-
     tbodyMov.innerHTML = pageItems.map(mov => {
+
       const fecha = mov.fecha ? new Date(mov.fecha) : null;
       const fechaTxt = fecha
         ? fecha.toLocaleString("es-ES", { dateStyle:"short", timeStyle:"short" })
@@ -1440,6 +1466,7 @@
 
       let icon = "✚";
       let claseTipo = "mov-row-ok";
+
       if (mov.tipo_movimiento === "Entrada"){ icon = "⬅"; claseTipo = "mov-row-in"; }
       else if (mov.tipo_movimiento === "Salida"){ icon = "➡"; claseTipo = "mov-row-out"; }
       else if (mov.tipo_movimiento === "Préstamo externo"){ icon = "🔁"; }
@@ -1451,16 +1478,29 @@
         ? `<span class="calib-chip ${estadoCal.clase}">${estadoCal.estado}</span>`
         : "";
 
+      // Operarios SOLO visibles si es salida
+      let op1 = "";
+      let op2 = "";
+
+      if (mov.tipo_movimiento === "Salida") {
+        if (mov.operario1)
+          op1 = `<span class="op-chip op1">${mov.operario1}</span>`;
+        if (mov.operario2)
+          op2 = `<span class="op-chip op2">${mov.operario2}</span>`;
+      }
+
       return `
         <tr>
           <td>${fechaTxt}</td>
           <td>${mov.codigo_instrumento || ""}</td>
           <td class="${claseTipo}">${icon} ${mov.tipo_movimiento}</td>
+          <td>${op1 || "-"}</td>
+          <td>${op2 || "-"}</td>
           <td>${mov.destino || "-"}</td>
           <td>${mov.responsable || "-"}</td>
           <td>${chip}</td>
           <td>
-            <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
+            <a class="btn" href="qr/qr.info.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
               Ver ficha
             </a>
           </td>
@@ -1479,28 +1519,28 @@
       return;
     }
 
-    // 1) Últimos 100 movimientos
+    // Últimos 120 movimientos, ahora con operario1 y operario2
     const { data: movs, error: errMov } = await supabase
       .from("movimientos")
-      .select("fecha, codigo_instrumento, tipo_movimiento, destino, responsable")
+      .select("fecha, codigo_instrumento, tipo_movimiento, destino, responsable, operario1, operario2")
       .order("fecha", { ascending:false })
-      .limit(100);
+      .limit(120);
 
     if (errMov){
       console.error("Error cargando movimientos:", errMov);
-      tbodyMov.innerHTML = `<tr><td colspan="7">Error al cargar movimientos.</td></tr>`;
+      tbodyMov.innerHTML = `<tr><td colspan="9">Error al cargar movimientos.</td></tr>`;
       return;
     }
 
     if (!movs || movs.length === 0){
-      tbodyMov.innerHTML = `<tr><td colspan="7">Todavía no hay movimientos registrados.</td></tr>`;
+      tbodyMov.innerHTML = `<tr><td colspan="9">Todavía no hay movimientos registrados.</td></tr>`;
       movPageInfo.textContent = "0 de 0";
       movPrevBtn.disabled = true;
       movNextBtn.disabled = true;
       return;
     }
 
-    // 2) Traer estado de calibración de los instrumentos implicados
+    // Traer estado de calibración de los instrumentos implicados
     const codigos = Array.from(new Set(movs.map(m => m.codigo_instrumento).filter(Boolean)));
 
     let mapaInst = {};
