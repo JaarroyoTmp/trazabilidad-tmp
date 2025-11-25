@@ -133,6 +133,13 @@
       font-size: 12px;
     }
 
+    .btn[disabled] {
+      opacity: .45;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
     main {
       display: flex;
       flex-direction: column;
@@ -182,6 +189,12 @@
     @media(max-width:900px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
     @media(max-width:640px){ .grid{grid-template-columns:1fr;} .btn{width:100%;}}
 
+    .row {
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
     label {
       font-size: 11px;
       text-transform: uppercase;
@@ -219,7 +232,47 @@
       margin-top:8px;
     }
 
+    .alert-critical {
+      font-size:12px;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(127,29,29,.7);
+      border:1px solid #f97373;
+      color:#fee2e2;
+      box-shadow:0 0 22px rgba(248,113,113,.7);
+    }
+
+    .alert-critical h3 {
+      margin:0 0 4px;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .helper-text {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top:4px;
+    }
+
     .hidden { display:none !important; }
+
+    .stats{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:10px;
+    }
+
+    .stat-badge{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#050d1a;
+      border:1px solid #253954;
+      color:var(--muted);
+    }
 
     .table-wrap {
       border-radius:12px;
@@ -337,7 +390,30 @@
         </div>
       </div>
 
-      <div class="grid">
+      <!-- ALERTA CRÍTICA: FUERA DE CALIBRACIÓN -->
+      <div id="alertaCritica" class="alert-critical hidden">
+        <h3>⚠ INSTRUMENTO FUERA DE CALIBRACIÓN</h3>
+        <p>Este instrumento está <b>fuera de calibración</b>. No debe utilizarse ni salir al taller en condiciones normales.</p>
+        <p style="margin-top:4px;">Para registrar un movimiento debes elegir una de estas opciones:</p>
+        <ul style="margin:6px 0 8px 18px; font-size:12px;">
+          <li><b>Calibrar ahora</b> (recomendado)</li>
+          <li><b>Usar bajo responsabilidad</b> (requiere responsable autorizado)</li>
+        </ul>
+
+        <div style="margin-top:6px;">
+          <label style="margin-bottom:4px; text-transform:none; letter-spacing:0; font-size:12px; color:#fecaca;">
+            Responsable autorizado para uso bajo responsabilidad
+          </label>
+          <input id="responsableAutorizacion" placeholder="Nombre y cargo de quien autoriza el uso">
+        </div>
+
+        <div class="row" style="margin-top:10px; justify-content:flex-end;">
+          <button class="btn secondary" type="button" id="btnCalibrarAhora">Calibrar ahora</button>
+          <button class="btn" type="button" id="btnForzarUso">Usar bajo responsabilidad</button>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:10px;">
         <div>
           <label>Tipo de movimiento</label>
           <select id="tipoMovimiento">
@@ -352,7 +428,7 @@
 
         <div>
           <label>Responsable</label>
-          <input id="responsable" placeholder="Nombre del responsable">
+          <input id="responsable" placeholder="Nombre del responsable del movimiento">
         </div>
 
         <div>
@@ -364,7 +440,7 @@
           <label>Observaciones</label>
           <textarea id="observaciones" placeholder="Opcional"></textarea>
           <p class="helper-text">
-            El estado de calibración se añadirá automáticamente.
+            El estado de calibración y el posible uso bajo responsabilidad se añadirán automáticamente.
           </p>
         </div>
       </div>
@@ -489,6 +565,30 @@ function computeEstado(prox) {
 =========================================================== */
 let instrumentoActual = null;
 let movimientosCount = 0;
+let estadoActualInstrumento = null;
+let usoBajoResponsabilidad = false;
+let responsableAutorizado = "";
+
+/* ===========================================================
+   HABILITAR / DESHABILITAR BOTÓN REGISTRAR
+=========================================================== */
+function actualizarBotonRegistrar() {
+  const btn = $("#btnRegistrar");
+  if (!btn) return;
+
+  if (!instrumentoActual) {
+    btn.disabled = true;
+    return;
+  }
+
+  if (estadoActualInstrumento &&
+      estadoActualInstrumento.estado === "FUERA DE CALIBRACIÓN" &&
+      !usoBajoResponsabilidad) {
+    btn.disabled = true;
+  } else {
+    btn.disabled = false;
+  }
+}
 
 /* ===========================================================
    CARGAR INSTRUMENTO
@@ -501,12 +601,16 @@ async function cargarInstrumento() {
   if (!codigo) {
     alertBox.textContent = "Introduce un código";
     alertBox.classList.remove("hidden");
+    instrumentoActual = null;
+    actualizarBotonRegistrar();
     return;
   }
 
   if (!sb) {
     alertBox.textContent = "Sin conexión con Supabase";
     alertBox.classList.remove("hidden");
+    instrumentoActual = null;
+    actualizarBotonRegistrar();
     return;
   }
 
@@ -521,6 +625,8 @@ async function cargarInstrumento() {
       console.error(error);
       alertBox.textContent = "Error consultando Supabase";
       alertBox.classList.remove("hidden");
+      instrumentoActual = null;
+      actualizarBotonRegistrar();
       return;
     }
 
@@ -529,7 +635,12 @@ async function cargarInstrumento() {
       alertBox.classList.remove("hidden");
       instrumentoActual = null;
       pintarInstrumento(null);
-      pintarMovimientos([]);
+      const tbody = $("#tablaMovimientos");
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="5">Introduce un código para ver movimientos</td></tr>`;
+      }
+      movimientosCount = 0;
+      actualizarBotonRegistrar();
       return;
     }
 
@@ -542,6 +653,8 @@ async function cargarInstrumento() {
     console.error(e);
     alertBox.textContent = "Error inesperado";
     alertBox.classList.remove("hidden");
+    instrumentoActual = null;
+    actualizarBotonRegistrar();
   }
 }
 
@@ -549,6 +662,9 @@ async function cargarInstrumento() {
    PINTAR INSTRUMENTO
 =========================================================== */
 function pintarInstrumento(inst) {
+  const alertaCritica = $("#alertaCritica");
+  const inputRespAuto = $("#responsableAutorizacion");
+
   if (!inst) {
     $("#descInstrumento").value = "";
     $("#fabInstrumento").value = "";
@@ -559,6 +675,12 @@ function pintarInstrumento(inst) {
     $("#ultimaCal").value = "";
     $("#proximaCal").value = "";
     $("#tipoCal").value = "";
+    estadoActualInstrumento = null;
+    usoBajoResponsabilidad = false;
+    responsableAutorizado = "";
+    if (alertaCritica) alertaCritica.classList.add("hidden");
+    if (inputRespAuto) inputRespAuto.value = "";
+    actualizarBotonRegistrar();
     return;
   }
 
@@ -576,6 +698,8 @@ function pintarInstrumento(inst) {
 
   // ✔ ESTADO METROLÓGICO CORRECTO
   const estado = computeEstado(inst.fecha_proxima_calibracion);
+  estadoActualInstrumento = estado;
+
   $("#estadoChip").textContent = estado.estado;
   $("#estadoChip").className = "pill " + estado.clase;
 
@@ -585,6 +709,23 @@ function pintarInstrumento(inst) {
   $("#statDias").textContent = "Días hasta próxima: " + (dias ?? "—");
 
   $("#statUso").textContent = "Movimientos: " + movimientosCount;
+
+  // Reset flujo de responsabilidad
+  usoBajoResponsabilidad = false;
+  responsableAutorizado = "";
+  if (inputRespAuto) inputRespAuto.value = "";
+
+  // Mostrar o no la alerta crítica
+  if (alertaCritica) {
+    if (estado.estado === "FUERA DE CALIBRACIÓN") {
+      alertaCritica.classList.remove("hidden");
+      alertaCritica.style.borderColor = "#f97373";
+    } else {
+      alertaCritica.classList.add("hidden");
+    }
+  }
+
+  actualizarBotonRegistrar();
 }
 
 /* ===========================================================
@@ -604,6 +745,7 @@ async function cargarMovimientos(codigo) {
     if (error) {
       console.error(error);
       tbody.innerHTML = `<tr><td colspan="5">Error al cargar histórico</td></tr>`;
+      movimientosCount = 0;
       return;
     }
 
@@ -657,18 +799,42 @@ async function registrarMovimiento() {
     return;
   }
   if (!responsable) {
-    alertBox.textContent = "Introduce un responsable";
+    alertBox.textContent = "Introduce un responsable del movimiento";
     alertBox.classList.remove("hidden");
     return;
   }
 
-  // ✔ ESTADO CALCULADO CON LA FECHA CORRECTA
+  // Recalcular estado por seguridad
   const estado = computeEstado(instrumentoActual.fecha_proxima_calibracion);
-  const obsFinal = (obsUser ? obsUser + "\n" : "") +
-                   `Estado calibración: ${estado.estado}`;
+
+  // BLOQUEO DURO SI ESTÁ FUERA DE CALIBRACIÓN Y NO SE HA ACEPTADO RESPONSABILIDAD
+  if (estado.estado === "FUERA DE CALIBRACIÓN" && !usoBajoResponsabilidad) {
+    alertBox.textContent = "Instrumento fuera de calibración. Debes calibrar ahora o marcar 'Usar bajo responsabilidad' con un responsable autorizado.";
+    alertBox.classList.remove("hidden");
+    return;
+  }
+
+  // Observaciones automáticas
+  let obsFinal = obsUser ? obsUser + "\n" : "";
+
+  if (estado.estado === "FUERA DE CALIBRACIÓN" && usoBajoResponsabilidad && responsableAutorizado) {
+    obsFinal += `USO BAJO RESPONSABILIDAD: ${responsableAutorizado}\n`;
+  }
+
+  obsFinal += `Estado calibración: ${estado.estado}`;
+
+  // Determinar nueva ubicación_actual
+  let nuevaUbicacion = instrumentoActual.ubicacion_actual || "";
+
+  if (tipo === "Entrada") {
+    nuevaUbicacion = "Laboratorio";
+  } else if (destino) {
+    nuevaUbicacion = destino;
+  }
 
   try {
-    const { error } = await sb.from("movimientos").insert({
+    // Insertar movimiento
+    const { error: errorMov } = await sb.from("movimientos").insert({
       codigo_instrumento: instrumentoActual.codigo,
       fecha: new Date().toISOString(),
       tipo_movimiento: tipo,
@@ -677,25 +843,49 @@ async function registrarMovimiento() {
       observaciones: obsFinal
     });
 
-    if (error) {
-      console.error(error);
+    if (errorMov) {
+      console.error(errorMov);
       alertBox.textContent = "Error al guardar movimiento";
       alertBox.classList.remove("hidden");
       return;
     }
 
-    alertBox.textContent = "Movimiento registrado con éxito";
-    alertBox.style.background = "rgba(22,101,52,.5)";
-    alertBox.style.borderColor = "#4ade80";
-    alertBox.style.color = "#dcfce7";
-    alertBox.classList.remove("hidden");
+    // Actualizar ubicación_actual en instrumentos
+    const { error: errorUpd } = await sb
+      .from("instrumentos")
+      .update({ ubicacion_actual: nuevaUbicacion })
+      .eq("codigo", instrumentoActual.codigo);
+
+    if (errorUpd) {
+      console.error(errorUpd);
+      // No bloqueamos, pero avisamos
+      alertBox.textContent = "Movimiento guardado, pero ha fallado la actualización de la ubicación.";
+      alertBox.classList.remove("hidden");
+    } else {
+      alertBox.textContent = "Movimiento registrado con éxito";
+      alertBox.style.background = "rgba(22,101,52,.5)";
+      alertBox.style.borderColor = "#4ade80";
+      alertBox.style.color = "#dcfce7";
+      alertBox.classList.remove("hidden");
+    }
+
+    // Sincronizar objeto en memoria con la nueva ubicación
+    instrumentoActual.ubicacion_actual = nuevaUbicacion;
 
     await cargarMovimientos(instrumentoActual.codigo);
 
+    // Reset campos de formulario
     $("#tipoMovimiento").value = "";
     $("#responsable").value = "";
     $("#destino").value = "";
     $("#observaciones").value = "";
+
+    // Reset forzado de responsabilidad tras cada movimiento
+    usoBajoResponsabilidad = false;
+    responsableAutorizado = "";
+    const inputRespAuto = $("#responsableAutorizacion");
+    if (inputRespAuto) inputRespAuto.value = "";
+    actualizarBotonRegistrar();
 
   } catch (e) {
     console.error(e);
@@ -715,14 +905,48 @@ $("#btnLimpiar").onclick = () => {
   $("#destino").value = "";
   $("#observaciones").value = "";
 };
+
 $("#codigoInput").onkeydown = e => {
   if (e.key === "Enter") {
     e.preventDefault();
     cargarInstrumento();
   }
 };
+
+// Botón "Usar bajo responsabilidad"
+$("#btnForzarUso").onclick = () => {
+  if (!instrumentoActual) return;
+  if (!estadoActualInstrumento || estadoActualInstrumento.estado !== "FUERA DE CALIBRACIÓN") return;
+
+  const val = ($("#responsableAutorizacion").value || "").trim();
+  if (!val) {
+    alert("Introduce el responsable autorizado para el uso bajo responsabilidad.");
+    return;
+  }
+
+  usoBajoResponsabilidad = true;
+  responsableAutorizado = val;
+
+  const alertaCritica = $("#alertaCritica");
+  if (alertaCritica) {
+    alertaCritica.style.borderColor = "#4ade80";
+  }
+
+  actualizarBotonRegistrar();
+};
+
+// Botón "Calibrar ahora"
+$("#btnCalibrarAhora").onclick = () => {
+  if (!instrumentoActual) return;
+  // Ajusta la URL si tu módulo de calibraciones se llama de otra forma
+  window.location.href = `calibraciones.html?codigo=${encodeURIComponent(instrumentoActual.codigo)}`;
+};
+
+// Al inicio, por seguridad desactivamos el botón Registrar
+actualizarBotonRegistrar();
 </script>
 
 </body>
 </html>
+
 
