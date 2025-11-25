@@ -103,7 +103,7 @@
       gap:14px;
     }
 
-    /* HERO NEÓN PRINCIPAL */
+    /* HERO */
     .hero-card{
       position:relative;
       border-radius:18px;
@@ -174,32 +174,16 @@
       border-radius:50%;
     }
 
-    .status-ok{
-      border-color:rgba(74,222,128,.4);
-      color:#bbf7d0;
-      box-shadow:0 0 14px rgba(74,222,128,.55);
-    }
+    .status-ok{ border-color:rgba(74,222,128,.4); color:#bbf7d0; box-shadow:0 0 14px rgba(74,222,128,.55);}
     .status-ok .dot{background:var(--ok);}
 
-    .status-warn{
-      border-color:rgba(250,204,21,.5);
-      color:#fef3c7;
-      box-shadow:0 0 14px rgba(250,204,21,.55);
-    }
+    .status-warn{ border-color:rgba(250,204,21,.5); color:#fef3c7; box-shadow:0 0 14px rgba(250,204,21,.55);}
     .status-warn .dot{background:var(--warn);}
 
-    .status-bad{
-      border-color:rgba(248,113,113,.7);
-      color:#fee2e2;
-      box-shadow:0 0 18px rgba(248,113,113,.85);
-    }
+    .status-bad{ border-color:rgba(248,113,113,.7); color:#fee2e2; box-shadow:0 0 18px rgba(248,113,113,.85);}
     .status-bad .dot{background:var(--danger);}
 
-    .status-info{
-      border-color:rgba(56,189,248,.6);
-      color:#e0f2fe;
-      box-shadow:0 0 14px rgba(56,189,248,.6);
-    }
+    .status-info{ border-color:rgba(56,189,248,.6); color:#e0f2fe; box-shadow:0 0 14px rgba(56,189,248,.6);}
     .status-info .dot{background:#38bdf8;}
 
     .status-caption{
@@ -209,7 +193,7 @@
       text-align:right;
     }
 
-    /* Observaciones bajo HERO */
+    /* Observaciones */
     .hero-observ{
       margin-top:6px;
       border-radius:12px;
@@ -225,7 +209,7 @@
       margin-right:4px;
     }
 
-    /* Tarjetas generales */
+    /* Tarjetas */
     .card{
       border-radius:16px;
       padding:14px 14px 12px;
@@ -269,7 +253,6 @@
       font-size:12px;
     }
 
-    /* Error box */
     .error-box{
       border-radius:14px;
       padding:12px 14px;
@@ -278,11 +261,6 @@
       color:#fee2e2;
       box-shadow:0 12px 30px rgba(0,0,0,.65);
       font-size:14px;
-    }
-    .error-box h2{
-      margin-top:0;
-      margin-bottom:6px;
-      font-size:16px;
     }
 
     /* Movimientos */
@@ -337,10 +315,9 @@
 
 <div class="wrap">
 
-  <!-- Caja de error -->
   <div id="errorBox" class="error-box" style="display:none"></div>
 
-  <!-- HERO NEÓN -->
+  <!-- HERO -->
   <section id="hero" class="hero-card" style="display:none">
     <div class="hero-main">
       <div class="hero-code" id="heroCode">CÓDIGO —</div>
@@ -357,59 +334,55 @@
     </div>
   </section>
 
-  <!-- Observaciones destacadas (pero secundarias) -->
   <section id="heroObserv" class="hero-observ" style="display:none"></section>
 
-  <!-- Información básica -->
+  <!-- INFORMACIÓN BÁSICA -->
   <section id="infoCard" class="card" style="display:none">
     <h2>Información básica</h2>
-    <div class="card-sub">Datos principales del instrumento leído por QR.</div>
+    <div class="card-sub">Datos generales del instrumento leído por QR.</div>
     <div id="infoBody"></div>
   </section>
 
-  <!-- Estado de calibración -->
+  <!-- ESTADO CALIBRACIÓN -->
   <section id="calCard" class="card" style="display:none">
     <h2>Estado de calibración</h2>
-    <div class="card-sub">Situación actual frente a su plan de calibración.</div>
+    <div class="card-sub">Situación frente al plan de calibración.</div>
     <div id="calBody"></div>
   </section>
 
-  <!-- Historial de movimientos -->
+  <!-- MOVIMIENTOS -->
   <section id="movCard" class="card" style="display:none">
     <h2>Últimos movimientos</h2>
-    <div class="card-sub">Trazabilidad básica de uso y ubicación reciente.</div>
+    <div class="card-sub">Trazabilidad reciente.</div>
     <div id="movBody"></div>
     <p class="muted" id="movHint"></p>
   </section>
 
 </div>
 
-<!-- Cliente Supabase global -->
+<!-- SUPABASE -->
 <script type="module" src="../config.mjs"></script>
 
 <script type="module">
   const supa = window.supabase;
 
-  // ---------------------------
-  //   OBTENER CÓDIGO DESDE URL
-  // ---------------------------
+  // ---------------------
+  //   OBTENER CÓDIGO URL
+  // ---------------------
   let codigo = new URLSearchParams(window.location.search).get("codigo");
 
-  // Permite URLs tipo /qr/12345
   if (!codigo) {
     const parts = window.location.pathname.split("/").filter(Boolean);
     const last = parts[parts.length - 1];
-    if (last && !last.includes(".html")) {
-      codigo = decodeURIComponent(last);
-    }
+    if (last && !last.includes(".html")) codigo = decodeURIComponent(last);
   }
 
-  const subTitle = document.getElementById("subTitle");
-  subTitle.textContent = codigo ? `Código: ${codigo}` : "Código no especificado";
+  document.getElementById("subTitle").textContent =
+    codigo ? `Código: ${codigo}` : "Código no especificado";
 
-  // ---------------------------
+  // ---------------------
   //   HELPERS
-  // ---------------------------
+  // ---------------------
   function showError(msg){
     const box = document.getElementById("errorBox");
     box.style.display = "block";
@@ -420,170 +393,104 @@
     `;
   }
 
-  function formatDateShort(iso){
+  function fDateShort(iso){
     if (!iso) return "—";
     const d = new Date(iso);
     if (isNaN(d)) return "—";
-    const dd = String(d.getDate()).padStart(2,"0");
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const yy = d.getFullYear();
-    return `${dd}/${mm}/${yy}`;
+    return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
   }
 
-  function formatDateTime(iso){
+  function fDateTime(iso){
     if (!iso) return "—";
     const d = new Date(iso);
     if (isNaN(d)) return "—";
-    const dd = String(d.getDate()).padStart(2,"0");
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const yy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mi = String(d.getMinutes()).padStart(2,"0");
-    return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+    return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
   }
 
-  function daysDiffToToday(iso){
+  function daysDiff(iso){
     if (!iso) return null;
-    const target = new Date(iso);
-    if (isNaN(target)) return null;
-    const today = new Date();
+    const d = new Date(iso);
+    if (isNaN(d)) return null;
     const MS = 86400000;
-    return Math.round((target - today)/MS);
+    return Math.round((d - new Date())/MS);
   }
 
-  function computeEstado(proxISO){
-    const dias = daysDiffToToday(proxISO);
+  function computeEstado(iso){
+    const diff = daysDiff(iso);
 
-    if (dias === null){
-      return {
-        clase: "status-info",
-        texto: "Sin próxima calibración",
-        detalle: "Este instrumento no tiene fecha futura asignada.",
-        dias: null,
-        icono: "🛈"
-      };
-    }
+    if (diff === null)
+      return { clase:"status-info", texto:"Sin próxima calibración", detalle:"No hay fecha asignada.", dias:null, icono:"🛈" };
 
-    if (dias < 0){
-      return {
-        clase: "status-bad",
-        texto: "Fuera de calibración",
-        detalle: "El equipo debe inmovilizarse hasta nueva calibración.",
-        dias,
-        icono: "⛔"
-      };
-    }
+    if (diff < 0)
+      return { clase:"status-bad", texto:"Fuera de calibración", detalle:"Calibración vencida.", dias:diff, icono:"⛔" };
 
-    if (dias <= 30){
-      return {
-        clase: "status-warn",
-        texto: "Próxima a vencer",
-        detalle: "Planificar calibración en breve.",
-        dias,
-        icono: "⚠"
-      };
-    }
+    if (diff <= 30)
+      return { clase:"status-warn", texto:"Próxima a vencer", detalle:"Calibración cercana.", dias:diff, icono:"⚠" };
 
-    return {
-      clase: "status-ok",
-      texto: "En regla",
-      detalle: "Instrumento dentro del plazo de calibración.",
-      dias,
-      icono: "✔"
-    };
+    return { clase:"status-ok", texto:"En regla", detalle:"Dentro del plazo.", dias:diff, icono:"✔" };
   }
 
-  // ---------------------------
-  //   FUNCIÓN PRINCIPAL
-  // ---------------------------
+  // ---------------------
+  //   PROGRAMA PRINCIPAL
+  // ---------------------
   async function main(){
-    if (!codigo){
-      showError("No se ha indicado un código en la URL.");
-      return;
-    }
+    if (!codigo) return showError("No se indicó código.");
 
-    if (!supa){
-      showError("Supabase no está disponible en esta página.");
-      return;
-    }
-
-    // Obtener instrumento desde Supabase
+    // Consultar instrumento
     const { data: inst, error: e1 } = await supa
       .from("instrumentos")
       .select("*")
       .eq("codigo", codigo)
       .maybeSingle();
 
-    if (e1){
-      console.error(e1);
-      showError("Error consultando la base de datos.");
-      return;
+    if (e1) return showError("Error consultando la base de datos.");
+    if (!inst) return showError(`No existe instrumento con código <b>${codigo}</b>.`);
+
+    // --------------------------------------------------------
+    //   OBTENER UBICACIÓN ACTUAL DESDE EL ÚLTIMO MOVIMIENTO
+    // --------------------------------------------------------
+    const { data: movs, error: eMov } = await supa
+      .from("movimientos")
+      .select("*")
+      .eq("codigo_instrumento", codigo)
+      .order("fecha", { ascending:false })
+      .limit(1);
+
+    let ubicMov = "Sin movimientos registrados";
+    if (movs && movs.length > 0) {
+      ubicMov = movs[0].destino || "Sin destino";
     }
 
-    if (!inst){
-      showError(`No existe ningún instrumento con código <b>${codigo}</b>.`);
-      return;
-    }
+    // --------------------------------------------------------
+    //   HERO
+    // --------------------------------------------------------
+    document.getElementById("hero").style.display = "flex";
+    document.getElementById("heroCode").textContent = `CÓDIGO · ${codigo}`;
+    document.getElementById("heroTitle").textContent =
+      inst.descripcion || "Instrumento sin descripción";
 
-    // ---------------------------
-    //   HERO CON DATOS ESENCIALES
-    // ---------------------------
-    const hero = document.getElementById("hero");
-    const heroCode = document.getElementById("heroCode");
-    const heroTitle = document.getElementById("heroTitle");
-    const heroSub = document.getElementById("heroSub");
-    const heroStatusPill = document.getElementById("heroStatusPill");
-    const heroStatusLabel = document.getElementById("heroStatusLabel");
-    const heroStatusCaption = document.getElementById("heroStatusCaption");
-    const heroObserv = document.getElementById("heroObserv");
-
-    hero.style.display = "flex";
-
-    heroCode.textContent = `CÓDIGO · ${codigo}`;
-    heroTitle.textContent = inst.descripcion || "Instrumento sin descripción";
-
-    // Texto principal: fabricante + ubicación actual muy visible
     const fabricanteTxt = inst.fabricante || "Fabricante N/D";
-    const ubicActual = inst.ubicacion_actual || "No especificada";
 
-    heroSub.innerHTML =
+    // 📍 Ubicación actual REAL desde los movimientos
+    document.getElementById("heroSub").innerHTML =
       `<strong>${fabricanteTxt}</strong><br>` +
-      `<span style="color:#7dd3fc">📍 Ubicación actual:</span> ${ubicActual}`;
+      `<span style="color:#7dd3fc">📍 Ubicación actual:</span> ${ubicMov}`;
 
-    // Observaciones: siempre mostrar algo
+    // Observaciones del HERO
     let obs = inst.observaciones;
-    if (!obs || obs === "null" || (typeof obs === "string" && obs.trim() === "")) {
+    if (!obs || obs === "null" || obs.trim() === "")
       obs = "Propiedad de Talleres Mecánicos Paramio";
-    }
 
-    heroObserv.style.display = "block";
-    heroObserv.innerHTML =
-      `<span class="label">📝 Observaciones</span>${obs}`;
+    const heroObs = document.getElementById("heroObserv");
+    heroObs.style.display = "block";
+    heroObs.innerHTML = `<span class="label">📝 Observaciones</span>${obs}`;
 
-    // Próxima calibración: usar siempre fecha_proxima_calibracion primero
-    const proxCalHero = inst.fecha_proxima_calibracion ?? inst.proxima_cal ?? null;
-    const estadoHero = computeEstado(proxCalHero);
-
-    heroStatusPill.className = "status-pill " + estadoHero.clase;
-    heroStatusLabel.textContent = `${estadoHero.icono} ${estadoHero.texto}`;
-
-    if (estadoHero.dias === null){
-      heroStatusCaption.textContent = estadoHero.detalle;
-    } else if (estadoHero.dias < 0){
-      const abs = Math.abs(estadoHero.dias);
-      heroStatusCaption.textContent =
-        `${estadoHero.detalle} Vencida hace ${abs} día${abs===1?"":"s"}.`;
-    } else {
-      heroStatusCaption.textContent =
-        `${estadoHero.detalle} Faltan ${estadoHero.dias} día${estadoHero.dias===1?"":"s"}.`;
-    }
-
-    // ---------------------------
-    //   INFORMACIÓN BÁSICA
-    // ---------------------------
-    const infoCard = document.getElementById("infoCard");
+    // --------------------------------------------------------
+    //   INFORMACIÓN BÁSICA (limpiada)
+    // --------------------------------------------------------
+    const info = document.getElementById("infoCard");
     const infoBody = document.getElementById("infoBody");
-    infoCard.style.display = "block";
+    info.style.display = "block";
 
     infoBody.innerHTML = `
       <div class="item">
@@ -603,121 +510,92 @@
         <span class="value">${inst.precision || "-"}</span>
       </div>
       <div class="item">
-        <span class="label">Ubicación nominal</span>
-        <span class="value">${inst.ubicacion || "-"}</span>
-      </div>
-      <div class="item">
-        <span class="label">Ubicación actual</span>
-        <span class="value">${inst.ubicacion_actual || "-"}</span>
-      </div>
-      <div class="item">
         <span class="label">Tipo de calibración</span>
         <span class="value">${inst.tipo_calibracion || "-"}</span>
       </div>
-      <div class="item">
-        <span class="label">Observaciones (detalle)</span>
-        <span class="value">${obs}</span>
-      </div>
     `;
 
-    // ---------------------------
-    //   ESTADO DE CALIBRACIÓN
-    // ---------------------------
-    const calCard = document.getElementById("calCard");
+    // --------------------------------------------------------
+    //   CALIBRACIÓN
+    // --------------------------------------------------------
+    const cal = document.getElementById("calCard");
     const calBody = document.getElementById("calBody");
-    calCard.style.display = "block";
+    cal.style.display = "block";
 
-    const ult = inst.fecha_ultima_cal ?? inst.fecha_calibracion ?? null;
-    const prox = inst.fecha_proxima_calibracion ?? inst.proxima_cal ?? null;
+    const ult = inst.fecha_ultima_calibracion || null;
+    const prox = inst.fecha_proxima_calibracion || null;
 
-    const est2 = computeEstado(prox);
+    const est = computeEstado(prox);
+    let detalleExtra = est.detalle;
 
-    let detalleExtra = est2.detalle;
-    if (est2.dias !== null){
-      if (est2.dias < 0){
-        const abs = Math.abs(est2.dias);
-        detalleExtra += ` Vencida hace ${abs} día${abs===1?"":"s"}.`;
-      } else {
-        detalleExtra += ` Faltan ${est2.dias} día${est2.dias===1?"":"s"}.`;
-      }
+    if (est.dias !== null){
+      if (est.dias < 0)
+        detalleExtra += ` Vencida hace ${Math.abs(est.dias)} días.`;
+      else
+        detalleExtra += ` Faltan ${est.dias} días.`;
     }
 
     calBody.innerHTML = `
       <div class="item">
         <span class="label">Última calibración</span>
-        <span class="value">${ult ? formatDateShort(ult) : "-"}</span>
+        <span class="value">${ult ? fDateShort(ult) : "-"}</span>
       </div>
-
       <div class="item">
         <span class="label">Próxima calibración</span>
-        <span class="value">${prox ? formatDateShort(prox) : "-"}</span>
+        <span class="value">${prox ? fDateShort(prox) : "-"}</span>
       </div>
-
       <div class="item" style="margin-top:8px;">
-        <span class="status-pill ${est2.clase}">
+        <span class="status-pill ${est.clase}">
           <span class="dot"></span>
-          ${est2.icono} ${est2.texto}
+          ${est.icono} ${est.texto}
         </span>
       </div>
-
       <p class="muted">${detalleExtra}</p>
     `;
 
-    // ---------------------------
-    //   HISTÓRICO DE MOVIMIENTOS
-    // ---------------------------
+    // --------------------------------------------------------
+    //   HISTORIAL DE MOVIMIENTOS
+    // --------------------------------------------------------
     const movCard = document.getElementById("movCard");
-    const movBody = document.getElementById("movBody");
-    const movHint = document.getElementById("movHint");
-
     movCard.style.display = "block";
 
-    const { data: movs, error: e2 } = await supa
+    const { data: movList, error: e2 } = await supa
       .from("movimientos")
       .select("*")
       .eq("codigo_instrumento", codigo)
       .order("fecha", { ascending:false })
       .limit(10);
 
-    if (e2){
-      console.error(e2);
-      movBody.innerHTML = `<div class="muted">No se han podido cargar movimientos.</div>`;
-      movHint.textContent = "";
-      return;
-    }
+    const movBody = document.getElementById("movBody");
+    const movHint = document.getElementById("movHint");
 
-    if (!movs || movs.length === 0){
+    if (!movList || movList.length === 0){
       movBody.innerHTML = `<div class="muted">No existen movimientos para este instrumento.</div>`;
       movHint.textContent = "";
     } else {
-      movBody.innerHTML = movs.map(m => `
+      movBody.innerHTML = movList.map(m => `
         <div class="mov-item">
           <div class="mov-header">
             <div class="mov-type">${m.tipo_movimiento || "Movimiento"}</div>
-            <div class="mov-date">${formatDateTime(m.fecha)}</div>
+            <div class="mov-date">${fDateTime(m.fecha)}</div>
           </div>
-
           <div class="mov-body-line">
             <span class="mov-body-label">Responsable</span>
             <span>${m.responsable || "-"}</span>
           </div>
-
           <div class="mov-body-line">
             <span class="mov-body-label">Destino</span>
             <span>${m.destino || "-"}</span>
           </div>
-
-          ${m.observaciones ? `
-            <div class="mov-body-line">
-              <span class="mov-body-label">Obs.</span>
-              <span>${m.observaciones.replace(/\n/g,"<br>")}</span>
-            </div>` : ""
+          ${
+            m.observaciones
+              ? `<div class="mov-body-line"><span class="mov-body-label">Obs.</span><span>${m.observaciones.replace(/\n/g,"<br>")}</span></div>`
+              : ""
           }
         </div>
       `).join("");
 
-      movHint.textContent =
-        "Se muestran los 10 movimientos más recientes registrados en la base de datos.";
+      movHint.textContent = "Se muestran los 10 movimientos más recientes.";
     }
   }
 
@@ -726,3 +604,4 @@
 
 </body>
 </html>
+
