@@ -245,6 +245,33 @@
     .mov-date{ font-size:11px; color:var(--muted); }
     .mov-body-line{ display:flex; justify-content:space-between; margin-top:3px; }
     .mov-body-label{ color:var(--muted); min-width:70px; }
+
+    /* Chips responsables actuales */
+    .resp-chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:6px;
+    }
+    .resp-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:11px;
+      border:1px solid rgba(148,163,184,.6);
+      background:rgba(15,23,42,.9);
+      color:#e5e7eb;
+    }
+    .resp-chip .icon{ font-size:13px; }
+    .resp-chip.primary{
+      border-color:rgba(56,189,248,.8);
+      box-shadow:0 0 10px rgba(56,189,248,.6);
+    }
+    .resp-chip.secondary{
+      border-color:rgba(148,163,184,.6);
+    }
   </style>
 </head>
 
@@ -279,6 +306,13 @@
   </section>
 
   <section id="heroObserv" class="hero-observ" style="display:none"></section>
+
+  <!-- Responsables actuales -->
+  <section id="respCard" class="card" style="display:none">
+    <h2>Responsables actuales</h2>
+    <div class="card-sub">Asignados en el último movimiento registrado.</div>
+    <div id="respChips" class="resp-chips"></div>
+  </section>
 
   <!-- Información básica -->
   <section id="infoCard" class="card" style="display:none">
@@ -366,7 +400,7 @@
     if (error) return showError("Error consultando DB.");
     if (!inst) return showError(`No existe el código ${codigo}`);
 
-    // MOVIMIENTOS → Obtener ubicación REAL
+    // MOVIMIENTOS → Obtener ubicación REAL + responsables actuales
     const { data: movs } = await supa
       .from("movimientos")
       .select("*")
@@ -375,7 +409,14 @@
       .limit(1);
 
     let ubic = "Sin movimientos registrados";
-    if (movs && movs.length>0) ubic = movs[0].destino || ubic;
+    let lastOperario1 = null;
+    let lastOperario2 = null;
+
+    if (movs && movs.length>0) {
+      ubic = movs[0].destino || ubic;
+      lastOperario1 = movs[0].operario1 || null;
+      lastOperario2 = movs[0].operario2 || null;
+    }
 
     // HERO
     document.getElementById("hero").style.display="flex";
@@ -410,6 +451,31 @@
     const obsBox = document.getElementById("heroObserv");
     obsBox.style.display="block";
     obsBox.innerHTML = `<span class="label">📝 Observaciones</span> ${obs}`;
+
+    // RESPONSABLES ACTUALES (chips)
+    const respCard = document.getElementById("respCard");
+    const respChips = document.getElementById("respChips");
+    if (lastOperario1 || lastOperario2) {
+      respCard.style.display = "block";
+      let chipsHtml = "";
+      if (lastOperario1) {
+        chipsHtml += `
+          <span class="resp-chip primary">
+            <span class="icon">👤</span>
+            <span>Operario 1: <strong>${lastOperario1}</strong></span>
+          </span>
+        `;
+      }
+      if (lastOperario2) {
+        chipsHtml += `
+          <span class="resp-chip secondary">
+            <span class="icon">👥</span>
+            <span>Operario 2: ${lastOperario2}</span>
+          </span>
+        `;
+      }
+      respChips.innerHTML = chipsHtml;
+    }
 
     // INFO BÁSICA
     const info = document.getElementById("infoCard");
@@ -465,14 +531,29 @@
           <div class="mov-type">${m.tipo_movimiento}</div>
           <div class="mov-date">${fDateTime(m.fecha)}</div>
         </div>
+
         <div class="mov-body-line">
           <span class="mov-body-label">Responsable</span>
-          <span>${m.responsable}</span>
+          <span>${m.responsable || "-"}</span>
         </div>
+
+        <div class="mov-body-line">
+          <span class="mov-body-label">Operario 1</span>
+          <span><strong style="color:#7dd3fc">${m.operario1 || "-"}</strong></span>
+        </div>
+
+        ${m.operario2 ? `
+          <div class="mov-body-line">
+            <span class="mov-body-label">Operario 2</span>
+            <span>${m.operario2}</span>
+          </div>
+        ` : ""}
+
         <div class="mov-body-line">
           <span class="mov-body-label">Destino</span>
-          <span>${m.destino}</span>
+          <span>${m.destino || "-"}</span>
         </div>
+
         ${m.observaciones ? `
           <div class="mov-body-line">
             <span class="mov-body-label">Obs.</span>
