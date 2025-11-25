@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>TMP · Gestión de Movimientos de Instrumentos</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <link rel="icon" href="img/tmp-quality.png" />
 
   <style>
@@ -88,10 +89,7 @@
       border-radius: 999px;
       background: #4ade80;
     }
-
-    .badge.offline .badge-dot {
-      background: #f97373;
-    }
+    .badge.offline .badge-dot { background: #f97373; }
 
     .btn {
       border: none;
@@ -135,56 +133,39 @@
       box-shadow: none;
       transform: none;
     }
-    main { display: flex; flex-direction: column; gap: 16px; }
+
+    main { display:flex; flex-direction:column; gap:16px; }
+
     .card {
-      border-radius: 16px;
-      background: linear-gradient(135deg, #0f1f33, #0a1625);
-      border: 1px solid rgba(43,78,122,.75);
-      box-shadow: 0 18px 40px rgba(0,0,0,.50);
-      padding: 16px 16px 14px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#0f1f33,#0a1625);
+      border:1px solid rgba(43,78,122,.75);
+      box-shadow:0 18px 40px rgba(0,0,0,.50);
+      padding:16px 16px 14px;
     }
 
     .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
     }
 
-    .card-title { font-size: 15px; font-weight: 600; }
+    .card-title { font-size:15px; font-weight:600; }
 
     .card-sub {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
     }
-
-    .pill {
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 11px;
-      border: 1px solid rgba(52,94,145,.9);
-      background: rgba(15,36,66,.9);
-      color: var(--muted);
-    }
-
-    .pill.ok { background:#07281a; border-color:#18a46d; color:#c9ffe5; }
-    .pill.warn { background:#392a09; border-color:#f9d567; color:#fff2c2; }
-    .pill.bad { background:#3b1010; border-color:#ff7b7b; color:#ffe2e2; }
-
-    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px 14px;}
-    @media(max-width:900px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
-    @media(max-width:640px){ .grid{grid-template-columns:1fr;} .btn{width:100%;}}
-
-    .row { display:flex; align-items:center; gap:8px; }
 
     label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      margin-bottom: 4px;
-      display: block;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--muted);
+      margin-bottom:4px;
+      display:block;
     }
 
     input,select,textarea {
@@ -198,46 +179,77 @@
       outline:none;
     }
 
-    input[readonly] { opacity:.85; background:#060d19; }
+    input[readonly] { opacity:.8; }
 
     textarea { min-height:70px; resize:vertical; }
 
-    .alert {
-      font-size:11px;
-      padding:6px 9px;
-      border-radius:9px;
-      border:1px solid rgba(248,113,113,.7);
-      color:#fecaca;
-      background:rgba(127,29,29,.4);
-      margin-top:8px;
-    }
-
-    .alert-critical {
-      font-size:12px;
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(127,29,29,.7);
-      border:1px solid #f97373;
-      color:#fee2e2;
-      box-shadow:0 0 22px rgba(248,113,113,.7);
-    }
   </style>
 </head>
 
 <body>
 <div class="app">
 
-<header> ... (MISMO HEADER QUE TU ORIGINAL) ... </header>
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" class="brand-logo">
+    <div>
+      <div class="brand-text-title">TMP · Movimientos de Instrumentos</div>
+      <div class="brand-text-sub">Trazabilidad — Entradas / Salidas / Estados</div>
+    </div>
+  </div>
+  <div class="row-right">
+    <button class="btn secondary" onclick="window.location.href='home.html'">← Volver</button>
+    <div id="onlineBadge" class="badge offline">
+      <span class="badge-dot"></span>
+      <span id="onlineText">Offline (sin conexión Supabase)</span>
+    </div>
+  </div>
+</header>
 
 <main>
 
-<!-- ●●● INSTRUMENTO (idéntico a tu original, sin quitar nada) -->
+<!-- ●●● INSTRUMENTO ●●● -->
 <section class="card">
-  ... (TODA LA SECCIÓN DE INSTRUMENTO IGUAL) ...
-</section>
+  <div class="card-header">
+    <div>
+      <div class="card-title">Instrumento</div>
+      <div class="card-sub">Introduce el código o usa QR.</div>
+    </div>
 
-<!-- ●●● REGISTRAR MOVIMIENTO — CON OPERARIO 1 Y 2 AÑADIDOS ●●● -->
+    <div id="estadoChip" class="pill neutral">Esperando instrumento</div>
+  </div>
+
+  <div class="grid">
+    <div style="grid-column:1/-1">
+      <label>Código del instrumento</label>
+      <div class="row">
+        <input id="codigoInput" placeholder="Ej. 11217">
+        <button id="btnCargarInstrumento" class="btn sm">Cargar</button>
+      </div>
+    </div>
+
+    <div><label>Descripción</label><input id="descInstrumento" readonly></div>
+    <div><label>Fabricante</label><input id="fabInstrumento" readonly></div>
+    <div><label>Rango</label><input id="rangoInstrumento" readonly></div>
+
+    <div><label>Unidad</label><input id="unidadInstrumento" readonly></div>
+    <div><label>Precisión</label><input id="precisionInstrumento" readonly></div>
+    <div><label>Ubicación actual</label><input id="ubicacionInstrumento" readonly></div>
+
+    <div><label>Última calibración</label><input id="ultimaCal" readonly></div>
+    <div><label>Próxima calibración</label><input id="proximaCal" readonly></div>
+    <div><label>Tipo calibración</label><input id="tipoCal" readonly></div>
+  </div>
+
+  <div class="stats">
+    <div id="statEstado" class="stat-badge">Estado: —</div>
+    <div id="statDias" class="stat-badge">Días hasta próxima: —</div>
+    <div id="statUso" class="stat-badge">Movimientos: —</div>
+  </div>
+
+  <div id="alertInstrumento" class="alert hidden"></div>
+</section>
+<!-- ●●● REGISTRAR MOVIMIENTO ●●● -->
 <section class="card">
   <div class="card-header">
     <div>
@@ -246,10 +258,22 @@
     </div>
   </div>
 
-  <!-- ALERTA CRÍTICA FUERA CALIBRACIÓN (sin cambios) -->
-  <div id="alertaCritica" class="alert-critical hidden"> ... </div>
+  <!-- ALERTA CRÍTICA (fuera calibración) -->
+  <div id="alertaCritica" class="alert-critical hidden">
+    <h3>⚠ INSTRUMENTO FUERA DE CALIBRACIÓN</h3>
+    <p>Para continuar debes calibrar o registrar un uso bajo responsabilidad.</p>
+
+    <label>Responsable autorizado</label>
+    <input id="responsableAutorizacion" placeholder="Nombre de quien autoriza">
+
+    <div class="row" style="justify-content:flex-end;margin-top:8px;">
+      <button class="btn secondary" id="btnCalibrarAhora">Calibrar ahora</button>
+      <button class="btn" id="btnForzarUso">Usar bajo responsabilidad</button>
+    </div>
+  </div>
 
   <div class="grid" style="margin-top:10px;">
+
     <div>
       <label>Tipo de movimiento</label>
       <select id="tipoMovimiento">
@@ -264,7 +288,7 @@
 
     <div>
       <label>Responsable</label>
-      <input id="responsable" placeholder="Nombre del responsable del movimiento">
+      <input id="responsable" placeholder="Responsable del movimiento">
     </div>
 
     <!-- NUEVOS CAMPOS -->
@@ -286,11 +310,12 @@
     <div style="grid-column:1/-1">
       <label>Observaciones</label>
       <textarea id="observaciones" placeholder="Opcional"></textarea>
-      <p class="helper-text">El estado de calibración se añade automáticamente.</p>
+      <p class="helper-text">El estado de calibración se anexa automáticamente.</p>
     </div>
+
   </div>
 
-  <div class="row" style="justify-content:flex-end; margin-top:10px;">
+  <div class="row" style="justify-content:flex-end;margin-top:10px;">
     <button class="btn secondary" id="btnLimpiar">Limpiar</button>
     <button class="btn" id="btnRegistrar">Registrar</button>
   </div>
@@ -310,7 +335,7 @@
     <table>
       <thead>
         <tr>
-          <th>Fecha (UTC)</th>
+          <th>Fecha</th>
           <th>Tipo</th>
           <th>Responsable</th>
           <th>Operario 1</th>
@@ -319,6 +344,7 @@
           <th>Observaciones</th>
         </tr>
       </thead>
+
       <tbody id="tablaMovimientos">
         <tr><td colspan="7">Introduce un código para ver movimientos</td></tr>
       </tbody>
@@ -331,32 +357,38 @@
 
 <!-- MODAL QR -->
 <div id="qrModal" class="qr-modal hidden">
-  ... (MISMO CÓDIGO ORIGINAL) ...
+  <div class="qr-modal-backdrop"></div>
+  <div class="qr-modal-inner">
+    <h2>Escanear código QR</h2>
+    <p class="helper-text">Apunta la cámara al QR del instrumento.</p>
+    <div id="qrReader"></div>
+    <div class="row" style="justify-content:end;margin-top:10px;">
+      <button class="btn secondary" id="btnCerrarQR">Cancelar</button>
+    </div>
+  </div>
 </div>
 
-<!-- FAB QR -->
+<!-- FAB -->
 <button class="qr-fab" id="btnFabQR">📷</button>
-<script type="module" src="config.mjs"></script>
+
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script type="module" src="config.mjs"></script>
 
 <script type="module">
 import { supabase } from "./config.mjs";
 window.supabase = supabase;
-</script>
-
-<script type="module">
 const sb = window.supabase;
-if (!sb) console.error("Supabase no cargó");
 
-function $(s){ return document.querySelector(s); }
+function $(s){return document.querySelector(s);}
 
 function fmtDate(iso){
-  const d = new Date(iso);
+  const d=new Date(iso); 
   return d.toISOString().replace("T"," ").slice(0,16)+" UTC";
 }
 
-const daysDiff = d => {
-  const x=new Date(d+"T00:00:00"); return Math.round((x-new Date())/86400000);
+function daysDiff(date){
+  const d=new Date(date+"T00:00:00");
+  return Math.round((d - new Date())/86400000);
 }
 
 function computeEstado(prox){
@@ -367,30 +399,87 @@ function computeEstado(prox){
 }
 
 let instrumentoActual=null;
-let movimientosCount=0;
 let estadoActualInstrumento=null;
-let usoBajoResponsabilidad=false;
-let responsableAutorizado="";
+let movimientosCount=0;
 
-/* === cargar instrumento === */
 async function cargarInstrumento(){
   const codigo=$("#codigoInput").value.trim();
-  const alertBox=$("#alertInstrumento");
-  alertBox.classList.add("hidden");
+  const alert=$("#alertInstrumento");
+  alert.classList.add("hidden");
 
   if(!codigo){
-    alertBox.textContent="Introduce un código";
-    alertBox.classList.remove("hidden");
+    alert.textContent="Introduce un código";
+    alert.classList.remove("hidden");
     return;
   }
-/* === registrar movimiento === */
+
+  const {data,error} = await sb.from("instrumentos")
+    .select("*")
+    .eq("codigo",codigo)
+    .maybeSingle();
+
+  if(error || !data){
+    alert.textContent="Instrumento no encontrado";
+    alert.classList.remove("hidden");
+    return;
+  }
+
+  instrumentoActual=data;
+
+  $("#descInstrumento").value=data.descripcion||"";
+  $("#fabInstrumento").value=data.fabricante||"";
+  $("#rangoInstrumento").value=data.rango||"";
+  $("#unidadInstrumento").value=data.unidad_base||"";
+  $("#precisionInstrumento").value=data.precision||"";
+  $("#ubicacionInstrumento").value=data.ubicacion_actual||"";
+
+  $("#ultimaCal").value=data.fecha_ultima_calibracion||"";
+  $("#proximaCal").value=data.fecha_proxima_calibracion||"";
+  $("#tipoCal").value=data.tipo_calibracion||"";
+
+  const est=computeEstado(data.fecha_proxima_calibracion);
+  estadoActualInstrumento=est;
+
+  $("#estadoChip").textContent = est.estado;
+  $("#estadoChip").className = "pill " + est.clase;
+
+  await cargarMovimientos(data.codigo);
+}
+
+async function cargarMovimientos(codigo){
+  const tbody=$("#tablaMovimientos");
+
+  const {data,error}=await sb.from("movimientos")
+    .select("*")
+    .eq("codigo_instrumento",codigo)
+    .order("fecha",{ascending:false})
+    .limit(20);
+
+  if(error || !data.length){
+    tbody.innerHTML=`<tr><td colspan="7">No hay movimientos</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(m => `
+    <tr>
+      <td>${fmtDate(m.fecha)}</td>
+      <td>${m.tipo_movimiento}</td>
+      <td>${m.responsable || ""}</td>
+      <td>${m.operario1 || ""}</td>
+      <td>${m.operario2 || ""}</td>
+      <td>${m.destino || ""}</td>
+      <td style="white-space:normal;max-width:260px;">${(m.observaciones||"").replace(/\n/g,"<br>")}</td>
+    </tr>
+  `).join("");
+}
+
 async function registrarMovimiento(){
-  const alertBox=$("#alertMovimiento");
-  alertBox.classList.add("hidden");
+  const alert=$("#alertMovimiento");
+  alert.classList.add("hidden");
 
   if(!instrumentoActual){
-    alertBox.textContent="Primero carga un instrumento";
-    alertBox.classList.remove("hidden");
+    alert.textContent="Primero carga un instrumento";
+    alert.classList.remove("hidden");
     return;
   }
 
@@ -401,55 +490,41 @@ async function registrarMovimiento(){
   const destino=$("#destino").value.trim();
   const obsUser=$("#observaciones").value.trim();
 
-  if(!tipo){
-    alertBox.textContent="Selecciona un tipo de movimiento";
-    alertBox.classList.remove("hidden");
-    return;
-  }
-  if(!responsable){
-    alertBox.textContent="Introduce un responsable";
-    alertBox.classList.remove("hidden");
-    return;
-  }
-  if(!operario1){
-    alertBox.textContent="Introduce Operario 1";
-    alertBox.classList.remove("hidden");
-    return;
-  }
+  if(!tipo){ alert.textContent="Selecciona un tipo"; alert.classList.remove("hidden"); return; }
+  if(!responsable){ alert.textContent="Introduce un responsable"; alert.classList.remove("hidden"); return; }
+  if(!operario1){ alert.textContent="Introduce Operario 1"; alert.classList.remove("hidden"); return; }
 
-  const estado = computeEstado(instrumentoActual.fecha_proxima_calibracion);
+  const est=computeEstado(instrumentoActual.fecha_proxima_calibracion);
+  let obsFinal=(obsUser?obsUser+"\n":"") + `Estado calibración: ${est.estado}`;
 
-  let obsFinal = obsUser ? obsUser+"\n" : "";
-  obsFinal += `Estado calibración: ${estado.estado}`;
+  let nuevaUbicacion = (tipo==="Entrada") ? "Laboratorio" : (destino || instrumentoActual.ubicacion_actual);
 
-  let nuevaUbicacion = (tipo === "Entrada") ? "Laboratorio" : (destino || instrumentoActual.ubicacion_actual);
-
-  const { error:errorMov } = await sb.from("movimientos").insert({
+  const {error:errorMov}=await sb.from("movimientos").insert({
     codigo_instrumento: instrumentoActual.codigo,
-    fecha: new Date().toISOString(),
-    tipo_movimiento: tipo,
+    fecha:new Date().toISOString(),
+    tipo_movimiento:tipo,
     responsable,
     operario1,
     operario2: operario2 || null,
     destino,
-    observaciones: obsFinal
+    observaciones:obsFinal
   });
 
   if(errorMov){
-    alertBox.textContent="Error al guardar movimiento";
-    alertBox.classList.remove("hidden");
+    alert.textContent="Error al registrar";
+    alert.classList.remove("hidden");
     return;
   }
 
   await sb.from("instrumentos")
-    .update({ ubicacion_actual:nuevaUbicacion })
-    .eq("codigo", instrumentoActual.codigo);
+    .update({ubicacion_actual:nuevaUbicacion})
+    .eq("codigo",instrumentoActual.codigo);
 
-  alertBox.textContent="Movimiento registrado con éxito";
-  alertBox.style.background="rgba(22,101,52,.5)";
-  alertBox.style.borderColor="#4ade80";
-  alertBox.style.color="#dcfce7";
-  alertBox.classList.remove("hidden");
+  alert.textContent="Movimiento registrado con éxito";
+  alert.style.background="rgba(22,101,52,.5)";
+  alert.style.borderColor="#4ade80";
+  alert.style.color="#dcfce7";
+  alert.classList.remove("hidden");
 
   $("#tipoMovimiento").value="";
   $("#responsable").value="";
@@ -457,9 +532,10 @@ async function registrarMovimiento(){
   $("#operario2").value="";
   $("#destino").value="";
   $("#observaciones").value="";
+
+  await cargarMovimientos(instrumentoActual.codigo);
 }
 
-/* EVENTOS */
 $("#btnRegistrar").onclick=registrarMovimiento;
 $("#btnCargarInstrumento").onclick=cargarInstrumento;
 $("#btnLimpiar").onclick=()=> {
@@ -470,7 +546,7 @@ $("#btnLimpiar").onclick=()=> {
   $("#destino").value="";
   $("#observaciones").value="";
 };
-</script>
 
+</script>
 </body>
 </html>
