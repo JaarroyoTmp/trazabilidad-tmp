@@ -284,6 +284,91 @@
     table { width:100%; border-collapse:collapse; font-size:12px; }
     th,td { padding:6px; border-bottom:1px solid #1f3046; white-space:nowrap; }
     th { background:#0c1929; text-transform:uppercase; color:var(--muted); font-size:11px; position:sticky; top:0; }
+
+    /* ========= FAB QR METÁLICO / TÉCNICO ========= */
+    .qr-fab {
+      position: fixed;
+      right: 18px;
+      bottom: 22px;
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border: 1px solid #38bdf8;
+      background:
+        radial-gradient(circle at 30% 20%, #1f2937 0, #020617 60%);
+      box-shadow:
+        0 0 18px rgba(56,189,248,.55),
+        0 10px 22px rgba(0,0,0,.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      color: #e5f2ff;
+      z-index: 60;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+
+    .qr-fab:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 0 26px rgba(56,189,248,.85),
+        0 14px 30px rgba(0,0,0,.9);
+      border-color: #7dd3fc;
+    }
+
+    /* ========= MODAL QR ========= */
+    .qr-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-modal-backdrop {
+      position:absolute;
+      inset:0;
+      background:rgba(15,23,42,.88);
+      backdrop-filter: blur(6px);
+    }
+
+    .qr-modal-inner {
+      position: relative;
+      z-index: 51;
+      width: min(440px, 92%);
+      border-radius: 16px;
+      padding: 14px 16px 16px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(59,130,246,.22) 0, transparent 60%),
+        radial-gradient(circle at 100% 0%, rgba(45,212,191,.18) 0, transparent 60%),
+        linear-gradient(135deg,#020617,#02081a);
+      border:1px solid rgba(37,99,235,.75);
+      box-shadow:
+        0 20px 50px rgba(0,0,0,.9),
+        0 0 28px rgba(56,189,248,.4);
+    }
+
+    .qr-modal-inner h2 {
+      margin: 0 0 4px;
+      font-size: 15px;
+    }
+
+    #qrReader {
+      margin-top: 10px;
+      width: 100%;
+      min-height: 260px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1f2937;
+      background:#020617;
+    }
+
+    /* html5-qrcode internal video container fallback */
+    #qrReader video {
+      border-radius: 10px;
+    }
   </style>
 </head>
 
@@ -317,7 +402,7 @@
         <div>
           <div class="card-title">Instrumento</div>
           <div class="card-sub">
-            Introduce el <b>código exacto</b> para cargar sus datos.
+            Introduce el <b>código exacto</b> para cargar sus datos o usa el lector QR.
           </div>
         </div>
         <div id="estadoChip" class="pill neutral">Esperando instrumento</div>
@@ -453,7 +538,7 @@
       <div id="alertMovimiento" class="alert hidden"></div>
     </section>
 
-    <!-- ●●● HISTORIAL ●●● -->
+    <!-- ●●● HISTÓRICO ●●● -->
     <section class="card">
       <div class="card-header">
         <div>
@@ -484,15 +569,36 @@
   </main>
 </div>
 
+<!-- MODAL LECTOR QR -->
+<div id="qrModal" class="qr-modal hidden">
+  <div class="qr-modal-backdrop"></div>
+  <div class="qr-modal-inner">
+    <h2>Escanear código QR</h2>
+    <p class="helper-text">Apunta la cámara al código QR del instrumento para cargarlo automáticamente.</p>
+    <div id="qrReader"></div>
+    <div class="row" style="justify-content:flex-end; margin-top:10px;">
+      <button class="btn secondary" type="button" id="btnCerrarQR">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB QR -->
+<button class="qr-fab" id="btnFabQR" title="Escanear código QR del instrumento">
+  📷
+</button>
+
 <!-- 🔥 SUPABASE CORRECTO: config.mjs -->
 <script type="module" src="config.mjs"></script>
+
+<!-- Librería lector QR -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <script type="module">
   import { supabase } from "./config.mjs";
   window.supabase = supabase;
 </script>
 
-<!-- 🔥 LÓGICA MOVIMIENTO -->
+<!-- 🔥 LÓGICA MOVIMIENTO + QR -->
 <script type="module">
 const sb = window.supabase;
 
@@ -568,6 +674,10 @@ let movimientosCount = 0;
 let estadoActualInstrumento = null;
 let usoBajoResponsabilidad = false;
 let responsableAutorizado = "";
+
+// QR
+let html5QrCodeInstance = null;
+let qrEnMarcha = false;
 
 /* ===========================================================
    HABILITAR / DESHABILITAR BOTÓN REGISTRAR
@@ -895,6 +1005,94 @@ async function registrarMovimiento() {
 }
 
 /* ===========================================================
+   LÓGICA QR
+=========================================================== */
+function extraerCodigoDesdeQR(textoCrudo) {
+  if (!textoCrudo) return "";
+  const raw = textoCrudo.trim();
+
+  // Intentar tratar como URL (caso qr_info.html?codigo=123, etc.)
+  try {
+    const url = new URL(raw);
+    const codParam = url.searchParams.get("codigo");
+    if (codParam) return codParam;
+
+    const partes = url.pathname.split("/").filter(Boolean);
+    const last = partes[partes.length - 1];
+    if (last && !last.includes(".html")) {
+      return decodeURIComponent(last);
+    }
+    return raw;
+  } catch {
+    // No es URL → usar el contenido directamente
+    return raw;
+  }
+}
+
+async function abrirQR() {
+  const modal = $("#qrModal");
+  if (!modal) return;
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert("Este dispositivo no permite acceso a la cámara para leer QR.");
+    return;
+  }
+
+  if (!window.Html5Qrcode) {
+    alert("Lector QR no disponible en esta página.");
+    return;
+  }
+
+  modal.classList.remove("hidden");
+
+  const contenedor = "qrReader";
+
+  if (html5QrCodeInstance) {
+    try { await html5QrCodeInstance.stop(); } catch {}
+    try { await html5QrCodeInstance.clear(); } catch {}
+  }
+
+  html5QrCodeInstance = new Html5Qrcode(contenedor);
+  qrEnMarcha = true;
+
+  html5QrCodeInstance.start(
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: { width: 250, height: 250 }
+    },
+    decodedText => {
+      const codigo = extraerCodigoDesdeQR(decodedText);
+      if (codigo) {
+        $("#codigoInput").value = codigo;
+        cargarInstrumento();
+        cerrarQR();
+      }
+    },
+    errorMsg => {
+      // Silencioso, solo para depuración
+      // console.debug("Escaneando QR...", errorMsg);
+    }
+  ).catch(err => {
+    console.error("No se pudo iniciar el lector QR:", err);
+    alert("No se pudo iniciar la cámara para el lector QR.");
+    cerrarQR();
+  });
+}
+
+function cerrarQR() {
+  const modal = $("#qrModal");
+  if (modal) modal.classList.add("hidden");
+
+  if (html5QrCodeInstance && qrEnMarcha) {
+    html5QrCodeInstance.stop()
+      .then(() => html5QrCodeInstance.clear())
+      .catch(() => {})
+      .finally(() => { qrEnMarcha = false; });
+  }
+}
+
+/* ===========================================================
    EVENTOS
 =========================================================== */
 $("#btnCargarInstrumento").onclick = cargarInstrumento;
@@ -938,8 +1136,17 @@ $("#btnForzarUso").onclick = () => {
 // Botón "Calibrar ahora"
 $("#btnCalibrarAhora").onclick = () => {
   if (!instrumentoActual) return;
-  // Ajusta la URL si tu módulo de calibraciones se llama de otra forma
   window.location.href = `calibraciones.html?codigo=${encodeURIComponent(instrumentoActual.codigo)}`;
+};
+
+// FAB QR
+$("#btnFabQR").onclick = () => {
+  abrirQR();
+};
+
+// Botón cerrar QR
+$("#btnCerrarQR").onclick = () => {
+  cerrarQR();
 };
 
 // Al inicio, por seguridad desactivamos el botón Registrar
@@ -948,5 +1155,7 @@ actualizarBotonRegistrar();
 
 </body>
 </html>
+
+
 
 
