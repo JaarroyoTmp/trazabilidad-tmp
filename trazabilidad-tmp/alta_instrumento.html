@@ -3,10 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TMP · Alta / Edición / Baja de Instrumentos</title>
-
-  <!-- Lector QR con cámara -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <title>TMP · Alta / Edición de Instrumentos</title>
 
   <style>
     :root{
@@ -18,112 +15,64 @@
       --primary-600:#1565c0;
       --accent:#ff8f00;
       --danger:#e53935;
-      --ok:#2e7d32;
       --chip:#20324b;
       --input:#0b1627;
       --border:#1c2a44;
     }
+
     *{box-sizing:border-box;}
+
     body{
       margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu;
       background:var(--bg);
       color:var(--txt);
+      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto;
     }
+
     header{
-      padding:14px 18px;
-      border-bottom:1px solid var(--border);
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      gap:14px;
-      background:linear-gradient(180deg,#0f1b2d 0,#0f1b2df0 100%);
-      position:sticky;
-      top:0;
-      z-index:10;
-    }
-    .brand-wrap{
-      display:flex;
       align-items:center;
-      gap:10px;
-    }
-    .brand-logo{
-      height:42px;
-      width:auto;
-    }
-    .brand-titles{
-      display:flex;
-      flex-direction:column;
-    }
-    .brand-titles h1{
-      margin:0;
-      font-size:1.15rem;
-    }
-    .brand-titles span{
-      font-size:.8rem;
-      color:var(--muted);
-    }
-    .chip{
-      background:var(--chip);
-      color:#cfe1ff;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.8rem;
-      border:1px solid var(--border);
-    }
-    .btn-header{
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:transparent;
-      color:#cfe1ff;
-      padding:8px 14px;
-      font-size:.85rem;
-      cursor:pointer;
-    }
-    .btn-header:hover{
-      background:#14233a;
+      padding:16px 20px;
+      border-bottom:1px solid var(--border);
+      background:#0f1b2d;
     }
 
     main{
-      max-width:1000px;
+      max-width:950px;
       margin:20px auto 40px;
-      padding:0 16px;
+      padding:0 18px;
     }
 
-    .tabs{
-      display:flex;
-      gap:8px;
-      margin:10px 0 18px;
-      flex-wrap:wrap;
-    }
-    .tab{
-      background:var(--chip);
-      border:1px solid var(--border);
-      color:#cfe1ff;
-      padding:8px 14px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:600;
-      font-size:.9rem;
-    }
-    .tab.active{
-      background:var(--primary);
-      border-color:transparent;
-      color:#fff;
-    }
+    h2{ margin:0 0 12px; }
 
     .panel{
       background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:16px;
+      border-radius:14px;
       padding:18px;
-      display:none;
+      border:1px solid var(--border);
     }
-    .panel.active{display:block;}
 
-    h2{
-      margin:0 0 12px;
-      font-size:1.1rem;
+    label{
+      display:block;
+      margin-bottom:4px;
+      font-size:.9rem;
+    }
+
+    input,textarea{
+      width:100%;
+      background:var(--input);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+      color:var(--txt);
+      font-size:.95rem;
+      outline:none;
+    }
+
+    input:focus,textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 1px rgba(30,136,229,.4);
     }
 
     .grid{
@@ -131,638 +80,286 @@
       grid-template-columns:1fr 1fr;
       gap:16px;
     }
-    @media (max-width:900px){
+
+    @media(max-width:800px){
       .grid{grid-template-columns:1fr;}
     }
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .row > div{flex:1;}
 
-    label{
-      display:block;
-      font-size:.85rem;
-      color:#cfe1ff;
-      margin-bottom:4px;
-    }
-    input,select,textarea{
-      width:100%;
-      background:var(--input);
-      color:var(--txt);
-      border-radius:10px;
-      border:1px solid var(--border);
-      padding:9px 11px;
-      font-size:.95rem;
-      outline:none;
-    }
-    input:focus,select:focus,textarea:focus{
-      border-color:var(--primary);
-      box-shadow:0 0 0 1px rgba(30,136,229,.4);
-    }
-    textarea{min-height:80px;resize:vertical;}
-
-    .help{
-      font-size:.8rem;
-      color:var(--muted);
-      margin-top:4px;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
     .btn{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
+      padding:10px 16px;
       border-radius:10px;
       border:0;
-      padding:9px 13px;
-      font-size:.9rem;
       cursor:pointer;
       font-weight:600;
+      font-size:.9rem;
     }
+
     .btn-primary{
       background:var(--primary);
       color:#fff;
     }
+
     .btn-primary:hover{
       background:var(--primary-600);
     }
-    .btn-accent{
-      background:var(--accent);
-      color:#132235;
-    }
-    .btn-warn{
-      background:var(--danger);
-      color:#fff;
-    }
+
     .btn-ghost{
       background:transparent;
       border:1px solid var(--border);
-      color:#cfe1ff;
-    }
-    .btn-ghost:hover{
-      background:#14233a;
+      color:var(--txt);
     }
 
     .alert{
-      margin:14px 0 0;
-      padding:10px 12px;
+      margin-top:14px;
+      padding:10px;
       border-radius:10px;
-      border:1px solid transparent;
-      font-size:.9rem;
       font-weight:500;
+      border:1px solid transparent;
     }
+
     .alert.ok{
       background:#17351d;
-      color:#baf3c1;
-      border-color:#214d28;
+      border-color:#235a2f;
+      color:#c6f7cb;
     }
+
     .alert.err{
       background:#3a1414;
-      color:#ffb3b2;
-      border-color:#572222;
+      border-color:#571f1f;
+      color:#ffb3b0;
     }
+
     .alert.info{
       background:#102941;
+      border-color:#1c3b60;
       color:#b3d6ff;
-      border-color:#1d3b60;
     }
+
     .hidden{display:none;}
 
-    .kpi{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:10px;
-      margin-top:14px;
-    }
-    .kpi > div{
-      background:#0b1627;
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:10px 12px;
-      text-align:center;
-    }
-    .kpi span{
-      font-size:.75rem;
-      color:var(--muted);
-      display:block;
-      margin-bottom:4px;
-    }
-    .kpi b{font-size:1rem;}
-
-    .qr-box{
-      background:#0c1a2c;
-      border:1px dashed var(--border);
-      border-radius:12px;
-      height:320px;
+    .row{
       display:flex;
-      align-items:center;
-      justify-content:center;
-      color:var(--muted);
-      font-size:.9rem;
-      text-align:center;
-      padding:10px;
-    }
-
-    /* Botón flotante volver */
-    .btn-float{
-      position:fixed;
-      right:20px;
-      bottom:20px;
-      background:#1e88e5;
-      color:#fff;
-      border:none;
-      border-radius:999px;
-      padding:9px 18px;
-      font-size:.9rem;
-      cursor:pointer;
-      box-shadow:0 0 10px rgba(0,0,0,.4);
-      z-index:20;
-    }
-    .btn-float:hover{
-      background:#1565c0;
+      gap:12px;
+      margin-top:14px;
     }
   </style>
 </head>
+
 <body>
 
-  <header>
-    <div class="brand-wrap">
-      <img src="img/tmp-quality.png" alt="TMP" class="brand-logo">
-      <div class="brand-titles">
-        <h1>TMP · Control Metrológico</h1>
-        <span>Alta, edición y baja de instrumentos</span>
-      </div>
+<header>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <img src="img/tmp-quality.png" height="42" />
+    <div>
+      <div style="font-weight:700;">TMP · Alta / Edición</div>
+      <div style="font-size:13px;color:var(--muted);">Gestión de instrumentos</div>
     </div>
+  </div>
+
+  <button class="btn btn-ghost" onclick="window.location.href='home.html'">🏠 Volver</button>
+</header>
+
+<main>
+
+  <section class="panel">
+    <h2>Ficha del instrumento</h2>
+    <div id="msg" class="alert hidden"></div>
+
+    <div class="grid">
+
+      <div>
+        <label>Código (único) *</label>
+        <div style="display:flex;gap:10px;">
+          <input id="codigo" placeholder="Ej: 400600">
+          <button id="btnBuscar" class="btn btn-ghost">Buscar</button>
+        </div>
+      </div>
+
+      <div>
+        <label>Descripción *</label>
+        <input id="descripcion" placeholder="Ej: Calibre 150 mm">
+      </div>
+
+      <div>
+        <label>Fabricante *</label>
+        <input id="fabricante" placeholder="Ej: Mitutoyo">
+      </div>
+
+      <div>
+        <label>Rango</label>
+        <input id="rango" placeholder="Ej: 0-150 mm">
+      </div>
+
+      <div>
+        <label>Precisión</label>
+        <input id="precision" placeholder="Ej: 0.01 mm">
+      </div>
+
+      <div>
+        <label>Tipo de calibración</label>
+        <input id="tipo_calibracion" placeholder="Interna / Externa">
+      </div>
+
+      <div>
+        <label>Última calibración</label>
+        <input id="fecha_calibracion" type="date">
+      </div>
+
+      <div>
+        <label>Próxima calibración</label>
+        <input id="fecha_proxima_calibracion" type="date">
+      </div>
+
+      <!-- NUEVO CAMPO DESTINO -->
+      <div style="grid-column:1/-1;">
+        <label>DESTINO (ubicación actual)</label>
+        <input id="destino" placeholder="Ej: Laboratorio, Producción, Cliente, Máquina 4...">
+      </div>
+
+      <div style="grid-column:1/-1;">
+        <label>Observaciones</label>
+        <textarea id="observaciones" placeholder="Notas internas"></textarea>
+      </div>
+
+    </div>
+
     <div class="row">
-      <div class="chip">Alta / Edición / Baja</div>
-      <button class="btn-header" onclick="window.location.href='home.html'">🏠 Volver al panel</button>
+      <button id="btnGuardar" class="btn btn-primary">💾 Guardar / Actualizar</button>
+      <button id="btnLimpiar" class="btn btn-ghost">Limpiar</button>
     </div>
-  </header>
+  </section>
 
-  <main>
-    <div class="tabs">
-      <button id="tabAlta" class="tab active">Alta / Edición</button>
-      <button id="tabBaja" class="tab">Baja por QR / Código</button>
-    </div>
+</main>
 
-    <!-- ============ PANEL ALTA / EDICIÓN ============ -->
-    <section id="panelAlta" class="panel active">
-      <h2>Ficha del instrumento</h2>
-      <div id="msgAlta" class="alert info hidden"></div>
+<script type="module" src="config.mjs"></script>
 
-      <div class="grid">
-        <div>
-          <label>Código (único) *</label>
-          <div class="row">
-            <input id="codigo" placeholder="Ej. 400600">
-            <button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button>
-          </div>
-          <p class="help">Si el código ya existe, se cargará para editar. Si no existe, se creará al guardar.</p>
-        </div>
+<script type="module">
+  const sb = window.supabase;
 
-        <div>
-          <label>Descripción *</label>
-          <input id="descripcion" placeholder="Ej. Tampón liso P/NP">
-        </div>
+  const $ = id => document.getElementById(id);
+  const msg = $("msg");
 
-        <div>
-          <label>Fabricante *</label>
-          <input id="fabricante" placeholder="Ej. Mitutoyo, TESA, N/A...">
-        </div>
+  function showMsg(text, type){
+    msg.textContent = text;
+    msg.className = "alert " + type;
+    msg.classList.remove("hidden");
+  }
 
-        <div>
-          <label>Rango / Especificación</label>
-          <input id="rango" placeholder="Ej. Ø8 H7">
-        </div>
+  function hideMsg(){ msg.classList.add("hidden"); }
 
-        <div>
-          <label>Precisión</label>
-          <input id="precision" placeholder="Ej. Atributo / 0.01 mm">
-        </div>
+  const f = {
+    codigo: $("codigo"),
+    descripcion: $("descripcion"),
+    fabricante: $("fabricante"),
+    rango: $("rango"),
+    precision: $("precision"),
+    tipo_calibracion: $("tipo_calibracion"),
+    fecha_calibracion: $("fecha_calibracion"),
+    fecha_proxima_calibracion: $("fecha_proxima_calibracion"),
+    destino: $("destino"),
+    observaciones: $("observaciones"),
+  };
 
-        <div>
-          <label>Tipo de calibración</label>
-          <input id="tipo_calibracion" placeholder="Ej. Interna / Externa">
-        </div>
+  function limpiar(){
+    for (const k in f) f[k].value = "";
+    hideMsg();
+  }
 
-        <div class="row">
-          <div>
-            <label>Ubicación</label>
-            <input id="ubicacion" placeholder="Ej. Laboratorio">
-          </div>
-          <div>
-            <label>Ubicación actual</label>
-            <input id="ubicacion_actual" placeholder="Ej. En laboratorio / Producción...">
-          </div>
-        </div>
-
-        <div>
-          <label>Estado</label>
-          <select id="estado">
-            <option value="En laboratorio">En laboratorio</option>
-            <option value="En uso">En uso</option>
-            <option value="Fuera de calibración">Fuera de calibración</option>
-            <option value="Baja técnica">Baja técnica</option>
-          </select>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Última calibración</label>
-            <input id="fecha_calibracion" type="date">
-          </div>
-          <div>
-            <label>Próxima calibración</label>
-            <input id="fecha_proxima_calibracion" type="date">
-          </div>
-        </div>
-
-        <div style="grid-column:1/-1;">
-          <label>Observaciones</label>
-          <textarea id="observaciones" placeholder="Notas internas, incidencias, etc."></textarea>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn btn-primary" id="btnGuardar">💾 Guardar / Actualizar</button>
-        <button class="btn btn-accent" id="btnLimpiar">🧽 Limpiar</button>
-      </div>
-
-      <div class="kpi">
-        <div>
-          <span>QR generado</span>
-          <b id="kpiQR">–</b>
-        </div>
-        <div>
-          <span>Resultado última operación</span>
-          <b id="kpiRes">–</b>
-        </div>
-        <div>
-          <span>Modo</span>
-          <b id="kpiModo">Alta / Edición</b>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ PANEL BAJA ============ -->
-    <section id="panelBaja" class="panel">
-      <h2>Dar de baja por QR o código</h2>
-      <div id="msgBaja" class="alert info hidden"></div>
-
-      <div class="grid">
-        <div>
-          <div id="qrReader" class="qr-box">
-            <span>Inicia el escaneo y enfoca el código QR del instrumento.</span>
-          </div>
-          <div class="actions" style="margin-top:10px">
-            <button class="btn btn-primary" id="btnIniciarEscaneo">📷 Iniciar escaneo</button>
-            <button class="btn btn-ghost" id="btnDetenerEscaneo">✋ Detener</button>
-          </div>
-        </div>
-
-        <div>
-          <label>Dar de baja manualmente por código</label>
-          <div class="row">
-            <input id="codigoBaja" placeholder="Ej. 400600">
-            <button class="btn btn-warn" id="btnBajaManual">🗑 Dar de baja</button>
-          </div>
-          <p class="help">
-            Esta acción elimina el instrumento de la base de datos.
-            Úsalo solo si estás seguro (baja técnica definitiva).
-          </p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Botón flotante volver -->
-  <button class="btn-float" onclick="window.location.href='home.html'">🏠 Volver al inicio</button>
-
-  <!-- Configuración Supabase (ESM) -->
-  <script type="module" src="config.mjs"></script>
-
-  <!-- Lógica principal -->
-  <script type="module">
-    // Cliente Supabase expuesto desde config.js
-    const supabase = window.supabase;
-
-    // === UTILS CORTOS ===
-    const $ = (id) => document.getElementById(id);
-
-    const msgAlta = $("msgAlta");
-    const msgBaja = $("msgBaja");
-    const kpiQR  = $("kpiQR");
-    const kpiRes = $("kpiRes");
-    const kpiModo = $("kpiModo");
-
-    function showMsg(el, text, type = "info") {
-      el.className = "alert " + type;
-      el.textContent = text;
-      el.classList.remove("hidden");
-    }
-    function hideMsg(el) {
-      el.classList.add("hidden");
+  async function buscar(){
+    hideMsg();
+    const code = f.codigo.value.trim();
+    if (!code){
+      showMsg("Introduce un código.", "err");
+      return;
     }
 
-    // === TABS ===
-    const tabAlta  = $("tabAlta");
-    const tabBaja  = $("tabBaja");
-    const panelAlta = $("panelAlta");
-    const panelBaja = $("panelBaja");
+    const { data, error } = await sb
+      .from("instrumentos")
+      .select("*")
+      .eq("codigo", code)
+      .maybeSingle();
 
-    tabAlta.addEventListener("click", () => {
-      tabAlta.classList.add("active");
-      tabBaja.classList.remove("active");
-      panelAlta.classList.add("active");
-      panelBaja.classList.remove("active");
-    });
+    if (error){
+      console.error(error);
+      showMsg("Error buscando instrumento.", "err");
+      return;
+    }
 
-    tabBaja.addEventListener("click", () => {
-      tabBaja.classList.add("active");
-      tabAlta.classList.remove("active");
-      panelBaja.classList.add("active");
-      panelAlta.classList.remove("active");
-    });
+    if (!data){
+      showMsg(`No existe ${code}. Se creará uno nuevo.`, "info");
+      return;
+    }
 
-    // === CAMPOS FORMULARIO ===
-    const f = {
-      codigo: $("codigo"),
-      descripcion: $("descripcion"),
-      fabricante: $("fabricante"),
-      rango: $("rango"),
-      precision: $("precision"),
-      tipo_calibracion: $("tipo_calibracion"),
-      ubicacion: $("ubicacion"),
-      ubicacion_actual: $("ubicacion_actual"),
-      estado: $("estado"),
-      fecha_calibracion: $("fecha_calibracion"),
-      fecha_proxima_calibracion: $("fecha_proxima_calibracion"),
-      observaciones: $("observaciones"),
+    // Cargar datos (NO tocamos ubicacion_actual aquí)
+    f.descripcion.value = data.descripcion || "";
+    f.fabricante.value = data.fabricante || "";
+    f.rango.value = data.rango || "";
+    f.precision.value = data.precision || "";
+    f.tipo_calibracion.value = data.tipo_calibracion || "";
+    f.fecha_calibracion.value = (data.fecha_calibracion || "").substring(0,10);
+    f.fecha_proxima_calibracion.value = (data.fecha_proxima_calibracion || "").substring(0,10);
+    f.observaciones.value = data.observaciones || "";
+
+    // DESTINO SOLO INFORMAR, NO SE USA PARA ACTUALIZAR EN EDICIÓN
+    f.destino.value = data.ubicacion_actual || "";
+
+    showMsg(`Instrumento ${code} cargado.`, "ok");
+  }
+
+  async function guardar(){
+    hideMsg();
+
+    const codigo = f.codigo.value.trim();
+    const descripcion = f.descripcion.value.trim();
+    const fabricante = f.fabricante.value.trim();
+    const destino = f.destino.value.trim();
+
+    if (!codigo || !descripcion || !fabricante){
+      showMsg("Código, descripción y fabricante son obligatorios.", "err");
+      return;
+    }
+
+    const { data: existente } = await sb
+      .from("instrumentos")
+      .select("*")
+      .eq("codigo", codigo)
+      .maybeSingle();
+
+    let payload = {
+      codigo,
+      descripcion,
+      fabricante,
+      rango: f.rango.value.trim() || null,
+      precision: f.precision.value.trim() || null,
+      tipo_calibracion: f.tipo_calibracion.value.trim() || null,
+      fecha_calibracion: f.fecha_calibracion.value || null,
+      fecha_proxima_calibracion: f.fecha_proxima_calibracion.value || null,
+      observaciones: f.observaciones.value.trim() || null,
     };
 
-    function limpiarFormulario() {
-      for (const key in f) {
-        f[key].value = "";
-      }
-      f.estado.value = "En laboratorio";
-      kpiQR.textContent = "–";
-      kpiRes.textContent = "–";
-      hideMsg(msgAlta);
-      kpiModo.textContent = "Alta / Edición";
+    if (!existente){
+      // NUEVO → ubicacion_actual = DESTINO
+      payload.ubicacion_actual = destino;
     }
 
-    // === BUSCAR POR CÓDIGO ===
-    async function buscarPorCodigo() {
-      hideMsg(msgAlta);
-      const codigo = f.codigo.value.trim();
-      if (!codigo) {
-        showMsg(msgAlta, "Introduce un código para buscar.", "err");
-        return;
-      }
+    const { error } = await sb
+      .from("instrumentos")
+      .upsert(payload, { onConflict: "codigo" });
 
-      const { data, error } = await supabase
-        .from("instrumentos")
-        .select("*")
-        .eq("codigo", codigo)
-        .maybeSingle();
-
-      if (error) {
-        console.error(error);
-        showMsg(msgAlta, "Error buscando el instrumento: " + error.message, "err");
-        return;
-      }
-
-      if (!data) {
-        showMsg(msgAlta, `No existe el código ${codigo}. Puedes crearlo con "Guardar".`, "info");
-        limpiarFormulario();
-        f.codigo.value = codigo;
-        kpiModo.textContent = "ALTA (nuevo)";
-        return;
-      }
-
-      // Cargar datos
-      f.descripcion.value = data.descripcion ?? "";
-      f.fabricante.value = data.fabricante ?? "";
-      f.rango.value = data.rango ?? "";
-      f.precision.value = data.precision ?? "";
-      f.tipo_calibracion.value = data.tipo_calibracion ?? "";
-      f.ubicacion.value = data.ubicacion ?? "";
-      f.ubicacion_actual.value = data.ubicacion_actual ?? "";
-      f.estado.value = data.estado ?? "En laboratorio";
-      f.fecha_calibracion.value =
-        (data.fecha_calibracion ?? "").substring(0, 10);
-      f.fecha_proxima_calibracion.value =
-        (data.fecha_proxima_calibracion ?? "").substring(0, 10);
-      f.observaciones.value = data.observaciones ?? "";
-
-      kpiQR.textContent = data.qr_url ? "Sí" : "No";
-      kpiRes.textContent = "Registro cargado";
-      kpiModo.textContent = "EDICIÓN";
-      showMsg(msgAlta, `Instrumento ${codigo} cargado para edición.`, "ok");
+    if (error){
+      console.error(error);
+      showMsg("Error guardando: " + error.message, "err");
+      return;
     }
 
-    // === GUARDAR / UPSERT ===
-    async function guardarInstrumento() {
-      hideMsg(msgAlta);
-      const codigo = f.codigo.value.trim();
-      const descripcion = f.descripcion.value.trim();
-      const fabricante = f.fabricante.value.trim();
+    showMsg("Instrumento guardado correctamente.", "ok");
+  }
 
-      if (!codigo || !descripcion || !fabricante) {
-        showMsg(msgAlta, "Código, Descripción y Fabricante son obligatorios.", "err");
-        return;
-      }
+  $("btnBuscar").onclick = buscar;
+  $("btnGuardar").onclick = guardar;
+  $("btnLimpiar").onclick = limpiar;
+</script>
 
-      // URL que se codificará en el QR → página de ficha QR
-      const baseUrl =
-        window.location.origin && window.location.origin !== "null"
-          ? window.location.origin + "/qr/"
-          : "https://trazabilidad-tmp.vercel.app/qr/";
-
-      const qr_link = baseUrl + encodeURIComponent(codigo);
-      const qr_url =
-        "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" +
-        encodeURIComponent(qr_link);
-
-      const payload = {
-        codigo,
-        descripcion,
-        fabricante,
-        rango: f.rango.value.trim() || null,
-        precision: f.precision.value.trim() || null,
-        tipo_calibracion: f.tipo_calibracion.value.trim() || null,
-        ubicacion: f.ubicacion.value.trim() || null,
-        ubicacion_actual: f.ubicacion_actual.value.trim() || null,
-        estado: f.estado.value,
-        fecha_calibracion: f.fecha_calibracion.value || null,
-        fecha_proxima_calibracion: f.fecha_proxima_calibracion.value || null,
-        observaciones: f.observaciones.value.trim() || null,
-        qr_url,
-        qr_link,
-      };
-
-      const { data, error } = await supabase
-        .from("instrumentos")
-        .upsert(payload, { onConflict: "codigo" })
-        .select("codigo")
-        .maybeSingle();
-
-      if (error) {
-        console.error(error);
-        showMsg(msgAlta, "Error al guardar: " + error.message, "err");
-        kpiRes.textContent = "Error";
-        return;
-      }
-
-      kpiQR.textContent = "Sí";
-      kpiRes.textContent = "Guardado correctamente";
-      kpiModo.textContent = data ? "EDICIÓN" : "ALTA";
-      showMsg(
-        msgAlta,
-        `Instrumento ${codigo} guardado/actualizado correctamente.`,
-        "ok"
-      );
-    }
-
-    // === BAJA POR QR / CÓDIGO ===
-    let html5Qr = null;
-
-    async function iniciarEscaneo() {
-      hideMsg(msgBaja);
-      try {
-        if (!html5Qr) {
-          html5Qr = new Html5Qrcode("qrReader");
-        }
-
-        const config = {
-          fps: 10,
-          qrbox: { width: 220, height: 220 },
-          aspectRatio: 1.0,
-        };
-
-        const onSuccess = async (decodedText) => {
-          try {
-            let code = null;
-
-            // Si viene URL completa, intentamos leer ?codigo=
-            if (decodedText.includes("codigo=")) {
-              const url = new URL(decodedText);
-              code = url.searchParams.get("codigo");
-            } else {
-              // Si el QR usa forma /qr/CODIGO
-              if (decodedText.startsWith("http")) {
-                const parts = decodedText.split("/");
-                const last = parts.filter(Boolean).pop();
-                code = decodeURIComponent(last);
-              } else {
-                // Si solo es el código
-                code = decodedText.trim();
-              }
-            }
-
-            if (!code) return;
-
-            await detenerEscaneo();
-            await confirmarBaja(code);
-          } catch (e) {
-            console.error(e);
-            showMsg(msgBaja, "Error interpretando el código QR.", "err");
-          }
-        };
-
-        const onError = () => {
-          // errores de escaneo continuos → ignorar para no saturar
-        };
-
-        await html5Qr.start(
-          { facingMode: "environment" },
-          config,
-          onSuccess,
-          onError
-        );
-        showMsg(msgBaja, "Escaneando... Enfoca el QR del instrumento.", "info");
-      } catch (e) {
-        console.error(e);
-        showMsg(
-          msgBaja,
-          "No se pudo iniciar la cámara. Revisa permisos del navegador.",
-          "err"
-        );
-      }
-    }
-
-    async function detenerEscaneo() {
-      try {
-        if (html5Qr && html5Qr.isScanning) {
-          await html5Qr.stop();
-        }
-        if (html5Qr) {
-          await html5Qr.clear();
-        }
-        showMsg(msgBaja, "Escaneo detenido.", "info");
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    async function confirmarBaja(codigo) {
-      const ok = confirm(
-        `⚠️ ¿Seguro que quieres dar de BAJA TÉCNICA el instrumento ${codigo}?`
-      );
-      if (!ok) return;
-
-      const { error } = await supabase
-        .from("instrumentos")
-        .delete()
-        .eq("codigo", codigo);
-
-      if (error) {
-        console.error(error);
-        showMsg(msgBaja, "Error al eliminar: " + error.message, "err");
-        return;
-      }
-
-      showMsg(
-        msgBaja,
-        `Instrumento ${codigo} eliminado correctamente de la base de datos.`,
-        "ok"
-      );
-    }
-
-    async function bajaManual() {
-      hideMsg(msgBaja);
-      const code = $("codigoBaja").value.trim();
-      if (!code) {
-        showMsg(msgBaja, "Introduce un código para dar de baja.", "err");
-        return;
-      }
-      await confirmarBaja(code);
-    }
-
-    // === EVENTOS ===
-    $("btnBuscarCodigo").addEventListener("click", buscarPorCodigo);
-    $("btnGuardar").addEventListener("click", guardarInstrumento);
-    $("btnLimpiar").addEventListener("click", limpiarFormulario);
-
-    $("btnIniciarEscaneo").addEventListener("click", iniciarEscaneo);
-    $("btnDetenerEscaneo").addEventListener("click", detenerEscaneo);
-    $("btnBajaManual").addEventListener("click", bajaManual);
-
-    // permitir buscar con Enter en campo código
-    f.codigo.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        buscarPorCodigo();
-      }
-    });
-  </script>
 </body>
 </html>
 
