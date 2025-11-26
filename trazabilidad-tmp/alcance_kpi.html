@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>TMP · Alcance del Laboratorio & KPIs</title>
+  <title>TMP · Alcance, KPIs y Objetivos del Laboratorio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="img/tmp-quality.png" />
 
@@ -460,7 +460,7 @@
       <img src="img/tmp-quality.png" alt="TMP">
     </div>
     <div>
-      <div class="brand-text-title">Laboratorio TMP · Alcance & KPIs</div>
+      <div class="brand-text-title">Laboratorio TMP · Alcance, KPIs y Objetivos</div>
       <div class="brand-text-sub">Magnitudes cubiertas, rangos de trabajo y salud metrológica en tiempo real</div>
     </div>
   </div>
@@ -660,7 +660,7 @@
     </div>
   </section>
 
-  <!-- BLOQUE INFERIOR: TRAZABILIDAD + NOTAS -->
+  <!-- BLOQUE INFERIOR: TRAZABILIDAD + OBJETIVOS -->
   <section class="layout-bottom">
 
     <article class="card">
@@ -695,30 +695,47 @@
     <article class="card">
       <div class="card-header-row">
         <div class="card-title">
-          📘 Notas de interpretación de KPIs
+          🎯 Objetivos del laboratorio TMP
         </div>
       </div>
       <p class="card-sub">
-        Los siguientes criterios orientativos pueden utilizarse para evaluar el “estado de salud” del sistema
-        metrológico TMP a partir de los indicadores mostrados.
+        Estos objetivos se apoyan directamente en los KPIs y gráficos de esta pantalla. Pueden utilizarse
+        como referencia en auditoría y para el seguimiento interno del sistema metrológico.
       </p>
 
       <ul class="list">
-        <li><strong>Fuera de calibración:</strong> el objetivo es que este porcentaje sea cercano a 0%. Valores
-          elevados indican riesgo directo sobre producto y procesos.</li>
-        <li><strong>Próximos:</strong> revisar la carga de trabajo del laboratorio para evitar picos y acumular equipos
-          vencidos. Un % bajo pero estable es un buen signo de planificación.</li>
-        <li><strong>En laboratorio vs en uso:</strong> un exceso de equipos en laboratorio puede indicar espera de
-          calibraciones o poca rotación; un exceso en uso sin control puede ser un riesgo.</li>
-        <li><strong>Calibrados:</strong> cuanto mayor sea el % de instrumentos calibrados, más robusto será el sistema,
-          siempre que la selección de equipos críticos esté bien definida.</li>
+        <li>
+          <strong>Equipos fuera de calibración:</strong> objetivo estructural de
+          <strong>0 equipos críticos vencidos</strong> y, en global, mantener
+          <strong>&lt; 2&nbsp;%</strong> del total de instrumentos fuera de plazo.
+        </li>
+        <li>
+          <strong>Equipos próximos (&lt; 30 días):</strong> mantener el porcentaje de equipos “próximos”
+          por debajo de <strong>15&nbsp;%</strong> del total, planificando las calibraciones para evitar picos.
+        </li>
+        <li>
+          <strong>Instrumentos calibrados (en vigor):</strong> mantener al menos un
+          <strong>90&nbsp;%</strong> de los equipos en estado metrológico “en regla” (no vencidos).
+        </li>
+        <li>
+          <strong>Ubicación controlada:</strong> asegurar que el <strong>100&nbsp;%</strong> de los
+          instrumentos tienen ubicación conocida y actualizada (laboratorio / en uso / externo).
+        </li>
+        <li>
+          <strong>Rotación del laboratorio:</strong> evitar acumulaciones prolongadas de equipos en laboratorio
+          por motivos de calibración, equilibrando el número de equipos en uso y en laboratorio según la carga real.
+        </li>
+        <li>
+          <strong>Trazabilidad de patrones:</strong> mantener el <strong>100&nbsp;%</strong> de los patrones
+          internos con calibración vigente y certificados externos disponibles para consulta durante auditorías.
+        </li>
       </ul>
 
       <div class="callout">
-        <strong>Ejemplo de mensaje en auditoría:</strong>
-        “El laboratorio interno de TMP cubre magnitudes dimensionales, par, dureza y pesaje, con un control online
-        de vencimientos y estados de calibración integrado en nuestros sistemas. Todos los patrones están trazados
-        a laboratorios acreditados y se monitorizan mediante KPIs metrológicos en tiempo real.”
+        <strong>Cómo utilizar estos objetivos:</strong> en una auditoría, se puede mostrar esta pantalla y explicar
+        que los objetivos del laboratorio se revisan con los KPIs de Supabase. Si algún indicador se sale de rango
+        (por ejemplo, aumenta el número de equipos vencidos), se genera un plan de acción sobre los equipos
+        afectados hasta volver a la “zona verde”.
       </div>
     </article>
 
@@ -727,7 +744,7 @@
 </main>
 
 <footer>
-  Talleres Mecánicos Paramio · Laboratorio TMP · Alcance & KPIs · 2025
+  Talleres Mecánicos Paramio · Laboratorio TMP · Alcance, KPIs y Objetivos · 2025
 </footer>
 
 <!-- Cliente Supabase (mismo que usas en home) -->
@@ -853,7 +870,7 @@
 
       // Salud global del sistema (badge)
       if (!total){
-        badgeHealth.textContent = "Sin datos suficientes";
+        badgeHealth.textContent = "Salud global: sin datos";
         badgeHealth.classList.remove("badge-ok","badge-warn");
       } else if (fuera === 0 && prox <= total*0.15){
         badgeHealth.textContent = "Salud global: ÓPTIMA";
@@ -931,3 +948,4 @@
 
 </body>
 </html>
+
