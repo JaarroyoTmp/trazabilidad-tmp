@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TMP · Histórico de calibraciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  :root{
+    --bg:#0d1117;
+    --panel:#161b22;
+    --txt:#e6edf3;
+    --muted:#8b949e;
+    --border:#30363d;
+    --accent:#22c55e;
+    --danger:#ef4444;
+    --warn:#f59e0b;
+    --info:#0ea5e9;
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--txt);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+
+  header{
+    background:#020617;
+    border-bottom:1px solid var(--border);
+    padding:16px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .brand img{
+    height:40px;
+  }
+
+  h1{
+    font-size:20px;
+    margin:0;
+  }
+
+  .wrap{
+    max-width:1100px;
+    margin:20px auto;
+    padding:0 16px;
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 14px 40px rgba(0,0,0,.4);
+  }
+
+  h2{
+    margin:0 0 8px;
+    font-size:18px;
+    color:var(--accent);
+  }
+
+  .muted{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:10px;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+
+  .toolbar input,
+  .toolbar select{
+    background:#0b1627;
+    border:1px solid var(--border);
+    color:var(--txt);
+    border-radius:999px;
+    padding:6px 12px;
+    font-size:13px;
+    outline:none;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+
+  th, td{
+    border-bottom:1px solid var(--border);
+    padding:6px 8px;
+  }
+
+  thead{
+    background:#020617;
+    position:sticky;
+    top:68px;
+    z-index:5;
+  }
+
+  .badge{
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    white-space:nowrap;
+    display:inline-block;
+  }
+
+  .ok{ background:#064e3b; color:#34d399; }
+  .bad{ background:#4c1d1d; color:#f87171; }
+  .warn{ background:#422006; color:#facc15; }
+  .info{ background:#082f49; color:#38bdf8; }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 10px;
+    background:#0b1627;
+    border:1px solid var(--border);
+    border-radius:999px;
+    color:var(--txt);
+    font-size:12px;
+    text-decoration:none;
+  }
+
+  .btn:hover{
+    background:#1e293b;
+  }
+
+  .pagination{
+    margin-top:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png">
+    <h1>Histórico de calibraciones</h1>
+  </div>
+  <a href="home.html" class="btn">🏠 Volver</a>
+</header>
+
+<div class="wrap">
+  
+  <div class="card">
+    <h2>Registro histórico</h2>
+    <p class="muted">Listado completo de calibraciones realizadas, generadas automáticamente por el sistema.</p>
+
+    <div class="toolbar">
+      <input id="search" type="text" placeholder="Buscar por código, laboratorio, resultado...">
+
+      <select id="filtro-tipo">
+        <option value="">Tipo: Todos</option>
+        <option value="interna">Interna</option>
+        <option value="externa">Externa</option>
+      </select>
+
+      <select id="filtro-lab">
+        <option value="">Laboratorio: Todos</option>
+      </select>
+
+      <select id="filtro-anio">
+        <option value="">Año: Todos</option>
+      </select>
+
+      <select id="filtro-resultado">
+        <option value="">Resultado: Todos</option>
+        <option value="OK">OK</option>
+        <option value="No conforme">No conforme</option>
+        <option value="Ajustado">Ajustado</option>
+      </select>
+
+      <button id="exportar" class="btn">⬇ Exportar CSV</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Código</th>
+          <th>Tipo</th>
+          <th>Laboratorio</th>
+          <th>Resultado</th>
+          <th>Operario</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-cal"></tbody>
+    </table>
+
+    <div class="pagination">
+      <button class="btn" id="prev">Anterior</button>
+      <div id="page-info">Página 1</div>
+      <button class="btn" id="next">Siguiente</button>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="config.mjs"></script>
+
+<script type="module">
+
+const supa = window.supabase;
+
+const tbody = document.getElementById("tbody-cal");
+const search = document.getElementById("search");
+
+const fTipo = document.getElementById("filtro-tipo");
+const fLab = document.getElementById("filtro-lab");
+const fAnio = document.getElementById("filtro-anio");
+const fRes = document.getElementById("filtro-resultado");
+
+let registros = [];
+const POR_PAG = 15;
+let pagina = 1;
+
+// ============ BADGES =============
+function badgeResultado(txt){
+  if (!txt) return "";
+  txt = txt.toLowerCase();
+
+  if (txt.includes("ok") || txt.includes("conforme"))
+    return `<span class="badge ok">OK</span>`;
+  if (txt.includes("no"))
+    return `<span class="badge bad">No conforme</span>`;
+  if (txt.includes("ajust"))
+    return `<span class="badge warn">Ajustado</span>`;
+
+  return `<span class="badge info">${txt}</span>`;
+}
+
+// ============ RENDER =============
+function render(){
+  let lista = filtrar();
+
+  const totalPag = Math.max(1, Math.ceil(lista.length / POR_PAG));
+  if (pagina > totalPag) pagina = totalPag;
+
+  const ini = (pagina - 1) * POR_PAG;
+  const fin = ini + POR_PAG;
+
+  const pageItems = lista.slice(ini, fin);
+
+  tbody.innerHTML = pageItems.map(reg => `
+    <tr>
+      <td>${reg.fecha || "-"}</td>
+      <td>${reg.codigo_instrumento}</td>
+      <td>${reg.tipo || "-"}</td>
+      <td>${reg.laboratorio || "-"}</td>
+      <td>${badgeResultado(reg.resultado)}</td>
+      <td>${reg.creado_por || "-"}</td>
+      <td>
+        <a class="btn" href="qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(reg.codigo_instrumento)}">
+          Ver ficha
+        </a>
+      </td>
+    </tr>
+  `).join("");
+
+  document.getElementById("page-info").textContent =
+    `Página ${pagina} de ${totalPag}`;
+}
+
+// ============ FILTROS =============
+function filtrar(){
+  const q = search.value.toLowerCase();
+
+  return registros.filter(r => {
+
+    if (q){
+      const hay =
+        (r.codigo_instrumento || "").toLowerCase().includes(q) ||
+        (r.laboratorio || "").toLowerCase().includes(q) ||
+        (r.resultado || "").toLowerCase().includes(q);
+
+      if (!hay) return false;
+    }
+
+    if (fTipo.value && r.tipo !== fTipo.value) return false;
+    if (fRes.value && r.resultado !== fRes.value) return false;
+
+    if (fLab.value && r.laboratorio !== fLab.value) return false;
+
+    if (fAnio.value){
+      const year = r.fecha ? r.fecha.split("-")[0] : "";
+      if (year !== fAnio.value) return false;
+    }
+
+    return true;
+  });
+}
+
+// ============ EXPORTAR CSV ============
+function exportCSV(){
+  let lista = filtrar();
+  let csv = "fecha,codigo,tipo,laboratorio,resultado,creado_por\n";
+
+  lista.forEach(r=>{
+    csv += `${r.fecha},${r.codigo_instrumento},${r.tipo},${r.laboratorio},${r.resultado},${r.creado_por}\n`;
+  });
+
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "calibraciones_historico.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// ============ CARGA DE DATOS ============
+async function cargar(){
+  const { data, error } = await supa
+    .from("calibraciones_log")
+    .select("*")
+    .order("fecha", {ascending:false});
+
+  if (error){
+    tbody.innerHTML = `<tr><td colspan="7">Error cargando datos.</td></tr>`;
+    console.error(error);
+    return;
+  }
+
+  registros = data;
+
+  // Rellenar filtro de laboratorio
+  const labs = [...new Set(registros.map(r=>r.laboratorio).filter(Boolean))];
+  fLab.innerHTML = `<option value="">Laboratorio: Todos</option>` +
+    labs.map(l=>`<option>${l}</option>`).join("");
+
+  // Rellenar filtro de años
+  const anios = [...new Set(registros.map(r=>r.fecha?.split("-")[0]))];
+  fAnio.innerHTML = `<option value="">Año: Todos</option>` +
+    anios.map(a=>`<option>${a}</option>`).join("");
+
+  render();
+}
+
+// Eventos
+search.addEventListener("input", ()=>{ pagina=1; render(); });
+fTipo.addEventListener("change", ()=>{ pagina=1; render(); });
+fLab.addEventListener("change", ()=>{ pagina=1; render(); });
+fAnio.addEventListener("change", ()=>{ pagina=1; render(); });
+fRes.addEventListener("change", ()=>{ pagina=1; render(); });
+
+document.getElementById("exportar").addEventListener("click", exportCSV);
+
+document.getElementById("prev").addEventListener("click", ()=>{
+  if (pagina > 1){ pagina--; render(); }
+});
+
+document.getElementById("next").addEventListener("click", ()=>{
+  pagina++; render();
+});
+
+// Inicial
+cargar();
+
+</script>
+
+</body>
+</html>
