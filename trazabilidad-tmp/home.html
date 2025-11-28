@@ -729,246 +729,253 @@
       color:#ffffff;
     }
 
-/* ========== CHAT TMP FLOTANTE ========== */
+    /* ========= CHAT IMPORTANTE: BANNER SUPERIOR ========= */
+    .chat-banner{
+      grid-column:1 / -1;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(248,113,113,0.7);
+      background:radial-gradient(circle at 0 0,#450a0a 0,transparent 55%),
+                 #7f1d1d;
+      box-shadow:0 14px 30px rgba(0,0,0,.5);
+      margin-bottom:4px;
+    }
+    .chat-banner-icon{
+      font-size:20px;
+    }
+    .chat-banner-text{
+      flex:1;
+      min-width:0;
+    }
+    .chat-banner-title{
+      font-size:13px;
+      font-weight:600;
+      margin-bottom:3px;
+    }
+    .chat-banner-msg{
+      font-size:12px;
+      color:#fee2e2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-.chat-fab {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  border: 1px solid rgba(34,197,94,.7);
-  background: radial-gradient(circle at 0 0,#16a34a 0,transparent 55%),
-              radial-gradient(circle at 100% 100%,#22c55e 0,transparent 55%),
-              #020617;
-  box-shadow: 0 12px 30px rgba(0,0,0,.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 60;
-  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-}
+    .hidden{
+      display:none !important;
+    }
 
-.chat-fab:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 18px 40px rgba(0,0,0,.85);
-}
+    /* ========= BOTÓN FLOTANTE CHAT ========= */
+    .chat-fab{
+      position:fixed;
+      bottom:18px;
+      right:18px;
+      width:52px;
+      height:52px;
+      border-radius:999px;
+      border:none;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#ecfeff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 18px 40px rgba(0,0,0,.7);
+      cursor:pointer;
+      z-index:60;
+      font-size:22px;
+    }
+    .chat-fab-badge{
+      position:absolute;
+      top:4px;
+      right:6px;
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      background:#ef4444;
+      box-shadow:0 0 0 3px rgba(239,68,68,.3);
+      display:none;
+    }
 
-.chat-fab-icon {
-  font-size: 22px;
-}
+    /* ========= PANEL CHAT ========= */
+    .chat-panel{
+      position:fixed;
+      bottom:0;
+      right:0;
+      width:min(380px,100%);
+      height:70%;
+      max-height:520px;
+      background:#020617;
+      border-top-left-radius:18px;
+      border-top-right-radius:0;
+      border:1px solid var(--border);
+      box-shadow:0 -18px 40px rgba(0,0,0,.85);
+      transform:translateY(110%);
+      transition:transform .25s ease;
+      z-index:55;
+      display:flex;
+      flex-direction:column;
+    }
+    .chat-panel.open{
+      transform:translateY(0);
+    }
+    @media (max-width:640px){
+      .chat-panel{
+        width:100%;
+        border-top-right-radius:18px;
+      }
+    }
 
-.chat-fab-badge {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #f9fafb;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 2px #020617;
-}
+    .chat-header{
+      padding:10px 12px 8px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .chat-header-titles{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .chat-header-title{
+      font-size:14px;
+      font-weight:600;
+    }
+    .chat-header-sub{
+      font-size:11px;
+      color:var(--muted);
+    }
+    .chat-close-btn{
+      border:none;
+      background:#020617;
+      color:var(--muted);
+      border-radius:999px;
+      width:26px;
+      height:26px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+    }
 
-/* PANEL DE CHAT */
+    .chat-messages{
+      flex:1;
+      padding:8px 10px 6px;
+      overflow-y:auto;
+      font-size:12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
 
-.chat-panel {
-  position: fixed;
-  right: 20px;
-  bottom: 84px;
-  width: min(360px, 92vw);
-  max-height: min(520px, 80vh);
-  background: #020617;
-  border-radius: 18px;
-  border: 1px solid #30363d;
-  box-shadow: 0 24px 60px rgba(0,0,0,.9);
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-  z-index: 59;
-}
+    .chat-msg{
+      border-radius:10px;
+      padding:6px 8px;
+      border:1px solid var(--border);
+      background:#020617;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .chat-msg-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:6px;
+    }
+    .chat-msg-author{
+      font-size:11px;
+      font-weight:600;
+    }
+    .chat-msg-meta{
+      font-size:10px;
+      color:var(--muted);
+    }
+    .chat-msg-text{
+      font-size:12px;
+    }
 
-.chat-panel.open {
-  display: flex;
-}
+    .chat-msg-important{
+      border-color:#ef4444;
+      background:radial-gradient(circle at 0 0,#450a0a 0,transparent 50%),#111827;
+    }
+    .chat-msg-important-label{
+      font-size:10px;
+      color:#fecaca;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+    }
 
-.chat-header {
-  padding: 10px 12px;
-  border-bottom: 1px solid #1f2933;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
+    .chat-msg-actions{
+      margin-top:3px;
+      display:flex;
+      gap:4px;
+      flex-wrap:wrap;
+    }
+    .chat-msg-actions button{
+      font-size:10px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--muted);
+      cursor:pointer;
+    }
 
-.chat-header-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+    .chat-form{
+      border-top:1px solid var(--border);
+      padding:8px 10px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:12px;
+    }
+    .chat-textarea{
+      width:100%;
+      min-height:50px;
+      max-height:100px;
+      resize:vertical;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      padding:6px 8px;
+      font-size:12px;
+      outline:none;
+    }
+    .chat-textarea:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(34,197,94,.4);
+    }
 
-.chat-header-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #22c55e;
-}
-
-.chat-header-sub {
-  font-size: 11px;
-  color: #8b949e;
-}
-
-.chat-header-pill {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid #374151;
-  color: #9ca3af;
-}
-
-.chat-close-btn {
-  border: none;
-  background: transparent;
-  color: #9ca3af;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.chat-messages {
-  padding: 8px 10px;
-  flex: 1;
-  overflow-y: auto;
-  background: radial-gradient(circle at 0 0,#020617 0,transparent 60%),
-              #020617;
-}
-
-.chat-message {
-  margin-bottom: 6px;
-  max-width: 90%;
-  padding: 6px 8px;
-  border-radius: 10px;
-  font-size: 12px;
-  line-height: 1.3;
-  position: relative;
-}
-
-.chat-message.mine {
-  margin-left: auto;
-  background: linear-gradient(135deg,#22c55e,#16a34a);
-  color: #ecfdf5;
-}
-
-.chat-message.theirs {
-  margin-right: auto;
-  background: #111827;
-  border: 1px solid #1f2937;
-}
-
-.chat-message-autor {
-  font-size: 11px;
-  opacity: .8;
-  margin-bottom: 2px;
-}
-
-.chat-message-time {
-  font-size: 10px;
-  opacity: .7;
-  margin-top: 2px;
-  text-align: right;
-}
-
-.chat-message-important {
-  border: 1px solid #f59e0b;
-  box-shadow: 0 0 0 1px rgba(245,158,11,.3);
-}
-
-.chat-important-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  border: 1px solid #f59e0b;
-  font-size: 10px;
-  color: #fbbf24;
-  margin-bottom: 3px;
-}
-
-.chat-input-bar {
-  border-top: 1px solid #1f2933;
-  padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.chat-input-row {
-  display: flex;
-  gap: 6px;
-}
-
-.chat-input-row input[type="text"] {
-  flex: 1;
-  background: #020617;
-  border-radius: 999px;
-  border: 1px solid #374151;
-  color: #f9fafb;
-  font-size: 12px;
-  padding: 6px 10px;
-  outline: none;
-}
-
-.chat-input-row input[type="text"]:focus {
-  border-color: #22c55e;
-  box-shadow: 0 0 0 1px rgba(34,197,94,.4);
-}
-
-.chat-send-btn {
-  border-radius: 999px;
-  border: 1px solid #22c55e;
-  background: linear-gradient(135deg,#22c55e,#16a34a);
-  color: #ecfdf5;
-  font-size: 13px;
-  padding: 6px 12px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.chat-send-btn:disabled {
-  opacity: .6;
-  cursor: default;
-}
-
-.chat-input-extra {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 11px;
-  color: #9ca3af;
-}
-
-.chat-input-extra label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-}
-
-.chat-input-extra input[type="checkbox"] {
-  width: 12px;
-  height: 12px;
-}
-
+    .chat-form-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .chat-important-toggle{
+      display:flex;
+      align-items:center;
+      gap:5px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .chat-important-toggle input{
+      accent-color:#ef4444;
+    }
+    .chat-important-toggle.disabled{
+      opacity:0.4;
+    }
+    .chat-user-label{
+      font-size:11px;
+      color:var(--muted);
+    }
   </style>
 </head>
 <body>
@@ -994,6 +1001,16 @@
 </div>
 
 <main>
+
+  <!-- BANNER DE AVISO IMPORTANTE DE CHAT -->
+  <section id="chat-banner" class="chat-banner hidden">
+    <div class="chat-banner-icon">⚠️</div>
+    <div class="chat-banner-text">
+      <div class="chat-banner-title">Aviso importante de Calidad</div>
+      <div id="chat-banner-msg" class="chat-banner-msg">—</div>
+    </div>
+    <button id="chat-banner-open" class="btn btn-primary">Abrir chat</button>
+  </section>
 
   <!-- KPIs -->
   <section class="kpi-section">
@@ -1227,17 +1244,6 @@
     <div class="card-desc">Requisitos metrológicos TMP: aceptación interna y externa. Documento clave para auditorías.</div>
   </a>
 
-<a class="card" href="calibraciones_historico.html">
-  <div class="card-title">
-    <span class="card-title-icon">🗂️</span>
-    <span>Histórico de Calibraciones</span>
-  </div>
-  <div class="card-desc">
-    Registro completo de todas las calibraciones realizadas, con filtros avanzados y exportación CSV.
-  </div>
-</a>
-
-  
   <a class="card" href="alcance_kpi.html">
     <div class="card-title">
       <span class="card-title-icon">📊</span>
@@ -1256,6 +1262,40 @@
   </footer>
 
 </main>
+
+<!-- PANEL CHAT + BOTÓN FLOTANTE -->
+<button id="chat-fab" class="chat-fab" title="Chat interno TMP">
+  💬
+  <span id="chat-fab-badge" class="chat-fab-badge"></span>
+</button>
+
+<div id="chat-panel" class="chat-panel">
+  <div class="chat-header">
+    <div class="chat-header-titles">
+      <div class="chat-header-title">Chat interno TMP</div>
+      <div class="chat-header-sub">
+        Avisos generales y mensajes importantes.  
+        <span id="chat-user-label" class="chat-user-label"></span>
+      </div>
+    </div>
+    <button id="chat-close" class="chat-close-btn">✕</button>
+  </div>
+
+  <div id="chat-messages" class="chat-messages">
+    <!-- mensajes -->
+  </div>
+
+  <form id="chat-form" class="chat-form">
+    <textarea id="chat-input" class="chat-textarea" placeholder="Escribe un mensaje..."></textarea>
+    <div class="chat-form-row">
+      <label id="chat-important-label" class="chat-important-toggle">
+        <input type="checkbox" id="chat-important">
+        <span>Marcar como <strong>IMPORTANTE</strong> (solo Calidad)</span>
+      </label>
+      <button type="submit" class="btn btn-primary">Enviar</button>
+    </div>
+  </form>
+</div>
 
 <!-- DIALOGOS: LISTA COMPLETA FUERA / PRÓXIMOS -->
 <dialog id="dialog-fuera">
@@ -1376,9 +1416,39 @@
   const movNextBtn     = document.getElementById("mov-next");
   const movPageInfo    = document.getElementById("mov-page-info");
 
+  // CHAT DOM
+  const chatFab          = document.getElementById("chat-fab");
+  const chatFabBadge     = document.getElementById("chat-fab-badge");
+  const chatPanel        = document.getElementById("chat-panel");
+  const chatClose        = document.getElementById("chat-close");
+  const chatMessagesEl   = document.getElementById("chat-messages");
+  const chatForm         = document.getElementById("chat-form");
+  const chatInput        = document.getElementById("chat-input");
+  const chatImportant    = document.getElementById("chat-important");
+  const chatImportantLbl = document.getElementById("chat-important-label");
+  const chatUserLabel    = document.getElementById("chat-user-label");
+
+  const chatBanner       = document.getElementById("chat-banner");
+  const chatBannerMsg    = document.getElementById("chat-banner-msg");
+  const chatBannerOpen   = document.getElementById("chat-banner-open");
+
   let cacheMovimientos = [];
   const MOV_POR_PAG = 8;
   let movPaginaActual = 1;
+
+  // ====== CONFIG USUARIO (nombre y rol) ======
+  const USER_NAME = localStorage.getItem("tmp_usuario_nombre") || "Usuario";
+  const USER_ROLE = localStorage.getItem("tmp_usuario_rol") || "operario"; // "operario" o "responsable"
+
+  if (chatUserLabel){
+    chatUserLabel.textContent = `${USER_NAME} · Rol: ${USER_ROLE}`;
+  }
+
+  // Solo responsable puede marcar IMPORTANTE
+  if (USER_ROLE !== "responsable"){
+    chatImportant.disabled = true;
+    chatImportantLbl.classList.add("disabled");
+  }
 
   // Utilidades
   function parseDate(str) {
@@ -1393,7 +1463,9 @@
     const dd = String(d.getDate()).padStart(2,"0");
     const mm = String(d.getMonth() + 1).padStart(2,"0");
     const yy = d.getFullYear();
-    return `${dd}/${mm}/${yy}`;
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mi = String(d.getMinutes()).padStart(2,"0");
+    return `${dd}/${mm}/${yy} ${hh}:${mi}`;
   }
 
   function daysBetween(a,b){
@@ -1564,6 +1636,7 @@
       table_fuera_top.style.display = "table";
       btn_fuera_ver_todos.style.display = "inline-flex";
 
+      const hoy = new Date();
       tbody_fuera_top.innerHTML = top.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
         const dias = dProx ? daysBetween(hoy, dProx) : 0; // días vencidos (>0)
@@ -1578,9 +1651,10 @@
       }).join("");
 
       // Modal completo
+      const hoy2 = new Date();
       tbody_fuera_modal.innerHTML = ordenados.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        const dias = dProx ? daysBetween(hoy, dProx) : 0;
+        const dias = dProx ? daysBetween(hoy2, dProx) : 0;
         return `
           <tr>
             <td>${inst.codigo || ""}</td>
@@ -1588,7 +1662,7 @@
             <td>${formatDate(dProx)}</td>
             <td>${dias}</td>
             <td>
-              <a class="btn" href="qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(inst.codigo || "")}">
+              <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || "")}">
                 Ver ficha
               </a>
             </td>
@@ -1618,6 +1692,7 @@
       table_prox_top.style.display = "table";
       btn_prox_ver_todos.style.display = "inline-flex";
 
+      const hoy = new Date();
       tbody_prox_top.innerHTML = topProx.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
         // días que faltan = prox - hoy (>0)
@@ -1633,9 +1708,10 @@
       }).join("");
 
       // Modal completo
+      const hoy2 = new Date();
       tbody_prox_modal.innerHTML = ordenadosProx.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0;
+        const dias = dProx ? daysBetween(dProx, hoy2) * -1 : 0;
         return `
           <tr>
             <td>${inst.codigo || ""}</td>
@@ -1752,7 +1828,7 @@
           <td>${mov.responsable || "-"}</td>
           <td>${chip}</td>
           <td>
-            <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
+            <a class="btn" href="qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
               Ver ficha
             </a>
           </td>
@@ -1857,216 +1933,162 @@
     cargarDashboard();
     cargarMovimientos();
   }, 30000);
-</script>
 
-<!-- ========== CHAT TMP FLOTANTE ========== -->
+  // ================== CHAT INTERNO TMP ==================
+  let chatMensajes = [];
 
-<div class="chat-fab" id="chat-fab">
-  <span class="chat-fab-icon">💬</span>
-  <span class="chat-fab-badge" id="chat-fab-badge" style="display:none;">0</span>
-</div>
-
-<div class="chat-panel" id="chat-panel">
-  <div class="chat-header">
-    <div class="chat-header-main">
-      <div class="chat-header-title">Chat TMP · Calidad / Taller</div>
-      <div class="chat-header-sub" id="chat-status">Conectando con Supabase...</div>
-    </div>
-    <div class="chat-header-pill">Avisos internos</div>
-    <button class="chat-close-btn" id="chat-close">✕</button>
-  </div>
-
-  <div class="chat-messages" id="chat-messages">
-    <!-- historial -->
-  </div>
-
-  <div class="chat-input-bar">
-    <div class="chat-input-row">
-      <input type="text" id="chat-input" placeholder="Escribe un mensaje..." />
-      <button class="chat-send-btn" id="chat-send">➤ Enviar</button>
-    </div>
-    <div class="chat-input-extra">
-      <label>
-        <input type="checkbox" id="chat-important" />
-        Aviso importante
-      </label>
-      <span id="chat-user-label"></span>
-    </div>
-  </div>
-</div>
-
-  // ========== CHAT TMP FLOTANTE ==========
-
-const chatFab       = document.getElementById("chat-fab");
-const chatFabBadge  = document.getElementById("chat-fab-badge");
-const chatPanel     = document.getElementById("chat-panel");
-const chatCloseBtn  = document.getElementById("chat-close");
-const chatMessages  = document.getElementById("chat-messages");
-const chatInput     = document.getElementById("chat-input");
-const chatSendBtn   = document.getElementById("chat-send");
-const chatImportant = document.getElementById("chat-important");
-const chatStatus    = document.getElementById("chat-status");
-const chatUserLabel = document.getElementById("chat-user-label");
-
-// 🔸 Pon aquí el nombre de usuario real (o un fijo tipo "Laboratorio")
-const CHAT_USER = "Laboratorio TMP"; // TODO: cambiar si quieres que sea distinto por persona
-
-let chatSubscribed = false;
-let chatUnreadCount = 0;
-
-// Mostrar usuario actual en la barra inferior
-if (chatUserLabel) {
-  chatUserLabel.textContent = `Usuario: ${CHAT_USER}`;
-}
-
-function toggleChatPanel() {
-  const abrir = !chatPanel.classList.contains("open");
-  if (abrir) {
+  function openChatPanel(){
     chatPanel.classList.add("open");
-    chatUnreadCount = 0;
-    chatFabBadge.style.display = "none";
-    chatFabBadge.textContent = "0";
     setTimeout(() => {
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      chatInput?.focus();
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
     }, 50);
-  } else {
+  }
+
+  function closeChatPanel(){
     chatPanel.classList.remove("open");
   }
-}
 
-chatFab?.addEventListener("click", toggleChatPanel);
-chatCloseBtn?.addEventListener("click", toggleChatPanel);
+  chatFab.addEventListener("click", openChatPanel);
+  chatClose.addEventListener("click", closeChatPanel);
+  chatBannerOpen.addEventListener("click", openChatPanel);
 
-// Formato fecha/hora cortito para mensajes
-function formatChatTime(ts) {
-  const d = ts ? new Date(ts) : new Date();
-  const hh = String(d.getHours()).padStart(2,"0");
-  const mm = String(d.getMinutes()).padStart(2,"0");
-  return `${hh}:${mm}`;
-}
+  function renderChatMensajes(){
+    if (!chatMensajes || chatMensajes.length === 0){
+      chatMessagesEl.innerHTML = `<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px;">Todavía no hay mensajes en el chat.</div>`;
+      return;
+    }
 
-// Render de mensajes
-function renderChatMessages(mensajes) {
-  chatMessages.innerHTML = mensajes.map(msg => {
-    const mine = msg.autor === CHAT_USER;
-    const cls  = mine ? "chat-message mine" : "chat-message theirs";
-    const extraCls = msg.importante ? " chat-message-important" : "";
-    return `
-      <div class="${cls}${extraCls}">
-        ${msg.importante ? `<div class="chat-important-pill">⚠ Aviso importante</div>` : ""}
-        <div class="chat-message-autor">${msg.autor}</div>
-        <div>${msg.mensaje}</div>
-        <div class="chat-message-time">${formatChatTime(msg.created_at)}</div>
-      </div>
-    `;
-  }).join("");
+    chatMessagesEl.innerHTML = chatMensajes.map(msg => {
+      const fecha = msg.created_at ? new Date(msg.created_at) : null;
+      const fechaTxt = fecha ? formatDate(fecha) : "—";
+      const importante = msg.importante && !msg.resuelto;
+      const importanteResuelto = msg.importante && msg.resuelto;
 
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+      const claseMsg = importante ? "chat-msg chat-msg-important" : "chat-msg";
+      const badgeImportante = importante
+        ? `<span class="chat-msg-important-label">⚠ IMPORTANTE · pendiente</span>`
+        : (importanteResuelto ? `<span class="chat-msg-important-label" style="color:#bbf7d0;">✅ IMPORTANTE · resuelto</span>` : "");
 
-// Cargar historial inicial
-async function cargarChatInicial() {
-  if (!supabase) {
-    chatStatus.textContent = "Supabase no disponible";
-    return;
+      // Solo operario puede marcar como realizado
+      const mostrarResolver = importante && !msg.resuelto && USER_ROLE === "operario";
+
+      return `
+        <div class="${claseMsg}">
+          <div class="chat-msg-header">
+            <div class="chat-msg-author">${msg.autor_nombre || "Usuario"} (${msg.autor_rol || "-"})</div>
+            <div class="chat-msg-meta">${fechaTxt}</div>
+          </div>
+          <div class="chat-msg-text">${(msg.texto || "").replace(/</g,"&lt;")}</div>
+          ${badgeImportante ? `<div>${badgeImportante}</div>` : ""}
+          <div class="chat-msg-actions">
+            ${
+              mostrarResolver
+              ? `<button type="button" data-resolver-id="${msg.id}">Marcar como realizado</button>`
+              : ""
+            }
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // Scroll al final
+    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
   }
 
-  chatStatus.textContent = "Conectando...";
-  const { data, error } = await supabase
-    .from("chat_mensajes")
-    .select("*")
-    .order("created_at", { ascending: true })
-    .limit(100);
-
-  if (error) {
-    console.error("Error cargando chat:", error);
-    chatStatus.textContent = "Error al cargar mensajes";
-    return;
+  function actualizarAvisosImportantes(){
+    const pendientes = chatMensajes.filter(m => m.importante && !m.resuelto);
+    if (pendientes.length > 0){
+      const ultimo = pendientes[pendientes.length - 1]; // el más reciente
+      chatBanner.classList.remove("hidden");
+      chatBannerMsg.textContent = ultimo.texto || "";
+      if (chatFabBadge) chatFabBadge.style.display = "block";
+    } else {
+      chatBanner.classList.add("hidden");
+      if (chatFabBadge) chatFabBadge.style.display = "none";
+    }
   }
 
-  chatStatus.textContent = "Conectado · chat interno TMP";
-  renderChatMessages(data || []);
+  async function cargarChat(){
+    if (!supabase){
+      console.error("Supabase no disponible para chat");
+      return;
+    }
 
-  // Suscripción a nuevos mensajes (realtime)
-  if (!chatSubscribed) {
-    const channel = supabase
-      .channel("chat_mensajes_changes")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_mensajes" },
-        payload => {
-          const msg = payload.new;
-          // Añadir al final
-          const wrapper = document.createElement("div");
-          const mine = msg.autor === CHAT_USER;
-          const cls  = mine ? "chat-message mine" : "chat-message theirs";
-          const extraCls = msg.importante ? " chat-message-important" : "";
+    const { data, error } = await supabase
+      .from("chat_mensajes")
+      .select("*")
+      .order("created_at", { ascending:true })
+      .limit(80);
 
-          wrapper.innerHTML = `
-            <div class="${cls}${extraCls}">
-              ${msg.importante ? `<div class="chat-important-pill">⚠ Aviso importante</div>` : ""}
-              <div class="chat-message-autor">${msg.autor}</div>
-              <div>${msg.mensaje}</div>
-              <div class="chat-message-time">${formatChatTime(msg.created_at)}</div>
-            </div>
-          `;
+    if (error){
+      console.error("Error cargando chat:", error);
+      return;
+    }
 
-          chatMessages.appendChild(wrapper.firstElementChild);
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-
-          // Si el panel está cerrado, sumar no leídos
-          if (!chatPanel.classList.contains("open")) {
-            chatUnreadCount++;
-            chatFabBadge.style.display = "flex";
-            chatFabBadge.textContent = String(chatUnreadCount);
-          }
-        }
-      )
-      .subscribe();
-
-    chatSubscribed = true;
-  }
-}
-
-// Enviar mensaje
-async function enviarMensaje() {
-  const texto = (chatInput.value || "").trim();
-  if (!texto || !supabase) return;
-
-  chatSendBtn.disabled = true;
-
-  const { error } = await supabase
-    .from("chat_mensajes")
-    .insert({
-      autor: CHAT_USER,
-      mensaje: texto,
-      importante: chatImportant.checked
-    });
-
-  chatSendBtn.disabled = false;
-
-  if (error) {
-    console.error("Error enviando mensaje de chat:", error);
-    alert("No se ha podido enviar el mensaje.");
-    return;
+    chatMensajes = data || [];
+    renderChatMensajes();
+    actualizarAvisosImportantes();
   }
 
-  chatInput.value = "";
-  chatImportant.checked = false;
-}
-
-chatSendBtn?.addEventListener("click", enviarMensaje);
-chatInput?.addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey) {
+  chatForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    enviarMensaje();
-  }
-});
+    const texto = (chatInput.value || "").trim();
+    if (!texto) return;
 
-// Cargar chat al inicio (independiente del resto del dashboard)
-cargarChatInicial();
+    const esImportante = chatImportant.checked && USER_ROLE === "responsable";
 
-  
+    const { error } = await supabase
+      .from("chat_mensajes")
+      .insert([{
+        texto,
+        autor_nombre: USER_NAME,
+        autor_rol: USER_ROLE,
+        importante: esImportante,
+        resuelto: false
+      }]);
+
+    if (error){
+      console.error("Error insertando mensaje de chat:", error);
+      return;
+    }
+
+    chatInput.value = "";
+    if (USER_ROLE === "responsable"){
+      chatImportant.checked = false;
+    }
+    await cargarChat();
+  });
+
+  // Delegación para "Marcar como realizado"
+  chatMessagesEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-resolver-id]");
+    if (!btn) return;
+
+    if (USER_ROLE !== "operario"){
+      alert("Solo los operarios pueden marcar como realizado un aviso importante.");
+      return;
+    }
+
+    const id = btn.getAttribute("data-resolver-id");
+    if (!id) return;
+
+    const { error } = await supabase
+      .from("chat_mensajes")
+      .update({ resuelto: true })
+      .eq("id", id);
+
+    if (error){
+      console.error("Error marcando mensaje como resuelto:", error);
+      return;
+    }
+
+    await cargarChat();
+  });
+
+  // Cargar chat al inicio + refresco periódico
+  cargarChat();
+  setInterval(cargarChat, 20000);
+</script>
+
 </body>
 </html>
