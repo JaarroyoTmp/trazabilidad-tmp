@@ -784,40 +784,32 @@
       100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
     }
 
-#chat-panel{
-  position: fixed;
-  bottom: 90px;
-  right: 24px;
-  background:#020617;
-  border:1px solid var(--border);
-  border-radius:16px;
-  box-shadow:0 18px 40px rgba(0,0,0,.7);
-  width: 480px;
-  height: 520px;
-  display:none;
-  flex-direction:column;
-  overflow:hidden;
-  z-index:40;
-  
-  opacity:0;
-  transform: translateY(10px);
-  transition: all .25s ease;
-}
+    /* Panel del chat (ventana emergente) */
+    #chat-panel{
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      background:#020617;
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 18px 40px rgba(0,0,0,.7);
+      width: 480px;
+      height: 520px;
+      display:flex;               /* SIEMPRE flex */
+      flex-direction:column;
+      overflow:hidden;
+      z-index:40;
+      opacity:0;                   /* Oculto por defecto */
+      pointer-events:none;
+      transform:translateY(10px);
+      transition:opacity .18s ease, transform .18s ease;
+    }
 
-/* Estado abierto */
-#chat-panel.open{
-  display:flex;
-  opacity:1;
-  transform: translateY(0);
-  pointer-events:auto;
-}
-
-#chat-panel{
-  transition: all .25s ease;
-  opacity: 0;
-  transform: translateY(10px);
-}
-
+    .chat-panel.open{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(0);
+    }
 
     .chat-header{
       padding:10px 12px;
@@ -853,14 +845,13 @@
       color:#fff;
     }
 
-   /* Área donde se ven los mensajes */
-#chat-messages{
-  flex:1;
-  padding:12px 14px;
-  overflow-y:auto;
-  font-size:13px;
-}
-
+    /* Área donde se ven los mensajes */
+    #chat-messages{
+      flex:1;
+      padding:12px 14px;
+      overflow-y:auto;
+      font-size:13px;
+    }
 
     .chat-empty{
       text-align:center;
@@ -957,6 +948,7 @@
       border-top:1px solid var(--border);
       padding:8px 10px 10px;
       background:#020617;
+      position:relative;
     }
 
     .chat-input-row textarea{
@@ -1011,20 +1003,36 @@
       align-items:center;
       gap:4px;
       flex:1;
-      min-width:120px;
+      min-width:140px;
     }
 
-    #chat-destinatarios{
+    .chat-dest-btn{
       flex:1;
-      min-height:24px;
-      max-height:50px;
-      background:#020617;
-      border-radius:8px;
+      border-radius:999px;
       border:1px solid var(--border);
+      background:#020617;
       color:var(--txt);
       font-size:11px;
-      padding:2px 4px;
-      outline:none;
+      padding:4px 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      cursor:pointer;
+    }
+    .chat-dest-btn span{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .chat-dest-btn::after{
+      content:"▾";
+      font-size:10px;
+      margin-left:6px;
+      color:var(--muted);
+    }
+    .chat-dest-btn:hover{
+      background:#020617;
+      border-color:var(--accent);
     }
 
     .chat-send-btn{
@@ -1048,12 +1056,86 @@
       color:var(--muted);
     }
 
+    /* Panel de selección de destinatarios */
+    .chat-dest-panel{
+      position:absolute;
+      left:10px;
+      right:10px;
+      bottom:74px;
+      background:#020617;
+      border-radius:12px;
+      border:1px solid var(--border);
+      box-shadow:0 18px 40px rgba(0,0,0,.9);
+      padding:6px 8px 8px;
+      font-size:12px;
+      display:none;
+      z-index:80;
+    }
+
+    .chat-dest-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:4px;
+    }
+
+    .chat-dest-title{
+      font-size:12px;
+      font-weight:600;
+      color:var(--accent);
+    }
+
+    .chat-dest-close{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:14px;
+      padding:2px 4px;
+      border-radius:999px;
+    }
+    .chat-dest-close:hover{
+      background:#020617;
+      color:#fff;
+    }
+
+    .chat-dest-body{
+      max-height:140px;
+      overflow-y:auto;
+      padding:2px 0;
+      margin-bottom:4px;
+    }
+
+    .chat-dest-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:2px 2px;
+      cursor:pointer;
+      user-select:none;
+      font-size:12px;
+    }
+    .chat-dest-item input{
+      width:12px;
+      height:12px;
+      margin:0;
+    }
+
+    .chat-dest-footer{
+      display:flex;
+      justify-content:flex-end;
+    }
+
     @media (max-width:640px){
-      .chat-panel{
+      #chat-panel{
         right:10px;
         left:10px;
         width:auto;
         max-height:75vh;
+      }
+      .chat-dest-panel{
+        left:6px;
+        right:6px;
       }
     }
   </style>
@@ -1405,7 +1487,7 @@
     <button id="chat-close" class="chat-close-btn">✕</button>
   </div>
 
-  <div id="chat-messages" class="chat-messages">
+  <div id="chat-messages">
     <div class="chat-empty">Todavía no hay mensajes en el chat.</div>
   </div>
 
@@ -1419,16 +1501,31 @@
         <span>Marcar como <span class="chat-important-word">IMPORTANTE</span></span>
       </label>
 
-      <label class="chat-to-label">
-        Para:
-        <select id="chat-destinatarios" multiple size="1">
-          <option value="__todos__" selected>Todos</option>
-        </select>
-      </label>
+      <div class="chat-to-label">
+        <span>Para:</span>
+        <button type="button" id="chat-dest-open" class="chat-dest-btn">
+          <span id="chat-dest-summary">Todos</span>
+        </button>
+      </div>
 
       <button id="chat-send" class="chat-send-btn">Enviar</button>
     </div>
     <div id="chat-status" class="chat-status"></div>
+
+    <!-- Panel de selección de destinatarios -->
+    <div id="chat-dest-panel" class="chat-dest-panel">
+      <div class="chat-dest-header">
+        <div class="chat-dest-title">Seleccionar destinatarios</div>
+        <button type="button" id="chat-dest-close" class="chat-dest-close">✕</button>
+      </div>
+      <div id="chat-dest-body" class="chat-dest-body">
+        <!-- Se rellena por JS -->
+      </div>
+      <div class="chat-dest-footer">
+        <button type="button" id="chat-dest-apply" class="chat-send-btn">Aplicar</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2010,13 +2107,20 @@
   const chatImportant    = document.getElementById("chat-important");
   const chatStatus       = document.getElementById("chat-status");
   const chatUserLabel    = document.getElementById("chat-user-label");
-  const destSelect       = document.getElementById("chat-destinatarios");
+
+  const destOpenBtn      = document.getElementById("chat-dest-open");
+  const destSummaryEl    = document.getElementById("chat-dest-summary");
+  const destPanel        = document.getElementById("chat-dest-panel");
+  const destBody         = document.getElementById("chat-dest-body");
+  const destCloseBtn     = document.getElementById("chat-dest-close");
+  const destApplyBtn     = document.getElementById("chat-dest-apply");
 
   chatUserLabel.textContent = `${CHAT_NOMBRE} (${CHAT_USERNAME})`;
 
   let chatMessages = [];
   let operariosLista = [];
   let mapaOperarios = {};
+  let destinatariosSeleccionados = []; // [] = TODOS
 
   function toggleChatPanel(){
     if (!chatPanel) return;
@@ -2027,7 +2131,9 @@
       chatPanel.classList.add("open");
       // Auto scroll al abrir
       setTimeout(() => {
-        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+        if (chatMessagesEl) {
+          chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+        }
       }, 80);
     }
   }
@@ -2047,7 +2153,7 @@
   }
 
   function esParaMi(msg){
-    const user = USERNAME;  // ya definido antes
+    const user = CHAT_USERNAME;
 
     // 1. Mis mensajes SIEMPRE se muestran
     if (msg.autor === user) return true;
@@ -2055,25 +2161,28 @@
     // 2. Obtener destinatarios correctamente
     let dest = msg.destinatarios;
 
-    // Si viene como null, undefined o string vacío → mensaje general
-    if (!dest || dest === null || dest === undefined || dest.length === 0){
-        return true; // mensaje general
+    // null/undefined/array vacía => mensaje general
+    if (!dest || (Array.isArray(dest) && dest.length === 0)){
+      return true;
     }
 
-    // 3. Si viene como string en vez de array (Supabase a veces lo hace)
+    // 3. Si viene como string en vez de array
     if (typeof dest === "string"){
-        try { dest = JSON.parse(dest); } catch(e) { dest = []; }
+      try {
+        dest = JSON.parse(dest);
+      } catch(e) {
+        dest = [];
+      }
     }
 
     // 4. Si ahora es array → comprobamos si incluye al usuario
     if (Array.isArray(dest)){
-        return dest.includes(user);
+      return dest.includes(user);
     }
 
-    // 5. Si llega cualquier otra cosa rara, lo tratamos como mensaje general
+    // 5. Si formato raro → lo tratamos como general
     return true;
-}
-
+  }
 
   function calcularNoLeidosImportantes(){
     let count = 0;
@@ -2117,17 +2226,22 @@
       const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
       const yaLeido = leidos.includes(user);
 
-      const dest = msg.destinatarios;
+      let dest = msg.destinatarios;
       let destLabel = "Todos";
       if (dest && dest.length > 0){
-        destLabel = dest.map(u => mapaOperarios[u]?.nombre || u).join(", ");
+        if (typeof dest === "string"){
+          try { dest = JSON.parse(dest); } catch(e) { dest = []; }
+        }
+        if (Array.isArray(dest) && dest.length > 0){
+          destLabel = dest.map(u => mapaOperarios[u]?.nombre || u).join(", ");
+        }
       }
 
       const tags = [];
       if (msg.importante){
         tags.push(`<span class="chat-tag chat-tag-important">IMPORTANTE</span>`);
       }
-      if (dest && dest.length > 0){
+      if (dest && Array.isArray(dest) && dest.length > 0){
         tags.push(`<span class="chat-tag chat-tag-dest">Para: ${destLabel}</span>`);
       }
 
@@ -2198,8 +2312,78 @@
     }
   }
 
+  function actualizarResumenDestinatarios(){
+    if (!destSummaryEl) return;
+
+    if (!destinatariosSeleccionados || destinatariosSeleccionados.length === 0){
+      destSummaryEl.textContent = "Todos";
+      return;
+    }
+
+    const nombres = destinatariosSeleccionados.map(u => mapaOperarios[u]?.nombre || u);
+    if (nombres.length <= 2){
+      destSummaryEl.textContent = nombres.join(", ");
+    } else {
+      destSummaryEl.textContent = `${nombres[0]}, ${nombres[1]} +${nombres.length - 2}`;
+    }
+  }
+
+  function abrirPanelDestinatarios(){
+    if (!destPanel) return;
+    destPanel.style.display = "block";
+
+    // Sin selección => marcar "Todos"
+    const inputs = destBody?.querySelectorAll("input[type=checkbox]") || [];
+    if (!destinatariosSeleccionados || destinatariosSeleccionados.length === 0){
+      inputs.forEach(inp => {
+        inp.checked = (inp.value === "__todos__");
+      });
+    } else {
+      inputs.forEach(inp => {
+        if (inp.value === "__todos__"){
+          inp.checked = false;
+        } else {
+          inp.checked = destinatariosSeleccionados.includes(inp.value);
+        }
+      });
+    }
+  }
+
+  function cerrarPanelDestinatarios(){
+    if (!destPanel) return;
+    destPanel.style.display = "none";
+  }
+
+  destOpenBtn?.addEventListener("click", abrirPanelDestinatarios);
+  destCloseBtn?.addEventListener("click", cerrarPanelDestinatarios);
+  destApplyBtn?.addEventListener("click", () => {
+    if (!destBody) return;
+    const inputs = destBody.querySelectorAll("input[type=checkbox]");
+    let seleccion = [];
+    let todosMarcado = false;
+
+    inputs.forEach(inp => {
+      if (inp.checked){
+        if (inp.value === "__todos__"){
+          todosMarcado = true;
+        } else {
+          seleccion.push(inp.value);
+        }
+      }
+    });
+
+    if (todosMarcado || seleccion.length === 0){
+      destinatariosSeleccionados = [];
+    } else {
+      destinatariosSeleccionados = seleccion;
+    }
+
+    actualizarResumenDestinatarios();
+    cerrarPanelDestinatarios();
+  });
+
   async function cargarOperarios(){
-    if (!supabaseChat || !destSelect) return;
+    if (!supabaseChat) return;
 
     const { data, error } = await supabaseChat
       .from("operarios")
@@ -2217,14 +2401,31 @@
       mapaOperarios[op.username] = op;
     });
 
-    // Rellenar select de destinatarios
-    destSelect.innerHTML = `<option value="__todos__" selected>Todos</option>`;
+    // Rellenar panel de destinatarios
+    if (!destBody) return;
+    destBody.innerHTML = "";
+
+    // Opción "Todos"
+    const labelTodos = document.createElement("label");
+    labelTodos.className = "chat-dest-item";
+    labelTodos.innerHTML = `
+      <input type="checkbox" value="__todos__" checked>
+      <span>Todos</span>
+    `;
+    destBody.appendChild(labelTodos);
+
+    // Operarios
     operariosLista.forEach(op => {
-      const opt = document.createElement("option");
-      opt.value = op.username;
-      opt.textContent = op.nombre || op.username;
-      destSelect.appendChild(opt);
+      const lab = document.createElement("label");
+      lab.className = "chat-dest-item";
+      lab.innerHTML = `
+        <input type="checkbox" value="${op.username}">
+        <span>${op.nombre || op.username}</span>
+      `;
+      destBody.appendChild(lab);
     });
+
+    actualizarResumenDestinatarios();
   }
 
   async function cargarMensajesInicial(){
@@ -2238,7 +2439,7 @@
 
     if (error){
       console.error("Error cargando mensajes del chat:", error);
-      chatStatus.textContent = "Error al cargar mensajes.";
+      if (chatStatus) chatStatus.textContent = "Error al cargar mensajes.";
       return;
     }
 
@@ -2252,18 +2453,17 @@
     if (!texto) return;
 
     chatSendBtn.disabled = true;
-    chatStatus.textContent = "Enviando...";
+    if (chatStatus) chatStatus.textContent = "Enviando...";
 
-    let destinatarios = Array.from(destSelect.selectedOptions || []).map(o => o.value);
-    if (destinatarios.includes("__todos__")){
-      destinatarios = []; // mensaje general
-    }
+    let destinatarios = destinatariosSeleccionados && destinatariosSeleccionados.length
+      ? [...destinatariosSeleccionados]
+      : null; // null => mensaje general
 
     const payload = {
       autor: CHAT_USERNAME,
       mensaje: texto,
       importante: !!chatImportant.checked,
-      destinatarios: destinatarios.length ? destinatarios : null
+      destinatarios
     };
 
     const { error } = await supabaseChat
@@ -2272,15 +2472,16 @@
 
     if (error){
       console.error("Error enviando mensaje:", error);
-      chatStatus.textContent = "No se ha podido enviar el mensaje.";
+      if (chatStatus) chatStatus.textContent = "No se ha podido enviar el mensaje.";
     } else {
       chatInput.value = "";
       chatImportant.checked = false;
-      if (destSelect){
-        destSelect.value = "__todos__";
+      destinatariosSeleccionados = [];
+      actualizarResumenDestinatarios();
+      if (chatStatus) {
+        chatStatus.textContent = "Mensaje enviado.";
+        setTimeout(() => { chatStatus.textContent = ""; }, 2000);
       }
-      chatStatus.textContent = "Mensaje enviado.";
-      setTimeout(() => chatStatus.textContent = "", 2000);
     }
 
     chatSendBtn.disabled = false;
@@ -2323,11 +2524,7 @@
           renderChatMessages();
         }
       )
-      .subscribe(status => {
-        if (status === "SUBSCRIBED"){
-          chatStatus.textContent = "";
-        }
-      });
+      .subscribe();
   }
 
   initChat();
