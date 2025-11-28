@@ -729,252 +729,321 @@
       color:#ffffff;
     }
 
-    /* ========= CHAT IMPORTANTE: BANNER SUPERIOR ========= */
-    .chat-banner{
-      grid-column:1 / -1;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 14px;
-      border-radius:14px;
-      border:1px solid rgba(248,113,113,0.7);
-      background:radial-gradient(circle at 0 0,#450a0a 0,transparent 55%),
-                 #7f1d1d;
-      box-shadow:0 14px 30px rgba(0,0,0,.5);
-      margin-bottom:4px;
-    }
-    .chat-banner-icon{
-      font-size:20px;
-    }
-    .chat-banner-text{
-      flex:1;
-      min-width:0;
-    }
-    .chat-banner-title{
-      font-size:13px;
-      font-weight:600;
-      margin-bottom:3px;
-    }
-    .chat-banner-msg{
-      font-size:12px;
-      color:#fee2e2;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    /* ===================== CHAT FLOTANTE TMP ===================== */
 
-    .hidden{
-      display:none !important;
-    }
-
-    /* ========= BOTÓN FLOTANTE CHAT ========= */
     .chat-fab{
       position:fixed;
-      bottom:18px;
       right:18px;
-      width:52px;
-      height:52px;
+      bottom:18px;
+      width:54px;
+      height:54px;
       border-radius:999px;
-      border:none;
       background:linear-gradient(135deg,#22c55e,#16a34a);
-      color:#ecfeff;
       display:flex;
       align-items:center;
       justify-content:center;
-      box-shadow:0 18px 40px rgba(0,0,0,.7);
+      box-shadow:0 12px 30px rgba(0,0,0,.7);
       cursor:pointer;
       z-index:60;
-      font-size:22px;
-    }
-    .chat-fab-badge{
-      position:absolute;
-      top:4px;
-      right:6px;
-      width:12px;
-      height:12px;
-      border-radius:999px;
-      background:#ef4444;
-      box-shadow:0 0 0 3px rgba(239,68,68,.3);
-      display:none;
+      transition:transform .18s ease, box-shadow .18s ease;
     }
 
-    /* ========= PANEL CHAT ========= */
+    .chat-fab:hover{
+      transform:translateY(-2px) scale(1.03);
+      box-shadow:0 16px 40px rgba(0,0,0,.8);
+    }
+
+    .chat-fab-icon{
+      font-size:22px;
+    }
+
+    .chat-fab-badge{
+      position:absolute;
+      top:-6px;
+      right:-4px;
+      min-width:22px;
+      height:22px;
+      border-radius:999px;
+      background:#ef4444;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:700;
+      box-shadow:0 0 0 2px #020617;
+    }
+
+    .chat-fab.chat-has-important{
+      animation:chatPulse 1.4s infinite;
+    }
+
+    @keyframes chatPulse{
+      0%{ box-shadow:0 0 0 0 rgba(239,68,68,.7); }
+      70%{ box-shadow:0 0 0 12px rgba(239,68,68,0); }
+      100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
+    }
+
     .chat-panel{
       position:fixed;
-      bottom:0;
-      right:0;
-      width:min(380px,100%);
-      height:70%;
-      max-height:520px;
+      right:18px;
+      bottom:80px;
+      width:360px;
+      max-height:70vh;
       background:#020617;
-      border-top-left-radius:18px;
-      border-top-right-radius:0;
+      border-radius:18px;
       border:1px solid var(--border);
-      box-shadow:0 -18px 40px rgba(0,0,0,.85);
-      transform:translateY(110%);
-      transition:transform .25s ease;
-      z-index:55;
+      box-shadow:0 18px 45px rgba(0,0,0,.9);
       display:flex;
       flex-direction:column;
+      overflow:hidden;
+      transform:translateY(8px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease, transform .22s ease;
+      z-index:59;
     }
+
     .chat-panel.open{
+      opacity:1;
+      pointer-events:auto;
       transform:translateY(0);
-    }
-    @media (max-width:640px){
-      .chat-panel{
-        width:100%;
-        border-top-right-radius:18px;
-      }
     }
 
     .chat-header{
-      padding:10px 12px 8px;
+      padding:10px 12px;
       border-bottom:1px solid var(--border);
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:8px;
     }
-    .chat-header-titles{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .chat-header-title{
+
+    .chat-title{
       font-size:14px;
       font-weight:600;
+      color:var(--accent);
     }
-    .chat-header-sub{
+
+    .chat-subtitle{
       font-size:11px;
       color:var(--muted);
     }
+
     .chat-close-btn{
       border:none;
-      background:#020617;
+      background:transparent;
       color:var(--muted);
-      border-radius:999px;
-      width:26px;
-      height:26px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
       cursor:pointer;
+      font-size:16px;
+      padding:4px 6px;
+      border-radius:999px;
+    }
+    .chat-close-btn:hover{
+      background:#020617;
+      color:#fff;
     }
 
     .chat-messages{
       flex:1;
-      padding:8px 10px 6px;
+      padding:10px 10px 6px;
       overflow-y:auto;
       font-size:12px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
     }
 
-    .chat-msg{
-      border-radius:10px;
-      padding:6px 8px;
-      border:1px solid var(--border);
-      background:#020617;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
+    .chat-empty{
+      text-align:center;
+      color:var(--muted);
+      margin-top:12px;
     }
-    .chat-msg-header{
+
+    .chat-msg-wrapper{
+      margin-bottom:6px;
+    }
+
+    .chat-message{
+      padding:6px 8px;
+      border-radius:10px;
+      border:1px solid #1f2937;
+      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
+                 #020617;
+    }
+
+    .chat-message.mine{
+      border-color:var(--accent);
+      background:radial-gradient(circle at 100% 0,#022c22 0,transparent 55%),
+                 #020617;
+    }
+
+    .chat-message-header{
       display:flex;
       justify-content:space-between;
       align-items:center;
       gap:6px;
+      margin-bottom:2px;
     }
-    .chat-msg-author{
-      font-size:11px;
+
+    .chat-author{
       font-weight:600;
+      font-size:11px;
     }
-    .chat-msg-meta{
+
+    .chat-meta{
       font-size:10px;
       color:var(--muted);
+      white-space:nowrap;
     }
-    .chat-msg-text{
+
+    .chat-text{
       font-size:12px;
+      margin:2px 0 4px;
+      white-space:pre-wrap;
+      word-break:break-word;
     }
 
-    .chat-msg-important{
-      border-color:#ef4444;
-      background:radial-gradient(circle at 0 0,#450a0a 0,transparent 50%),#111827;
-    }
-    .chat-msg-important-label{
-      font-size:10px;
-      color:#fecaca;
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-    }
-
-    .chat-msg-actions{
-      margin-top:3px;
+    .chat-tags{
       display:flex;
-      gap:4px;
       flex-wrap:wrap;
-    }
-    .chat-msg-actions button{
+      gap:4px;
+      align-items:center;
+      margin-top:2px;
       font-size:10px;
-      padding:2px 8px;
+    }
+
+    .chat-tag{
+      border-radius:999px;
+      padding:2px 6px;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+
+    .chat-tag-important{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+
+    .chat-tag-dest{
+      border-color:var(--accent);
+      color:var(--accent);
+    }
+
+    .chat-done-btn{
       border-radius:999px;
       border:1px solid var(--border);
       background:#020617;
       color:var(--muted);
+      font-size:10px;
+      padding:2px 8px;
       cursor:pointer;
+      margin-left:auto;
+    }
+    .chat-done-btn:hover{
+      background:var(--hover);
+      color:#fff;
     }
 
-    .chat-form{
+    .chat-input-area{
       border-top:1px solid var(--border);
-      padding:8px 10px 10px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      font-size:12px;
+      padding:6px 8px 8px;
+      background:#020617;
     }
-    .chat-textarea{
+
+    .chat-input-row textarea{
       width:100%;
-      min-height:50px;
-      max-height:100px;
       resize:vertical;
+      min-height:40px;
+      max-height:90px;
+      background:#020617;
       border-radius:10px;
       border:1px solid var(--border);
-      background:#020617;
       color:var(--txt);
-      padding:6px 8px;
       font-size:12px;
+      padding:6px 8px;
       outline:none;
     }
-    .chat-textarea:focus{
+
+    .chat-input-row textarea:focus{
       border-color:var(--accent);
       box-shadow:0 0 0 1px rgba(34,197,94,.4);
     }
 
-    .chat-form-row{
+    .chat-input-extra{
+      margin-top:4px;
       display:flex;
-      justify-content:space-between;
       align-items:center;
-      gap:8px;
+      gap:6px;
       flex-wrap:wrap;
+      font-size:11px;
+      color:var(--muted);
     }
-    .chat-important-toggle{
+
+    .chat-important-label{
       display:flex;
       align-items:center;
-      gap:5px;
+      gap:4px;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .chat-important-word{
+      color:var(--danger);
+      font-weight:600;
+    }
+
+    .chat-input-extra input[type="checkbox"]{
+      width:12px;
+      height:12px;
+    }
+
+    .chat-to-label{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      flex:1;
+      min-width:120px;
+    }
+
+    #chat-destinatarios{
+      flex:1;
+      min-height:24px;
+      max-height:50px;
+      background:#020617;
+      border-radius:8px;
+      border:1px solid var(--border);
+      color:var(--txt);
       font-size:11px;
+      padding:2px 4px;
+      outline:none;
+    }
+
+    .chat-send-btn{
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#ecfeff;
+      font-size:12px;
+      padding:4px 10px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .chat-send-btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .chat-status{
+      margin-top:3px;
+      font-size:10px;
       color:var(--muted);
     }
-    .chat-important-toggle input{
-      accent-color:#ef4444;
-    }
-    .chat-important-toggle.disabled{
-      opacity:0.4;
-    }
-    .chat-user-label{
-      font-size:11px;
-      color:var(--muted);
+
+    @media (max-width:640px){
+      .chat-panel{
+        right:10px;
+        left:10px;
+        width:auto;
+        max-height:75vh;
+      }
     }
   </style>
 </head>
@@ -1001,16 +1070,6 @@
 </div>
 
 <main>
-
-  <!-- BANNER DE AVISO IMPORTANTE DE CHAT -->
-  <section id="chat-banner" class="chat-banner hidden">
-    <div class="chat-banner-icon">⚠️</div>
-    <div class="chat-banner-text">
-      <div class="chat-banner-title">Aviso importante de Calidad</div>
-      <div id="chat-banner-msg" class="chat-banner-msg">—</div>
-    </div>
-    <button id="chat-banner-open" class="btn btn-primary">Abrir chat</button>
-  </section>
 
   <!-- KPIs -->
   <section class="kpi-section">
@@ -1263,40 +1322,6 @@
 
 </main>
 
-<!-- PANEL CHAT + BOTÓN FLOTANTE -->
-<button id="chat-fab" class="chat-fab" title="Chat interno TMP">
-  💬
-  <span id="chat-fab-badge" class="chat-fab-badge"></span>
-</button>
-
-<div id="chat-panel" class="chat-panel">
-  <div class="chat-header">
-    <div class="chat-header-titles">
-      <div class="chat-header-title">Chat interno TMP</div>
-      <div class="chat-header-sub">
-        Avisos generales y mensajes importantes.  
-        <span id="chat-user-label" class="chat-user-label"></span>
-      </div>
-    </div>
-    <button id="chat-close" class="chat-close-btn">✕</button>
-  </div>
-
-  <div id="chat-messages" class="chat-messages">
-    <!-- mensajes -->
-  </div>
-
-  <form id="chat-form" class="chat-form">
-    <textarea id="chat-input" class="chat-textarea" placeholder="Escribe un mensaje..."></textarea>
-    <div class="chat-form-row">
-      <label id="chat-important-label" class="chat-important-toggle">
-        <input type="checkbox" id="chat-important">
-        <span>Marcar como <strong>IMPORTANTE</strong> (solo Calidad)</span>
-      </label>
-      <button type="submit" class="btn btn-primary">Enviar</button>
-    </div>
-  </form>
-</div>
-
 <!-- DIALOGOS: LISTA COMPLETA FUERA / PRÓXIMOS -->
 <dialog id="dialog-fuera">
   <div class="dialog-header">
@@ -1352,9 +1377,54 @@
   </div>
 </dialog>
 
+<!-- ================= CHAT FLOTANTE: BOTÓN + PANEL ================ -->
+<div id="chat-fab" class="chat-fab">
+  <span class="chat-fab-icon">💬</span>
+  <span id="chat-fab-badge" class="chat-fab-badge" style="display:none;">0</span>
+</div>
+
+<div id="chat-panel" class="chat-panel">
+  <div class="chat-header">
+    <div>
+      <div class="chat-title">Chat interno TMP</div>
+      <div class="chat-subtitle">
+        Avisos generales y mensajes importantes. Usuario: <span id="chat-user-label">-</span>
+      </div>
+    </div>
+    <button id="chat-close" class="chat-close-btn">✕</button>
+  </div>
+
+  <div id="chat-messages" class="chat-messages">
+    <div class="chat-empty">Todavía no hay mensajes en el chat.</div>
+  </div>
+
+  <div class="chat-input-area">
+    <div class="chat-input-row">
+      <textarea id="chat-input" rows="2" placeholder="Escribe un mensaje (Enter = salto, Ctrl+Enter = enviar)"></textarea>
+    </div>
+    <div class="chat-input-extra">
+      <label class="chat-important-label">
+        <input type="checkbox" id="chat-important">
+        <span>Marcar como <span class="chat-important-word">IMPORTANTE</span></span>
+      </label>
+
+      <label class="chat-to-label">
+        Para:
+        <select id="chat-destinatarios" multiple size="1">
+          <option value="__todos__" selected>Todos</option>
+        </select>
+      </label>
+
+      <button id="chat-send" class="chat-send-btn">Enviar</button>
+    </div>
+    <div id="chat-status" class="chat-status"></div>
+  </div>
+</div>
+
 <!-- CARGAR SUPABASE -->
 <script type="module" src="config.mjs"></script>
 
+<!-- SCRIPT PRINCIPAL DASHBOARD (KPIs + MOVIMIENTOS) -->
 <script type="module">
   const supabase = window.supabase;
 
@@ -1416,39 +1486,9 @@
   const movNextBtn     = document.getElementById("mov-next");
   const movPageInfo    = document.getElementById("mov-page-info");
 
-  // CHAT DOM
-  const chatFab          = document.getElementById("chat-fab");
-  const chatFabBadge     = document.getElementById("chat-fab-badge");
-  const chatPanel        = document.getElementById("chat-panel");
-  const chatClose        = document.getElementById("chat-close");
-  const chatMessagesEl   = document.getElementById("chat-messages");
-  const chatForm         = document.getElementById("chat-form");
-  const chatInput        = document.getElementById("chat-input");
-  const chatImportant    = document.getElementById("chat-important");
-  const chatImportantLbl = document.getElementById("chat-important-label");
-  const chatUserLabel    = document.getElementById("chat-user-label");
-
-  const chatBanner       = document.getElementById("chat-banner");
-  const chatBannerMsg    = document.getElementById("chat-banner-msg");
-  const chatBannerOpen   = document.getElementById("chat-banner-open");
-
   let cacheMovimientos = [];
   const MOV_POR_PAG = 8;
   let movPaginaActual = 1;
-
-  // ====== CONFIG USUARIO (nombre y rol) ======
-  const USER_NAME = localStorage.getItem("tmp_usuario_nombre") || "Usuario";
-  const USER_ROLE = localStorage.getItem("tmp_usuario_rol") || "operario"; // "operario" o "responsable"
-
-  if (chatUserLabel){
-    chatUserLabel.textContent = `${USER_NAME} · Rol: ${USER_ROLE}`;
-  }
-
-  // Solo responsable puede marcar IMPORTANTE
-  if (USER_ROLE !== "responsable"){
-    chatImportant.disabled = true;
-    chatImportantLbl.classList.add("disabled");
-  }
 
   // Utilidades
   function parseDate(str) {
@@ -1463,9 +1503,7 @@
     const dd = String(d.getDate()).padStart(2,"0");
     const mm = String(d.getMonth() + 1).padStart(2,"0");
     const yy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mi = String(d.getMinutes()).padStart(2,"0");
-    return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+    return `${dd}/${mm}/${yy}`;
   }
 
   function daysBetween(a,b){
@@ -1636,7 +1674,6 @@
       table_fuera_top.style.display = "table";
       btn_fuera_ver_todos.style.display = "inline-flex";
 
-      const hoy = new Date();
       tbody_fuera_top.innerHTML = top.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
         const dias = dProx ? daysBetween(hoy, dProx) : 0; // días vencidos (>0)
@@ -1651,10 +1688,9 @@
       }).join("");
 
       // Modal completo
-      const hoy2 = new Date();
       tbody_fuera_modal.innerHTML = ordenados.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        const dias = dProx ? daysBetween(hoy2, dProx) : 0;
+        const dias = dProx ? daysBetween(hoy, dProx) : 0;
         return `
           <tr>
             <td>${inst.codigo || ""}</td>
@@ -1692,7 +1728,6 @@
       table_prox_top.style.display = "table";
       btn_prox_ver_todos.style.display = "inline-flex";
 
-      const hoy = new Date();
       tbody_prox_top.innerHTML = topProx.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
         // días que faltan = prox - hoy (>0)
@@ -1708,10 +1743,9 @@
       }).join("");
 
       // Modal completo
-      const hoy2 = new Date();
       tbody_prox_modal.innerHTML = ordenadosProx.map(inst => {
         const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        const dias = dProx ? daysBetween(dProx, hoy2) * -1 : 0;
+        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0;
         return `
           <tr>
             <td>${inst.codigo || ""}</td>
@@ -1828,7 +1862,7 @@
           <td>${mov.responsable || "-"}</td>
           <td>${chip}</td>
           <td>
-            <a class="btn" href="qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
+            <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
               Ver ficha
             </a>
           </td>
@@ -1933,161 +1967,336 @@
     cargarDashboard();
     cargarMovimientos();
   }, 30000);
+</script>
 
-  // ================== CHAT INTERNO TMP ==================
-  let chatMensajes = [];
+<!-- SCRIPT CHAT INTERNO TMP -->
+<script type="module">
+  const supabaseChat = window.supabase;
 
-  function openChatPanel(){
-    chatPanel.classList.add("open");
-    setTimeout(() => {
-      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-    }, 50);
+  if (!supabaseChat) {
+    console.error("Supabase no disponible para el chat.");
   }
 
-  function closeChatPanel(){
-    chatPanel.classList.remove("open");
+  // Usuario logado desde localStorage (login.html)
+  let operario = null;
+  try {
+    operario = JSON.parse(localStorage.getItem("operario"));
+  } catch (e) {
+    operario = null;
   }
 
-  chatFab.addEventListener("click", openChatPanel);
-  chatClose.addEventListener("click", closeChatPanel);
-  chatBannerOpen.addEventListener("click", openChatPanel);
+  const CHAT_USERNAME = operario?.username || "invitado";
+  const CHAT_NOMBRE   = operario?.nombre   || CHAT_USERNAME;
 
-  function renderChatMensajes(){
-    if (!chatMensajes || chatMensajes.length === 0){
-      chatMessagesEl.innerHTML = `<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px;">Todavía no hay mensajes en el chat.</div>`;
+  // Elementos DOM
+  const chatFab          = document.getElementById("chat-fab");
+  const chatFabBadge     = document.getElementById("chat-fab-badge");
+  const chatPanel        = document.getElementById("chat-panel");
+  const chatCloseBtn     = document.getElementById("chat-close");
+  const chatMessagesEl   = document.getElementById("chat-messages");
+  const chatInput        = document.getElementById("chat-input");
+  const chatSendBtn      = document.getElementById("chat-send");
+  const chatImportant    = document.getElementById("chat-important");
+  const chatStatus       = document.getElementById("chat-status");
+  const chatUserLabel    = document.getElementById("chat-user-label");
+  const destSelect       = document.getElementById("chat-destinatarios");
+
+  chatUserLabel.textContent = `${CHAT_NOMBRE} (${CHAT_USERNAME})`;
+
+  let chatMessages = [];
+  let operariosLista = [];
+  let mapaOperarios = {};
+
+  function toggleChatPanel(){
+    if (!chatPanel) return;
+    const abierto = chatPanel.classList.contains("open");
+    if (abierto){
+      chatPanel.classList.remove("open");
+    } else {
+      chatPanel.classList.add("open");
+      // Auto scroll al abrir
+      setTimeout(() => {
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+      }, 80);
+    }
+  }
+
+  chatFab?.addEventListener("click", toggleChatPanel);
+  chatCloseBtn?.addEventListener("click", toggleChatPanel);
+
+  function formatChatTime(ts){
+    if (!ts) return "";
+    const d = new Date(ts);
+    if (isNaN(d)) return "";
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mi = String(d.getMinutes()).padStart(2,"0");
+    return `${dd}/${mm} ${hh}:${mi}`;
+  }
+
+  function esParaMi(msg){
+    const dest = msg.destinatarios;
+    if (!dest || dest.length === 0) return true; // mensaje general
+    return dest.includes(CHAT_USERNAME);
+  }
+
+  function calcularNoLeidosImportantes(){
+    let count = 0;
+    const user = CHAT_USERNAME;
+    chatMessages.forEach(msg => {
+      if (!msg.importante) return;
+      if (!esParaMi(msg)) return;
+      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
+      if (!leidos.includes(user)) count++;
+    });
+
+    if (!chatFabBadge) return;
+    if (count > 0){
+      chatFabBadge.textContent = count;
+      chatFabBadge.style.display = "flex";
+      chatFab?.classList.add("chat-has-important");
+    } else {
+      chatFabBadge.style.display = "none";
+      chatFab?.classList.remove("chat-has-important");
+    }
+  }
+
+  function renderChatMessages(){
+    if (!chatMessagesEl) return;
+
+    const visibles = chatMessages.filter(esParaMi);
+
+    if (visibles.length === 0){
+      chatMessagesEl.innerHTML = `<div class="chat-empty">Todavía no hay mensajes en el chat.</div>`;
+      calcularNoLeidosImportantes();
       return;
     }
 
-    chatMessagesEl.innerHTML = chatMensajes.map(msg => {
-      const fecha = msg.created_at ? new Date(msg.created_at) : null;
-      const fechaTxt = fecha ? formatDate(fecha) : "—";
-      const importante = msg.importante && !msg.resuelto;
-      const importanteResuelto = msg.importante && msg.resuelto;
+    const user = CHAT_USERNAME;
 
-      const claseMsg = importante ? "chat-msg chat-msg-important" : "chat-msg";
-      const badgeImportante = importante
-        ? `<span class="chat-msg-important-label">⚠ IMPORTANTE · pendiente</span>`
-        : (importanteResuelto ? `<span class="chat-msg-important-label" style="color:#bbf7d0;">✅ IMPORTANTE · resuelto</span>` : "");
+    chatMessagesEl.innerHTML = visibles.map(msg => {
+      const mine = msg.autor === user;
+      const cls  = mine ? "chat-message mine" : "chat-message";
+      const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor;
 
-      // Solo operario puede marcar como realizado
-      const mostrarResolver = importante && !msg.resuelto && USER_ROLE === "operario";
+      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
+      const yaLeido = leidos.includes(user);
+
+      const dest = msg.destinatarios;
+      let destLabel = "Todos";
+      if (dest && dest.length > 0){
+        destLabel = dest.map(u => mapaOperarios[u]?.nombre || u).join(", ");
+      }
+
+      const tags = [];
+      if (msg.importante){
+        tags.push(`<span class="chat-tag chat-tag-important">IMPORTANTE</span>`);
+      }
+      if (dest && dest.length > 0){
+        tags.push(`<span class="chat-tag chat-tag-dest">Para: ${destLabel}</span>`);
+      }
+
+      let botonHecho = "";
+      if (msg.importante && !yaLeido && !mine){
+        botonHecho = `<button class="chat-done-btn" data-id="${msg.id}">Marcar hecho</button>`;
+      } else if (msg.importante && yaLeido && !mine){
+        tags.push(`<span class="chat-tag">Marcado como hecho</span>`);
+      }
 
       return `
-        <div class="${claseMsg}">
-          <div class="chat-msg-header">
-            <div class="chat-msg-author">${msg.autor_nombre || "Usuario"} (${msg.autor_rol || "-"})</div>
-            <div class="chat-msg-meta">${fechaTxt}</div>
-          </div>
-          <div class="chat-msg-text">${(msg.texto || "").replace(/</g,"&lt;")}</div>
-          ${badgeImportante ? `<div>${badgeImportante}</div>` : ""}
-          <div class="chat-msg-actions">
-            ${
-              mostrarResolver
-              ? `<button type="button" data-resolver-id="${msg.id}">Marcar como realizado</button>`
-              : ""
-            }
+        <div class="chat-msg-wrapper">
+          <div class="${cls}">
+            <div class="chat-message-header">
+              <div class="chat-author">${autorNombre}</div>
+              <div class="chat-meta">${formatChatTime(msg.created_at)}</div>
+            </div>
+            <div class="chat-text">${(msg.mensaje || "").replace(/</g,"&lt;")}</div>
+            <div class="chat-tags">
+              ${tags.join("")}
+              ${botonHecho}
+            </div>
           </div>
         </div>
       `;
     }).join("");
 
-    // Scroll al final
+    // Listeners para los botones "Marcar hecho"
+    document.querySelectorAll(".chat-done-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-id");
+        await marcarMensajeHecho(id);
+      });
+    });
+
+    // Scroll abajo
     chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+
+    calcularNoLeidosImportantes();
   }
 
-  function actualizarAvisosImportantes(){
-    const pendientes = chatMensajes.filter(m => m.importante && !m.resuelto);
-    if (pendientes.length > 0){
-      const ultimo = pendientes[pendientes.length - 1]; // el más reciente
-      chatBanner.classList.remove("hidden");
-      chatBannerMsg.textContent = ultimo.texto || "";
-      if (chatFabBadge) chatFabBadge.style.display = "block";
-    } else {
-      chatBanner.classList.add("hidden");
-      if (chatFabBadge) chatFabBadge.style.display = "none";
-    }
-  }
+  async function marcarMensajeHecho(id){
+    if (!id || !supabaseChat) return;
+    const user = CHAT_USERNAME;
+    const msg = chatMessages.find(m => String(m.id) === String(id));
+    if (!msg) return;
 
-  async function cargarChat(){
-    if (!supabase){
-      console.error("Supabase no disponible para chat");
+    const leidos = Array.isArray(msg.leido_por) ? [...msg.leido_por] : [];
+    if (leidos.includes(user)) return;
+    leidos.push(user);
+
+    const { data, error } = await supabaseChat
+      .from("chat_mensajes")
+      .update({ leido_por: leidos })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error){
+      console.error("Error marcando mensaje como hecho:", error);
       return;
     }
 
-    const { data, error } = await supabase
+    const idx = chatMessages.findIndex(m => m.id === data.id);
+    if (idx >= 0){
+      chatMessages[idx] = data;
+      renderChatMessages();
+    }
+  }
+
+  async function cargarOperarios(){
+    if (!supabaseChat || !destSelect) return;
+
+    const { data, error } = await supabaseChat
+      .from("operarios")
+      .select("username, nombre, rol")
+      .order("nombre", { ascending:true });
+
+    if (error){
+      console.error("Error cargando operarios para el chat:", error);
+      return;
+    }
+
+    operariosLista = data || [];
+    mapaOperarios = {};
+    operariosLista.forEach(op => {
+      mapaOperarios[op.username] = op;
+    });
+
+    // Rellenar select de destinatarios
+    destSelect.innerHTML = `<option value="__todos__" selected>Todos</option>`;
+    operariosLista.forEach(op => {
+      const opt = document.createElement("option");
+      opt.value = op.username;
+      opt.textContent = op.nombre || op.username;
+      destSelect.appendChild(opt);
+    });
+  }
+
+  async function cargarMensajesInicial(){
+    if (!supabaseChat) return;
+
+    const { data, error } = await supabaseChat
       .from("chat_mensajes")
       .select("*")
       .order("created_at", { ascending:true })
-      .limit(80);
+      .limit(200);
 
     if (error){
-      console.error("Error cargando chat:", error);
+      console.error("Error cargando mensajes del chat:", error);
+      chatStatus.textContent = "Error al cargar mensajes.";
       return;
     }
 
-    chatMensajes = data || [];
-    renderChatMensajes();
-    actualizarAvisosImportantes();
+    chatMessages = data || [];
+    renderChatMessages();
   }
 
-  chatForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  async function enviarMensaje(){
+    if (!supabaseChat) return;
     const texto = (chatInput.value || "").trim();
     if (!texto) return;
 
-    const esImportante = chatImportant.checked && USER_ROLE === "responsable";
+    chatSendBtn.disabled = true;
+    chatStatus.textContent = "Enviando...";
 
-    const { error } = await supabase
-      .from("chat_mensajes")
-      .insert([{
-        texto,
-        autor_nombre: USER_NAME,
-        autor_rol: USER_ROLE,
-        importante: esImportante,
-        resuelto: false
-      }]);
-
-    if (error){
-      console.error("Error insertando mensaje de chat:", error);
-      return;
+    let destinatarios = Array.from(destSelect.selectedOptions || []).map(o => o.value);
+    if (destinatarios.includes("__todos__")){
+      destinatarios = []; // mensaje general
     }
 
-    chatInput.value = "";
-    if (USER_ROLE === "responsable"){
+    const payload = {
+      autor: CHAT_USERNAME,
+      mensaje: texto,
+      importante: !!chatImportant.checked,
+      destinatarios: destinatarios.length ? destinatarios : null
+    };
+
+    const { error } = await supabaseChat
+      .from("chat_mensajes")
+      .insert(payload);
+
+    if (error){
+      console.error("Error enviando mensaje:", error);
+      chatStatus.textContent = "No se ha podido enviar el mensaje.";
+    } else {
+      chatInput.value = "";
       chatImportant.checked = false;
+      if (destSelect){
+        destSelect.value = "__todos__";
+      }
+      chatStatus.textContent = "Mensaje enviado.";
+      setTimeout(() => chatStatus.textContent = "", 2000);
     }
-    await cargarChat();
+
+    chatSendBtn.disabled = false;
+  }
+
+  chatSendBtn?.addEventListener("click", enviarMensaje);
+
+  chatInput?.addEventListener("keydown", (e) => {
+    // Ctrl+Enter -> enviar
+    if (e.key === "Enter" && e.ctrlKey){
+      e.preventDefault();
+      enviarMensaje();
+    }
   });
 
-  // Delegación para "Marcar como realizado"
-  chatMessagesEl.addEventListener("click", async (e) => {
-    const btn = e.target.closest("button[data-resolver-id]");
-    if (!btn) return;
+  async function initChat(){
+    if (!supabaseChat) return;
+    await cargarOperarios();
+    await cargarMensajesInicial();
 
-    if (USER_ROLE !== "operario"){
-      alert("Solo los operarios pueden marcar como realizado un aviso importante.");
-      return;
-    }
+    // Suscripción en tiempo real
+    supabaseChat
+      .channel("chat_mensajes_changes")
+      .on("postgres_changes",
+        { event:"INSERT", schema:"public", table:"chat_mensajes" },
+        payload => {
+          chatMessages.push(payload.new);
+          renderChatMessages();
+        }
+      )
+      .on("postgres_changes",
+        { event:"UPDATE", schema:"public", table:"chat_mensajes" },
+        payload => {
+          const idx = chatMessages.findIndex(m => m.id === payload.new.id);
+          if (idx >= 0){
+            chatMessages[idx] = payload.new;
+          } else {
+            chatMessages.push(payload.new);
+          }
+          renderChatMessages();
+        }
+      )
+      .subscribe(status => {
+        if (status === "SUBSCRIBED"){
+          chatStatus.textContent = "";
+        }
+      });
+  }
 
-    const id = btn.getAttribute("data-resolver-id");
-    if (!id) return;
-
-    const { error } = await supabase
-      .from("chat_mensajes")
-      .update({ resuelto: true })
-      .eq("id", id);
-
-    if (error){
-      console.error("Error marcando mensaje como resuelto:", error);
-      return;
-    }
-
-    await cargarChat();
-  });
-
-  // Cargar chat al inicio + refresco periódico
-  cargarChat();
-  setInterval(cargarChat, 20000);
+  initChat();
 </script>
 
 </body>
