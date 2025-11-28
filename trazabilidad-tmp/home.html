@@ -784,25 +784,23 @@
       100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
     }
 
-    .chat-panel{
-      position:fixed;
-      right:18px;
-      bottom:80px;
-      width:360px;
-      max-height:70vh;
-      background:#020617;
-      border-radius:18px;
-      border:1px solid var(--border);
-      box-shadow:0 18px 45px rgba(0,0,0,.9);
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-      transform:translateY(8px);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .22s ease, transform .22s ease;
-      z-index:59;
-    }
+    /* Panel del chat (ventana emergente) */
+#chat-panel{
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  background:#020617;
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 18px 40px rgba(0,0,0,.7);
+  width: 480px;        /* ANTES ~360px */
+  height: 520px;       /* ANTES más bajo */
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+  z-index:40;
+}
+
 
     .chat-panel.open{
       opacity:1;
@@ -844,12 +842,14 @@
       color:#fff;
     }
 
-    .chat-messages{
-      flex:1;
-      padding:10px 10px 6px;
-      overflow-y:auto;
-      font-size:12px;
-    }
+   /* Área donde se ven los mensajes */
+#chat-messages{
+  flex:1;
+  padding:12px 14px;
+  overflow-y:auto;
+  font-size:13px;
+}
+
 
     .chat-empty{
       text-align:center;
@@ -944,20 +944,20 @@
 
     .chat-input-area{
       border-top:1px solid var(--border);
-      padding:6px 8px 8px;
+      padding:8px 10px 10px;
       background:#020617;
     }
 
     .chat-input-row textarea{
       width:100%;
       resize:vertical;
-      min-height:40px;
-      max-height:90px;
+      min-height:60px;
+      max-height:120px;
       background:#020617;
-      border-radius:10px;
+      border-radius:8px;
       border:1px solid var(--border);
       color:var(--txt);
-      font-size:12px;
+      font-size:13px;
       padding:6px 8px;
       outline:none;
     }
