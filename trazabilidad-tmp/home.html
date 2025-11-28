@@ -2036,10 +2036,33 @@
   }
 
   function esParaMi(msg){
-    const dest = msg.destinatarios;
-    if (!dest || dest.length === 0) return true; // mensaje general
-    return dest.includes(CHAT_USERNAME);
-  }
+    const user = USERNAME;  // ya definido antes
+
+    // 1. Mis mensajes SIEMPRE se muestran
+    if (msg.autor === user) return true;
+
+    // 2. Obtener destinatarios correctamente
+    let dest = msg.destinatarios;
+
+    // Si viene como null, undefined o string vacío → mensaje general
+    if (!dest || dest === null || dest === undefined || dest.length === 0){
+        return true; // mensaje general
+    }
+
+    // 3. Si viene como string en vez de array (Supabase a veces lo hace)
+    if (typeof dest === "string"){
+        try { dest = JSON.parse(dest); } catch(e) { dest = []; }
+    }
+
+    // 4. Si ahora es array → comprobamos si incluye al usuario
+    if (Array.isArray(dest)){
+        return dest.includes(user);
+    }
+
+    // 5. Si llega cualquier otra cosa rara, lo tratamos como mensaje general
+    return true;
+}
+
 
   function calcularNoLeidosImportantes(){
     let count = 0;
