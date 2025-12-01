@@ -2100,458 +2100,83 @@
   }, 30000);
 </script>
 
-<!-- SCRIPT CHAT INTERNO TMP -->
+<!-- SCRIPT CHAT: SOLO BADGE + BOTÓN QUE ABRE chat.html -->
 <script type="module">
-  const supabaseChat = window.supabase;
+  const supabase = window.supabase;
 
-  if (!supabaseChat) {
-    console.error("Supabase no disponible para el chat.");
-  }
-
-  // Usuario logado desde localStorage (login.html)
+  // Usuario logado
   let operario = null;
   try {
     operario = JSON.parse(localStorage.getItem("operario"));
   } catch (e) {
     operario = null;
   }
+  const USER = operario?.username || "invitado";
 
-  const CHAT_USERNAME = operario?.username || "invitado";
-  const CHAT_NOMBRE   = operario?.nombre   || CHAT_USERNAME;
+  const chatFab      = document.getElementById("chat-fab");
+  const chatFabBadge = document.getElementById("chat-fab-badge");
 
-  // Elementos DOM
-  const chatFab          = document.getElementById("chat-fab");
-  const chatFabBadge     = document.getElementById("chat-fab-badge");
-  const chatPanel        = document.getElementById("chat-panel");
-  const chatCloseBtn     = document.getElementById("chat-close");
-  const chatMessagesEl   = document.getElementById("chat-messages");
-  const chatInput        = document.getElementById("chat-input");
-  const chatSendBtn      = document.getElementById("chat-send");
-  const chatImportant    = document.getElementById("chat-important");
-  const chatStatus       = document.getElementById("chat-status");
-  const chatUserLabel    = document.getElementById("chat-user-label");
-
-  const destOpenBtn      = document.getElementById("chat-dest-open");
-  const destSummaryEl    = document.getElementById("chat-dest-summary");
-  const destPanel        = document.getElementById("chat-dest-panel");
-  const destBody         = document.getElementById("chat-dest-body");
-  const destCloseBtn     = document.getElementById("chat-dest-close");
-  const destApplyBtn     = document.getElementById("chat-dest-apply");
-
-  chatUserLabel.textContent = `${CHAT_NOMBRE} (${CHAT_USERNAME})`;
-
-  let chatMessages = [];
-  let operariosLista = [];
-  let mapaOperarios = {};
-  let destinatariosSeleccionados = []; // [] = TODOS
-
-  function toggleChatPanel(){
-    if (!chatPanel) return;
-    const abierto = chatPanel.classList.contains("open");
-    if (abierto){
-      chatPanel.classList.remove("open");
-    } else {
-      chatPanel.classList.add("open");
-      // Auto scroll al abrir
-      setTimeout(() => {
-        if (chatMessagesEl) {
-          chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-        }
-      }, 80);
-    }
-  }
-
-  chatFab?.addEventListener("click", toggleChatPanel);
-  chatCloseBtn?.addEventListener("click", toggleChatPanel);
-
-  function formatChatTime(ts){
-    if (!ts) return "";
-    const d = new Date(ts);
-    if (isNaN(d)) return "";
-    const dd = String(d.getDate()).padStart(2,"0");
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mi = String(d.getMinutes()).padStart(2,"0");
-    return `${dd}/${mm} ${hh}:${mi}`;
-  }
-
-  function esParaMi(msg){
-    const user = CHAT_USERNAME;
-
-    // 1. Mis mensajes SIEMPRE se muestran
-    if (msg.autor === user) return true;
-
-    // 2. Obtener destinatarios correctamente
-    let dest = msg.destinatarios;
-
-    // null/undefined/array vacía => mensaje general
-    if (!dest || (Array.isArray(dest) && dest.length === 0)){
-      return true;
-    }
-
-    // 3. Si viene como string en vez de array
-    if (typeof dest === "string"){
-      try {
-        dest = JSON.parse(dest);
-      } catch(e) {
-        dest = [];
-      }
-    }
-
-    // 4. Si ahora es array → comprobamos si incluye al usuario
-    if (Array.isArray(dest)){
-      return dest.includes(user);
-    }
-
-    // 5. Si formato raro → lo tratamos como general
-    return true;
-  }
-
-  function calcularNoLeidosImportantes(){
-    let count = 0;
-    const user = CHAT_USERNAME;
-    chatMessages.forEach(msg => {
-      if (!msg.importante) return;
-      if (!esParaMi(msg)) return;
-      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
-      if (!leidos.includes(user)) count++;
+  // 1) Al hacer click -> abrir chat.html
+  if (chatFab) {
+    chatFab.addEventListener("click", () => {
+      window.location.href = "chat.html";
     });
-
-    if (!chatFabBadge) return;
-    if (count > 0){
-      chatFabBadge.textContent = count;
-      chatFabBadge.style.display = "flex";
-      chatFab?.classList.add("chat-has-important");
-    } else {
-      chatFabBadge.style.display = "none";
-      chatFab?.classList.remove("chat-has-important");
-    }
   }
 
-  function renderChatMessages(){
-    if (!chatMessagesEl) return;
+  // 2) Contar mensajes IMPORTANTES pendientes para este usuario
+  async function actualizarBadgeImportantes() {
+    if (!supabase || !USER || USER === "invitado") return;
 
-    const visibles = chatMessages.filter(esParaMi);
-
-    if (visibles.length === 0){
-      chatMessagesEl.innerHTML = `<div class="chat-empty">Todavía no hay mensajes en el chat.</div>`;
-      calcularNoLeidosImportantes();
-      return;
-    }
-
-    const user = CHAT_USERNAME;
-
-    chatMessagesEl.innerHTML = visibles.map(msg => {
-      const mine = msg.autor === user;
-      const cls  = mine ? "chat-message mine" : "chat-message";
-      const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor;
-
-      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
-      const yaLeido = leidos.includes(user);
-
-      let dest = msg.destinatarios;
-      let destLabel = "Todos";
-      if (dest && dest.length > 0){
-        if (typeof dest === "string"){
-          try { dest = JSON.parse(dest); } catch(e) { dest = []; }
-        }
-        if (Array.isArray(dest) && dest.length > 0){
-          destLabel = dest.map(u => mapaOperarios[u]?.nombre || u).join(", ");
-        }
-      }
-
-      const tags = [];
-      if (msg.importante){
-        tags.push(`<span class="chat-tag chat-tag-important">IMPORTANTE</span>`);
-      }
-      if (dest && Array.isArray(dest) && dest.length > 0){
-        tags.push(`<span class="chat-tag chat-tag-dest">Para: ${destLabel}</span>`);
-      }
-
-      let botonHecho = "";
-      if (msg.importante && !yaLeido && !mine){
-        botonHecho = `<button class="chat-done-btn" data-id="${msg.id}">Marcar hecho</button>`;
-      } else if (msg.importante && yaLeido && !mine){
-        tags.push(`<span class="chat-tag">Marcado como hecho</span>`);
-      }
-
-      return `
-        <div class="chat-msg-wrapper">
-          <div class="${cls}">
-            <div class="chat-message-header">
-              <div class="chat-author">${autorNombre}</div>
-              <div class="chat-meta">${formatChatTime(msg.created_at)}</div>
-            </div>
-            <div class="chat-text">${(msg.mensaje || "").replace(/</g,"&lt;")}</div>
-            <div class="chat-tags">
-              ${tags.join("")}
-              ${botonHecho}
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    // Listeners para los botones "Marcar hecho"
-    document.querySelectorAll(".chat-done-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-id");
-        await marcarMensajeHecho(id);
-      });
-    });
-
-    // Scroll abajo
-    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-
-    calcularNoLeidosImportantes();
-  }
-
-  async function marcarMensajeHecho(id){
-    if (!id || !supabaseChat) return;
-    const user = CHAT_USERNAME;
-    const msg = chatMessages.find(m => String(m.id) === String(id));
-    if (!msg) return;
-
-    const leidos = Array.isArray(msg.leido_por) ? [...msg.leido_por] : [];
-    if (leidos.includes(user)) return;
-    leidos.push(user);
-
-    const { data, error } = await supabaseChat
+    const { data, error } = await supabase
       .from("chat_mensajes")
-      .update({ leido_por: leidos })
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error){
-      console.error("Error marcando mensaje como hecho:", error);
-      return;
-    }
-
-    const idx = chatMessages.findIndex(m => m.id === data.id);
-    if (idx >= 0){
-      chatMessages[idx] = data;
-      renderChatMessages();
-    }
-  }
-
-  function actualizarResumenDestinatarios(){
-    if (!destSummaryEl) return;
-
-    if (!destinatariosSeleccionados || destinatariosSeleccionados.length === 0){
-      destSummaryEl.textContent = "Todos";
-      return;
-    }
-
-    const nombres = destinatariosSeleccionados.map(u => mapaOperarios[u]?.nombre || u);
-    if (nombres.length <= 2){
-      destSummaryEl.textContent = nombres.join(", ");
-    } else {
-      destSummaryEl.textContent = `${nombres[0]}, ${nombres[1]} +${nombres.length - 2}`;
-    }
-  }
-
-  function abrirPanelDestinatarios(){
-    if (!destPanel) return;
-    destPanel.style.display = "block";
-
-    // Sin selección => marcar "Todos"
-    const inputs = destBody?.querySelectorAll("input[type=checkbox]") || [];
-    if (!destinatariosSeleccionados || destinatariosSeleccionados.length === 0){
-      inputs.forEach(inp => {
-        inp.checked = (inp.value === "__todos__");
-      });
-    } else {
-      inputs.forEach(inp => {
-        if (inp.value === "__todos__"){
-          inp.checked = false;
-        } else {
-          inp.checked = destinatariosSeleccionados.includes(inp.value);
-        }
-      });
-    }
-  }
-
-  function cerrarPanelDestinatarios(){
-    if (!destPanel) return;
-    destPanel.style.display = "none";
-  }
-
-  destOpenBtn?.addEventListener("click", abrirPanelDestinatarios);
-  destCloseBtn?.addEventListener("click", cerrarPanelDestinatarios);
-  destApplyBtn?.addEventListener("click", () => {
-    if (!destBody) return;
-    const inputs = destBody.querySelectorAll("input[type=checkbox]");
-    let seleccion = [];
-    let todosMarcado = false;
-
-    inputs.forEach(inp => {
-      if (inp.checked){
-        if (inp.value === "__todos__"){
-          todosMarcado = true;
-        } else {
-          seleccion.push(inp.value);
-        }
-      }
-    });
-
-    if (todosMarcado || seleccion.length === 0){
-      destinatariosSeleccionados = [];
-    } else {
-      destinatariosSeleccionados = seleccion;
-    }
-
-    actualizarResumenDestinatarios();
-    cerrarPanelDestinatarios();
-  });
-
-  async function cargarOperarios(){
-    if (!supabaseChat) return;
-
-    const { data, error } = await supabaseChat
-      .from("operarios")
-      .select("username, nombre, rol")
-      .order("nombre", { ascending:true });
-
-    if (error){
-      console.error("Error cargando operarios para el chat:", error);
-      return;
-    }
-
-    operariosLista = data || [];
-    mapaOperarios = {};
-    operariosLista.forEach(op => {
-      mapaOperarios[op.username] = op;
-    });
-
-    // Rellenar panel de destinatarios
-    if (!destBody) return;
-    destBody.innerHTML = "";
-
-    // Opción "Todos"
-    const labelTodos = document.createElement("label");
-    labelTodos.className = "chat-dest-item";
-    labelTodos.innerHTML = `
-      <input type="checkbox" value="__todos__" checked>
-      <span>Todos</span>
-    `;
-    destBody.appendChild(labelTodos);
-
-    // Operarios
-    operariosLista.forEach(op => {
-      const lab = document.createElement("label");
-      lab.className = "chat-dest-item";
-      lab.innerHTML = `
-        <input type="checkbox" value="${op.username}">
-        <span>${op.nombre || op.username}</span>
-      `;
-      destBody.appendChild(lab);
-    });
-
-    actualizarResumenDestinatarios();
-  }
-
-  async function cargarMensajesInicial(){
-    if (!supabaseChat) return;
-
-    const { data, error } = await supabaseChat
-      .from("chat_mensajes")
-      .select("*")
-      .order("created_at", { ascending:true })
+      .select("id, importante, destinatarios, leido_por")
+      .eq("importante", true)
+      .order("created_at", { ascending: false })
       .limit(200);
 
-    if (error){
-      console.error("Error cargando mensajes del chat:", error);
-      if (chatStatus) chatStatus.textContent = "Error al cargar mensajes.";
+    if (error) {
+      console.error("Error cargando mensajes importantes:", error);
       return;
     }
 
-    chatMessages = data || [];
-    renderChatMessages();
-  }
+    const lista = (data || []).filter(msg => {
+      const dest = msg.destinatarios;
+      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
 
-  async function enviarMensaje(){
-    if (!supabaseChat) return;
-    const texto = (chatInput.value || "").trim();
-    if (!texto) return;
+      // ¿Es para mí?
+      let esParaMi = false;
 
-    chatSendBtn.disabled = true;
-    if (chatStatus) chatStatus.textContent = "Enviando...";
-
-    let destinatarios = destinatariosSeleccionados && destinatariosSeleccionados.length
-      ? [...destinatariosSeleccionados]
-      : null; // null => mensaje general
-
-    const payload = {
-      autor: CHAT_USERNAME,
-      mensaje: texto,
-      importante: !!chatImportant.checked,
-      destinatarios
-    };
-
-    const { error } = await supabaseChat
-      .from("chat_mensajes")
-      .insert(payload);
-
-    if (error){
-      console.error("Error enviando mensaje:", error);
-      if (chatStatus) chatStatus.textContent = "No se ha podido enviar el mensaje.";
-    } else {
-      chatInput.value = "";
-      chatImportant.checked = false;
-      destinatariosSeleccionados = [];
-      actualizarResumenDestinatarios();
-      if (chatStatus) {
-        chatStatus.textContent = "Mensaje enviado.";
-        setTimeout(() => { chatStatus.textContent = ""; }, 2000);
+      // sin destinatarios => mensaje general (todos)
+      if (!dest || dest.length === 0) {
+        esParaMi = true;
+      } else if (Array.isArray(dest)) {
+        esParaMi = dest.includes(USER);
       }
-    }
 
-    chatSendBtn.disabled = false;
+      // ¿Ya marcado como hecho?
+      const yaHecho = leidos.includes(USER);
+
+      return esParaMi && !yaHecho;
+    });
+
+    const pendientes = lista.length;
+
+    if (!chatFabBadge) return;
+    if (pendientes > 0) {
+      chatFabBadge.textContent = pendientes;
+      chatFabBadge.style.display = "flex";
+      chatFab.classList.add("chat-has-important");
+    } else {
+      chatFabBadge.style.display = "none";
+      chatFab.classList.remove("chat-has-important");
+    }
   }
 
-  chatSendBtn?.addEventListener("click", enviarMensaje);
-
-  chatInput?.addEventListener("keydown", (e) => {
-    // Ctrl+Enter -> enviar
-    if (e.key === "Enter" && e.ctrlKey){
-      e.preventDefault();
-      enviarMensaje();
-    }
-  });
-
-  async function initChat(){
-    if (!supabaseChat) return;
-    await cargarOperarios();
-    await cargarMensajesInicial();
-
-    // Suscripción en tiempo real
-    supabaseChat
-      .channel("chat_mensajes_changes")
-      .on("postgres_changes",
-        { event:"INSERT", schema:"public", table:"chat_mensajes" },
-        payload => {
-          chatMessages.push(payload.new);
-          renderChatMessages();
-        }
-      )
-      .on("postgres_changes",
-        { event:"UPDATE", schema:"public", table:"chat_mensajes" },
-        payload => {
-          const idx = chatMessages.findIndex(m => m.id === payload.new.id);
-          if (idx >= 0){
-            chatMessages[idx] = payload.new;
-          } else {
-            chatMessages.push(payload.new);
-          }
-          renderChatMessages();
-        }
-      )
-      .subscribe();
-  }
-
-  initChat();
+  // Llamada inicial + refresco cada 20 s
+  actualizarBadgeImportantes();
+  setInterval(actualizarBadgeImportantes, 20000);
 </script>
+
 
 </body>
 </html
