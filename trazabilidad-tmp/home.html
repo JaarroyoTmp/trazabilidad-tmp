@@ -14,7 +14,6 @@
       --border:#30363d;
       --card-bg:#1c2431;
       --hover:#263041;
-      /* Color principal: verde */
       --accent:#22c55e;
       --danger:#ef4444;
       --warning:#f59e0b;
@@ -71,36 +70,18 @@
       gap:18px;
     }
 
-    /* Bloques superiores: KPIs + alertas ocupan todo el ancho */
+    /* ======================= KPIs ======================= */
+
     .kpi-section,
     .alerts-section{
       grid-column:1 / -1;
       background:var(--panel);
       border:1px solid var(--border);
       border-radius:18px;
-      padding:18px 18px 16px;
+      padding:18px;
       box-shadow:0 16px 40px rgba(0,0,0,.4);
       position:relative;
       overflow:hidden;
-    }
-
-    .kpi-section::before,
-    .alerts-section::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius:inherit;
-      background:conic-gradient(
-        from 140deg,
-        rgba(34,197,94,.7),
-        transparent 40%,
-        transparent 60%,
-        rgba(34,197,94,.6),
-        rgba(34,197,94,.7)
-      );
-      opacity:0.12;
-      pointer-events:none;
-      mix-blend-mode:screen;
     }
 
     .section-title{
@@ -114,10 +95,9 @@
     .muted{
       font-size:13px;
       color:var(--muted);
-      margin:0 0 12px;
+      margin-bottom:12px;
     }
 
-    /* KPIs */
     .kpi-grid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
@@ -135,50 +115,9 @@
       box-shadow:0 10px 24px rgba(0,0,0,.45);
     }
 
-    .kpi-card::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius:inherit;
-      background:conic-gradient(
-        from 200deg,
-        rgba(34,197,94,.9),
-        transparent 45%,
-        transparent 55%,
-        rgba(34,197,94,.7),
-        rgba(34,197,94,.9)
-      );
-      opacity:0;
-      transition:opacity .25s ease;
-      pointer-events:none;
-      mix-blend-mode:screen;
-    }
-
-    .kpi-card::after{
-      content:"";
-      position:absolute;
-      inset:1px;
-      border-radius:inherit;
-      background:radial-gradient(circle at 0 0,#0b1220 0,transparent 55%),
-                 linear-gradient(145deg,#020617,#020617 40%,#020c15);
-      z-index:0;
-    }
-
-    .kpi-card.updated {
-      box-shadow:0 0 24px rgba(34,197,94,.55);
-    }
-    .kpi-card.updated::before{
-      opacity:1;
-    }
-
     .kpi-card:hover{
       transform:translateY(-3px) scale(1.01);
       box-shadow:0 18px 40px rgba(0,0,0,.65);
-    }
-
-    .kpi-card > *{
-      position:relative;
-      z-index:1;
     }
 
     .kpi-label{
@@ -193,84 +132,31 @@
       line-height:1.1;
     }
 
-    .kpi-extra{
-      margin-top:4px;
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    /* ALERTAS RESUMIDAS */
-    .alerts-header{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      margin-bottom:6px;
-      position:relative;
-      z-index:1;
-    }
+    /* ============ ALERTAS ============= */
 
     .alert-summary-grid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
       gap:12px;
-      position:relative;
-      z-index:1;
     }
 
     .alert-summary-card{
-      background:radial-gradient(circle at 0 0,#020617 0,#020617 55%,#020617);
+      background:#020617;
       border-radius:14px;
       border:1px solid var(--border);
-      padding:10px 12px 12px;
+      padding:10px 12px;
+      position:relative;
       display:flex;
       flex-direction:column;
-      gap:6px;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .alert-summary-card::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius:inherit;
-      background:conic-gradient(
-        from 160deg,
-        rgba(239,68,68,.8),
-        transparent 40%,
-        transparent 60%,
-        rgba(245,158,11,.7),
-        rgba(239,68,68,.8)
-      );
-      opacity:0;
-      transition:opacity .25s ease;
-      mix-blend-mode:screen;
-    }
-
-    .alert-summary-card.critical::before{
-      opacity:.35;
-    }
-
-    .alert-summary-card > *{
-      position:relative;
-      z-index:1;
-    }
-
-    .alert-title-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
       gap:6px;
     }
 
     .alert-title-main{
+      font-size:15px;
+      font-weight:600;
       display:flex;
       align-items:center;
       gap:6px;
-      font-size:15px;
-      font-weight:600;
     }
 
     .badge{
@@ -278,173 +164,27 @@
       padding:3px 9px;
       border-radius:999px;
       border:1px solid var(--border);
-      color:var(--muted);
-      white-space:nowrap;
-      background:#020617;
     }
 
-    .badge-danger{
-      border-color:var(--danger);
-      color:var(--danger);
-      animation:blink 1.6s infinite;
-    }
-    .badge-warning{
-      border-color:var(--warning);
-      color:var(--warning);
-    }
-    .badge-soft{
-      border-color:var(--accent);
-      color:var(--accent);
-      background:#020617;
-    }
+    /* ===================== TARJETAS ===================== */
 
-    @keyframes blink {
-      0%, 100% { opacity:1; }
-      50% { opacity:.3; }
-    }
-
-    .alert-meta{
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .alert-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-top:4px;
-    }
-
-    .btn{
-      border-radius:999px;
-      font-size:11px;
-      padding:4px 10px;
-      border:1px solid var(--border);
-      background:#020617;
-      color:var(--txt);
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      cursor:pointer;
-      transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
-    }
-    .btn:hover{
-      background:var(--hover);
-      transform:translateY(-1px);
-      box-shadow:0 10px 24px rgba(0,0,0,.4);
-    }
-
-    .btn-primary{
-      border-color:var(--accent);
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-      color:#ecfeff;
-    }
-    .btn-primary:hover{
-      filter:brightness(1.05);
-    }
-
-    .mini-table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:12px;
-      margin-top:4px;
-    }
-
-    .mini-table th,
-    .mini-table td{
-      padding:3px 4px;
-      border-bottom:1px solid var(--border);
-      text-align:left;
-      white-space:nowrap;
-    }
-
-    .mini-table thead{
-      background:#020617;
-    }
-
-    .mini-table tbody tr:nth-child(even){
-      background:#020617;
-    }
-
-    .chip-severity{
-      display:inline-flex;
-      align-items:center;
-      padding:1px 6px;
-      border-radius:999px;
-      font-size:10px;
-      border:1px solid var(--border);
-    }
-    .chip-critical{
-      border-color:var(--danger);
-      color:var(--danger);
-    }
-    .chip-high{
-      border-color:var(--warning);
-      color:var(--warning);
-    }
-    .chip-info{
-      border-color:var(--accent);
-      color:var(--accent);
-    }
-
-    /* Tarjetas de navegación — Estilo C (Pro-Line con borde animado) */
     .card{
       position:relative;
       background:var(--panel);
       border-radius:18px;
       border:1px solid var(--border);
-      padding:18px 18px 16px;
+      padding:18px;
       text-decoration:none;
       color:var(--txt);
       display:flex;
       flex-direction:column;
       gap:6px;
       transition:transform .2s ease, box-shadow .25s ease;
-      overflow:hidden;
-    }
-
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius:inherit;
-      background:conic-gradient(
-        from 180deg,
-        rgba(34,197,94,.9),
-        transparent 35%,
-        transparent 65%,
-        rgba(34,197,94,.8),
-        rgba(34,197,94,.9)
-      );
-      opacity:0;
-      transition:opacity .25s ease;
-      mix-blend-mode:screen;
-      pointer-events:none;
-    }
-
-    .card::after{
-      content:"";
-      position:absolute;
-      inset:1px;
-      border-radius:inherit;
-      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
-                 linear-gradient(135deg,#020617,#020617 40%,#020c1a);
-      z-index:0;
-    }
-
-    .card > *{
-      position:relative;
-      z-index:1;
     }
 
     .card:hover{
       transform:translateY(-4px) scale(1.01);
       box-shadow:0 18px 40px rgba(0,0,0,.7);
-    }
-
-    .card:hover::before{
-      opacity:1;
     }
 
     .card-title{
@@ -456,690 +196,209 @@
       gap:8px;
     }
 
-    .card-title-icon{
-      font-size:18px;
-    }
-
     .card-desc{
       font-size:13px;
       color:var(--muted);
-      line-height:1.3;
     }
 
-    footer{
-      grid-column:1 / -1;
-      text-align:center;
-      margin-top:10px;
-      padding-bottom:20px;
-      font-size:13px;
-      color:var(--muted);
+    /* ================ CHAT ================ */
+
+    .chat-fab{
+      position:fixed;
+      right:22px;
+      bottom:22px;
+      width:54px;
+      height:54px;
+      background:#22c55e;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:24px;
+      color:white;
+      z-index:20;
+      box-shadow:0 8px 24px rgba(0,0,0,.6);
+      transition:transform .2s ease;
     }
 
-    /* DIALOGOS (ver todos) */
-    dialog::backdrop{
-      background:rgba(15,23,42,.85);
+    .chat-fab:hover{
+      transform:scale(1.08);
     }
-    dialog{
-      border:none;
-      border-radius:16px;
-      background:#020617;
-      color:var(--txt);
-      max-width:900px;
-      width:min(96vw,900px);
-      padding:14px 16px 12px;
-      box-shadow:0 24px 60px rgba(0,0,0,.85);
+
+    .chat-fab-badge{
+      position:absolute;
+      top:-6px;
+      right:-6px;
+      background:#ef4444;
+      color:white;
+      font-size:12px;
+      padding:2px 6px;
+      border-radius:999px;
+      display:none;
     }
-    .dialog-header{
+
+    .chat-panel{
+      position:fixed;
+      right:0;
+      bottom:0;
+      width:330px;
+      height:80%;
+      max-height:600px;
+      background:var(--panel);
+      border-left:1px solid var(--border);
+      border-top:1px solid var(--border);
+      transform:translateY(100%);
+      transition:transform .28s ease;
+      z-index:30;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .chat-panel.open{
+      transform:translateY(0);
+    }
+
+    .chat-header{
+      padding:12px;
+      border-bottom:1px solid var(--border);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:8px;
-      margin-bottom:8px;
     }
-    .dialog-title{
+
+    .chat-title{
       font-size:15px;
       font-weight:600;
-    }
-    .dialog-sub{
-      font-size:12px;
-      color:var(--muted);
-    }
-    .dialog-table-wrap{
-      max-height:420px;
-      overflow:auto;
-      border-radius:10px;
-      border:1px solid var(--border);
-    }
-    .dialog-table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:12px;
-    }
-    .dialog-table th,
-    .dialog-table td{
-      padding:5px 6px;
-      border-bottom:1px solid var(--border);
-      white-space:nowrap;
-      text-align:left;
-    }
-    .dialog-table thead{
-      background:#020617;
-      position:sticky;
-      top:0;
-      z-index:1;
+      color:var(--accent);
     }
 
-    .dialog-footer{
-      display:flex;
-      justify-content:flex-end;
-      margin-top:8px;
-      gap:6px;
-      font-size:12px;
+    .chat-subtitle{
+      font-size:11px;
       color:var(--muted);
     }
 
-    /* TOAST / NOTIFICACIÓN SUPERIOR */
-    .toast{
-      position:fixed;
-      top:14px;
-      right:16px;
-      background:#020617;
-      border-radius:999px;
-      border:1px solid var(--border);
-      padding:8px 12px;
-      font-size:12px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      box-shadow:0 8px 24px rgba(0,0,0,.85);
-      z-index:50;
-      opacity:0;
-      transform:translateY(-8px);
-      pointer-events:none;
-      transition:opacity .25s ease, transform .25s ease;
-    }
-    .toast.show{
-      opacity:1;
-      transform:translateY(0);
-      pointer-events:auto;
-    }
-    .toast-icon{
-      font-size:16px;
-    }
-    .toast-msg-main{
-      font-weight:600;
-    }
-    .toast-msg-sub{
-      color:var(--muted);
-    }
-    .toast-close{
+    .chat-close-btn{
+      background:none;
       border:none;
-      background:transparent;
       color:var(--muted);
+      font-size:18px;
       cursor:pointer;
-      font-size:14px;
     }
 
-    @media (max-width:640px){
-      header{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:8px;
-      }
-      .toast{
-        left:10px;
-        right:10px;
-        border-radius:12px;
-      }
+    .chat-messages{
+      flex:1;
+      padding:10px;
+      overflow-y:auto;
+      font-size:13px;
     }
 
-    /* ====== KPI CARDS CLICABLES ====== */
-
-    .kpi-card.kpi-clickable {
-      cursor: pointer;
-      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .kpi-card.kpi-clickable:hover {
-      background: #263041;
-      box-shadow: 0 0 12px rgba(34,197,94,0.35);
-      transform: translateY(-2px);
-    }
-
-    .kpi-card.kpi-clickable:active {
-      transform: scale(0.97);
-    }
-
-    /* ====== ÚLTIMOS MOVIMIENTOS ====== */
-
-    .mov-section{
-      grid-column:1 / -1;
-      background:var(--panel);
+    .chat-message{
+      background:#1c2431;
+      padding:8px 10px;
+      border-radius:10px;
+      margin-bottom:10px;
       border:1px solid var(--border);
-      border-radius:18px;
-      padding:18px;
-      box-shadow:0 16px 40px rgba(0,0,0,.4);
     }
 
-    .mov-header{
+    .chat-message.mine{
+      background:#0f172a;
+      border-color:#22c55e;
+    }
+
+    .chat-message-header{
+      font-size:11px;
+      color:var(--muted);
       display:flex;
       justify-content:space-between;
-      align-items:flex-end;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:6px;
+      margin-bottom:4px;
     }
 
-    .mov-toolbar{
+    .chat-tags{
+      margin-top:4px;
+      font-size:11px;
       display:flex;
-      gap:8px;
       flex-wrap:wrap;
+      gap:4px;
     }
 
-    .mov-toolbar input,
-    .mov-toolbar select{
+    .chat-tag{
+      padding:2px 6px;
+      border-radius:999px;
+      background:#020617;
+      border:1px solid var(--border);
+    }
+
+    .chat-tag-important{
+      border-color:#ef4444;
+      color:#ef4444;
+    }
+
+    .chat-tag-dest{
+      border-color:#22c55e;
+      color:#22c55e;
+    }
+
+    .chat-input-area{
+      border-top:1px solid var(--border);
+      padding:8px;
+    }
+
+    .chat-input-row textarea{
+      width:100%;
       background:#0b1627;
       border:1px solid var(--border);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
+      border-radius:8px;
+      padding:8px;
       color:var(--txt);
-      outline:none;
+      font-size:13px;
+      resize:none;
     }
 
-    .mov-toolbar input:focus,
-    .mov-toolbar select:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 1px rgba(34,197,94,.4);
-    }
-
-    .mov-pagination{
-      margin-top:8px;
+    .chat-input-extra{
+      margin-top:6px;
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap:8px;
+      font-size:12px;
+    }
+
+    .chat-send-btn{
+      background:#22c55e;
+      border:none;
+      padding:6px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      color:#fff;
+      font-weight:600;
+    }
+
+    .chat-status{
       font-size:12px;
       color:var(--muted);
+      margin-top:4px;
+      height:14px;
     }
 
-    .mov-pagination .btn{
-      padding:4px 12px;
-    }
-
-    .mov-row-in{
-      color:var(--accent);
-      font-weight:600;
-    }
-    .mov-row-out{
-      color:var(--danger);
-      font-weight:600;
-    }
-    .mov-row-ok{
-      color:var(--success);
-      font-weight:600;
-    }
-
-    .calib-chip{
-      display:inline-flex;
-      align-items:center;
-      padding:1px 6px;
-      border-radius:999px;
-      font-size:10px;
+    /* PANEL DESTINATARIOS */
+    .chat-dest-panel{
+      display:none;
+      background:#0b1220;
       border:1px solid var(--border);
-    }
-    .calib-ok{
-      border-color:var(--success);
-      color:var(--success);
-    }
-    .calib-warn{
-      border-color:var(--warning);
-      color:var(--warning);
-    }
-    .calib-bad{
-      border-color:var(--danger);
-      color:var(--danger);
+      border-radius:10px;
+      padding:10px;
+      margin-top:8px;
+      max-height:160px;
+      overflow-y:auto;
     }
 
-    @media (max-width:720px){
-      .mov-header{
-        align-items:flex-start;
-      }
-      .mov-toolbar{
-        width:100%;
-        justify-content:flex-start;
-      }
+    .chat-dest-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      margin-bottom:4px;
     }
 
-    /* Operarios: chips */
-    .op-chip {
-      display:inline-block;
-      padding:2px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:600;
-      white-space:nowrap;
-    }
-    .op1 {
-      background:#0ea5e9;   /* azul */
-      color:#ffffff;
-    }
-    .op2 {
-      background:#f97316;   /* naranja */
-      color:#ffffff;
-    }
-</style>
-    
-   <script type="module">
-const supabaseChat = window.supabase;
-
-/* ============================================================
-   USUARIO
-============================================================ */
-let operario = null;
-try { operario = JSON.parse(localStorage.getItem("operario")); } catch {}
-const CHAT_USERNAME = operario?.username || "invitado";
-const CHAT_NOMBRE   = operario?.nombre   || CHAT_USERNAME;
-
-/* ============================================================
-   ELEMENTOS DOM
-============================================================ */
-const chatFab          = document.getElementById("chat-fab");
-const chatFabBadge     = document.getElementById("chat-fab-badge");
-const chatPanel        = document.getElementById("chat-panel");
-const chatCloseBtn     = document.getElementById("chat-close");
-const chatMessagesEl   = document.getElementById("chat-messages");
-const chatInput        = document.getElementById("chat-input");
-const chatSendBtn      = document.getElementById("chat-send");
-const chatImportant    = document.getElementById("chat-important");
-const chatStatus       = document.getElementById("chat-status");
-const chatUserLabel    = document.getElementById("chat-user-label");
-
-const destOpenBtn      = document.getElementById("chat-dest-open");
-const destSummaryEl    = document.getElementById("chat-dest-summary");
-const destPanel        = document.getElementById("chat-dest-panel");
-const destBody         = document.getElementById("chat-dest-body");
-const destCloseBtn     = document.getElementById("chat-dest-close");
-const destApplyBtn     = document.getElementById("chat-dest-apply");
-
-/* ============================================================
-   VARIABLES DE ESTADO
-============================================================ */
-let chatMessages = [];
-let operariosLista = [];
-let mapaOperarios = {};
-let destinatariosSeleccionados = [];   // vacío = TODOS
-
-chatUserLabel.textContent = `${CHAT_NOMBRE} (${CHAT_USERNAME})`;
-
-/* ============================================================
-   UTILIDADES
-============================================================ */
-function normalizeArray(value) {
-  if (!value) return [];
-  if (Array.isArray(value)) return value;
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function formatChatTime(ts){
-  if (!ts) return "";
-  const d = new Date(ts);
-  if (isNaN(d)) return "";
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const hh = String(d.getHours()).padStart(2,"0");
-  const mi = String(d.getMinutes()).padStart(2,"0");
-  return `${dd}/${mm} ${hh}:${mi}`;
-}
-
-/* ============================================================
-   LÓGICA CHAT PANEL
-============================================================ */
-function toggleChatPanel(){
-  if (!chatPanel) return;
-  chatPanel.classList.toggle("open");
-
-  // Al abrir, marcar todos los importantes visibles como leídos automáticamente
-  if (chatPanel.classList.contains("open")) {
-    setTimeout(() => {
-      if (chatMessagesEl)
-        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-    }, 150);
-  }
-}
-
-chatFab?.addEventListener("click", toggleChatPanel);
-chatCloseBtn?.addEventListener("click", toggleChatPanel);
-
-/* ============================================================
-   MENSAJES PARA MÍ
-============================================================ */
-function esParaMi(msg){
-  const user = CHAT_USERNAME;
-
-  // Mis mensajes → siempre visibles
-  if (msg.autor === user) return true;
-
-  // Normalizar destinatarios
-  const destinatarios = normalizeArray(msg.destinatarios);
-
-  // Sin destinatarios → mensaje general
-  if (destinatarios.length === 0) return true;
-
-  // Con destinatarios → solo si estoy incluido
-  return destinatarios.includes(user);
-}
-
-/* ============================================================
-   CONTADOR DE IMPORTANTES NO LEÍDOS
-============================================================ */
-function calcularNoLeidosImportantes(){
-  let count = 0;
-  const user = CHAT_USERNAME;
-
-  for (const msg of chatMessages){
-    if (!msg.importante) continue;
-    if (!esParaMi(msg)) continue;
-
-    const leidos = normalizeArray(msg.leido_por);
-    if (!leidos.includes(user)) count++;
-  }
-
-  if (count > 0){
-    chatFabBadge.textContent = count;
-    chatFabBadge.style.display = "flex";
-    chatFab.classList.add("chat-has-important");
-  } else {
-    chatFabBadge.style.display = "none";
-    chatFab.classList.remove("chat-has-important");
-  }
-}
-
-/* ============================================================
-   PINTAR MENSAJES
-============================================================ */
-function renderChatMessages(){
-  const visibles = chatMessages.filter(esParaMi);
-
-  if (visibles.length === 0){
-    chatMessagesEl.innerHTML = `<div class="chat-empty">Todavía no hay mensajes en el chat.</div>`;
-    calcularNoLeidosImportantes();
-    return;
-  }
-
-  const user = CHAT_USERNAME;
-
-  chatMessagesEl.innerHTML = visibles.map(msg => {
-    const mine = msg.autor === user;
-    const cls = mine ? "chat-message mine" : "chat-message";
-    const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor;
-
-    const leidos = normalizeArray(msg.leido_por);
-    const yaLeido = leidos.includes(user);
-
-    // Tags
-    const tags = [];
-    if (msg.importante)
-      tags.push(`<span class="chat-tag chat-tag-important">IMPORTANTE</span>`);
-
-    const destinatarios = normalizeArray(msg.destinatarios);
-    if (destinatarios.length > 0){
-      const nombres = destinatarios.map(u => mapaOperarios[u]?.nombre || u);
-      tags.push(`<span class="chat-tag chat-tag-dest">Para: ${nombres.join(", ")}</span>`);
-    }
-
-    // Botón “Marcar hecho”
-    let botonHecho = "";
-    if (msg.importante && !mine && !yaLeido){
-      botonHecho = `
-        <button class="chat-done-btn" data-id="${msg.id}">
-          Marcar hecho
-        </button>`;
-    }
-    else if (msg.importante && yaLeido && !mine){
-      tags.push(`<span class="chat-tag">Marcado como hecho</span>`);
-    }
-
-    return `
-      <div class="chat-msg-wrapper">
-        <div class="${cls}">
-          <div class="chat-message-header">
-            <div class="chat-author">${autorNombre}</div>
-            <div class="chat-meta">${formatChatTime(msg.created_at)}</div>
-          </div>
-
-          <div class="chat-text">${(msg.mensaje || "").replace(/</g,"&lt;")}</div>
-
-          <div class="chat-tags">
-            ${tags.join("")}
-            ${botonHecho}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  // Listeners botón “Hecho”
-  document.querySelectorAll(".chat-done-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-id");
-      await marcarMensajeHecho(id);
-    });
-  });
-
-  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-
-  calcularNoLeidosImportantes();
-}
-
-/* ============================================================
-   MARCAR MENSAJE COMO HECHO
-============================================================ */
-async function marcarMensajeHecho(id){
-  const msg = chatMessages.find(m => String(m.id) === String(id));
-  if (!msg) return;
-
-  const user = CHAT_USERNAME;
-  let leidos = normalizeArray(msg.leido_por);
-  if (!leidos.includes(user)) leidos.push(user);
-
-  const { data, error } = await supabaseChat
-    .from("chat_mensajes")
-    .update({ leido_por: leidos })
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error){
-    console.error("Error marcando como hecho:", error);
-    return;
-  }
-
-  Object.assign(msg, data);
-  renderChatMessages();
-}
-
-/* ============================================================
-   DESTINATARIOS
-============================================================ */
-function actualizarResumenDestinatarios(){
-  if (destinatariosSeleccionados.length === 0){
-    destSummaryEl.textContent = "Todos";
-    return;
-  }
-
-  const nombres = destinatariosSeleccionados.map(u => mapaOperarios[u]?.nombre || u);
-  destSummaryEl.textContent = nombres.length <= 2
-    ? nombres.join(", ")
-    : `${nombres[0]}, ${nombres[1]} +${nombres.length - 2}`;
-}
-
-function abrirPanelDestinatarios(){
-  destPanel.style.display = "block";
-}
-function cerrarPanelDestinatarios(){
-  destPanel.style.display = "none";
-}
-
-destOpenBtn.addEventListener("click", abrirPanelDestinatarios);
-destCloseBtn.addEventListener("click", cerrarPanelDestinatarios);
-
-destApplyBtn?.addEventListener("click", () => {
-  const inputs = destBody.querySelectorAll("input[type=checkbox]");
-  let seleccion = [];
-  let todosMarcado = false;
-
-  inputs.forEach(inp => {
-    if (inp.checked){
-      if (inp.value === "__todos__") todosMarcado = true;
-      else seleccion.push(inp.value);
-    }
-  });
-
-  destinatariosSeleccionados = todosMarcado ? [] : seleccion;
-  actualizarResumenDestinatarios();
-  cerrarPanelDestinatarios();
-});
-
-/* ============================================================
-   ENVIAR MENSAJE
-============================================================ */
-async function enviarMensaje(){
-  const texto = chatInput.value.trim();
-  if (!texto) return;
-
-  chatSendBtn.disabled = true;
-  chatStatus.textContent = "Enviando...";
-
-  const destinatarios = destinatariosSeleccionados.length
-    ? destinatariosSeleccionados
-    : null;
-
-  const payload = {
-    autor: CHAT_USERNAME,
-    mensaje: texto,
-    importante: chatImportant.checked,
-    destinatarios
-  };
-
-  const { error } = await supabaseChat
-    .from("chat_mensajes")
-    .insert(payload);
-
-  if (error){
-    console.error("Error enviando mensaje:", error);
-    chatStatus.textContent = "Error enviando.";
-  } else {
-    chatInput.value = "";
-    chatImportant.checked = false;
-    destinatariosSeleccionados = [];
-    actualizarResumenDestinatarios();
-
-    chatStatus.textContent = "Enviado";
-    setTimeout(() => chatStatus.textContent = "", 1500);
-  }
-
-  chatSendBtn.disabled = false;
-}
-
-chatSendBtn.addEventListener("click", enviarMensaje);
-
-chatInput.addEventListener("keydown", e => {
-  if (e.key === "Enter" && e.ctrlKey){
-    e.preventDefault();
-    enviarMensaje();
-  }
-});
-
-/* ============================================================
-   CARGA INICIAL
-============================================================ */
-async function cargarOperarios(){
-  const { data } = await supabaseChat
-    .from("operarios")
-    .select("username, nombre")
-    .order("nombre", { ascending:true });
-
-  operariosLista = data || [];
-  mapaOperarios = {};
-  operariosLista.forEach(op => mapaOperarios[op.username] = op);
-
-  // Rellenar selector
-  destBody.innerHTML = `
-    <label class="chat-dest-item">
-      <input type="checkbox" value="__todos__" checked>
-      <span>Todos</span>
-    </label>
-  `;
-
-  operariosLista.forEach(op => {
-    const item = document.createElement("label");
-    item.className = "chat-dest-item";
-    item.innerHTML = `
-      <input type="checkbox" value="${op.username}">
-      <span>${op.nombre}</span>
-    `;
-    destBody.appendChild(item);
-  });
-
-  actualizarResumenDestinatarios();
-}
-
-async function cargarMensajesInicial(){
-  const { data } = await supabaseChat
-    .from("chat_mensajes")
-    .select("*")
-    .order("created_at", { ascending:true })
-    .limit(300);
-
-  chatMessages = data || [];
-  renderChatMessages();
-}
-
-/* ============================================================
-   SUSCRIPCIÓN EN TIEMPO REAL
-============================================================ */
-function activarRealtime(){
-  supabaseChat
-    .channel("chat_mensajes_changes")
-    .on("postgres_changes",
-      { event:"INSERT", schema:"public", table:"chat_mensajes" },
-      payload => {
-        chatMessages.push(payload.new);
-        renderChatMessages();
-      }
-    )
-    .on("postgres_changes",
-      { event:"UPDATE", schema:"public", table:"chat_mensajes" },
-      payload => {
-        const idx = chatMessages.findIndex(m => m.id === payload.new.id);
-        if (idx >= 0) chatMessages[idx] = payload.new;
-        else chatMessages.push(payload.new);
-        renderChatMessages();
-      }
-    )
-    .subscribe();
-}
-
-/* ============================================================
-   INICIO
-============================================================ */
-(async function init(){
-  if (!supabaseChat){
-    console.error("Supabase no disponible para chat.");
-    return;
-  }
-
-  await cargarOperarios();
-  await cargarMensajesInicial();
-  activarRealtime();
-})();
-</script>
   </style>
 </head>
 <body>
@@ -1218,7 +477,7 @@ function activarRealtime(){
     </div>
   </section>
 
-  <!-- ALERTAS COMPACTAS -->
+  <!-- ALERTAS -->
   <section class="alerts-section">
     <div class="alerts-header">
       <div>
@@ -1260,7 +519,7 @@ function activarRealtime(){
         </div>
       </div>
 
-      <!-- Próximos a calibrar -->
+      <!-- Próximos -->
       <div class="alert-summary-card" id="card-alert-prox">
         <div class="alert-title-row">
           <div class="alert-title-main">
@@ -1298,10 +557,10 @@ function activarRealtime(){
     <div class="mov-header">
       <div>
         <h2 class="section-title">Últimos movimientos</h2>
-        <p class="muted">Entradas, salidas y movimientos recientes. Incluye responsables y operarios asignados.</p>
+        <p class="muted">Entradas, salidas y movimientos recientes. Incluye responsables y operarios.</p>
       </div>
       <div class="mov-toolbar">
-        <input id="mov-search" type="text" placeholder="Buscar por código, destino, responsable u operarios...">
+        <input id="mov-search" type="text" placeholder="Buscar...">
         <select id="mov-tipo">
           <option value="">Todos los tipos</option>
           <option value="Entrada">Entrada</option>
@@ -1341,104 +600,69 @@ function activarRealtime(){
     </div>
   </section>
 
-  <!-- TARJETAS / ACCESOS -->
+  <!-- TARJETAS -->
   <a class="card" href="alta_instrumento.html">
-    <div class="card-title">
-      <span class="card-title-icon">➕</span>
-      <span>Alta / Edición</span>
-    </div>
+    <div class="card-title">➕ Alta / Edición</div>
     <div class="card-desc">Registrar instrumentos, editar fichas, generar QR y gestionar estados.</div>
   </a>
 
   <a class="card" href="movimiento.html">
-    <div class="card-title">
-      <span class="card-title-icon">🔄</span>
-      <span>Movimientos</span>
-    </div>
-    <div class="card-desc">Registrar entradas, salidas, ubicaciones y responsables.</div>
+    <div class="card-title">🔄 Movimientos</div>
+    <div class="card-desc">Registrar entradas, salidas y ubicaciones.</div>
   </a>
 
   <a class="card" href="qr/qr.index.html">
-    <div class="card-title">
-      <span class="card-title-icon">🏷</span>
-      <span>Generar QR</span>
-    </div>
-    <div class="card-desc">Crear códigos QR para identificación rápida y trazabilidad.</div>
+    <div class="card-title">🏷 Generar QR</div>
+    <div class="card-desc">Crear códigos QR para trazabilidad rápida.</div>
   </a>
 
   <a class="card" href="TMP_Calibraciones_Lab.html">
-    <div class="card-title">
-      <span class="card-title-icon">📏</span>
-      <span>Calibraciones Lab</span>
-    </div>
-    <div class="card-desc">Gestión de calibraciones internas del laboratorio TMP.</div>
+    <div class="card-title">📏 Calibraciones Lab</div>
+    <div class="card-desc">Gestión de calibraciones internas.</div>
   </a>
 
   <a class="card" href="App_Patrones_TMP.html">
-    <div class="card-title">
-      <span class="card-title-icon">📐</span>
-      <span>Patrones</span>
-    </div>
-    <div class="card-desc">Inventario y control de patrones del laboratorio.</div>
+    <div class="card-title">📐 Patrones</div>
+    <div class="card-desc">Inventario y control de patrones.</div>
   </a>
 
   <a class="card" href="App_Familias_TMP.html">
-    <div class="card-title">
-      <span class="card-title-icon">🧩</span>
-      <span>Familias</span>
-    </div>
-    <div class="card-desc">Clasificación y agrupación de instrumentos TMP.</div>
+    <div class="card-title">🧩 Familias</div>
+    <div class="card-desc">Clasificación y agrupación de instrumentos.</div>
   </a>
 
   <a class="card" href="criterios.html">
-    <div class="card-title">
-      <span class="card-title-icon">📘</span>
-      <span>Criterios de Aceptación</span>
-    </div>
-    <div class="card-desc">Requisitos metrológicos TMP: aceptación interna y externa. Documento clave para auditorías.</div>
+    <div class="card-title">📘 Criterios de Aceptación</div>
+    <div class="card-desc">Documento clave para auditorías.</div>
   </a>
 
   <a class="card" href="alcance_kpi.html">
-    <div class="card-title">
-      <span class="card-title-icon">📊</span>
-      <span>Alcance Laboratorio & KPIs</span>
-    </div>
-    <div class="card-desc">Magnitudes cubiertas, rangos y panel avanzado de indicadores del laboratorio TMP.</div>
+    <div class="card-title">📊 Alcance Laboratorio & KPIs</div>
+    <div class="card-desc">Magnitudes cubiertas y KPI avanzados.</div>
   </a>
 
   <a class="card" href="buscar_instrumento.html">
     <div class="card-title">🔎 Buscar instrumento</div>
-    <div class="card-desc">Consulta rápida de existencia, estado y datos básicos de cualquier equipo.</div>
+    <div class="card-desc">Consulta de existencia, estado y ficha.</div>
   </a>
 
-<a class="card" href="equipos-referencia-crear.html">
-    <div class="card-title">
-        <span class="card-title-icon">📋</span>
-        <span>Crear tabla de equipos</span>
-    </div>
-    <div class="card-desc">
-        Registrar una nueva referencia con los equipos necesarios para medirla.
-    </div>
-</a>
+  <a class="card" href="equipos-referencia-crear.html">
+    <div class="card-title">📋 Crear tabla de equipos</div>
+    <div class="card-desc">Registrar referencia con los equipos necesarios.</div>
+  </a>
 
-<a class="card" href="equipos-referencia-consulta.html">
-    <div class="card-title">
-        <span class="card-title-icon">🔍</span>
-        <span>Consultar tablas de equipos</span>
-    </div>
-    <div class="card-desc">
-        Buscar una referencia, ver sus equipos definidos y editar versiones anteriores.
-    </div>
-</a>
+  <a class="card" href="equipos-referencia-consulta.html">
+    <div class="card-title">🔍 Consultar tablas de equipos</div>
+    <div class="card-desc">Buscar referencia y ver equipos definidos.</div>
+  </a>
 
-  
   <footer>
     Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2025
   </footer>
 
 </main>
 
-<!-- DIALOGOS: LISTA COMPLETA FUERA / PRÓXIMOS -->
+<!-- DIALOGOS -->
 <dialog id="dialog-fuera">
   <div class="dialog-header">
     <div>
@@ -1461,15 +685,12 @@ function activarRealtime(){
       <tbody id="tbody-fuera-modal"></tbody>
     </table>
   </div>
-  <div class="dialog-footer">
-    <span>Revisa estos equipos con prioridad. Puedes abrir su ficha desde la columna “Ver”.</span>
-  </div>
 </dialog>
 
 <dialog id="dialog-prox">
   <div class="dialog-header">
     <div>
-      <div class="dialog-title">Equipos próximos a calibrar (&lt; 30 días)</div>
+      <div class="dialog-title">Equipos próximos a calibrar (&lt;30 días)</div>
       <div class="dialog-sub" id="dialog-prox-sub">Listado completo de instrumentos cuya calibración vence pronto.</div>
     </div>
     <button class="btn" id="dialog-prox-cerrar">Cerrar</button>
@@ -1488,12 +709,9 @@ function activarRealtime(){
       <tbody id="tbody-prox-modal"></tbody>
     </table>
   </div>
-  <div class="dialog-footer">
-    <span>Úsalos para planificar el trabajo del laboratorio y evitar acumulaciones.</span>
-  </div>
 </dialog>
 
-<!-- ================= CHAT FLOTANTE: BOTÓN + PANEL ================ -->
+<!-- CHAT -->
 <div id="chat-fab" class="chat-fab">
   <span class="chat-fab-icon">💬</span>
   <span id="chat-fab-badge" class="chat-fab-badge" style="display:none;">0</span>
@@ -1510,18 +728,19 @@ function activarRealtime(){
     <button id="chat-close" class="chat-close-btn">✕</button>
   </div>
 
-  <div id="chat-messages">
+  <div id="chat-messages" class="chat-messages">
     <div class="chat-empty">Todavía no hay mensajes en el chat.</div>
   </div>
 
   <div class="chat-input-area">
     <div class="chat-input-row">
-      <textarea id="chat-input" rows="2" placeholder="Escribe un mensaje (Enter = salto, Ctrl+Enter = enviar)"></textarea>
+      <textarea id="chat-input" rows="2" placeholder="Escribe un mensaje..."></textarea>
     </div>
+
     <div class="chat-input-extra">
       <label class="chat-important-label">
         <input type="checkbox" id="chat-important">
-        <span>Marcar como <span class="chat-important-word">IMPORTANTE</span></span>
+        <span>IMPORTANTE</span>
       </label>
 
       <div class="chat-to-label">
@@ -1533,17 +752,15 @@ function activarRealtime(){
 
       <button id="chat-send" class="chat-send-btn">Enviar</button>
     </div>
+
     <div id="chat-status" class="chat-status"></div>
 
-    <!-- Panel de selección de destinatarios -->
     <div id="chat-dest-panel" class="chat-dest-panel">
       <div class="chat-dest-header">
         <div class="chat-dest-title">Seleccionar destinatarios</div>
         <button type="button" id="chat-dest-close" class="chat-dest-close">✕</button>
       </div>
-      <div id="chat-dest-body" class="chat-dest-body">
-        <!-- Se rellena por JS -->
-      </div>
+      <div id="chat-dest-body"></div>
       <div class="chat-dest-footer">
         <button type="button" id="chat-dest-apply" class="chat-send-btn">Aplicar</button>
       </div>
@@ -1551,7 +768,6 @@ function activarRealtime(){
 
   </div>
 </div>
-
 <!-- CARGAR SUPABASE -->
 <script type="module" src="config.mjs"></script>
 
@@ -1559,7 +775,9 @@ function activarRealtime(){
 <script type="module">
   const supabase = window.supabase;
 
-  // Helpers DOM
+  /* ============================================================
+     HELPERS DOM
+  ============================================================ */
   const kpi_total          = document.getElementById("kpi-total");
   const kpi_uso            = document.getElementById("kpi-uso");
   const kpi_lab            = document.getElementById("kpi-lab");
@@ -1574,15 +792,7 @@ function activarRealtime(){
   const kpi_proximos_extra   = document.getElementById("kpi-proximos-extra");
   const kpi_fuera_extra      = document.getElementById("kpi-fuera-extra");
 
-  const kpi_card_total = document.getElementById("kpi-card-total");
-  const kpi_card_uso   = document.getElementById("kpi-card-uso");
-  const kpi_card_lab   = document.getElementById("kpi-card-lab");
-  const kpi_card_cal   = document.getElementById("kpi-card-cal");
-  const kpi_card_prox  = document.getElementById("kpi-card-prox");
-  const kpi_card_fuera = document.getElementById("kpi-card-fuera");
-
   const badgeResumenGlobal = document.getElementById("badge-resumen-global");
-
   const badge_fuera_count = document.getElementById("badge-fuera-count");
   const badge_prox_count  = document.getElementById("badge-prox-count");
 
@@ -1599,17 +809,14 @@ function activarRealtime(){
 
   const dlgFuera = document.getElementById("dialog-fuera");
   const dlgProx  = document.getElementById("dialog-prox");
+
   const dlgFueraCerrar = document.getElementById("dialog-fuera-cerrar");
   const dlgProxCerrar  = document.getElementById("dialog-prox-cerrar");
+
   const tbody_fuera_modal = document.getElementById("tbody-fuera-modal");
   const tbody_prox_modal  = document.getElementById("tbody-prox-modal");
 
-  const toast      = document.getElementById("toast");
-  const toastMain  = document.getElementById("toast-main");
-  const toastSub   = document.getElementById("toast-sub");
-  const toastClose = document.getElementById("toast-close");
-
-  // MOVIMIENTOS DOM
+  // MOVIMIENTOS
   const tbodyMov       = document.getElementById("tbody-movimientos");
   const movSearch      = document.getElementById("mov-search");
   const movTipoSelect  = document.getElementById("mov-tipo");
@@ -1621,10 +828,13 @@ function activarRealtime(){
   const MOV_POR_PAG = 8;
   let movPaginaActual = 1;
 
-  // Utilidades
+  /* ============================================================
+      UTILIDADES
+  ============================================================ */
+
   function parseDate(str) {
     if (!str) return null;
-    const norm = String(str).replace(/_/g, "-"); // soporta YYYY_MM_DD
+    const norm = String(str).replace(/_/g, "-");
     const d = new Date(norm);
     return isNaN(d) ? null : d;
   }
@@ -1642,59 +852,37 @@ function activarRealtime(){
     return Math.floor((a - b)/MS);
   }
 
-  function animateCard(el){
-    if (!el) return;
-    el.classList.add("updated");
-    setTimeout(()=>el.classList.remove("updated"), 900);
-  }
-
   function pct(part, total){
     if (!total) return "0%";
     return `${Math.round((part/total)*100)}%`;
   }
 
-  function severityChip(days, mode){
-    // mode: "vencido" (negativo) o "futuro"
-    let cls = "chip-severity chip-info";
-    let txt = "Info";
+  function estadoCalibracion(inst){
+    const hoy = new Date();
+    const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
 
-    if (mode === "vencido"){
-      if (days > 60){ cls = "chip-severity chip-critical"; txt = "CRÍTICO"; }
-      else if (days > 30){ cls = "chip-severity chip-high"; txt = "ALTA"; }
-      else { cls = "chip-severity chip-info"; txt = "MEDIA"; }
-    } else {
-      if (days <= 7){ cls = "chip-severity chip-high"; txt = "ALTA"; }
-      else if (days <= 15){ cls = "chip-severity chip-info"; txt = "MEDIA"; }
-      else { cls = "chip-severity chip-info"; txt = "BAJA"; }
-    }
-    return `<span class="${cls}">${txt}</span>`;
+    if (!prox) return {estado:"SIN FECHA", clase:"calib-warn"};
+
+    if (prox < hoy) return {estado:"FUERA", clase:"calib-bad"};
+
+    const mas30 = new Date(hoy.getTime() + 30*86400000);
+    if (prox <= mas30) return {estado:"PRÓXIMA", clase:"calib-warn"};
+
+    return {estado:"OK", clase:"calib-ok"};
   }
 
-  function showToast(main, sub){
-    toastMain.textContent = main;
-    toastSub.textContent  = sub;
-    toast.classList.add("show");
-    setTimeout(()=>toast.classList.remove("show"), 10000);
-  }
-
-  toastClose.addEventListener("click", () => {
-    toast.classList.remove("show");
-  });
-
-  // LÓGICA PRINCIPAL DASHBOARD
-  async function cargarDashboard() {
-    if (!supabase) {
-      console.error("Supabase no disponible en home.html");
-      return;
-    }
+  /* ============================================================
+      CARGA DEL DASHBOARD
+  ============================================================ */
+  async function cargarDashboard(){
+    if (!supabase) return;
 
     const { data: instrumentos, error } = await supabase
       .from("instrumentos")
-      // usamos las dos columnas para compatibilidad
       .select("codigo, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
 
-    if (error) {
-      console.error("Error cargando instrumentos en home:", error);
+    if (error){
+      console.error("Error cargando instrumentos:", error);
       return;
     }
 
@@ -1704,32 +892,24 @@ function activarRealtime(){
 
     let enLab = 0;
     let enUso = 0;
+    let calibrados = 0;
 
-    let calibrados = 0;  // equipos EN VIGOR (no vencidos)
     const fueraLista = [];
-    const proxLista  = [];
+    const proxLista = [];
 
     instrumentos.forEach(inst => {
-      // Ubicación
       const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
       if (ubic === "laboratorio") enLab++;
       else enUso++;
 
-      // Fecha próxima (nueva + vieja columna)
       const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
 
       if (prox) {
-        if (prox < hoy) {
-          // Fuera de calibración
+        if (prox < hoy){
           fueraLista.push(inst);
         } else {
-          // EN VIGOR (calibrado)
           calibrados++;
-
-          // Además, si está dentro de los próximos 30 días → próximos
-          if (prox <= mas30) {
-            proxLista.push(inst);
-          }
+          if (prox <= mas30) proxLista.push(inst);
         }
       }
     });
@@ -1742,174 +922,113 @@ function activarRealtime(){
     kpi_proximos.textContent   = proxLista.length;
     kpi_fuera.textContent      = fueraLista.length;
 
-    kpi_total_extra.textContent      = "";
     kpi_uso_extra.textContent        = total ? `${pct(enUso,total)} del total` : "";
     kpi_lab_extra.textContent        = total ? `${pct(enLab,total)} del total` : "";
     kpi_calibrados_extra.textContent = total ? `${pct(calibrados,total)} en vigor` : "";
     kpi_proximos_extra.textContent   = total ? `${pct(proxLista.length,total)} del total` : "";
     kpi_fuera_extra.textContent      = total ? `${pct(fueraLista.length,total)} del total` : "";
 
-    animateCard(kpi_card_total);
-    animateCard(kpi_card_uso);
-    animateCard(kpi_card_lab);
-    animateCard(kpi_card_cal);
-    animateCard(kpi_card_prox);
-    animateCard(kpi_card_fuera);
-
-    // Tarjetas de alerta para dar glow cuando hay crisis
-    const cardAlertFuera = document.getElementById("card-alert-fuera");
-    const cardAlertProx  = document.getElementById("card-alert-prox");
-    cardAlertFuera.classList.remove("critical");
-    cardAlertProx.classList.remove("critical");
-
-    // Resumen global de alertas
-    const totalAlertas = fueraLista.length + proxLista.length;
-    if (fueraLista.length > 0) {
-      badgeResumenGlobal.textContent = `⚠ ${totalAlertas} equipos requieren atención (prioridad fuera de calibración)`;
-      badgeResumenGlobal.classList.remove("badge-soft");
-      badgeResumenGlobal.classList.add("badge-danger");
-      cardAlertFuera.classList.add("critical");
-      showToast(
-        "Equipos fuera de calibración",
-        `Tienes ${fueraLista.length} equipos vencidos y ${proxLista.length} próximos.`
-      );
-    } else if (proxLista.length > 0) {
-      badgeResumenGlobal.textContent = `⏳ ${proxLista.length} equipos próximos a calibrar (<30 días)`;
-      badgeResumenGlobal.classList.remove("badge-soft");
-      badgeResumenGlobal.classList.add("badge-warning");
-      cardAlertProx.classList.add("critical");
-    } else {
-      badgeResumenGlobal.textContent = "Sin equipos vencidos ni próximos en 30 días";
-      badgeResumenGlobal.classList.add("badge-soft");
-    }
-
-    // ---- FUERA: TOP + MODAL ----
+    /* ------- ALERTAS -------- */
     badge_fuera_count.textContent = fueraLista.length;
-    if (fueraLista.length === 0) {
-      meta_fuera.textContent = "No hay instrumentos fuera de calibración. Mantén esta situación bajo control.";
+    badge_prox_count.textContent  = proxLista.length;
+
+    // Fuera de calibración
+    if (fueraLista.length === 0){
+      meta_fuera.textContent = "No hay instrumentos fuera de calibración.";
       table_fuera_top.style.display = "none";
       btn_fuera_ver_todos.style.display = "none";
       tbody_fuera_modal.innerHTML = "";
     } else {
-      // Ordenar por más vencidos primero
-      const ordenados = [...fueraLista].sort((a,b) => {
+      const orden = [...fueraLista].sort((a,b)=>{
         const da = parseDate(a.fecha_proxima_calibracion) || parseDate(a.proxima_calibracion);
         const db = parseDate(b.fecha_proxima_calibracion) || parseDate(b.proxima_calibracion);
-        return da - db; // más antiguo (más vencido) primero
+        return da - db;
       });
 
-      const MAX_TOP = 3;
-      const top = ordenados.slice(0, MAX_TOP);
+      const top = orden.slice(0,3);
 
-      meta_fuera.textContent = `${fueraLista.length} equipos vencidos. Mostrando los ${top.length} más críticos (más días de retraso).`;
+      meta_fuera.textContent = `${fueraLista.length} equipos vencidos.`;
       table_fuera_top.style.display = "table";
       btn_fuera_ver_todos.style.display = "inline-flex";
 
-      tbody_fuera_top.innerHTML = top.map(inst => {
-        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        const dias = dProx ? daysBetween(hoy, dProx) : 0; // días vencidos (>0)
+      tbody_fuera_top.innerHTML = top.map(inst=>{
+        const dp = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        const dias = dp ? daysBetween(hoy, dp) : 0;
         return `
           <tr>
-            <td>${inst.codigo || ""}</td>
-            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${inst.codigo}</td>
+            <td>${inst.ubicacion_actual}</td>
             <td>${dias}</td>
-            <td>${severityChip(dias,"vencido")}</td>
-          </tr>
-        `;
+            <td><span class="chip-severity chip-critical">CRÍTICO</span></td>
+          </tr>`;
       }).join("");
 
-      // Modal completo
-      tbody_fuera_modal.innerHTML = ordenados.map(inst => {
-        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        const dias = dProx ? daysBetween(hoy, dProx) : 0;
+      tbody_fuera_modal.innerHTML = orden.map(inst=>{
+        const dp = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        const dias = dp ? daysBetween(hoy, dp) : 0;
         return `
           <tr>
-            <td>${inst.codigo || ""}</td>
-            <td>${inst.ubicacion_actual || ""}</td>
-            <td>${formatDate(dProx)}</td>
+            <td>${inst.codigo}</td>
+            <td>${inst.ubicacion_actual}</td>
+            <td>${formatDate(dp)}</td>
             <td>${dias}</td>
-            <td>
-              <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || "")}">
-                Ver ficha
-              </a>
-            </td>
-          </tr>
-        `;
+            <td><a class="btn" href="alta_instrumento.html?codigo=${inst.codigo}">Ver ficha</a></td>
+          </tr>`;
       }).join("");
     }
 
-    // ---- PRÓXIMOS: TOP + MODAL ----
-    badge_prox_count.textContent = proxLista.length;
-    if (proxLista.length === 0) {
-      meta_prox.textContent = "No hay instrumentos cuya calibración venza en los próximos 30 días.";
+    // Próximos 30 días
+    if (proxLista.length === 0){
+      meta_prox.textContent = "No hay instrumentos próximos.";
       table_prox_top.style.display = "none";
       btn_prox_ver_todos.style.display = "none";
       tbody_prox_modal.innerHTML = "";
     } else {
-      const ordenadosProx = [...proxLista].sort((a,b) => {
+      const orden = [...proxLista].sort((a,b)=>{
         const da = parseDate(a.fecha_proxima_calibracion) || parseDate(a.proxima_calibracion);
         const db = parseDate(b.fecha_proxima_calibracion) || parseDate(b.proxima_calibracion);
-        return da - db; // más cercano primero
+        return da - db;
       });
 
-      const MAX_TOP = 3;
-      const topProx = ordenadosProx.slice(0, MAX_TOP);
+      const top = orden.slice(0,3);
 
-      meta_prox.textContent = `${proxLista.length} equipos con calibración próxima. Mostrando los ${topProx.length} más urgentes.`;
+      meta_prox.textContent = `${proxLista.length} equipos próximos.`;
       table_prox_top.style.display = "table";
       btn_prox_ver_todos.style.display = "inline-flex";
 
-      tbody_prox_top.innerHTML = topProx.map(inst => {
-        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        // días que faltan = prox - hoy (>0)
-        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0;
+      tbody_prox_top.innerHTML = top.map(inst=>{
+        const dp = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        const dias = dp ? daysBetween(dp, hoy) * -1 : 0;
         return `
           <tr>
-            <td>${inst.codigo || ""}</td>
-            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${inst.codigo}</td>
+            <td>${inst.ubicacion_actual}</td>
             <td>${dias}</td>
-            <td>${severityChip(dias,"futuro")}</td>
-          </tr>
-        `;
+            <td><span class="chip-severity chip-info">INFO</span></td>
+          </tr>`;
       }).join("");
 
-      // Modal completo
-      tbody_prox_modal.innerHTML = ordenadosProx.map(inst => {
-        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0;
+      tbody_prox_modal.innerHTML = orden.map(inst=>{
+        const dp = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        const dias = dp ? daysBetween(dp, hoy) * -1 : 0;
         return `
           <tr>
-            <td>${inst.codigo || ""}</td>
-            <td>${inst.ubicacion_actual || ""}</td>
-            <td>${formatDate(dProx)}</td>
+            <td>${inst.codigo}</td>
+            <td>${inst.ubicacion_actual}</td>
+            <td>${formatDate(dp)}</td>
             <td>${dias}</td>
-            <td>
-              <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || "")}">
-                Ver ficha
-              </a>
-            </td>
-          </tr>
-        `;
+            <td><a class="btn" href="alta_instrumento.html?codigo=${inst.codigo}">Ver ficha</a></td>
+          </tr>`;
       }).join("");
     }
+
   }
 
-  // ====== LÓGICA ÚLTIMOS MOVIMIENTOS ======
+  /* ============================================================
+      MOVIMIENTOS
+  ============================================================ */
 
-  function estadoCalibracionFromInstrumento(inst){
-    const hoy = new Date();
-    const prox = parseDate(inst?.fecha_proxima_calibracion) || parseDate(inst?.proxima_calibracion);
-    if (!prox) return {estado:"SIN FECHA", clase:"calib-warn"};
-
-    if (prox < hoy) return {estado:"FUERA", clase:"calib-bad"};
-
-    const mas30 = new Date(hoy.getTime() + 30*86400000);
-    if (prox <= mas30) return {estado:"PRÓXIMA", clase:"calib-warn"};
-
-    return {estado:"OK", clase:"calib-ok"};
-  }
-
-  function aplicarFiltrosMovimientos(){
+  function aplicarFiltrosMov(){
     const q = (movSearch.value || "").toLowerCase();
     const tipo = movTipoSelect.value;
 
@@ -1926,136 +1045,106 @@ function activarRealtime(){
 
         if (!hay) return false;
       }
+
       return true;
     });
   }
 
   function renderMovimientos(){
-    const filtrados = aplicarFiltrosMovimientos();
+    const filtrados = aplicarFiltrosMov();
     const total = filtrados.length;
 
     if (total === 0){
-      tbodyMov.innerHTML = `<tr><td colspan="9">No hay movimientos que coincidan con el filtro.</td></tr>`;
+      tbodyMov.innerHTML = `<tr><td colspan="9">No hay movimientos coincidentes.</td></tr>`;
       movPageInfo.textContent = "0 de 0";
       movPrevBtn.disabled = true;
       movNextBtn.disabled = true;
       return;
     }
 
-    const totalPaginas = Math.max(1, Math.ceil(total / MOV_POR_PAG));
-    if (movPaginaActual > totalPaginas) movPaginaActual = totalPaginas;
+    const totalPag = Math.max(1, Math.ceil(total / MOV_POR_PAG));
+    if (movPaginaActual > totalPag) movPaginaActual = totalPag;
     if (movPaginaActual < 1) movPaginaActual = 1;
 
-    const inicio = (movPaginaActual - 1) * MOV_POR_PAG;
-    const fin    = inicio + MOV_POR_PAG;
-    const pageItems = filtrados.slice(inicio, fin);
+    const ini = (movPaginaActual - 1) * MOV_POR_PAG;
+    const fin = ini + MOV_POR_PAG;
 
-    tbodyMov.innerHTML = pageItems.map(mov => {
+    const page = filtrados.slice(ini, fin);
 
+    tbodyMov.innerHTML = page.map(mov=>{
       const fecha = mov.fecha ? new Date(mov.fecha) : null;
       const fechaTxt = fecha
-        ? fecha.toLocaleString("es-ES", { dateStyle:"short", timeStyle:"short" })
+        ? fecha.toLocaleString("es-ES",{dateStyle:"short", timeStyle:"short"})
         : "—";
 
+      const estado = mov.estadoCal || {estado:"", clase:""};
+
       let icon = "✚";
-      let claseTipo = "mov-row-ok";
+      let tipoClase = "mov-row-ok";
 
-      if (mov.tipo_movimiento === "Entrada"){ icon = "⬅"; claseTipo = "mov-row-in"; }
-      else if (mov.tipo_movimiento === "Salida"){ icon = "➡"; claseTipo = "mov-row-out"; }
-      else if (mov.tipo_movimiento === "Préstamo externo"){ icon = "🔁"; }
-      else if (mov.tipo_movimiento === "Revisión / reparación"){ icon = "🛠"; }
-      else if (mov.tipo_movimiento === "Envío a calibración externa"){ icon = "📦"; }
+      if (mov.tipo_movimiento === "Entrada"){ icon="⬅"; tipoClase="mov-row-in"; }
+      if (mov.tipo_movimiento === "Salida"){ icon="➡"; tipoClase="mov-row-out"; }
+      if (mov.tipo_movimiento === "Préstamo externo"){ icon="🔁"; }
+      if (mov.tipo_movimiento === "Revisión / reparación"){ icon="🛠"; }
+      if (mov.tipo_movimiento === "Envío a calibración externa"){ icon="📦"; }
 
-      const estadoCal = mov.estadoCal || {estado:"", clase:""};
-      const chip = estadoCal.estado
-        ? `<span class="calib-chip ${estadoCal.clase}">${estadoCal.estado}</span>`
-        : "";
-
-      // Operarios SOLO visibles si es salida
-      let op1 = "";
-      let op2 = "";
-
-      if (mov.tipo_movimiento === "Salida") {
-        if (mov.operario1)
-          op1 = `<span class="op-chip op1">${mov.operario1}</span>`;
-        if (mov.operario2)
-          op2 = `<span class="op-chip op2">${mov.operario2}</span>`;
+      let op1="", op2="";
+      if (mov.tipo_movimiento === "Salida"){
+        if (mov.operario1) op1 = `<span class="op-chip op1">${mov.operario1}</span>`;
+        if (mov.operario2) op2 = `<span class="op-chip op2">${mov.operario2}</span>`;
       }
 
       return `
         <tr>
           <td>${fechaTxt}</td>
           <td>${mov.codigo_instrumento || ""}</td>
-          <td class="${claseTipo}">${icon} ${mov.tipo_movimiento}</td>
+          <td class="${tipoClase}">${icon} ${mov.tipo_movimiento}</td>
           <td>${op1 || "-"}</td>
           <td>${op2 || "-"}</td>
           <td>${mov.destino || "-"}</td>
           <td>${mov.responsable || "-"}</td>
-          <td>${chip}</td>
-          <td>
-            <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
-              Ver ficha
-            </a>
-          </td>
+          <td>${estado.estado ? `<span class="calib-chip ${estado.clase}">${estado.estado}</span>` : ""}</td>
+          <td><a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${mov.codigo_instrumento}">Ver ficha</a></td>
         </tr>
       `;
     }).join("");
 
-    movPageInfo.textContent = `Página ${movPaginaActual} de ${totalPaginas} · ${total} movimientos`;
+    movPageInfo.textContent = `Página ${movPaginaActual} de ${totalPag} · ${total}`;
     movPrevBtn.disabled = movPaginaActual <= 1;
-    movNextBtn.disabled = movPaginaActual >= totalPaginas;
+    movNextBtn.disabled = movPaginaActual >= totalPag;
   }
 
   async function cargarMovimientos(){
-    if (!supabase){
-      console.error("Supabase no disponible en home.html para movimientos");
-      return;
-    }
-
-    // Últimos 120 movimientos, ahora con operario1 y operario2
-    const { data: movs, error: errMov } = await supabase
+    const { data: movs, error } = await supabase
       .from("movimientos")
       .select("fecha, codigo_instrumento, tipo_movimiento, destino, responsable, operario1, operario2")
-      .order("fecha", { ascending:false })
+      .order("fecha",{ascending:false})
       .limit(120);
 
-    if (errMov){
-      console.error("Error cargando movimientos:", errMov);
+    if (error){
       tbodyMov.innerHTML = `<tr><td colspan="9">Error al cargar movimientos.</td></tr>`;
       return;
     }
 
-    if (!movs || movs.length === 0){
-      tbodyMov.innerHTML = `<tr><td colspan="9">Todavía no hay movimientos registrados.</td></tr>`;
-      movPageInfo.textContent = "0 de 0";
-      movPrevBtn.disabled = true;
-      movNextBtn.disabled = true;
-      return;
-    }
-
-    // Traer estado de calibración de los instrumentos implicados
-    const codigos = Array.from(new Set(movs.map(m => m.codigo_instrumento).filter(Boolean)));
+    const codigos = [...new Set(movs.map(m=>m.codigo_instrumento).filter(Boolean))];
 
     let mapaInst = {};
     if (codigos.length > 0){
-      const { data: insts, error: errInst } = await supabase
+      const {data: insts, error:err2} = await supabase
         .from("instrumentos")
         .select("codigo, fecha_proxima_calibracion, proxima_calibracion")
         .in("codigo", codigos);
 
-      if (!errInst && insts){
-        insts.forEach(inst => {
-          mapaInst[inst.codigo] = inst;
-        });
+      if (!err2){
+        insts.forEach(inst => mapaInst[inst.codigo]=inst);
       }
     }
 
-    cacheMovimientos = movs.map(m => {
+    cacheMovimientos = movs.map(m=>{
       const inst = mapaInst[m.codigo_instrumento];
-      const estadoCal = inst ? estadoCalibracionFromInstrumento(inst) : {estado:"", clase:""};
       return {
         ...m,
-        estadoCal
+        estadoCal: inst ? estadoCalibracion(inst) : {estado:"", clase:""}
       };
     });
 
@@ -2063,494 +1152,377 @@ function activarRealtime(){
     renderMovimientos();
   }
 
-  // Eventos diálogos
-  btn_fuera_ver_todos.addEventListener("click", () => dlgFuera.showModal());
-  btn_prox_ver_todos.addEventListener("click", () => dlgProx.showModal());
-  dlgFueraCerrar.addEventListener("click", () => dlgFuera.close());
-  dlgProxCerrar.addEventListener("click", () => dlgProx.close());
+  /* ============================================================
+      EVENTOS
+  ============================================================ */
 
-  // Eventos filtros movimientos
-  movSearch.addEventListener("input", () => {
-    movPaginaActual = 1;
-    renderMovimientos();
-  });
+  btn_fuera_ver_todos.addEventListener("click",()=>dlgFuera.showModal());
+  btn_prox_ver_todos .addEventListener("click",()=>dlgProx.showModal());
+  dlgFueraCerrar.addEventListener("click",()=>dlgFuera.close());
+  dlgProxCerrar .addEventListener("click",()=>dlgProx.close());
 
-  movTipoSelect.addEventListener("change", () => {
-    movPaginaActual = 1;
-    renderMovimientos();
-  });
+  movSearch.addEventListener("input",()=>{movPaginaActual=1;renderMovimientos();});
+  movTipoSelect.addEventListener("change",()=>{movPaginaActual=1;renderMovimientos();});
 
-  movPrevBtn.addEventListener("click", () => {
-    movPaginaActual--;
-    renderMovimientos();
-  });
+  movPrevBtn.addEventListener("click",()=>{movPaginaActual--;renderMovimientos();});
+  movNextBtn.addEventListener("click",()=>{movPaginaActual++;renderMovimientos();});
 
-  movNextBtn.addEventListener("click", () => {
-    movPaginaActual++;
-    renderMovimientos();
-  });
-
-  // Cargar al inicio + refresco periódico
   cargarDashboard();
   cargarMovimientos();
 
-  setInterval(() => {
+  setInterval(()=>{
     cargarDashboard();
     cargarMovimientos();
   }, 30000);
+
 </script>
 
-<!-- SCRIPT CHAT INTERNO TMP -->
+<!-- SCRIPT CHAT INTERNO TMP (CORREGIDO Y ÚNICO) -->
 <script type="module">
   const supabaseChat = window.supabase;
 
-  if (!supabaseChat) {
-    console.error("Supabase no disponible para el chat.");
-  }
-
-  // Usuario logado desde localStorage (login.html)
   let operario = null;
-  try {
-    operario = JSON.parse(localStorage.getItem("operario"));
-  } catch (e) {
-    operario = null;
-  }
-
+  try { operario = JSON.parse(localStorage.getItem("operario")); } catch {}
   const CHAT_USERNAME = operario?.username || "invitado";
   const CHAT_NOMBRE   = operario?.nombre   || CHAT_USERNAME;
 
-  // Elementos DOM
-  const chatFab          = document.getElementById("chat-fab");
-  const chatFabBadge     = document.getElementById("chat-fab-badge");
-  const chatPanel        = document.getElementById("chat-panel");
-  const chatCloseBtn     = document.getElementById("chat-close");
-  const chatMessagesEl   = document.getElementById("chat-messages");
-  const chatInput        = document.getElementById("chat-input");
-  const chatSendBtn      = document.getElementById("chat-send");
-  const chatImportant    = document.getElementById("chat-important");
-  const chatStatus       = document.getElementById("chat-status");
-  const chatUserLabel    = document.getElementById("chat-user-label");
+  /* ===================== DOM ===================== */
+  const chatFab      = document.getElementById("chat-fab");
+  const chatBadge    = document.getElementById("chat-fab-badge");
+  const chatPanel    = document.getElementById("chat-panel");
+  const chatClose    = document.getElementById("chat-close");
+  const chatMessages = document.getElementById("chat-messages");
+  const chatInput    = document.getElementById("chat-input");
+  const chatSend     = document.getElementById("chat-send");
+  const chatImportant= document.getElementById("chat-important");
+  const chatStatus   = document.getElementById("chat-status");
+  const chatUserLabel= document.getElementById("chat-user-label");
 
-  const destOpenBtn      = document.getElementById("chat-dest-open");
-  const destSummaryEl    = document.getElementById("chat-dest-summary");
-  const destPanel        = document.getElementById("chat-dest-panel");
-  const destBody         = document.getElementById("chat-dest-body");
-  const destCloseBtn     = document.getElementById("chat-dest-close");
-  const destApplyBtn     = document.getElementById("chat-dest-apply");
+  const destOpen     = document.getElementById("chat-dest-open");
+  const destPanel    = document.getElementById("chat-dest-panel");
+  const destBody     = document.getElementById("chat-dest-body");
+  const destClose    = document.getElementById("chat-dest-close");
+  const destApply    = document.getElementById("chat-dest-apply");
+  const destSummary  = document.getElementById("chat-dest-summary");
 
   chatUserLabel.textContent = `${CHAT_NOMBRE} (${CHAT_USERNAME})`;
 
-  let chatMessages = [];
+  /* ===================== ESTADO ===================== */
+  let chatList = [];
   let operariosLista = [];
   let mapaOperarios = {};
-  let destinatariosSeleccionados = []; // [] = TODOS
+  let destinatarios = [];  // vacío = TODOS
 
-  function toggleChatPanel(){
-    if (!chatPanel) return;
-    const abierto = chatPanel.classList.contains("open");
-    if (abierto){
-      chatPanel.classList.remove("open");
-    } else {
-      chatPanel.classList.add("open");
-      // Auto scroll al abrir
-      setTimeout(() => {
-        if (chatMessagesEl) {
-          chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-        }
-      }, 80);
-    }
+  /* ===================== UTILIDADES ===================== */
+
+  function normArray(v){
+    if (!v) return [];
+    if (Array.isArray(v)) return v;
+    try { const p=JSON.parse(v); return Array.isArray(p)?p:[]; } catch { return []; }
   }
 
-  chatFab?.addEventListener("click", toggleChatPanel);
-  chatCloseBtn?.addEventListener("click", toggleChatPanel);
-
-  function formatChatTime(ts){
-    if (!ts) return "";
+  function formatTS(ts){
     const d = new Date(ts);
     if (isNaN(d)) return "";
-    const dd = String(d.getDate()).padStart(2,"0");
-    const mm = String(d.getMonth()+1).padStart(2,"0");
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mi = String(d.getMinutes()).padStart(2,"0");
+    const dd=String(d.getDate()).padStart(2,"0");
+    const mm=String(d.getMonth()+1).padStart(2,"0");
+    const hh=String(d.getHours()).padStart(2,"0");
+    const mi=String(d.getMinutes()).padStart(2,"0");
     return `${dd}/${mm} ${hh}:${mi}`;
   }
 
   function esParaMi(msg){
-    const user = CHAT_USERNAME;
+    if (msg.autor === CHAT_USERNAME) return true;
 
-    // 1. Mis mensajes SIEMPRE se muestran
-    if (msg.autor === user) return true;
+    const dest = normArray(msg.destinatarios);
+    if (dest.length === 0) return true;
 
-    // 2. Obtener destinatarios correctamente
-    let dest = msg.destinatarios;
-
-    // null/undefined/array vacía => mensaje general
-    if (!dest || (Array.isArray(dest) && dest.length === 0)){
-      return true;
-    }
-
-    // 3. Si viene como string en vez de array
-    if (typeof dest === "string"){
-      try {
-        dest = JSON.parse(dest);
-      } catch(e) {
-        dest = [];
-      }
-    }
-
-    // 4. Si ahora es array → comprobamos si incluye al usuario
-    if (Array.isArray(dest)){
-      return dest.includes(user);
-    }
-
-    // 5. Si formato raro → lo tratamos como general
-    return true;
+    return dest.includes(CHAT_USERNAME);
   }
 
-  function calcularNoLeidosImportantes(){
+  function actualizarBadge(){
     let count = 0;
-    const user = CHAT_USERNAME;
-    chatMessages.forEach(msg => {
+    chatList.forEach(msg=>{
       if (!msg.importante) return;
       if (!esParaMi(msg)) return;
-      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
-      if (!leidos.includes(user)) count++;
+
+      const leidos = normArray(msg.leido_por);
+      if (!leidos.includes(CHAT_USERNAME)) count++;
     });
 
-    if (!chatFabBadge) return;
     if (count > 0){
-      chatFabBadge.textContent = count;
-      chatFabBadge.style.display = "flex";
-      chatFab?.classList.add("chat-has-important");
+      chatBadge.textContent = count;
+      chatBadge.style.display="flex";
     } else {
-      chatFabBadge.style.display = "none";
-      chatFab?.classList.remove("chat-has-important");
+      chatBadge.style.display="none";
     }
   }
 
-  function renderChatMessages(){
-    if (!chatMessagesEl) return;
+  /* ===================== RENDER ===================== */
 
-    const visibles = chatMessages.filter(esParaMi);
+  function renderChat(){
+    const visibles = chatList.filter(esParaMi);
 
     if (visibles.length === 0){
-      chatMessagesEl.innerHTML = `<div class="chat-empty">Todavía no hay mensajes en el chat.</div>`;
-      calcularNoLeidosImportantes();
+      chatMessages.innerHTML = `<div class="chat-empty">Todavía no hay mensajes.</div>`;
+      actualizarBadge();
       return;
     }
 
-    const user = CHAT_USERNAME;
+    chatMessages.innerHTML = visibles.map(msg=>{
+      const mine = msg.autor === CHAT_USERNAME;
+      const cls = mine ? "chat-message mine" : "chat-message";
+      const autor = mapaOperarios[msg.autor]?.nombre || msg.autor;
 
-    chatMessagesEl.innerHTML = visibles.map(msg => {
-      const mine = msg.autor === user;
-      const cls  = mine ? "chat-message mine" : "chat-message";
-      const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor;
+      const leidos = normArray(msg.leido_por);
+      const yaLeido = leidos.includes(CHAT_USERNAME);
 
-      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
-      const yaLeido = leidos.includes(user);
+      const dest = normArray(msg.destinatarios);
+      const destLabel = dest.length
+        ? "Para: " + dest.map(u=>mapaOperarios[u]?.nombre||u).join(", ")
+        : "";
 
-      let dest = msg.destinatarios;
-      let destLabel = "Todos";
-      if (dest && dest.length > 0){
-        if (typeof dest === "string"){
-          try { dest = JSON.parse(dest); } catch(e) { dest = []; }
-        }
-        if (Array.isArray(dest) && dest.length > 0){
-          destLabel = dest.map(u => mapaOperarios[u]?.nombre || u).join(", ");
-        }
-      }
-
-      const tags = [];
+      let tags = "";
       if (msg.importante){
-        tags.push(`<span class="chat-tag chat-tag-important">IMPORTANTE</span>`);
+        tags += `<span class="chat-tag chat-tag-important">IMPORTANTE</span>`;
       }
-      if (dest && Array.isArray(dest) && dest.length > 0){
-        tags.push(`<span class="chat-tag chat-tag-dest">Para: ${destLabel}</span>`);
+      if (dest.length){
+        tags += `<span class="chat-tag chat-tag-dest">${destLabel}</span>`;
       }
 
-      let botonHecho = "";
-      if (msg.importante && !yaLeido && !mine){
-        botonHecho = `<button class="chat-done-btn" data-id="${msg.id}">Marcar hecho</button>`;
-      } else if (msg.importante && yaLeido && !mine){
-        tags.push(`<span class="chat-tag">Marcado como hecho</span>`);
+      let btnHecho = "";
+      if (msg.importante && !mine && !yaLeido){
+        btnHecho = `<button class="chat-done-btn" data-id="${msg.id}">Hecho</button>`;
       }
 
       return `
-        <div class="chat-msg-wrapper">
-          <div class="${cls}">
-            <div class="chat-message-header">
-              <div class="chat-author">${autorNombre}</div>
-              <div class="chat-meta">${formatChatTime(msg.created_at)}</div>
-            </div>
-            <div class="chat-text">${(msg.mensaje || "").replace(/</g,"&lt;")}</div>
-            <div class="chat-tags">
-              ${tags.join("")}
-              ${botonHecho}
-            </div>
+        <div class="${cls}">
+          <div class="chat-message-header">
+            <span>${autor}</span>
+            <span>${formatTS(msg.created_at)}</span>
           </div>
+          <div class="chat-text">${(msg.mensaje||"").replace(/</g,"&lt;")}</div>
+          <div class="chat-tags">${tags} ${btnHecho}</div>
         </div>
       `;
     }).join("");
 
-    // Listeners para los botones "Marcar hecho"
-    document.querySelectorAll(".chat-done-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
+    document.querySelectorAll(".chat-done-btn").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
         const id = btn.getAttribute("data-id");
-        await marcarMensajeHecho(id);
+        await marcarHecho(id);
       });
     });
 
-    // Scroll abajo
-    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    calcularNoLeidosImportantes();
+    actualizarBadge();
   }
 
-  async function marcarMensajeHecho(id){
-    if (!id || !supabaseChat) return;
-    const user = CHAT_USERNAME;
-    const msg = chatMessages.find(m => String(m.id) === String(id));
+  async function marcarHecho(id){
+    const msg = chatList.find(m=>String(m.id)===String(id));
     if (!msg) return;
 
-    const leidos = Array.isArray(msg.leido_por) ? [...msg.leido_por] : [];
-    if (leidos.includes(user)) return;
-    leidos.push(user);
+    let leidos = normArray(msg.leido_por);
+    if (!leidos.includes(CHAT_USERNAME)) leidos.push(CHAT_USERNAME);
 
-    const { data, error } = await supabaseChat
+    const {data,error} = await supabaseChat
       .from("chat_mensajes")
-      .update({ leido_por: leidos })
-      .eq("id", id)
+      .update({leido_por:leidos})
+      .eq("id",id)
       .select()
       .single();
 
-    if (error){
-      console.error("Error marcando mensaje como hecho:", error);
+    if (!error){
+      const idx = chatList.findIndex(m=>m.id===data.id);
+      if (idx>=0){
+        chatList[idx]=data;
+        renderChat();
+      }
+    }
+  }
+
+  /* ===================== DESTINATARIOS ===================== */
+
+  function actualizarResumenDest(){
+    if (!destinatarios.length){
+      destSummary.textContent = "Todos";
       return;
     }
-
-    const idx = chatMessages.findIndex(m => m.id === data.id);
-    if (idx >= 0){
-      chatMessages[idx] = data;
-      renderChatMessages();
-    }
+    const n = destinatarios.map(u=>mapaOperarios[u]?.nombre||u);
+    if (n.length<=2) destSummary.textContent = n.join(", ");
+    else destSummary.textContent = `${n[0]}, ${n[1]} +${n.length-2}`;
   }
 
-  function actualizarResumenDestinatarios(){
-    if (!destSummaryEl) return;
-
-    if (!destinatariosSeleccionados || destinatariosSeleccionados.length === 0){
-      destSummaryEl.textContent = "Todos";
-      return;
-    }
-
-    const nombres = destinatariosSeleccionados.map(u => mapaOperarios[u]?.nombre || u);
-    if (nombres.length <= 2){
-      destSummaryEl.textContent = nombres.join(", ");
-    } else {
-      destSummaryEl.textContent = `${nombres[0]}, ${nombres[1]} +${nombres.length - 2}`;
-    }
+  function abrirDest(){
+    destPanel.style.display="block";
+    const checks = destBody.querySelectorAll("input[type=checkbox]");
+    checks.forEach(ch=>{
+      if (destinatarios.length===0){
+        ch.checked = (ch.value==="__todos__");
+      } else {
+        if (ch.value==="__todos__") ch.checked=false;
+        else ch.checked = destinatarios.includes(ch.value);
+      }
+    });
   }
 
-  function abrirPanelDestinatarios(){
-    if (!destPanel) return;
-    destPanel.style.display = "block";
+  function cerrarDest(){ destPanel.style.display="none"; }
 
-    // Sin selección => marcar "Todos"
-    const inputs = destBody?.querySelectorAll("input[type=checkbox]") || [];
-    if (!destinatariosSeleccionados || destinatariosSeleccionados.length === 0){
-      inputs.forEach(inp => {
-        inp.checked = (inp.value === "__todos__");
-      });
-    } else {
-      inputs.forEach(inp => {
-        if (inp.value === "__todos__"){
-          inp.checked = false;
-        } else {
-          inp.checked = destinatariosSeleccionados.includes(inp.value);
-        }
-      });
-    }
-  }
+  destOpen.addEventListener("click", abrirDest);
+  destClose.addEventListener("click", cerrarDest);
 
-  function cerrarPanelDestinatarios(){
-    if (!destPanel) return;
-    destPanel.style.display = "none";
-  }
-
-  destOpenBtn?.addEventListener("click", abrirPanelDestinatarios);
-  destCloseBtn?.addEventListener("click", cerrarPanelDestinatarios);
-  destApplyBtn?.addEventListener("click", () => {
-    if (!destBody) return;
+  destApply.addEventListener("click",()=>{
     const inputs = destBody.querySelectorAll("input[type=checkbox]");
-    let seleccion = [];
-    let todosMarcado = false;
+    let sel = [];
+    let todos=false;
 
-    inputs.forEach(inp => {
+    inputs.forEach(inp=>{
       if (inp.checked){
-        if (inp.value === "__todos__"){
-          todosMarcado = true;
-        } else {
-          seleccion.push(inp.value);
-        }
+        if (inp.value==="__todos__") todos=true;
+        else sel.push(inp.value);
       }
     });
 
-    if (todosMarcado || seleccion.length === 0){
-      destinatariosSeleccionados = [];
-    } else {
-      destinatariosSeleccionados = seleccion;
-    }
+    destinatarios = (todos || sel.length===0) ? [] : sel;
 
-    actualizarResumenDestinatarios();
-    cerrarPanelDestinatarios();
+    actualizarResumenDest();
+    cerrarDest();
   });
 
-  async function cargarOperarios(){
-    if (!supabaseChat) return;
+  /* ===================== ENVIAR MENSAJE ===================== */
 
-    const { data, error } = await supabaseChat
-      .from("operarios")
-      .select("username, nombre, rol")
-      .order("nombre", { ascending:true });
-
-    if (error){
-      console.error("Error cargando operarios para el chat:", error);
-      return;
-    }
-
-    operariosLista = data || [];
-    mapaOperarios = {};
-    operariosLista.forEach(op => {
-      mapaOperarios[op.username] = op;
-    });
-
-    // Rellenar panel de destinatarios
-    if (!destBody) return;
-    destBody.innerHTML = "";
-
-    // Opción "Todos"
-    const labelTodos = document.createElement("label");
-    labelTodos.className = "chat-dest-item";
-    labelTodos.innerHTML = `
-      <input type="checkbox" value="__todos__" checked>
-      <span>Todos</span>
-    `;
-    destBody.appendChild(labelTodos);
-
-    // Operarios
-    operariosLista.forEach(op => {
-      const lab = document.createElement("label");
-      lab.className = "chat-dest-item";
-      lab.innerHTML = `
-        <input type="checkbox" value="${op.username}">
-        <span>${op.nombre || op.username}</span>
-      `;
-      destBody.appendChild(lab);
-    });
-
-    actualizarResumenDestinatarios();
-  }
-
-  async function cargarMensajesInicial(){
-    if (!supabaseChat) return;
-
-    const { data, error } = await supabaseChat
-      .from("chat_mensajes")
-      .select("*")
-      .order("created_at", { ascending:true })
-      .limit(200);
-
-    if (error){
-      console.error("Error cargando mensajes del chat:", error);
-      if (chatStatus) chatStatus.textContent = "Error al cargar mensajes.";
-      return;
-    }
-
-    chatMessages = data || [];
-    renderChatMessages();
-  }
-
-  async function enviarMensaje(){
-    if (!supabaseChat) return;
-    const texto = (chatInput.value || "").trim();
+  async function enviar(){
+    const texto = chatInput.value.trim();
     if (!texto) return;
 
-    chatSendBtn.disabled = true;
-    if (chatStatus) chatStatus.textContent = "Enviando...";
-
-    let destinatarios = destinatariosSeleccionados && destinatariosSeleccionados.length
-      ? [...destinatariosSeleccionados]
-      : null; // null => mensaje general
+    chatSend.disabled=true;
+    chatStatus.textContent="Enviando...";
 
     const payload = {
       autor: CHAT_USERNAME,
       mensaje: texto,
       importante: !!chatImportant.checked,
-      destinatarios
+      destinatarios: destinatarios.length ? destinatarios : null
     };
 
-    const { error } = await supabaseChat
+    const {error} = await supabaseChat
       .from("chat_mensajes")
       .insert(payload);
 
-    if (error){
-      console.error("Error enviando mensaje:", error);
-      if (chatStatus) chatStatus.textContent = "No se ha podido enviar el mensaje.";
+    if (!error){
+      chatInput.value="";
+      chatImportant.checked=false;
+      destinatarios=[];
+      actualizarResumenDest();
+      chatStatus.textContent="Enviado";
+      setTimeout(()=>chatStatus.textContent="",1500);
     } else {
-      chatInput.value = "";
-      chatImportant.checked = false;
-      destinatariosSeleccionados = [];
-      actualizarResumenDestinatarios();
-      if (chatStatus) {
-        chatStatus.textContent = "Mensaje enviado.";
-        setTimeout(() => { chatStatus.textContent = ""; }, 2000);
-      }
+      chatStatus.textContent="Error enviando.";
     }
 
-    chatSendBtn.disabled = false;
+    chatSend.disabled=false;
   }
 
-  chatSendBtn?.addEventListener("click", enviarMensaje);
+  chatSend.addEventListener("click", enviar);
 
-  chatInput?.addEventListener("keydown", (e) => {
-    // Ctrl+Enter -> enviar
-    if (e.key === "Enter" && e.ctrlKey){
+  chatInput.addEventListener("keydown", e=>{
+    if (e.key==="Enter" && e.ctrlKey){
       e.preventDefault();
-      enviarMensaje();
+      enviar();
     }
   });
 
-  async function initChat(){
-    if (!supabaseChat) return;
-    await cargarOperarios();
-    await cargarMensajesInicial();
+  /* ===================== CARGA INICIAL ===================== */
+  async function cargarOperarios(){
+    const {data} = await supabaseChat
+      .from("operarios")
+      .select("username,nombre")
+      .order("nombre",{ascending:true});
 
-    // Suscripción en tiempo real
+    operariosLista = data || [];
+    mapaOperarios = {};
+    operariosLista.forEach(op=> mapaOperarios[op.username]=op );
+
+    destBody.innerHTML = `
+      <label class="chat-dest-item">
+        <input type="checkbox" value="__todos__" checked>
+        <span>Todos</span>
+      </label>
+    `;
+
+    operariosLista.forEach(op=>{
+      const el = document.createElement("label");
+      el.className="chat-dest-item";
+      el.innerHTML = `
+        <input type="checkbox" value="${op.username}">
+        <span>${op.nombre}</span>
+      `;
+      destBody.appendChild(el);
+    });
+
+    actualizarResumenDest();
+  }
+
+  async function cargarMensajes(){
+    const {data} = await supabaseChat
+      .from("chat_mensajes")
+      .select("*")
+      .order("created_at",{ascending:true})
+      .limit(300);
+
+    chatList = data || [];
+    renderChat();
+  }
+
+  /* ===================== TOGGLE PANEL ===================== */
+  function togglePanel(){
+    chatPanel.classList.toggle("open");
+    if (chatPanel.classList.contains("open")){
+      setTimeout(()=>{ chatMessages.scrollTop = chatMessages.scrollHeight; },80);
+    }
+  }
+
+  chatFab.addEventListener("click", togglePanel);
+  chatClose.addEventListener("click", togglePanel);
+
+  /* ===================== REALTIME ===================== */
+  function activarRealtime(){
     supabaseChat
       .channel("chat_mensajes_changes")
       .on("postgres_changes",
-        { event:"INSERT", schema:"public", table:"chat_mensajes" },
-        payload => {
-          chatMessages.push(payload.new);
-          renderChatMessages();
+        {event:"INSERT",schema:"public",table:"chat_mensajes"},
+        payload=>{
+          chatList.push(payload.new);
+          renderChat();
         }
       )
       .on("postgres_changes",
-        { event:"UPDATE", schema:"public", table:"chat_mensajes" },
-        payload => {
-          const idx = chatMessages.findIndex(m => m.id === payload.new.id);
-          if (idx >= 0){
-            chatMessages[idx] = payload.new;
-          } else {
-            chatMessages.push(payload.new);
-          }
-          renderChatMessages();
+        {event:"UPDATE",schema:"public",table:"chat_mensajes"},
+        payload=>{
+          const idx = chatList.findIndex(m=>m.id===payload.new.id);
+          if (idx>=0) chatList[idx]=payload.new;
+          else chatList.push(payload.new);
+          renderChat();
         }
       )
       .subscribe();
   }
 
-  initChat();
+  /* ===================== INIT ===================== */
+  async function init(){
+    if (!supabaseChat){
+      console.error("Supabase no disponible para chat.");
+      return;
+    }
+
+    await cargarOperarios();
+    await cargarMensajes();
+    activarRealtime();
+  }
+
+  init();
+
 </script>
 
 </body>
