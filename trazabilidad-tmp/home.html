@@ -729,422 +729,416 @@
       color:#ffffff;
     }
 
-    /* ===================== CHAT FLOTANTE TMP ===================== */
+   <script type="module">
+const supabaseChat = window.supabase;
 
-    .chat-fab{
-      position:fixed;
-      right:18px;
-      bottom:18px;
-      width:54px;
-      height:54px;
-      border-radius:999px;
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:0 12px 30px rgba(0,0,0,.7);
-      cursor:pointer;
-      z-index:60;
-      transition:transform .18s ease, box-shadow .18s ease;
-    }
+/* ============================================================
+   USUARIO
+============================================================ */
+let operario = null;
+try { operario = JSON.parse(localStorage.getItem("operario")); } catch {}
+const CHAT_USERNAME = operario?.username || "invitado";
+const CHAT_NOMBRE   = operario?.nombre   || CHAT_USERNAME;
 
-    .chat-fab:hover{
-      transform:translateY(-2px) scale(1.03);
-      box-shadow:0 16px 40px rgba(0,0,0,.8);
-    }
+/* ============================================================
+   ELEMENTOS DOM
+============================================================ */
+const chatFab          = document.getElementById("chat-fab");
+const chatFabBadge     = document.getElementById("chat-fab-badge");
+const chatPanel        = document.getElementById("chat-panel");
+const chatCloseBtn     = document.getElementById("chat-close");
+const chatMessagesEl   = document.getElementById("chat-messages");
+const chatInput        = document.getElementById("chat-input");
+const chatSendBtn      = document.getElementById("chat-send");
+const chatImportant    = document.getElementById("chat-important");
+const chatStatus       = document.getElementById("chat-status");
+const chatUserLabel    = document.getElementById("chat-user-label");
 
-    .chat-fab-icon{
-      font-size:22px;
-    }
+const destOpenBtn      = document.getElementById("chat-dest-open");
+const destSummaryEl    = document.getElementById("chat-dest-summary");
+const destPanel        = document.getElementById("chat-dest-panel");
+const destBody         = document.getElementById("chat-dest-body");
+const destCloseBtn     = document.getElementById("chat-dest-close");
+const destApplyBtn     = document.getElementById("chat-dest-apply");
 
-    .chat-fab-badge{
-      position:absolute;
-      top:-6px;
-      right:-4px;
-      min-width:22px;
-      height:22px;
-      border-radius:999px;
-      background:#ef4444;
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:11px;
-      font-weight:700;
-      box-shadow:0 0 0 2px #020617;
-    }
+/* ============================================================
+   VARIABLES DE ESTADO
+============================================================ */
+let chatMessages = [];
+let operariosLista = [];
+let mapaOperarios = {};
+let destinatariosSeleccionados = [];   // vacío = TODOS
 
-    .chat-fab.chat-has-important{
-      animation:chatPulse 1.4s infinite;
-    }
+chatUserLabel.textContent = `${CHAT_NOMBRE} (${CHAT_USERNAME})`;
 
-    @keyframes chatPulse{
-      0%{ box-shadow:0 0 0 0 rgba(239,68,68,.7); }
-      70%{ box-shadow:0 0 0 12px rgba(239,68,68,0); }
-      100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
-    }
-
-    /* Panel del chat (ventana emergente) */
-    #chat-panel{
-      position: fixed;
-      bottom: 90px;
-      right: 24px;
-      background:#020617;
-      border:1px solid var(--border);
-      border-radius:16px;
-      box-shadow:0 18px 40px rgba(0,0,0,.7);
-      width: 480px;
-      height: 520px;
-      display:flex;               /* SIEMPRE flex */
-      flex-direction:column;
-      overflow:hidden;
-      z-index:40;
-      opacity:0;                   /* Oculto por defecto */
-      pointer-events:none;
-      transform:translateY(10px);
-      transition:opacity .18s ease, transform .18s ease;
-    }
-
-.chat-panel.open {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transform: translateY(0) !important;
+/* ============================================================
+   UTILIDADES
+============================================================ */
+function normalizeArray(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
-    
-    .chat-panel.open{
-      opacity:1;
-      pointer-events:auto;
-      transform:translateY(0);
+function formatChatTime(ts){
+  if (!ts) return "";
+  const d = new Date(ts);
+  if (isNaN(d)) return "";
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mi = String(d.getMinutes()).padStart(2,"0");
+  return `${dd}/${mm} ${hh}:${mi}`;
+}
+
+/* ============================================================
+   LÓGICA CHAT PANEL
+============================================================ */
+function toggleChatPanel(){
+  if (!chatPanel) return;
+  chatPanel.classList.toggle("open");
+
+  // Al abrir, marcar todos los importantes visibles como leídos automáticamente
+  if (chatPanel.classList.contains("open")) {
+    setTimeout(() => {
+      if (chatMessagesEl)
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }, 150);
+  }
+}
+
+chatFab?.addEventListener("click", toggleChatPanel);
+chatCloseBtn?.addEventListener("click", toggleChatPanel);
+
+/* ============================================================
+   MENSAJES PARA MÍ
+============================================================ */
+function esParaMi(msg){
+  const user = CHAT_USERNAME;
+
+  // Mis mensajes → siempre visibles
+  if (msg.autor === user) return true;
+
+  // Normalizar destinatarios
+  const destinatarios = normalizeArray(msg.destinatarios);
+
+  // Sin destinatarios → mensaje general
+  if (destinatarios.length === 0) return true;
+
+  // Con destinatarios → solo si estoy incluido
+  return destinatarios.includes(user);
+}
+
+/* ============================================================
+   CONTADOR DE IMPORTANTES NO LEÍDOS
+============================================================ */
+function calcularNoLeidosImportantes(){
+  let count = 0;
+  const user = CHAT_USERNAME;
+
+  for (const msg of chatMessages){
+    if (!msg.importante) continue;
+    if (!esParaMi(msg)) continue;
+
+    const leidos = normalizeArray(msg.leido_por);
+    if (!leidos.includes(user)) count++;
+  }
+
+  if (count > 0){
+    chatFabBadge.textContent = count;
+    chatFabBadge.style.display = "flex";
+    chatFab.classList.add("chat-has-important");
+  } else {
+    chatFabBadge.style.display = "none";
+    chatFab.classList.remove("chat-has-important");
+  }
+}
+
+/* ============================================================
+   PINTAR MENSAJES
+============================================================ */
+function renderChatMessages(){
+  const visibles = chatMessages.filter(esParaMi);
+
+  if (visibles.length === 0){
+    chatMessagesEl.innerHTML = `<div class="chat-empty">Todavía no hay mensajes en el chat.</div>`;
+    calcularNoLeidosImportantes();
+    return;
+  }
+
+  const user = CHAT_USERNAME;
+
+  chatMessagesEl.innerHTML = visibles.map(msg => {
+    const mine = msg.autor === user;
+    const cls = mine ? "chat-message mine" : "chat-message";
+    const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor;
+
+    const leidos = normalizeArray(msg.leido_por);
+    const yaLeido = leidos.includes(user);
+
+    // Tags
+    const tags = [];
+    if (msg.importante)
+      tags.push(`<span class="chat-tag chat-tag-important">IMPORTANTE</span>`);
+
+    const destinatarios = normalizeArray(msg.destinatarios);
+    if (destinatarios.length > 0){
+      const nombres = destinatarios.map(u => mapaOperarios[u]?.nombre || u);
+      tags.push(`<span class="chat-tag chat-tag-dest">Para: ${nombres.join(", ")}</span>`);
     }
 
-    .chat-header{
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
+    // Botón “Marcar hecho”
+    let botonHecho = "";
+    if (msg.importante && !mine && !yaLeido){
+      botonHecho = `
+        <button class="chat-done-btn" data-id="${msg.id}">
+          Marcar hecho
+        </button>`;
+    }
+    else if (msg.importante && yaLeido && !mine){
+      tags.push(`<span class="chat-tag">Marcado como hecho</span>`);
     }
 
-    .chat-title{
-      font-size:14px;
-      font-weight:600;
-      color:var(--accent);
-    }
+    return `
+      <div class="chat-msg-wrapper">
+        <div class="${cls}">
+          <div class="chat-message-header">
+            <div class="chat-author">${autorNombre}</div>
+            <div class="chat-meta">${formatChatTime(msg.created_at)}</div>
+          </div>
 
-    .chat-subtitle{
-      font-size:11px;
-      color:var(--muted);
-    }
+          <div class="chat-text">${(msg.mensaje || "").replace(/</g,"&lt;")}</div>
 
-    .chat-close-btn{
-      border:none;
-      background:transparent;
-      color:var(--muted);
-      cursor:pointer;
-      font-size:16px;
-      padding:4px 6px;
-      border-radius:999px;
-    }
-    .chat-close-btn:hover{
-      background:#020617;
-      color:#fff;
-    }
+          <div class="chat-tags">
+            ${tags.join("")}
+            ${botonHecho}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
 
-    /* Área donde se ven los mensajes */
-    #chat-messages{
-      flex:1;
-      padding:12px 14px;
-      overflow-y:auto;
-      font-size:13px;
-    }
+  // Listeners botón “Hecho”
+  document.querySelectorAll(".chat-done-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      await marcarMensajeHecho(id);
+    });
+  });
 
-    .chat-empty{
-      text-align:center;
-      color:var(--muted);
-      margin-top:12px;
-    }
+  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
 
-    .chat-msg-wrapper{
-      margin-bottom:6px;
-    }
+  calcularNoLeidosImportantes();
+}
 
-    .chat-message{
-      padding:6px 8px;
-      border-radius:10px;
-      border:1px solid #1f2937;
-      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
-                 #020617;
-    }
+/* ============================================================
+   MARCAR MENSAJE COMO HECHO
+============================================================ */
+async function marcarMensajeHecho(id){
+  const msg = chatMessages.find(m => String(m.id) === String(id));
+  if (!msg) return;
 
-    .chat-message.mine{
-      border-color:var(--accent);
-      background:radial-gradient(circle at 100% 0,#022c22 0,transparent 55%),
-                 #020617;
-    }
+  const user = CHAT_USERNAME;
+  let leidos = normalizeArray(msg.leido_por);
+  if (!leidos.includes(user)) leidos.push(user);
 
-    .chat-message-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:6px;
-      margin-bottom:2px;
-    }
+  const { data, error } = await supabaseChat
+    .from("chat_mensajes")
+    .update({ leido_por: leidos })
+    .eq("id", id)
+    .select()
+    .single();
 
-    .chat-author{
-      font-weight:600;
-      font-size:11px;
-    }
+  if (error){
+    console.error("Error marcando como hecho:", error);
+    return;
+  }
 
-    .chat-meta{
-      font-size:10px;
-      color:var(--muted);
-      white-space:nowrap;
-    }
+  Object.assign(msg, data);
+  renderChatMessages();
+}
 
-    .chat-text{
-      font-size:12px;
-      margin:2px 0 4px;
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
+/* ============================================================
+   DESTINATARIOS
+============================================================ */
+function actualizarResumenDestinatarios(){
+  if (destinatariosSeleccionados.length === 0){
+    destSummaryEl.textContent = "Todos";
+    return;
+  }
 
-    .chat-tags{
-      display:flex;
-      flex-wrap:wrap;
-      gap:4px;
-      align-items:center;
-      margin-top:2px;
-      font-size:10px;
-    }
+  const nombres = destinatariosSeleccionados.map(u => mapaOperarios[u]?.nombre || u);
+  destSummaryEl.textContent = nombres.length <= 2
+    ? nombres.join(", ")
+    : `${nombres[0]}, ${nombres[1]} +${nombres.length - 2}`;
+}
 
-    .chat-tag{
-      border-radius:999px;
-      padding:2px 6px;
-      border:1px solid var(--border);
-      color:var(--muted);
-    }
+function abrirPanelDestinatarios(){
+  destPanel.style.display = "block";
+}
+function cerrarPanelDestinatarios(){
+  destPanel.style.display = "none";
+}
 
-    .chat-tag-important{
-      border-color:var(--danger);
-      color:var(--danger);
-    }
+destOpenBtn.addEventListener("click", abrirPanelDestinatarios);
+destCloseBtn.addEventListener("click", cerrarPanelDestinatarios);
 
-    .chat-tag-dest{
-      border-color:var(--accent);
-      color:var(--accent);
-    }
+destApplyBtn?.addEventListener("click", () => {
+  const inputs = destBody.querySelectorAll("input[type=checkbox]");
+  let seleccion = [];
+  let todosMarcado = false;
 
-    .chat-done-btn{
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#020617;
-      color:var(--muted);
-      font-size:10px;
-      padding:2px 8px;
-      cursor:pointer;
-      margin-left:auto;
+  inputs.forEach(inp => {
+    if (inp.checked){
+      if (inp.value === "__todos__") todosMarcado = true;
+      else seleccion.push(inp.value);
     }
-    .chat-done-btn:hover{
-      background:var(--hover);
-      color:#fff;
-    }
+  });
 
-    .chat-input-area{
-      border-top:1px solid var(--border);
-      padding:8px 10px 10px;
-      background:#020617;
-      position:relative;
-    }
+  destinatariosSeleccionados = todosMarcado ? [] : seleccion;
+  actualizarResumenDestinatarios();
+  cerrarPanelDestinatarios();
+});
 
-    .chat-input-row textarea{
-      width:100%;
-      resize:vertical;
-      min-height:60px;
-      max-height:120px;
-      background:#020617;
-      border-radius:8px;
-      border:1px solid var(--border);
-      color:var(--txt);
-      font-size:13px;
-      padding:6px 8px;
-      outline:none;
-    }
+/* ============================================================
+   ENVIAR MENSAJE
+============================================================ */
+async function enviarMensaje(){
+  const texto = chatInput.value.trim();
+  if (!texto) return;
 
-    .chat-input-row textarea:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 1px rgba(34,197,94,.4);
-    }
+  chatSendBtn.disabled = true;
+  chatStatus.textContent = "Enviando...";
 
-    .chat-input-extra{
-      margin-top:4px;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      flex-wrap:wrap;
-      font-size:11px;
-      color:var(--muted);
-    }
+  const destinatarios = destinatariosSeleccionados.length
+    ? destinatariosSeleccionados
+    : null;
 
-    .chat-important-label{
-      display:flex;
-      align-items:center;
-      gap:4px;
-      cursor:pointer;
-      user-select:none;
-    }
+  const payload = {
+    autor: CHAT_USERNAME,
+    mensaje: texto,
+    importante: chatImportant.checked,
+    destinatarios
+  };
 
-    .chat-important-word{
-      color:var(--danger);
-      font-weight:600;
-    }
+  const { error } = await supabaseChat
+    .from("chat_mensajes")
+    .insert(payload);
 
-    .chat-input-extra input[type="checkbox"]{
-      width:12px;
-      height:12px;
-    }
+  if (error){
+    console.error("Error enviando mensaje:", error);
+    chatStatus.textContent = "Error enviando.";
+  } else {
+    chatInput.value = "";
+    chatImportant.checked = false;
+    destinatariosSeleccionados = [];
+    actualizarResumenDestinatarios();
 
-    .chat-to-label{
-      display:flex;
-      align-items:center;
-      gap:4px;
-      flex:1;
-      min-width:140px;
-    }
+    chatStatus.textContent = "Enviado";
+    setTimeout(() => chatStatus.textContent = "", 1500);
+  }
 
-    .chat-dest-btn{
-      flex:1;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#020617;
-      color:var(--txt);
-      font-size:11px;
-      padding:4px 8px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      cursor:pointer;
-    }
-    .chat-dest-btn span{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .chat-dest-btn::after{
-      content:"▾";
-      font-size:10px;
-      margin-left:6px;
-      color:var(--muted);
-    }
-    .chat-dest-btn:hover{
-      background:#020617;
-      border-color:var(--accent);
-    }
+  chatSendBtn.disabled = false;
+}
 
-    .chat-send-btn{
-      border-radius:999px;
-      border:1px solid var(--accent);
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-      color:#ecfeff;
-      font-size:12px;
-      padding:4px 10px;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .chat-send-btn:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-    }
+chatSendBtn.addEventListener("click", enviarMensaje);
 
-    .chat-status{
-      margin-top:3px;
-      font-size:10px;
-      color:var(--muted);
-    }
+chatInput.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.ctrlKey){
+    e.preventDefault();
+    enviarMensaje();
+  }
+});
 
-    /* Panel de selección de destinatarios */
-    .chat-dest-panel{
-      position:absolute;
-      left:10px;
-      right:10px;
-      bottom:74px;
-      background:#020617;
-      border-radius:12px;
-      border:1px solid var(--border);
-      box-shadow:0 18px 40px rgba(0,0,0,.9);
-      padding:6px 8px 8px;
-      font-size:12px;
-      display:none;
-      z-index:80;
-    }
+/* ============================================================
+   CARGA INICIAL
+============================================================ */
+async function cargarOperarios(){
+  const { data } = await supabaseChat
+    .from("operarios")
+    .select("username, nombre")
+    .order("nombre", { ascending:true });
 
-    .chat-dest-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:4px;
-    }
+  operariosLista = data || [];
+  mapaOperarios = {};
+  operariosLista.forEach(op => mapaOperarios[op.username] = op);
 
-    .chat-dest-title{
-      font-size:12px;
-      font-weight:600;
-      color:var(--accent);
-    }
+  // Rellenar selector
+  destBody.innerHTML = `
+    <label class="chat-dest-item">
+      <input type="checkbox" value="__todos__" checked>
+      <span>Todos</span>
+    </label>
+  `;
 
-    .chat-dest-close{
-      border:none;
-      background:transparent;
-      color:var(--muted);
-      cursor:pointer;
-      font-size:14px;
-      padding:2px 4px;
-      border-radius:999px;
-    }
-    .chat-dest-close:hover{
-      background:#020617;
-      color:#fff;
-    }
+  operariosLista.forEach(op => {
+    const item = document.createElement("label");
+    item.className = "chat-dest-item";
+    item.innerHTML = `
+      <input type="checkbox" value="${op.username}">
+      <span>${op.nombre}</span>
+    `;
+    destBody.appendChild(item);
+  });
 
-    .chat-dest-body{
-      max-height:140px;
-      overflow-y:auto;
-      padding:2px 0;
-      margin-bottom:4px;
-    }
+  actualizarResumenDestinatarios();
+}
 
-    .chat-dest-item{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      padding:2px 2px;
-      cursor:pointer;
-      user-select:none;
-      font-size:12px;
-    }
-    .chat-dest-item input{
-      width:12px;
-      height:12px;
-      margin:0;
-    }
+async function cargarMensajesInicial(){
+  const { data } = await supabaseChat
+    .from("chat_mensajes")
+    .select("*")
+    .order("created_at", { ascending:true })
+    .limit(300);
 
-    .chat-dest-footer{
-      display:flex;
-      justify-content:flex-end;
-    }
+  chatMessages = data || [];
+  renderChatMessages();
+}
 
-    @media (max-width:640px){
-      #chat-panel{
-        right:10px;
-        left:10px;
-        width:auto;
-        max-height:75vh;
+/* ============================================================
+   SUSCRIPCIÓN EN TIEMPO REAL
+============================================================ */
+function activarRealtime(){
+  supabaseChat
+    .channel("chat_mensajes_changes")
+    .on("postgres_changes",
+      { event:"INSERT", schema:"public", table:"chat_mensajes" },
+      payload => {
+        chatMessages.push(payload.new);
+        renderChatMessages();
       }
-      .chat-dest-panel{
-        left:6px;
-        right:6px;
+    )
+    .on("postgres_changes",
+      { event:"UPDATE", schema:"public", table:"chat_mensajes" },
+      payload => {
+        const idx = chatMessages.findIndex(m => m.id === payload.new.id);
+        if (idx >= 0) chatMessages[idx] = payload.new;
+        else chatMessages.push(payload.new);
+        renderChatMessages();
       }
-    }
+    )
+    .subscribe();
+}
+
+/* ============================================================
+   INICIO
+============================================================ */
+(async function init(){
+  if (!supabaseChat){
+    console.error("Supabase no disponible para chat.");
+    return;
+  }
+
+  await cargarOperarios();
+  await cargarMensajesInicial();
+  activarRealtime();
+})();
+</script>
   </style>
 </head>
 <body>
