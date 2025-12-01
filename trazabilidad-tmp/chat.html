@@ -1,366 +1,1692 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chat interno TMP</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat interno TMP</title>
 
-<style>
-:root{
-  --bg:#0d1117;
-  --panel:#161b22;
-  --txt:#f0f6fc;
-  --border:#30363d;
-  --accent:#22c55e;
-  --danger:#ef4444;
-}
+  <style>
+    :root{
+      --bg:#020617;
+      --bg-alt:#020617;
+      --panel:#0b1120;
+      --panel-alt:#111827;
+      --border:#1f2937;
+      --txt:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#22c55e;
+      --accent-soft:rgba(34,197,94,.12);
+      --danger:#ef4444;
+      --warning:#f59e0b;
 
-/* GENERAL */
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto;
-  background:var(--bg);
-  color:var(--txt);
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-}
+      --bubble-mine:#16a34a;
+      --bubble-mine-txt:#ecfdf5;
+      --bubble-other:#111827;
+      --bubble-other-txt:#e5e7eb;
+    }
 
-/* HEADER */
-.chat-header{
-  background:#020617;
-  border-bottom:1px solid var(--border);
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.chat-title{
-  font-size:18px;
-  font-weight:700;
-  color:var(--accent);
-}
-.chat-user{
-  font-size:12px;
-  color:var(--txt);
-  opacity:.75;
-}
+    *{ box-sizing:border-box; }
 
-/* MENSAJES */
-#chat-messages{
-  flex:1;
-  padding:12px;
-  overflow-y:auto;
-}
-.chat-empty{
-  text-align:center;
-  color:#aaa;
-  margin-top:20px;
-}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
+                 radial-gradient(circle at 100% 0,#020617 0,transparent 55%),
+                 #020617;
+      color:var(--txt);
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
 
-.msg-wrap{
-  margin-bottom:10px;
-}
-.msg{
-  padding:10px 12px;
-  border-radius:10px;
-  max-width:78%;
-  background:var(--panel);
-  border:1px solid var(--border);
-  box-shadow:0 2px 6px rgba(0,0,0,.4);
-}
-.msg.mine{
-  margin-left:auto;
-  background:#06381e;
-  border-color:#198754;
-}
+    /* LAYOUT GENERAL */
 
-.msg-header{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:4px;
-  font-size:11px;
-}
-.msg-author{ font-weight:600; }
-.msg-date{ opacity:.7; }
+    .chat-shell{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      max-width:1200px;
+      margin:0 auto;
+      width:100%;
+      padding:8px 10px;
+      gap:8px;
+    }
 
-.msg-text{
-  white-space:pre-wrap;
-  font-size:13px;
-}
+    .chat-header-main{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:8px 10px;
+      border-radius:14px;
+      background:linear-gradient(135deg,#020617,#020617 40%,#022c22);
+      border:1px solid var(--border);
+      box-shadow:0 18px 40px rgba(0,0,0,.65);
+      gap:10px;
+    }
 
-.msg-tags{
-  margin-top:6px;
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  font-size:10px;
-}
+    .chat-logo-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
 
-.tag{
-  padding:3px 7px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  opacity:.8;
-}
-.tag-important{ border-color:var(--danger); color:var(--danger); }
-.tag-dest{ border-color:var(--accent); color:var(--accent); }
+    .chat-logo{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      background:#030712;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+    }
 
-.msg-done-btn{
-  margin-left:auto;
-  font-size:10px;
-  padding:3px 8px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#020617;
-  cursor:pointer;
-  color:#aaa;
-}
-.msg-done-btn:hover{
-  background:#1b2534;
-  color:#fff;
-}
+    .chat-header-text h1{
+      margin:0;
+      font-size:16px;
+    }
+    .chat-header-text p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+    }
 
-/* INPUT */
-.chat-input-box{
-  border-top:1px solid var(--border);
-  padding:10px;
-  background:#020617;
-}
-.chat-input{
-  width:100%;
-  background:#0a1320;
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:8px;
-  color:var(--txt);
-  resize:none;
-  min-height:60px;
-  max-height:150px;
-}
-.chat-input:focus{
-  border-color:var(--accent);
-}
+    .chat-user-pill{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:rgba(15,23,42,.8);
+      color:var(--accent);
+      white-space:nowrap;
+    }
 
-.chat-bottom{
-  margin-top:6px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
+    .chat-layout{
+      flex:1;
+      display:grid;
+      grid-template-columns:270px minmax(0,1fr);
+      gap:8px;
+      min-height:0;
+    }
 
-.chat-send{
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:none;
-  padding:6px 14px;
-  border-radius:999px;
-  cursor:pointer;
-  font-size:14px;
-  color:white;
-  font-weight:600;
-}
+    @media (max-width:800px){
+      .chat-layout{
+        grid-template-columns:1fr;
+      }
+      .sidebar{
+        display:none;
+      }
+      .sidebar.open{
+        display:block;
+        position:absolute;
+        inset:64px 8px auto 8px;
+        z-index:40;
+        box-shadow:0 24px 60px rgba(0,0,0,.85);
+      }
+      .toggle-sidebar-btn{
+        display:inline-flex;
+      }
+    }
 
-.chat-important-box{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  font-size:12px;
-}
-.chat-important-word{
-  color:var(--danger);
-  font-weight:700;
-}
+    .sidebar{
+      background:var(--panel);
+      border-radius:14px;
+      border:1px solid var(--border);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
 
-.chat-status{
-  margin-top:3px;
-  font-size:10px;
-  opacity:.65;
-  color:#aaa;
-}
-</style>
+    .sidebar-header{
+      padding:8px 10px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+    }
+
+    .sidebar-title{
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .sidebar-sub{
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .btn-mini{
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      font-size:11px;
+      padding:4px 8px;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+    }
+    .btn-mini:hover{
+      background:#020617;
+      border-color:var(--accent);
+    }
+
+    .toggle-sidebar-btn{
+      display:none;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      font-size:11px;
+      padding:4px 8px;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+    }
+
+    .sidebar-search{
+      padding:6px 8px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .sidebar-search input{
+      width:100%;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      font-size:12px;
+      padding:4px 8px;
+      outline:none;
+    }
+    .sidebar-search input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(34,197,94,.4);
+    }
+
+    .sidebar-section-label{
+      padding:4px 10px 2px;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:var(--muted);
+    }
+
+    .conv-list{
+      flex:1;
+      overflow-y:auto;
+      padding:4px 4px 8px;
+      font-size:13px;
+    }
+
+    .conv-item{
+      border-radius:10px;
+      padding:6px 8px;
+      margin:2px 2px;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      cursor:pointer;
+      position:relative;
+    }
+    .conv-item:hover{
+      background:#111827;
+    }
+    .conv-item.active{
+      background:#1f2937;
+      border:1px solid var(--accent);
+    }
+
+    .conv-line-1{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:4px;
+    }
+    .conv-name{
+      font-weight:600;
+      font-size:13px;
+    }
+    .conv-time{
+      font-size:10px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .conv-line-2{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:4px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .conv-last{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .conv-badge{
+      min-width:18px;
+      height:18px;
+      border-radius:999px;
+      background:#ef4444;
+      color:#fff;
+      font-size:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 4px;
+    }
+
+    .conv-important-dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:var(--warning);
+    }
+
+    /* PANEL DE CHAT */
+
+    .chat-main{
+      background:var(--panel);
+      border-radius:14px;
+      border:1px solid var(--border);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      position:relative;
+    }
+
+    .chat-main-header{
+      padding:8px 10px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+    }
+
+    .chat-main-title{
+      font-size:14px;
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .chat-main-sub{
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .chat-main-header-left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .chat-main-header-right{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .badge-pill{
+      font-size:10px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background:#020617;
+      white-space:nowrap;
+    }
+
+    .badge-pill.importante{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+
+    .btn-ghost{
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      font-size:10px;
+      padding:3px 8px;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+    }
+    .btn-ghost:hover{
+      background:#020617;
+      border-color:var(--accent);
+    }
+
+    .chat-messages{
+      flex:1;
+      padding:10px 12px;
+      overflow-y:auto;
+      font-size:13px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      background:
+        radial-gradient(circle at 0 0,#020617 0,transparent 55%),
+        radial-gradient(circle at 100% 100%,#020617 0,transparent 55%),
+        linear-gradient(135deg,#020617,#020617 40%,#020617);
+    }
+
+    .day-separator{
+      text-align:center;
+      margin:6px 0;
+      font-size:10px;
+      color:var(--muted);
+      position:relative;
+    }
+    .day-separator::before,
+    .day-separator::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      width:30%;
+      border-top:1px solid #111827;
+    }
+    .day-separator::before{
+      left:4%;
+    }
+    .day-separator::after{
+      right:4%;
+    }
+
+    .msg-row{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      max-width:80%;
+    }
+
+    .msg-row.mine{
+      align-self:flex-end;
+    }
+    .msg-row.other{
+      align-self:flex-start;
+    }
+
+    .msg-author{
+      font-size:11px;
+      color:var(--muted);
+      margin:0 4px;
+    }
+
+    .msg-bubble{
+      border-radius:16px;
+      padding:6px 8px 4px;
+      position:relative;
+      display:inline-flex;
+      flex-direction:column;
+      gap:2px;
+      box-shadow:0 8px 18px rgba(0,0,0,.5);
+    }
+
+    .msg-row.mine .msg-bubble{
+      background:var(--bubble-mine);
+      color:var(--bubble-mine-txt);
+      border-bottom-right-radius:4px;
+    }
+
+    .msg-row.other .msg-bubble{
+      background:var(--bubble-other);
+      color:var(--bubble-other-txt);
+      border-bottom-left-radius:4px;
+    }
+
+    .msg-text{
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-size:13px;
+    }
+
+    .msg-meta{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:10px;
+      color:rgba(243,244,246,.8);
+      gap:4px;
+    }
+
+    .msg-meta-left{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      flex-wrap:wrap;
+    }
+
+    .msg-meta-right{
+      white-space:nowrap;
+    }
+
+    .msg-tag{
+      border-radius:999px;
+      padding:1px 6px;
+      border:1px solid rgba(148,163,184,.6);
+      font-size:10px;
+    }
+
+    .msg-tag.importante{
+      border-color:var(--danger);
+      color:#fecaca;
+      background:rgba(127,29,29,.6);
+    }
+
+    .msg-tag-hecho{
+      border-color:var(--accent);
+      color:#bbf7d0;
+      background:rgba(22,163,74,.4);
+    }
+
+    .msg-done-btn{
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.5);
+      background:transparent;
+      color:#e5e7eb;
+      font-size:10px;
+      padding:1px 8px;
+      cursor:pointer;
+    }
+    .msg-done-btn:hover{
+      background:rgba(15,23,42,.8);
+    }
+
+    .msg-hechos-list{
+      font-size:10px;
+      color:rgba(209,213,219,.9);
+    }
+
+    .chat-empty{
+      text-align:center;
+      color:var(--muted);
+      margin-top:20px;
+      font-size:12px;
+    }
+
+    /* INPUT */
+
+    .chat-input-area{
+      border-top:1px solid var(--border);
+      padding:6px 8px 8px;
+      background:var(--panel-alt);
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .chat-input-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      font-size:11px;
+      color:var(--muted);
+      flex-wrap:wrap;
+    }
+
+    .chat-input-top-left{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+
+    .chat-important-label{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+    }
+
+    .chat-important-label input{
+      width:12px;
+      height:12px;
+      margin:0;
+    }
+
+    .chat-important-word{
+      color:var(--danger);
+      font-weight:600;
+    }
+
+    .chat-dest-chip{
+      border-radius:999px;
+      border:1px solid var(--border);
+      padding:2px 8px;
+      font-size:10px;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      background:#020617;
+      cursor:pointer;
+    }
+
+    .chat-input-row{
+      display:flex;
+      align-items:flex-end;
+      gap:6px;
+    }
+
+    #msg-input{
+      flex:1;
+      resize:vertical;
+      min-height:46px;
+      max-height:120px;
+      background:#020617;
+      border-radius:10px;
+      border:1px solid var(--border);
+      color:var(--txt);
+      font-size:13px;
+      padding:6px 8px;
+      outline:none;
+    }
+    #msg-input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(34,197,94,.4);
+    }
+
+    #btn-send{
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#ecfdf5;
+      font-size:13px;
+      padding:6px 12px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    #btn-send:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    .chat-status{
+      font-size:10px;
+      color:var(--muted);
+      min-height:12px;
+    }
+
+    /* PANEL DESTINATARIOS (NUEVA CONVERSACIÓN) */
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.85);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:50;
+    }
+    .overlay.show{
+      display:flex;
+    }
+
+    .panel{
+      background:#020617;
+      border-radius:14px;
+      border:1px solid var(--border);
+      width:min(420px,94vw);
+      max-height:80vh;
+      display:flex;
+      flex-direction:column;
+      box-shadow:0 24px 60px rgba(0,0,0,.9);
+    }
+
+    .panel-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:8px 10px;
+      border-bottom:1px solid var(--border);
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .panel-body{
+      padding:8px 10px;
+      overflow-y:auto;
+      font-size:13px;
+    }
+
+    .panel-footer{
+      padding:8px 10px;
+      border-top:1px solid var(--border);
+      display:flex;
+      justify-content:flex-end;
+      gap:6px;
+    }
+
+    .btn-secondary{
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      font-size:12px;
+      padding:4px 10px;
+      cursor:pointer;
+    }
+    .btn-secondary:hover{
+      border-color:var(--accent);
+    }
+
+    .btn-primary{
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#ecfdf5;
+      font-size:12px;
+      padding:4px 12px;
+      cursor:pointer;
+    }
+
+    .panel-close{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .dest-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 0;
+      cursor:pointer;
+    }
+    .dest-item input{
+      margin:0;
+      width:14px;
+      height:14px;
+    }
+
+    .dest-item span{
+      font-size:13px;
+    }
+
+    /* TOAST SUPERIOR */
+
+    .toast{
+      position:fixed;
+      top:10px;
+      right:12px;
+      background:#020617;
+      border-radius:999px;
+      border:1px solid var(--border);
+      padding:6px 10px;
+      font-size:11px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      box-shadow:0 10px 30px rgba(0,0,0,.8);
+      z-index:80;
+      opacity:0;
+      transform:translateY(-8px);
+      pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease;
+      max-width:260px;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+      pointer-events:auto;
+    }
+    .toast-icon{
+      font-size:16px;
+    }
+    .toast-text-main{
+      font-weight:600;
+    }
+    .toast-text-sub{
+      color:var(--muted);
+    }
+    .toast-close{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:14px;
+    }
+
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="chat-header">
-  <div class="chat-title">Chat interno TMP</div>
-  <div class="chat-user" id="chat-user-label">Cargando usuario...</div>
-</div>
+<div class="chat-shell">
+  <header class="chat-header-main">
+    <div class="chat-logo-title">
+      <div class="chat-logo">💬</div>
+      <div class="chat-header-text">
+        <h1>Chat interno TMP</h1>
+        <p>Conversaciones tipo WhatsApp · mensajes importantes con validación</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button class="toggle-sidebar-btn" id="btn-toggle-sidebar">Conversaciones</button>
+      <div class="chat-user-pill" id="user-pill">Usuario: –</div>
+    </div>
+  </header>
 
-<!-- MENSAJES -->
-<div id="chat-messages">
-  <div class="chat-empty">Cargando mensajes...</div>
-</div>
+  <div class="chat-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div>
+          <div class="sidebar-title">Conversaciones</div>
+          <div class="sidebar-sub">Selecciona un chat o crea uno nuevo</div>
+        </div>
+        <button class="btn-mini" id="btn-new-chat">+ Nuevo</button>
+      </div>
 
-<!-- INPUT -->
-<div class="chat-input-box">
-  <textarea id="chat-input" class="chat-input" placeholder="Escribe un mensaje..."></textarea>
+      <div class="sidebar-search">
+        <input id="conv-search" type="text" placeholder="Buscar conversación...">
+      </div>
 
-  <div class="chat-bottom">
-    <label class="chat-important-box">
-      <input type="checkbox" id="chat-important">
-      <span>Marcar como <span class="chat-important-word">IMPORTANTE</span></span>
-    </label>
+      <div class="sidebar-section-label">Importantes</div>
+      <div class="conv-list" id="conv-list-important"></div>
 
-    <button id="chat-send" class="chat-send">Enviar</button>
-  </div>
+      <div class="sidebar-section-label">Chats</div>
+      <div class="conv-list" id="conv-list-main"></div>
+    </aside>
 
-  <div id="chat-status" class="chat-status"></div>
-</div>
-
-<script type="module" src="config.mjs"></script>
-
-<script type="module">
-const supabase = window.supabase;
-
-let operario = null;
-try { operario = JSON.parse(localStorage.getItem("operario")); }
-catch { operario = null; }
-
-const USER = operario?.username || "invitado";
-const NOMBRE = operario?.nombre || USER;
-
-document.getElementById("chat-user-label").textContent =
-  `${NOMBRE} (${USER})`;
-
-const chatMessagesEl = document.getElementById("chat-messages");
-const chatInput = document.getElementById("chat-input");
-const chatSend = document.getElementById("chat-send");
-const chatImportant = document.getElementById("chat-important");
-const chatStatus = document.getElementById("chat-status");
-
-let mensajes = [];
-
-/* ========== FORMATEAR FECHA ========== */
-function fmt(ts){
-  const d = new Date(ts);
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const hh = String(d.getHours()).padStart(2,"0");
-  const mi = String(d.getMinutes()).padStart(2,"0");
-  return `${dd}/${mm} ${hh}:${mi}`;
-}
-
-/* ========== MOSTRAR MENSAJES ========== */
-function render(){
-  if (!mensajes.length){
-    chatMessagesEl.innerHTML = `<div class="chat-empty">No hay mensajes.</div>`;
-    return;
-  }
-
-  chatMessagesEl.innerHTML = mensajes.map(msg => {
-    const mine = msg.autor === USER;
-    const clase = mine ? "msg mine" : "msg";
-
-    const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
-    const yaLeido = leidos.includes(USER);
-
-    let tags = "";
-    if (msg.importante)
-      tags += `<span class="tag tag-important">IMPORTANTE</span>`;
-
-    const dest = msg.destinatarios;
-    if (dest && dest.length)
-      tags += `<span class="tag tag-dest">Para: ${dest.join(", ")}</span>`;
-
-    let btnHecho = "";
-    if (msg.importante && !yaLeido && !mine){
-      btnHecho = `<button class="msg-done-btn" data-id="${msg.id}">Hecho</button>`;
-    }
-
-    return `
-      <div class="msg-wrap">
-        <div class="${clase}">
-          <div class="msg-header">
-            <span class="msg-author">${msg.autor}</span>
-            <span class="msg-date">${fmt(msg.created_at)}</span>
+    <!-- PANEL CHAT PRINCIPAL -->
+    <section class="chat-main">
+      <header class="chat-main-header">
+        <div class="chat-main-header-left">
+          <div class="chat-main-title">
+            <span id="conv-title">Selecciona una conversación</span>
           </div>
-          <div class="msg-text">${(msg.mensaje || "").replace(/</g,"&lt;")}</div>
+          <div class="chat-main-sub" id="conv-sub">No hay conversación activa.</div>
+        </div>
+        <div class="chat-main-header-right">
+          <span class="badge-pill" id="conv-participants-pill">–</span>
+          <button class="btn-ghost" id="btn-open-important">
+            ⭐ Importantes
+          </button>
+        </div>
+      </header>
 
-          <div class="msg-tags">
-            ${tags}
-            ${btnHecho}
-          </div>
+      <div class="chat-messages" id="messages-container">
+        <div class="chat-empty">
+          Selecciona una conversación en la izquierda o crea un nuevo chat.
         </div>
       </div>
-    `;
-  }).join("");
 
-  // eventos botones "hecho"
-  document.querySelectorAll(".msg-done-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=> marcarHecho(btn.dataset.id));
+      <footer class="chat-input-area">
+        <div class="chat-input-top">
+          <div class="chat-input-top-left">
+            <label class="chat-important-label">
+              <input type="checkbox" id="chk-important">
+              <span>Marcar como <span class="chat-important-word">IMPORTANTE</span></span>
+            </label>
+            <div class="chat-dest-chip" id="dest-chip">
+              Destinatarios: <span id="dest-chip-text">Auto (según conversación)</span>
+            </div>
+          </div>
+          <div class="chat-input-top-right" style="font-size:10px;color:var(--muted);">
+            Enter = salto · Ctrl+Enter = enviar
+          </div>
+        </div>
+
+        <div class="chat-input-row">
+          <textarea id="msg-input" placeholder="Escribe un mensaje..."></textarea>
+          <button id="btn-send">Enviar</button>
+        </div>
+        <div class="chat-status" id="chat-status"></div>
+      </footer>
+    </section>
+  </div>
+</div>
+
+<!-- OVERLAY NUEVA CONVERSACIÓN -->
+<div class="overlay" id="overlay-new-chat">
+  <div class="panel">
+    <div class="panel-header">
+      <span>Nueva conversación</span>
+      <button class="panel-close" id="btn-close-new-chat">✕</button>
+    </div>
+    <div class="panel-body" id="new-chat-body">
+      <!-- Relleno por JS con operarios -->
+    </div>
+    <div class="panel-footer">
+      <button class="btn-secondary" id="btn-cancel-new-chat">Cancelar</button>
+      <button class="btn-primary" id="btn-create-new-chat">Crear chat</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY LISTA DE IMPORTANTES -->
+<div class="overlay" id="overlay-important">
+  <div class="panel" style="width:min(520px,96vw);">
+    <div class="panel-header">
+      <span>Mensajes importantes</span>
+      <button class="panel-close" id="btn-close-important">✕</button>
+    </div>
+    <div class="panel-body" id="important-body" style="font-size:12px;">
+      <!-- Relleno por JS -->
+    </div>
+    <div class="panel-footer">
+      <button class="btn-secondary" id="btn-close-important-footer">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toast-icon">🔔</div>
+  <div>
+    <div class="toast-text-main" id="toast-main">Título</div>
+    <div class="toast-text-sub" id="toast-sub">Mensaje</div>
+  </div>
+  <button class="toast-close" id="toast-close">✕</button>
+</div>
+
+<!-- SUPABASE CONFIG -->
+<script type="module" src="config.mjs"></script>
+
+<!-- LÓGICA DEL CHAT -->
+<script type="module">
+  const supabase = window.supabase;
+
+  // ======== UTILIDADES BÁSICAS ========
+
+  function normalizeArray(value){
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function formatTime(ts){
+    if (!ts) return "";
+    const d = new Date(ts);
+    if (isNaN(d)) return "";
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mi = String(d.getMinutes()).padStart(2,"0");
+    return `${dd}/${mm} ${hh}:${mi}`;
+  }
+
+  function formatDay(ts){
+    if (!ts) return "";
+    const d = new Date(ts);
+    if (isNaN(d)) return "";
+    return d.toLocaleDateString("es-ES", { weekday:"short", year:"numeric", month:"short", day:"numeric" });
+  }
+
+  function showToast(main, sub, icon="🔔"){
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+    document.getElementById("toast-main").textContent = main;
+    document.getElementById("toast-sub").textContent  = sub || "";
+    document.getElementById("toast-icon").textContent = icon;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 5000);
+  }
+
+  document.getElementById("toast-close").addEventListener("click", () => {
+    document.getElementById("toast").classList.remove("show");
   });
 
-  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-}
+  // ======== ESTADO GLOBAL ========
 
-/* ========== CARGAR MENSAJES ========== */
-async function cargar(){
-  const { data, error } = await supabase
-    .from("chat_mensajes")
-    .select("*")
-    .order("created_at",{ascending:true})
-    .limit(300);
+  let currentUser = null;       // { username, nombre, rol? }
+  let currentUsername = "invitado";
+  let currentNombre   = "Invitado";
 
-  if (!error) mensajes = data;
-  render();
-}
-cargar();
+  let operarios = [];
+  let mapaOperarios = {};
 
-/* ========== REALTIME ========== */
-supabase
-  .channel("chat-realtime")
-  .on("postgres_changes",
-      {event:"*",schema:"public",table:"chat_mensajes"},
-      payload=>{
-        const m = payload.new;
-        const idx = mensajes.findIndex(x=>x.id===m.id);
-        if(idx>=0) mensajes[idx]=m;
-        else mensajes.push(m);
-        render();
+  let allMessages = []; // todos los mensajes visibles (esParaMi)
+  let conversations = {}; // key -> { key, participantes, title, messages, lastMessage }
+  let selectedConvKey = null;
+  let selectedConvParticipants = [];  // user ids (username) sin asegurar orden
+
+  // ======== CARGAR USUARIO LOCAL ========
+
+  function initCurrentUser(){
+    try {
+      const op = JSON.parse(localStorage.getItem("operario"));
+      if (op && op.username){
+        currentUser = op;
+        currentUsername = op.username;
+        currentNombre   = op.nombre || op.username;
       }
-  )
-  .subscribe();
+    } catch {
+      currentUser = null;
+    }
+    document.getElementById("user-pill").textContent =
+      `Usuario: ${currentNombre} (${currentUsername})`;
+  }
 
-/* ========== ENVIAR ========== */
-chatSend.addEventListener("click", enviar);
+  // ======== SUPABASE: OPERARIOS ========
 
-async function enviar(){
-  const txt = chatInput.value.trim();
-  if (!txt) return;
+  async function cargarOperarios(){
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("operarios")
+      .select("username, nombre, rol")
+      .order("nombre", { ascending:true });
 
-  chatSend.disabled = true;
-  chatStatus.textContent = "Enviando...";
+    if (error){
+      console.error("Error cargando operarios:", error);
+      return;
+    }
+    operarios = data || [];
+    mapaOperarios = {};
+    operarios.forEach(o => mapaOperarios[o.username] = o);
 
-  const payload = {
-    autor: USER,
-    mensaje: txt,
-    importante: chatImportant.checked,
-    destinatarios: null
-  };
+    // Rellenar panel de nueva conversación
+    const body = document.getElementById("new-chat-body");
+    body.innerHTML = `
+      <p style="font-size:12px;color:var(--muted);margin-top:0;">
+        Marca uno o varios destinatarios para crear un chat privado o de grupo.
+      </p>
+    `;
 
-  await supabase.from("chat_mensajes").insert(payload);
+    operarios.forEach(op => {
+      if (op.username === currentUsername) return; // no me incluyo a mí mismo
+      const row = document.createElement("label");
+      row.className = "dest-item";
+      row.innerHTML = `
+        <input type="checkbox" value="${op.username}">
+        <span>${op.nombre || op.username}</span>
+      `;
+      body.appendChild(row);
+    });
+  }
 
-  chatInput.value = "";
-  chatImportant.checked = false;
-  chatStatus.textContent = "";
-  chatSend.disabled = false;
-}
+  // ======== LÓGICA DE VISIBILIDAD (PRIVACIDAD) ========
 
-/* ========== MARCAR HECHO ========== */
-async function marcarHecho(id){
-  const msg = mensajes.find(m=>m.id==id);
-  if (!msg) return;
+  function esParaMi(msg){
+    const user = currentUsername;
+    if (!user) return false;
 
-  const leidos = Array.isArray(msg.leido_por) ? [...msg.leido_por] : [];
-  if (!leidos.includes(USER)) leidos.push(USER);
+    // Mis mensajes siempre los veo
+    if (msg.autor === user) return true;
 
-  await supabase
-    .from("chat_mensajes")
-    .update({ leido_por: leidos })
-    .eq("id",id);
+    let dest = msg.destinatarios;
+    if (!dest || (Array.isArray(dest) && dest.length === 0)){
+      // Mensaje general
+      return true;
+    }
+    if (typeof dest === "string"){
+      try { dest = JSON.parse(dest); } catch { dest = []; }
+    }
+    if (Array.isArray(dest)){
+      return dest.includes(user);
+    }
+    // formato raro -> máximo permisivo
+    return true;
+  }
 
-}
+  // Devuelve array de participantes (usernames) de un mensaje
+  function getParticipantsFromMsg(msg){
+    let dest = normalizeArray(msg.destinatarios);
+    const set = new Set(dest);
+    set.add(msg.autor);
+    return Array.from(set).sort();
+  }
+
+  // Key de conversación:
+  // - "GENERAL" si destinatarios vacío
+  // - si no, todos los participantes (autor + destinatarios) ordenados y unidos con "|"
+  function getConversationKeyFromMsg(msg){
+    let dest = normalizeArray(msg.destinatarios);
+    if (!dest || dest.length === 0){
+      return "GENERAL";
+    }
+    const parts = getParticipantsFromMsg(msg);
+    return parts.join("|");
+  }
+
+  // Nombre legible de conversación desde una key
+  function getConversationTitle(key){
+    if (key === "GENERAL") return "Chat general";
+
+    const parts = key.split("|");
+    // conversaciones que me incluyen:
+    // quitarme a mí de la lista para mostrar nombres de otros
+    const others = parts.filter(p => p !== currentUsername);
+    if (others.length === 1){
+      const op = mapaOperarios[others[0]];
+      return op?.nombre || others[0];
+    }
+    // grupo
+    const nombres = others.map(u => mapaOperarios[u]?.nombre || u);
+    if (nombres.length <= 2) return `Grupo: ${nombres.join(", ")}`;
+    return `Grupo: ${nombres[0]}, ${nombres[1]} +${nombres.length - 2}`;
+  }
+
+  // Texto "participantes" para cabecera
+  function getParticipantsText(key){
+    if (key === "GENERAL"){
+      return "Todos los usuarios (mensaje general)";
+    }
+    const parts = key.split("|");
+    const nombres = parts.map(u => mapaOperarios[u]?.nombre || u);
+    return nombres.join(", ");
+  }
+
+  // ======== CARGAR MENSAJES ========
+
+  async function cargarMensajesInicial(){
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("chat_mensajes")
+      .select("*")
+      .order("created_at", { ascending:true })
+      .limit(500);
+
+    if (error){
+      console.error("Error cargando mensajes:", error);
+      document.getElementById("chat-status").textContent =
+        "Error al cargar mensajes.";
+      return;
+    }
+
+    const visibles = (data || []).filter(esParaMi);
+    allMessages = visibles;
+    construirConversaciones();
+    renderConversaciones();
+    if (!selectedConvKey){
+      // por defecto el general si existe, si no, la primera
+      if (conversations["GENERAL"]){
+        seleccionarConversacion("GENERAL");
+      } else {
+        const keys = Object.keys(conversations);
+        if (keys.length > 0) seleccionarConversacion(keys[0]);
+      }
+    } else {
+      seleccionarConversacion(selectedConvKey);
+    }
+
+    document.getElementById("chat-status").textContent = "";
+  }
+
+  // ======== CONSTRUCCIÓN DE CONVERSACIONES EN MEMORIA ========
+
+  function construirConversaciones(){
+    conversations = {};
+    const user = currentUsername;
+    allMessages.forEach(msg => {
+      if (!esParaMi(msg)) return;
+      const key = getConversationKeyFromMsg(msg);
+      if (!conversations[key]){
+        const parts = (key === "GENERAL") ? [] : key.split("|");
+        conversations[key] = {
+          key,
+          participantes: parts,
+          messages: [],
+          lastMessage: null
+        };
+      }
+      conversations[key].messages.push(msg);
+      conversations[key].lastMessage = msg;
+    });
+  }
+
+  // ======== RENDERIZAR LISTA DE CONVERSACIONES ========
+
+  function getUnreadCountForConversation(conv){
+    const user = currentUsername;
+    let count = 0;
+    conv.messages.forEach(m => {
+      if (!m.importante) return; // solo contamos importantes para el “globo” de tarea
+      const leidos = normalizeArray(m.leido_por);
+      if (m.autor !== user && !leidos.includes(user)) count++;
+    });
+    return count;
+  }
+
+  function hasImportantInConversation(conv){
+    return conv.messages.some(m => m.importante);
+  }
+
+  function renderConversaciones(){
+    const search = (document.getElementById("conv-search").value || "").toLowerCase();
+
+    const mainList  = document.getElementById("conv-list-main");
+    const impList   = document.getElementById("conv-list-important");
+    mainList.innerHTML = "";
+    impList.innerHTML  = "";
+
+    const keys = Object.keys(conversations).sort((a,b) => {
+      const ma = conversations[a].lastMessage?.created_at || "";
+      const mb = conversations[b].lastMessage?.created_at || "";
+      return ma.localeCompare(mb);
+    });
+
+    keys.reverse(); // últimos arriba
+
+    keys.forEach(key => {
+      const conv = conversations[key];
+      const title = getConversationTitle(key);
+      const last = conv.lastMessage;
+
+      if (search){
+        const lowerTitle = title.toLowerCase();
+        const lastText = (last?.mensaje || "").toLowerCase();
+        if (!lowerTitle.includes(search) && !lastText.includes(search)) return;
+      }
+
+      const lastText = last?.mensaje || "";
+      const timeTxt  = last ? formatTime(last.created_at) : "";
+      const unread   = getUnreadCountForConversation(conv);
+      const importantFlag = hasImportantInConversation(conv);
+
+      const el = document.createElement("div");
+      el.className = "conv-item" + (selectedConvKey === key ? " active" : "");
+      el.dataset.key = key;
+      el.innerHTML = `
+        <div class="conv-line-1">
+          <div class="conv-name">${title}</div>
+          <div class="conv-time">${timeTxt}</div>
+        </div>
+        <div class="conv-line-2">
+          <div class="conv-last">${lastText || "Sin mensajes"}</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            ${importantFlag ? '<span class="conv-important-dot"></span>' : ''}
+            ${unread > 0 ? `<div class="conv-badge">${unread}</div>` : ""}
+          </div>
+        </div>
+      `;
+      el.addEventListener("click", () => {
+        seleccionarConversacion(key);
+        // en móvil, cerrar lista
+        document.getElementById("sidebar")?.classList.remove("open");
+      });
+
+      if (importantFlag){
+        impList.appendChild(el.cloneNode(true));
+      }
+
+      // En la sección de chats ponemos todo
+      mainList.appendChild(el);
+    });
+
+    if (!impList.children.length){
+      impList.innerHTML = `<div style="font-size:11px;color:var(--muted);padding:4px 6px;">
+        No hay conversaciones con mensajes importantes.
+      </div>`;
+    }
+
+    if (!mainList.children.length){
+      mainList.innerHTML = `<div style="font-size:11px;color:var(--muted);padding:4px 6px;">
+        No hay conversaciones. Crea un nuevo chat.
+      </div>`;
+    }
+  }
+
+  // ======== SELECCIONAR CONVERSACIÓN ========
+
+  function seleccionarConversacion(key){
+    if (!conversations[key]){
+      selectedConvKey = null;
+      selectedConvParticipants = [];
+      document.getElementById("conv-title").textContent = "Sin conversación";
+      document.getElementById("conv-sub").textContent   = "Selecciona un chat o crea uno nuevo.";
+      document.getElementById("conv-participants-pill").textContent = "–";
+      document.getElementById("messages-container").innerHTML =
+        `<div class="chat-empty">No hay mensajes.</div>`;
+      return;
+    }
+
+    selectedConvKey = key;
+    const conv = conversations[key];
+    selectedConvParticipants = (key === "GENERAL") ? [] : key.split("|");
+
+    document.getElementById("conv-title").textContent = getConversationTitle(key);
+    document.getElementById("conv-sub").textContent   = key === "GENERAL"
+      ? "Chat general visible para todos."
+      : "Solo ven esta conversación los participantes listados.";
+    document.getElementById("conv-participants-pill").textContent =
+      getParticipantsText(key);
+
+    renderConversaciones(); // refrescar active
+    renderMensajes();
+  }
+
+  // ======== RENDERIZAR MENSAJES DE LA CONVERSACIÓN ACTUAL ========
+
+  function renderMensajes(){
+    const container = document.getElementById("messages-container");
+    container.innerHTML = "";
+
+    const key = selectedConvKey;
+    if (!key || !conversations[key]){
+      container.innerHTML = `<div class="chat-empty">No hay conversación seleccionada.</div>`;
+      return;
+    }
+
+    const msgs = conversations[key].messages;
+    if (!msgs.length){
+      container.innerHTML = `<div class="chat-empty">Todavía no hay mensajes en este chat.</div>`;
+      return;
+    }
+
+    let lastDay = "";
+    msgs.forEach(msg => {
+      const thisDay = formatDay(msg.created_at);
+      if (thisDay !== lastDay){
+        lastDay = thisDay;
+        const dayEl = document.createElement("div");
+        dayEl.className = "day-separator";
+        dayEl.textContent = thisDay;
+        container.appendChild(dayEl);
+      }
+
+      const mine = msg.autor === currentUsername;
+      const row = document.createElement("div");
+      row.className = "msg-row " + (mine ? "mine" : "other");
+
+      // autor (solo en grupos o general y cuando el mensaje no es mío)
+      const showAuthor = !mine && selectedConvKey !== "GENERAL" ? true : !mine;
+      if (showAuthor){
+        const au = document.createElement("div");
+        au.className = "msg-author";
+        const op = mapaOperarios[msg.autor];
+        au.textContent = op?.nombre || msg.autor;
+        row.appendChild(au);
+      }
+
+      const bubble = document.createElement("div");
+      bubble.className = "msg-bubble";
+
+      const textDiv = document.createElement("div");
+      textDiv.className = "msg-text";
+      textDiv.textContent = msg.mensaje || "";
+      bubble.appendChild(textDiv);
+
+      const metaDiv = document.createElement("div");
+      metaDiv.className = "msg-meta";
+
+      const metaLeft = document.createElement("div");
+      metaLeft.className = "msg-meta-left";
+
+      if (msg.importante){
+        const t = document.createElement("span");
+        t.className = "msg-tag importante";
+        t.textContent = "IMPORTANTE";
+        metaLeft.appendChild(t);
+      }
+
+      const dest = normalizeArray(msg.destinatarios);
+      if (dest.length > 0 && selectedConvKey === "GENERAL"){
+        const nombres = dest.map(u => mapaOperarios[u]?.nombre || u);
+        const t = document.createElement("span");
+        t.className = "msg-tag";
+        t.textContent = "Para: " + nombres.join(", ");
+        metaLeft.appendChild(t);
+      }
+
+      // info de quién lo ha marcado como hecho
+      const leidos = normalizeArray(msg.leido_por);
+      const userLeido = leidos.includes(currentUsername);
+
+      if (msg.importante){
+        if (!mine && !userLeido){
+          const btn = document.createElement("button");
+          btn.className = "msg-done-btn";
+          btn.textContent = "Marcar hecho";
+          btn.addEventListener("click", () => marcarMensajeHecho(msg.id));
+          metaLeft.appendChild(btn);
+        }
+        if (userLeido && !mine){
+          const t = document.createElement("span");
+          t.className = "msg-tag msg-tag-hecho";
+          t.textContent = "Marcado como hecho";
+          metaLeft.appendChild(t);
+        }
+
+        // Para el autor: quién lo ha hecho
+        if (mine && leidos.length > 0){
+          const nombres = leidos.map(u => mapaOperarios[u]?.nombre || u);
+          const spanH = document.createElement("span");
+          spanH.className = "msg-hechos-list";
+          spanH.textContent = "Hecho por: " + nombres.join(", ");
+          metaLeft.appendChild(spanH);
+        }
+      }
+
+      const metaRight = document.createElement("div");
+      metaRight.className = "msg-meta-right";
+      metaRight.textContent = formatTime(msg.created_at);
+
+      metaDiv.appendChild(metaLeft);
+      metaDiv.appendChild(metaRight);
+      bubble.appendChild(metaDiv);
+
+      row.appendChild(bubble);
+      container.appendChild(row);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // ======== MARCAR MENSAJE COMO HECHO ========
+
+  async function marcarMensajeHecho(id){
+    if (!supabase || !id) return;
+    const msg = allMessages.find(m => String(m.id) === String(id));
+    if (!msg) return;
+
+    let leidos = normalizeArray(msg.leido_por);
+    if (leidos.includes(currentUsername)) return;
+    leidos.push(currentUsername);
+
+    const { data, error } = await supabase
+      .from("chat_mensajes")
+      .update({ leido_por: leidos })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error){
+      console.error("Error marcando mensaje como hecho:", error);
+      showToast("Error", "No se ha podido marcar como hecho.", "⚠️");
+      return;
+    }
+
+    // actualizar en memoria
+    const idx = allMessages.findIndex(m => m.id === data.id);
+    if (idx >= 0) allMessages[idx] = data;
+    construirConversaciones();
+    renderConversaciones();
+    if (selectedConvKey) seleccionarConversacion(selectedConvKey);
+  }
+
+  // ======== ENVIAR MENSAJE ========
+
+  async function enviarMensaje(){
+    const txtArea = document.getElementById("msg-input");
+    const text = (txtArea.value || "").trim();
+    if (!text) return;
+    if (!supabase) return;
+
+    const statusEl = document.getElementById("chat-status");
+    statusEl.textContent = "Enviando...";
+    document.getElementById("btn-send").disabled = true;
+
+    // Destinatarios según conversación actual
+    let destinatarios = null;
+
+    if (selectedConvKey === "GENERAL" || !selectedConvKey){
+      destinatarios = null;
+    } else {
+      // participantes sin mí mismo
+      const parts = selectedConvKey.split("|");
+      const dest = parts.filter(u => u !== currentUsername);
+      destinatarios = dest.length ? dest : null;
+    }
+
+    const payload = {
+      autor: currentUsername,
+      mensaje: text,
+      importante: !!document.getElementById("chk-important").checked,
+      destinatarios
+    };
+
+    const { error } = await supabase
+      .from("chat_mensajes")
+      .insert(payload);
+
+    if (error){
+      console.error("Error enviando mensaje:", error);
+      statusEl.textContent = "No se ha podido enviar el mensaje.";
+    } else {
+      txtArea.value = "";
+      document.getElementById("chk-important").checked = false;
+      statusEl.textContent = "Mensaje enviado.";
+      setTimeout(() => statusEl.textContent = "", 1500);
+    }
+
+    document.getElementById("btn-send").disabled = false;
+  }
+
+  // ======== NUEVA CONVERSACIÓN ========
+
+  function abrirNuevaConversacion(){
+    document.getElementById("overlay-new-chat").classList.add("show");
+  }
+  function cerrarNuevaConversacion(){
+    document.getElementById("overlay-new-chat").classList.remove("show");
+  }
+
+  function crearNuevaConversacionDesdeSeleccion(){
+    const body = document.getElementById("new-chat-body");
+    const inputs = body.querySelectorAll("input[type=checkbox]");
+    const seleccion = [];
+    inputs.forEach(i => {
+      if (i.checked) seleccion.push(i.value);
+    });
+
+    if (!seleccion.length){
+      showToast("Selecciona al menos un usuario","Para crear un chat debes elegir destinatarios.","⚠️");
+      return;
+    }
+
+    // participantes = yo + selección
+    const set = new Set(seleccion);
+    set.add(currentUsername);
+    const partes = Array.from(set).sort();
+    const key = partes.join("|");
+
+    if (!conversations[key]){
+      conversations[key] = {
+        key,
+        participantes: partes,
+        messages: [],
+        lastMessage: null
+      };
+    }
+
+    cerrarNuevaConversacion();
+    renderConversaciones();
+    seleccionarConversacion(key);
+  }
+
+  // ======== LISTA DE IMPORTANTES (OVERLAY) ========
+
+  function abrirListaImportantes(){
+    const body = document.getElementById("important-body");
+    const importantes = allMessages.filter(m => m.importante && esParaMi(m));
+
+    if (!importantes.length){
+      body.innerHTML = `<p style="color:var(--muted);font-size:12px;">
+        No tienes mensajes importantes.
+      </p>`;
+    } else {
+      importantes.sort((a,b) => (b.created_at || "").localeCompare(a.created_at || ""));
+      body.innerHTML = importantes.map(msg => {
+        const dest = normalizeArray(msg.destinatarios);
+        const leidos = normalizeArray(msg.leido_por);
+        const mine   = msg.autor === currentUsername;
+
+        const participantes = getParticipantsFromMsg(msg);
+        const convKey       = getConversationKeyFromMsg(msg);
+        const titulo        = getConversationTitle(convKey);
+        const nombresDest   = dest.map(u => mapaOperarios[u]?.nombre || u);
+
+        const nombresLeidos = leidos.map(u => mapaOperarios[u]?.nombre || u);
+        const hechoTxt = nombresLeidos.length
+          ? `Hecho por: ${nombresLeidos.join(", ")}`
+          : "Pendiente de marcar como hecho";
+
+        return `
+          <div style="border-bottom:1px solid var(--border);padding:6px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+              <span style="font-weight:600;">${titulo}</span>
+              <span style="color:var(--muted);">${formatTime(msg.created_at)}</span>
+            </div>
+            <div style="font-size:12px;margin-top:2px;">${(msg.mensaje || "").replace(/</g,"&lt;")}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+              Enviado por: <strong>${mapaOperarios[msg.autor]?.nombre || msg.autor}</strong>
+              ${dest.length ? ` · Para: ${nombresDest.join(", ")}` : ""}
+            </div>
+            <div style="font-size:11px;margin-top:2px;color:${nombresLeidos.length ? "#bbf7d0" : "#fecaca"};">
+              ${hechoTxt}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("overlay-important").classList.add("show");
+  }
+
+  function cerrarListaImportantes(){
+    document.getElementById("overlay-important").classList.remove("show");
+  }
+
+  // ======== REALTIME SUPABASE ========
+
+  function activarRealtime(){
+    if (!supabase) return;
+
+    supabase
+      .channel("chat_mensajes_changes")
+      .on("postgres_changes",
+        { event:"INSERT", schema:"public", table:"chat_mensajes" },
+        payload => {
+          const msg = payload.new;
+          if (!esParaMi(msg)) return;
+          allMessages.push(msg);
+          construirConversaciones();
+          renderConversaciones();
+
+          // si el mensaje pertenece a la conversación actual
+          const convKey = getConversationKeyFromMsg(msg);
+          if (convKey === selectedConvKey){
+            seleccionarConversacion(convKey);
+          }
+
+          // pequeña notificación si el mensaje es importante y no es mío
+          if (msg.importante && msg.autor !== currentUsername){
+            const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor;
+            showToast(
+              "Nuevo mensaje IMPORTANTE",
+              `${autorNombre}: ${msg.mensaje.slice(0,80)}`,
+              "⭐"
+            );
+          }
+        }
+      )
+      .on("postgres_changes",
+        { event:"UPDATE", schema:"public", table:"chat_mensajes" },
+        payload => {
+          const msg = payload.new;
+          // actualizar en allMessages
+          const idx = allMessages.findIndex(m => m.id === msg.id);
+          if (idx >= 0) allMessages[idx] = msg;
+          else if (esParaMi(msg)) allMessages.push(msg);
+
+          construirConversaciones();
+          renderConversaciones();
+          if (selectedConvKey){
+            seleccionarConversacion(selectedConvKey);
+          }
+
+          // Si soy el autor y alguien nuevo ha marcado hecho, mostrar toast
+          const oldMsg = payload.old || null;
+          if (oldMsg && msg.autor === currentUsername && msg.importante){
+            const oldLeidos = normalizeArray(oldMsg.leido_por);
+            const newLeidos = normalizeArray(msg.leido_por);
+            if (newLeidos.length > oldLeidos.length){
+              const nuevos = newLeidos.filter(u => !oldLeidos.includes(u));
+              if (nuevos.length){
+                const nombres = nuevos.map(u => mapaOperarios[u]?.nombre || u);
+                showToast(
+                  "Tarea marcada como hecha",
+                  `${nombres.join(", ")} confirmó tu mensaje importante.`,
+                  "✅"
+                );
+              }
+            }
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  // ======== EVENTOS UI ========
+
+  document.getElementById("btn-send").addEventListener("click", enviarMensaje);
+  document.getElementById("msg-input").addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.ctrlKey){
+      e.preventDefault();
+      enviarMensaje();
+    }
+  });
+
+  document.getElementById("btn-new-chat").addEventListener("click", abrirNuevaConversacion);
+  document.getElementById("btn-close-new-chat").addEventListener("click", cerrarNuevaConversacion);
+  document.getElementById("btn-cancel-new-chat").addEventListener("click", cerrarNuevaConversacion);
+  document.getElementById("btn-create-new-chat").addEventListener("click", crearNuevaConversacionDesdeSeleccion);
+
+  document.getElementById("btn-open-important").addEventListener("click", abrirListaImportantes);
+  document.getElementById("btn-close-important").addEventListener("click", cerrarListaImportantes);
+  document.getElementById("btn-close-important-footer").addEventListener("click", cerrarListaImportantes);
+
+  document.getElementById("conv-search").addEventListener("input", renderConversaciones);
+
+  document.getElementById("btn-toggle-sidebar").addEventListener("click", () => {
+    const sb = document.getElementById("sidebar");
+    sb.classList.toggle("open");
+  });
+
+  // El chip de destinatarios es informativo: muestra una explicación
+  document.getElementById("dest-chip").addEventListener("click", () => {
+    if (!selectedConvKey || selectedConvKey === "GENERAL"){
+      showToast(
+        "Destinatarios",
+        "En el chat general los mensajes son visibles para todos.",
+        "ℹ️"
+      );
+    } else {
+      showToast(
+        "Destinatarios",
+        "En este chat solo ven las conversaciones los participantes listados arriba.",
+        "ℹ️"
+      );
+    }
+  });
+
+  // ======== INIT ========
+
+  async function init(){
+    if (!supabase){
+      console.error("Supabase no disponible.");
+      document.getElementById("chat-status").textContent =
+        "Supabase no está disponible.";
+      return;
+    }
+    initCurrentUser();
+    await cargarOperarios();
+    await cargarMensajesInicial();
+    activarRealtime();
+  }
+
+  init();
+
 </script>
+
 </body>
 </html>
