@@ -2369,6 +2369,74 @@
   setInterval(actualizarBadgeImportantes, 20000);
 </script>
 
+/* === GLOBO 3D SUPABASE ALERTAS IMPORTANTES === */
 
+const alertGlobe = document.getElementById("alert-globe");
+const alertGlobeCount = document.getElementById("alert-globe-count");
+
+// Lógica para contar mensajes importantes NO leídos
+async function actualizarGloboAlertas(){
+  const userData = JSON.parse(localStorage.getItem("operario"));
+  const USER = userData?.username || null;
+  if(!USER) return;
+
+  const { data, error } = await supabase
+    .from("chat_mensajes")
+    .select("*");
+
+  if(error){
+    console.error("Error cargando mensajes para globo:", error);
+    return;
+  }
+
+  let pendientes = 0;
+
+  data.forEach(msg=>{
+    if(!msg.importante) return;
+
+    const destinatarios = msg.destinatarios || [];
+    const leidos = msg.leido_por || [];
+
+    // Mensajes generales → siempre cuentan si no están leídos
+    const esGeneral = destinatarios.length === 0;
+
+    // Mensajes dirigidos a mí
+    const esParaMi = destinatarios.includes(USER);
+
+    if((esGeneral || esParaMi) && !leidos.includes(USER)){
+      pendientes++;
+    }
+  });
+
+  if(pendientes > 0){
+    alertGlobeCount.textContent = pendientes;
+    alertGlobe.classList.add("show");
+  }
+  else{
+    alertGlobe.classList.remove("show");
+  }
+}
+
+// Click abre chat.html
+alertGlobe.addEventListener("click", ()=>{
+  window.location.href = "chat.html";
+});
+
+// Real-time Supabase
+supabase
+  .channel("alertas-importantes")
+  .on("postgres_changes",
+      { event:"*", schema:"public", table:"chat_mensajes"},
+      payload => actualizarGloboAlertas()
+  )
+  .subscribe();
+
+// Primera carga
+actualizarGloboAlertas();
+
+// Auto refresco cada 30s
+setInterval(actualizarGloboAlertas, 30000);
+
+  
 </body>
 </html
