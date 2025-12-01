@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>TMP · Consulta Tablas de Equipos</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <link rel="icon" href="img/tmp-quality.png" />
+
+  <style>
+    :root {
+      --bg0:#050b16;
+      --bg1:#071324;
+      --card:#0f1f33;
+      --border:#203552;
+      --txt:#f2f6fb;
+      --muted:#9fb3ca;
+      --accent:#3ea8ff;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family:"Inter",sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, #182f55 0, transparent 55%),
+        radial-gradient(circle at 100% 0%, #1a3b64 0, transparent 55%),
+        linear-gradient(180deg,var(--bg1),var(--bg0));
+      color:var(--txt);
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:40px;
+    }
+
+    .app { max-width:1100px; margin:16px auto 32px; padding:0 14px; }
+
+    header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:18px;
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .brand-logo { height:34px; }
+    .brand-title { font-size:17px; font-weight:700; }
+    .brand-sub { font-size:12px; color:var(--muted); }
+
+    .btn {
+      padding:10px 16px;
+      border:none;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      background:var(--accent);
+      color:#031321;
+    }
+
+    .btn.secondary {
+      background:transparent;
+      color:var(--muted);
+      border:1px solid var(--border);
+    }
+
+    .card {
+      border-radius:16px;
+      background:linear-gradient(135deg,#0f1f33,#0a1625);
+      border:1px solid rgba(62,168,255,.4);
+      box-shadow:0 18px 40px rgba(0,0,0,.5);
+      padding:16px;
+      margin-bottom:20px;
+    }
+
+    .card-title { font-size:15px; font-weight:700; }
+    .card-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+
+    label {
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      margin-bottom:4px;
+      display:block;
+    }
+
+    input, select, textarea {
+      width:100%;
+      background:#050d1a;
+      border:1px solid #253954;
+      border-radius:10px;
+      padding:9px 11px;
+      color:var(--txt);
+      font-size:13px;
+    }
+
+    textarea { min-height:70px; resize:vertical; }
+
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+    @media(max-width:900px) { .grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:600px) { .grid { grid-template-columns:1fr; } }
+
+    .table-wrap {
+      border-radius:12px;
+      overflow:auto;
+      border:1px solid var(--border);
+      max-height:350px;
+    }
+
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th,td { padding:6px; border-bottom:1px solid #1f3046; }
+    th {
+      background:#0c1929;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-size:11px;
+      position:sticky;
+      top:0;
+    }
+
+    #msg {
+      margin-top:8px;
+      color:#ff7b7b;
+      font-size:12px;
+      display:none;
+    }
+
+    /* ---------- MODO IMPRESIÓN ---------- */
+    @media print {
+      body {
+        background:white !important;
+        color:black !important;
+      }
+
+      header,
+      .no-print,
+      #versionWrapper,
+      .card-sub {
+        display:none !important;
+      }
+
+      .card {
+        background:white !important;
+        border:1px solid #777 !important;
+        box-shadow:none !important;
+        color:black !important;
+      }
+
+      input, textarea {
+        background:white !important;
+        border:1px solid #999 !important;
+        color:black !important;
+      }
+
+      table, th, td {
+        border:1px solid black !important;
+        color:black !important;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" class="brand-logo">
+    <div>
+      <div class="brand-title">TMP · Consultar Tablas de Equipos</div>
+      <div class="brand-sub">Ver, imprimir y editar versiones</div>
+    </div>
+  </div>
+
+  <button class="btn secondary" onclick="location.href='home.html'">← Volver</button>
+</header>
+
+<!-- BÚSQUEDA -->
+<section class="card no-print">
+  <div class="card-title">Buscar referencia</div>
+  <div class="card-sub">Introduce una referencia para cargar su tabla de equipos</div>
+
+  <label>Referencia</label>
+  <div style="display:flex; gap:8px;">
+    <input id="refInput" placeholder="Ej: REF-001">
+    <button class="btn" id="btnBuscar">Buscar</button>
+  </div>
+
+  <p id="msg"></p>
+
+  <div id="versionWrapper" style="margin-top:12px; display:none;">
+    <label>Versión</label>
+    <select id="versionSelect"></select>
+  </div>
+</section>
+
+<!-- INFORMACIÓN -->
+<section class="card">
+  <div class="card-title">Datos de la referencia</div>
+
+  <div class="grid">
+    <div>
+      <label>Referencia</label>
+      <input id="refDetalle" readonly>
+    </div>
+    <div>
+      <label>Pieza</label>
+      <input id="piezaDetalle" readonly>
+    </div>
+    <div>
+      <label>Cliente</label>
+      <input id="clienteDetalle" readonly>
+    </div>
+    <div>
+      <label>Responsable</label>
+      <input id="responsableDetalle" readonly>
+    </div>
+    <div>
+      <label>Fecha</label>
+      <input id="fechaDetalle" readonly>
+    </div>
+    <div>
+      <label>Versión</label>
+      <input id="versionDetalle" readonly>
+    </div>
+  </div>
+
+  <label style="margin-top:12px;">Observaciones</label>
+  <textarea id="observacionesDetalle" readonly></textarea>
+</section>
+
+<!-- TABLA EQUIPOS -->
+<section class="card">
+  <div class="card-title">Equipos necesarios</div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>Tipo medida</th>
+        </tr>
+      </thead>
+      <tbody id="tablaEquipos">
+        <tr><td colspan="5">Sin datos</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BOTONES -->
+  <div class="no-print" style="margin-top:16px; display:flex; gap:10px;">
+    <button class="btn" id="btnEditarVersion">✏️ Editar esta versión</button>
+    <button class="btn" onclick="window.print()">🖨 Imprimir tabla</button>
+  </div>
+</section>
+
+</div>
+
+<!-- SUPABASE -->
+<script type="module" src="config.mjs"></script>
+
+<script type="module">
+const sb = window.supabase;
+const $ = sel => document.querySelector(sel);
+
+let registros = [];
+let idx = 0;
+
+/* ============================
+   UTILIDADES
+============================ */
+function msj(t) {
+  const box = $("#msg");
+  box.textContent = t;
+  box.style.display = "block";
+}
+
+function limpiarDatos() {
+  $("#refDetalle").value = "";
+  $("#piezaDetalle").value = "";
+  $("#clienteDetalle").value = "";
+  $("#responsableDetalle").value = "";
+  $("#fechaDetalle").value = "";
+  $("#versionDetalle").value = "";
+  $("#observacionesDetalle").value = "";
+  $("#tablaEquipos").innerHTML = "<tr><td colspan='5'>Sin datos</td></tr>";
+}
+
+/* ============================
+   CARGAR REGISTRO
+============================ */
+function mostrarRegistro(rec) {
+  $("#refDetalle").value = rec.referencia || "";
+  $("#piezaDetalle").value = rec.pieza || "";
+  $("#clienteDetalle").value = rec.cliente || "";
+  $("#responsableDetalle").value = rec.responsable || "";
+  $("#fechaDetalle").value = rec.fecha || "";
+  $("#versionDetalle").value = rec.version || "";
+  $("#observacionesDetalle").value = rec.observaciones || "";
+
+  const eqs = Array.isArray(rec.equipos) ? rec.equipos : [];
+  const tbody = $("#tablaEquipos");
+
+  if (eqs.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='5'>No hay equipos</td></tr>";
+    return;
+  }
+
+  tbody.innerHTML = eqs.map((e,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${e.codigo_equipo||""}</td>
+      <td>${e.descripcion_equipo||""}</td>
+      <td>${e.cantidad||""}</td>
+      <td>${e.tipo_medida||""}</td>
+    </tr>
+  `).join("");
+}
+
+/* ============================
+   BUSQUEDA PRINCIPAL
+============================ */
+async function buscar() {
+  const ref = $("#refInput").value.trim();
+  if (!ref) return msj("Introduce una referencia.");
+
+  limpiarDatos();
+
+  const { data, error } = await sb
+    .from("control_metrologico")
+    .select("*")
+    .eq("referencia", ref)
+    .order("fecha", { ascending:false });
+
+  if (error) return msj("Error consultando Supabase.");
+  if (!data || data.length === 0)
+    return msj(`No existe ninguna tabla para "${ref}".`);
+
+  registros = data;
+  idx = 0;
+
+  // Mostrar versiones si hay varias
+  const wrapper = $("#versionWrapper");
+  const sel = $("#versionSelect");
+
+  if (registros.length > 1) {
+    wrapper.style.display = "block";
+    sel.innerHTML = registros.map((r,i)=>
+      `<option value="${i}">${r.version || ("Versión "+(i+1))}</option>`
+    ).join("");
+  } else {
+    wrapper.style.display = "none";
+    sel.innerHTML = "";
+  }
+
+  mostrarRegistro(registros[idx]);
+  $("#msg").style.display = "none";
+}
+
+$("#btnBuscar").onclick = buscar;
+$("#refInput").onkeydown = e => {
+  if (e.key === "Enter") buscar();
+};
+
+/* ============================
+   CAMBIO DE VERSIÓN
+============================ */
+$("#versionSelect").onchange = e => {
+  const i = parseInt(e.target.value);
+  if (!registros[i]) return;
+  idx = i;
+  mostrarRegistro(registros[idx]);
+};
+
+/* ============================
+   EDITAR
+============================ */
+$("#btnEditarVersion").onclick = () => {
+  if (!registros[idx]) {
+    alert("Primero busca una referencia.");
+    return;
+  }
+
+  localStorage.setItem("editarReferencia", JSON.stringify(registros[idx]));
+  window.location.href = "equipos-referencia-crear.html?modo=editar";
+};
+
+</script>
+
+</body>
+</html>
+
