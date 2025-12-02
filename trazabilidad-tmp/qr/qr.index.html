@@ -242,6 +242,7 @@
       box-shadow:0 0 10px rgba(0,0,0,.4);
       z-index:50;
     }
+
     #volverHome:hover{
       background:#2ea043;
     }
@@ -298,7 +299,7 @@
 </header>
 
 <div class="wrap">
-  <!-- PANEL IZQUIERDO: UN INSTRUMENTO / PRUEBA RÁPIDA -->
+  <!-- PANEL IZQUIERDO -->
   <div class="card">
     <h2>Generar QR individual</h2>
 
@@ -318,11 +319,10 @@
     <div id="qrResult"></div>
 
     <p class="hint">
-      El QR generado apunta a la ficha del instrumento (qr.info_instrumentos) en el sistema TMP.
+      El QR generado apunta a la ficha del instrumento en el sistema TMP.
       La etiqueta <b>sólo contiene el código QR</b>, sin texto visible.
     </p>
   </div>
-
   <!-- PANEL DERECHO: SELECCIÓN MÚLTIPLE + HOJA A4 -->
   <div class="card">
     <h2>Imprimir hoja A4 de etiquetas</h2>
@@ -334,16 +334,15 @@
     </div>
 
     <div class="list-instrumentos" id="listaInstrumentos">
-      <!-- Aquí se cargan los instrumentos desde Supabase -->
+      <!-- Aquí se cargan los instrumentos -->
     </div>
 
     <div class="panel-footer" id="infoCapacidad">
       <span><strong>Tamaño actual QR:</strong> <span id="lblTamano">10 mm</span></span>
-      <span><strong>Capacidad fija hoja A4:</strong> <span id="lblCapacidad">–</span> etiquetas</span>
+      <span><strong>Capacidad fija hoja A4:</strong> <span id="lblCapacidad">12</span> etiquetas</span>
       <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
       <span class="hint">
-        Hoja fija en cuadrícula 3 x 4 con líneas de corte visibles.  
-        Priorizamos que sea muy fácil recortar recto, aunque quepan menos etiquetas.
+        Hoja fija en cuadrícula 3x4 con líneas de corte pegadas al QR (4 mm).
       </span>
     </div>
 
@@ -354,25 +353,25 @@
     </div>
 
     <div class="preview-sheet">
-      <div class="hint">Esquema de cuadrícula (3 columnas x 4 filas):</div>
+      <div class="hint">Esquema de cuadrícula (3 columnas × 4 filas):</div>
       <div id="previewGrid" class="preview-grid"></div>
     </div>
   </div>
 
 </div>
 
-<!-- Cargar Supabase config -->
+<!-- Supabase -->
 <script type="module" src="../config.mjs"></script>
+
 <script>
-  // ==========================
+  // ==================================
   // CONFIGURACIÓN GENERAL
-  // ==========================
+  // ==================================
   const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-  // A4 siempre, cuadrícula fija 3 x 4
   const PRINT_COLS = 3;
   const PRINT_ROWS = 4;
-  const MAX_PER_PAGE = PRINT_COLS * PRINT_ROWS;
+  const MAX_PER_PAGE = 12;
 
   let etiquetaMM = 10;
   let allInstrumentos = [];
@@ -387,43 +386,24 @@
   const buscadorInput = document.getElementById("buscador");
 
   const lblTamano = document.getElementById("lblTamano");
-  const lblCapacidad = document.getElementById("lblCapacidad");
   const lblSeleccionados = document.getElementById("lblSeleccionados");
   const previewGrid = document.getElementById("previewGrid");
 
-  // ==========================
-  // CAPACIDAD FIJA POR HOJA A4 (3 x 4)
-  // ==========================
-  function computeLayout(){
-    return {
-      cols: PRINT_COLS,
-      rows: PRINT_ROWS,
-      perPage: MAX_PER_PAGE
-    };
-  }
 
+  // ==================================
+  // PREVIEW 3×4
+  // ==================================
   function actualizarCapacidad(){
-    const {cols, rows, perPage} = computeLayout();
-
     lblTamano.textContent = etiquetaMM + " mm";
-    lblCapacidad.textContent = `${perPage} (${cols} columnas x ${rows} filas)`;
     lblSeleccionados.textContent = selectedCodigos.size;
 
-    // PREVIEW COMPACTO
-    const maxColsPreview = cols;
-    const maxRowsPreview = rows;
-
-    const previewCells = maxColsPreview * maxRowsPreview;
-
-    previewGrid.style.gridTemplateColumns = `repeat(${maxColsPreview}, 1fr)`;
+    previewGrid.style.gridTemplateColumns = "repeat(3, 1fr)";
     previewGrid.innerHTML = "";
 
-    const usados = Math.min(selectedCodigos.size, previewCells);
-
-    for(let i = 0; i < previewCells; i++){
+    for(let i = 0; i < MAX_PER_PAGE; i++){
       const div = document.createElement("div");
       div.className = "preview-cell";
-      if (i < usados){
+      if (i < selectedCodigos.size) {
         div.classList.add("filled");
         div.textContent = i+1;
       }
@@ -431,9 +411,10 @@
     }
   }
 
-  // ==========================
+
+  // ==================================
   // GENERAR QR INDIVIDUAL
-  // ==========================
+  // ==================================
   function generarQR(){
     const codigo = codigoInput.value.trim();
     if (!codigo){
@@ -459,9 +440,6 @@
     qrResult.appendChild(p);
   }
 
-  // ==========================
-  // GESTIÓN DE TAMAÑO
-  // ==========================
   sizeButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       sizeButtons.forEach(b => b.classList.remove("active"));
@@ -475,6 +453,7 @@
   });
 
   document.getElementById("btnGenerar").addEventListener("click", generarQR);
+
   codigoInput.addEventListener("keydown", e => {
     if (e.key === "Enter"){
       e.preventDefault();
@@ -482,9 +461,10 @@
     }
   });
 
-  // ==========================
+
+  // ==================================
   // CARGAR INSTRUMENTOS DESDE SUPABASE
-  // ==========================
+  // ==================================
   async function cargarInstrumentos(){
     const supabase = window.supabase;
 
@@ -505,11 +485,12 @@
       return;
     }
 
-    allInstrumentos = data || [];
+    allInstrumentos = data;
     badgeEstado.textContent = `Instrumentos cargados: ${allInstrumentos.length}`;
 
     renderInstrumentList();
   }
+
 
   function renderInstrumentList(filtro = ""){
     const term = filtro.toLowerCase();
@@ -524,7 +505,8 @@
     listaInstrumentos.innerHTML = "";
 
     if (!filtrados.length){
-      listaInstrumentos.innerHTML = `<div style="padding:8px;font-size:13px;color:#777;">Sin resultados</div>`;
+      listaInstrumentos.innerHTML =
+        `<div style="padding:8px;font-size:13px;color:#777;">Sin resultados</div>`;
       return;
     }
 
@@ -564,145 +546,174 @@
     renderInstrumentList(buscadorInput.value);
   });
 
+
   document.getElementById("btnRefrescarLista").addEventListener("click", cargarInstrumentos);
+
   document.getElementById("btnLimpiarSeleccion").addEventListener("click", () => {
     selectedCodigos.clear();
     renderInstrumentList(buscadorInput.value);
   });
-
-  // ==========================
-  // IMPRESIÓN A4 CON LÍNEAS DE CORTE
-  // ==========================
-  function imprimirHoja(){
-    if (!selectedCodigos.size){
-      alert("Selecciona al menos un instrumento.");
-      return;
-    }
-
-    const {cols, rows, perPage} = computeLayout();
-    const codigos = Array.from(selectedCodigos);
-    const usable = Math.min(codigos.length, perPage);
-
-    if (codigos.length > perPage){
-      if (!confirm(
-        `La hoja A4 está fijada a ${perPage} etiquetas (3 columnas x 4 filas).\n` +
-        `Has seleccionado ${codigos.length}.\n\n` +
-        `Se imprimirán solo las primeras ${perPage}.\n\n` +
-        `¿Continuar?`
-      )){
+  <!-- ==================================
+       IMPRESIÓN A4 *CON LÍNEAS DE CORTE A 4 MM*
+       CUADRÍCULA FIJA 3x4 → 12 ETIQUETAS
+     ================================== -->
+  <script>
+    function imprimirHoja(){
+      if (!selectedCodigos.size){
+        alert("Selecciona al menos un instrumento.");
         return;
       }
-    }
 
-    const codigosImpr = codigos.slice(0, usable);
+      const codigos = Array.from(selectedCodigos).slice(0, 12); // max 12
+      const etiqueta = etiquetaMM; // tamaño QR en mm
 
-    // Construimos las celdas de la cuadrícula 3x4
-    let filasHTML = "";
-    let index = 0;
+      let etiquetasHTML = "";
+      let index = 0;
 
-    for (let r = 0; r < rows; r++){
-      let celdas = "";
-      for (let c = 0; c < cols; c++){
-        if (index < codigosImpr.length){
-          const codigo = codigosImpr[index];
+      for (let fila = 0; fila < 4; fila++){
+        for (let col = 0; col < 3; col++){
+          const codigo = codigos[index++];
+          if (!codigo) break;
+
           const url = BASE_URL + encodeURIComponent(codigo);
-          celdas += `
-            <td>
-              <div class="label">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}" alt="${codigo}">
-              </div>
-            </td>
-          `;
-        } else {
-          celdas += `<td></td>`;
-        }
-        index++;
-      }
-      filasHTML += `<tr>${celdas}</tr>`;
-    }
 
-    const html = `
+          etiquetasHTML += `
+            <div class="cell">
+              <div class="cut-top"></div>
+              <div class="cut-right"></div>
+              <div class="cut-bottom"></div>
+              <div class="cut-left"></div>
+
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}"
+                   class="qr">
+            </div>
+          `;
+        }
+      }
+
+      // -----------------------------
+      //   HTML & CSS FINAL DE IMPRESIÓN
+      // -----------------------------
+      const html = `
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Etiquetas TMP A4</title>
+<title>Etiquetas TMP – A4</title>
 
 <style>
   @page {
     size: A4;
-    margin: 10mm;
+    margin: 10mm; /* margen físico */
   }
 
   body{
     margin:0;
-    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:0;
+    font-family:sans-serif;
   }
 
-  .sheet-wrapper{
-    width:100%;
-    height:100%;
+  /* === GRID FIJO 3 x 4 === */
+  .sheet{
+    display:grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(4, auto);
+    justify-content:center;
+    align-items:center;
+    gap: 10mm;  /* GRAN separación entre etiquetas */
+    margin-top: 5mm;
+  }
+
+  /* === CELDA DE ETIQUETA === */
+  .cell{
+    position:relative;
+    width:${etiqueta}mm;
+    height:${etiqueta}mm;
     display:flex;
     align-items:center;
     justify-content:center;
   }
 
-  table.sheet{
-    border-collapse:collapse;
-    width:100%;
-    height:260mm; /* ocupa casi todo el alto útil */
-    table-layout:fixed;
+  .qr{
+    width:${etiqueta}mm;
+    height:${etiqueta}mm;
   }
 
-  table.sheet td{
-    border:0.3mm dashed #888; /* LÍNEAS DE CORTE VISIBLES */
-    padding:5mm;              /* MÁS ESPACIO ENTRE ETIQUETAS */
-    text-align:center;
-    vertical-align:middle;
+  /* ======== MARCAS DE CORTE ========
+     - 4 mm desde el borde del QR
+     - líneas finas discontinuas
+  =================================== */
+
+  .cut-top{
+    position:absolute;
+    top:-4mm;
+    left:0;
+    right:0;
+    height:0;
+    border-top:0.4mm dashed #444;
   }
 
-  .label img{
-    width:${etiquetaMM}mm;
-    height:${etiquetaMM}mm;
+  .cut-bottom{
+    position:absolute;
+    bottom:-4mm;
+    left:0;
+    right:0;
+    height:0;
+    border-bottom:0.4mm dashed #444;
   }
+
+  .cut-left{
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:-4mm;
+    width:0;
+    border-left:0.4mm dashed #444;
+  }
+
+  .cut-right{
+    position:absolute;
+    top:0;
+    bottom:0;
+    right:-4mm;
+    width:0;
+    border-right:0.4mm dashed #444;
+  }
+
 </style>
 </head>
 
 <body>
-  <div class="sheet-wrapper">
-    <table class="sheet">
-      <tbody>
-        ${filasHTML}
-      </tbody>
-    </table>
+
+  <div class="sheet">
+    ${etiquetasHTML}
   </div>
 
   <script>
     window.onload = () => {
-      setTimeout(() => { window.print(); }, 300);
+      setTimeout(() => window.print(), 300);
     };
   <\/script>
-</body>
-</html>
-    `;
-
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-  }
-
-  document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHoja);
-
-  // ==========================
-  // INICIALIZACIÓN
-  // ==========================
-  window.addEventListener("load", () => {
-    actualizarCapacidad();
-    setTimeout(cargarInstrumentos, 350);
-  });
-</script>
 
 </body>
 </html>
+      `;
 
+      const win = window.open("", "_blank");
+      win.document.write(html);
+      win.document.close();
+    }
+  </script>
 
+  <!-- =========================
+        INICIALIZACIÓN
+     ========================= -->
+  <script>
+    window.addEventListener("load", () => {
+      actualizarCapacidad();
+      setTimeout(cargarInstrumentos, 350);
+    });
+  </script>
+
+</body>
+</html>
