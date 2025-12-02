@@ -292,13 +292,13 @@
 <header>
   <img src="../img/tmp-quality.png" alt="TMP" class="logo">
   <div>
-    <h1>Generador de códigos QR</h1>
-    <span class="sub">Trazabilidad de instrumentos · TMP</span>
+    <h1>Generar códigos QR</h1>
+    <span class="sub">Trazabilidad instrumentos TMP</span>
   </div>
 </header>
 
 <div class="wrap">
-  <!-- PANEL IZQUIERDO: UN INSTRUMENTO / PRUEBA RÁPIDA -->
+  <!-- PANEL IZQUIERDO -->
   <div class="card">
     <h2>Generar QR individual</h2>
 
@@ -316,67 +316,52 @@
     </div>
 
     <div id="qrResult"></div>
-
-    <p class="hint">
-      El QR generado apunta a la ficha del instrumento (qr.info_instrumentos) en el sistema TMP.
-      La etiqueta <b>sólo contiene el código QR</b>, sin texto visible.
-    </p>
   </div>
 
-  <!-- PANEL DERECHO: SELECCIÓN MÚLTIPLE + HOJA A4 -->
+  <!-- PANEL DERECHO -->
   <div class="card">
-    <h2>Imprimir hoja A4 de etiquetas</h2>
-    <div class="badge" id="badgeEstado">Cargando instrumentos desde Supabase…</div>
+    <h2>Imprimir hoja A5</h2>
+    <div class="badge" id="badgeEstado">Cargando instrumentos…</div>
 
     <div class="search-box">
-      <label for="buscador">Buscar instrumentos (código o descripción)</label>
-      <input id="buscador" type="text" placeholder="Ej: 112, micrómetro, tampón…">
+      <label for="buscador">Buscar instrumentos</label>
+      <input id="buscador" type="text">
     </div>
 
-    <div class="list-instrumentos" id="listaInstrumentos">
-      <!-- Aquí se cargan los instrumentos desde Supabase -->
-    </div>
+    <div class="list-instrumentos" id="listaInstrumentos"></div>
 
-    <div class="panel-footer" id="infoCapacidad">
-      <span><strong>Tamaño actual:</strong> <span id="lblTamano">10 mm</span></span>
-      <span><strong>Capacidad estimada hoja A4:</strong> <span id="lblCapacidad">–</span> etiquetas</span>
+    <div class="panel-footer">
+      <span><strong>Tamaño:</strong> <span id="lblTamano">10 mm</span></span>
+      <span><strong>Capacidad A5:</strong> <span id="lblCapacidad">–</span></span>
       <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
-      <span class="hint">
-        Consejos: selecciona sólo los equipos que vayas a etiquetar ahora.  
-        Si escoges menos de la capacidad, el resto de la hoja quedará en blanco.
-      </span>
     </div>
 
     <div class="btn-row">
-      <button class="btn-main" id="btnImprimirHoja">Imprimir hoja A4</button>
+      <button class="btn-main" id="btnImprimirHoja">Imprimir hoja A5</button>
       <button class="btn-ghost" id="btnLimpiarSeleccion">Limpiar selección</button>
-      <button class="btn-ghost" id="btnRefrescarLista">Recargar lista desde Supabase</button>
+      <button class="btn-ghost" id="btnRefrescarLista">Refrescar</button>
     </div>
 
     <div class="preview-sheet">
-      <div class="hint">Esquema aproximado de ocupación de la hoja (no escala real):</div>
+      <div class="hint">Esquema aproximado:</div>
       <div id="previewGrid" class="preview-grid"></div>
     </div>
   </div>
-
 </div>
 
-<!-- Cargar Supabase config -->
 <script type="module" src="../config.mjs"></script>
-<script>
-  // ==========================
-  // CONFIGURACIÓN GENERAL
-  // ==========================
-  const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-  const PAGE_WIDTH_MM  = 210;
-  const PAGE_HEIGHT_MM = 297;
-  const PAGE_MARGIN_MM = 12;  // margen más grande para que NADA se imprima encima
-  const GAP_MM         = 3;   // separación entre etiquetas aumentada
+<script>
+  const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
   let etiquetaMM = 10;
   let allInstrumentos = [];
   const selectedCodigos = new Set();
+
+  const PAGE_A5_W = 148;
+  const PAGE_A5_H = 210;
+  const PAGE_MARGIN = 8;
+  const GAP_MM = 3;
 
   const qrResult   = document.getElementById("qrResult");
   const codigoInput = document.getElementById("codigo");
@@ -392,11 +377,11 @@
   const previewGrid = document.getElementById("previewGrid");
 
   // ==========================
-  // CAPACIDAD POR HOJA A4
+  // LAYOUT A5
   // ==========================
   function computeLayout(labelMM){
-    const usableW = PAGE_WIDTH_MM  - 2*PAGE_MARGIN_MM;
-    const usableH = PAGE_HEIGHT_MM - 2*PAGE_MARGIN_MM;
+    const usableW = PAGE_A5_W - (2 * PAGE_MARGIN);
+    const usableH = PAGE_A5_H - (2 * PAGE_MARGIN);
 
     const cellW = labelMM + GAP_MM;
     const cellH = labelMM + GAP_MM;
@@ -404,35 +389,23 @@
     const cols = Math.max(1, Math.floor(usableW / cellW));
     const rows = Math.max(1, Math.floor(usableH / cellH));
 
-    return {
-      cols,
-      rows,
-      perPage: cols * rows
-    };
+    return { cols, rows, perPage: cols * rows };
   }
 
   function actualizarCapacidad(){
     const {cols, rows, perPage} = computeLayout(etiquetaMM);
 
     lblTamano.textContent = etiquetaMM + " mm";
-    lblCapacidad.textContent = `${perPage} (${cols} columnas x ${rows} filas)`;
+    lblCapacidad.textContent = `${perPage} (${cols}x${rows})`;
     lblSeleccionados.textContent = selectedCodigos.size;
 
-    // PREVIEW COMPACTO
-    const maxColsPreview = Math.min(cols, 16);
-    const maxRowsPreview = Math.min(rows, 10);
-
-    const previewCells = maxColsPreview * maxRowsPreview;
-
-    previewGrid.style.gridTemplateColumns = `repeat(${maxColsPreview}, 1fr)`;
+    previewGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
     previewGrid.innerHTML = "";
 
-    const usados = Math.min(selectedCodigos.size, previewCells);
-
-    for(let i = 0; i < previewCells; i++){
+    for(let i = 0; i < cols * rows; i++){
       const div = document.createElement("div");
       div.className = "preview-cell";
-      if (i < usados){
+      if(i < selectedCodigos.size){
         div.classList.add("filled");
         div.textContent = i+1;
       }
@@ -441,12 +414,12 @@
   }
 
   // ==========================
-  // GENERAR QR INDIVIDUAL
+  // QR individual
   // ==========================
   function generarQR(){
     const codigo = codigoInput.value.trim();
     if (!codigo){
-      alert("Introduce el código del instrumento");
+      alert("Introduce un código");
       return;
     }
 
@@ -461,67 +434,37 @@
       width: etiquetaMM * 8,
       height: etiquetaMM * 8
     });
-
-    const p = document.createElement("p");
-    p.className = "hint";
-    p.textContent = "URL: " + url;
-    qrResult.appendChild(p);
   }
 
-  // ==========================
-  // GESTIÓN DE TAMAÑO
-  // ==========================
   sizeButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       sizeButtons.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
-      etiquetaMM = parseInt(btn.dataset.mm, 10);
+      etiquetaMM = parseInt(btn.dataset.mm);
       actualizarCapacidad();
-
-      if (codigoInput.value.trim()) generarQR();
     });
   });
 
   document.getElementById("btnGenerar").addEventListener("click", generarQR);
-  codigoInput.addEventListener("keydown", e => {
-    if (e.key === "Enter"){
-      e.preventDefault();
-      generarQR();
-    }
-  });
 
   // ==========================
-  // CARGAR INSTRUMENTOS DESDE SUPABASE
+  // Cargar instrumentos
   // ==========================
   async function cargarInstrumentos(){
     const supabase = window.supabase;
-
-    if (!supabase){
-      badgeEstado.textContent = "Supabase no disponible.";
-      return;
-    }
-
-    badgeEstado.textContent = "Cargando instrumentos…";
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("instrumentos")
       .select("codigo, descripcion")
-      .order("codigo", { ascending:true });
-
-    if (error){
-      badgeEstado.textContent = "Error al cargar.";
-      return;
-    }
+      .order("codigo");
 
     allInstrumentos = data || [];
-    badgeEstado.textContent = `Instrumentos cargados: ${allInstrumentos.length}`;
+    badgeEstado.textContent = `Instrumentos: ${allInstrumentos.length}`;
 
     renderInstrumentList();
   }
 
-  function renderInstrumentList(filtro = ""){
-    const term = filtro.toLowerCase();
+  function renderInstrumentList(filter=""){
+    const term = filter.toLowerCase();
 
     const filtrados = term
       ? allInstrumentos.filter(i =>
@@ -532,11 +475,6 @@
 
     listaInstrumentos.innerHTML = "";
 
-    if (!filtrados.length){
-      listaInstrumentos.innerHTML = `<div style="padding:8px;font-size:13px;color:#777;">Sin resultados</div>`;
-      return;
-    }
-
     filtrados.forEach(inst => {
       const row = document.createElement("label");
       row.className = "inst-row";
@@ -544,25 +482,24 @@
       const check = document.createElement("input");
       check.type = "checkbox";
       check.dataset.codigo = inst.codigo;
-      check.checked = selectedCodigos.has(inst.codigo);
 
       check.addEventListener("change", () => {
-        if (check.checked) selectedCodigos.add(inst.codigo);
+        if(check.checked) selectedCodigos.add(inst.codigo);
         else selectedCodigos.delete(inst.codigo);
         actualizarCapacidad();
       });
 
-      const codeSpan = document.createElement("span");
-      codeSpan.className = "inst-code";
-      codeSpan.textContent = inst.codigo;
+      const code = document.createElement("span");
+      code.className = "inst-code";
+      code.textContent = inst.codigo;
 
-      const descSpan = document.createElement("span");
-      descSpan.className = "inst-desc";
-      descSpan.textContent = inst.descripcion || "";
+      const desc = document.createElement("span");
+      desc.className = "inst-desc";
+      desc.textContent = inst.descripcion || "";
 
       row.appendChild(check);
-      row.appendChild(codeSpan);
-      row.appendChild(descSpan);
+      row.appendChild(code);
+      row.appendChild(desc);
       listaInstrumentos.appendChild(row);
     });
 
@@ -578,12 +515,13 @@
     selectedCodigos.clear();
     renderInstrumentList(buscadorInput.value);
   });
+
   // ==========================
-  // IMPRESIÓN A4 CON MÁRGENES AMPLIOS Y CROQUIS SEPARADO
+  // IMPRESIÓN A5
   // ==========================
   function imprimirHoja(){
-    if (!selectedCodigos.size){
-      alert("Selecciona al menos un instrumento.");
+    if(!selectedCodigos.size){
+      alert("Selecciona al menos 1 instrumento");
       return;
     }
 
@@ -591,148 +529,61 @@
     const codigos = Array.from(selectedCodigos);
     const usable = Math.min(codigos.length, perPage);
 
-    if (codigos.length > perPage){
-      if (!confirm(
-        `Para ${etiquetaMM} mm caben ${perPage} etiquetas por hoja.\n` +
-        `Has seleccionado ${codigos.length}.\n\n` +
-        `Se imprimirán solo las primeras ${perPage}.\n\n` +
-        `¿Continuar?`
-      )){
-        return;
-      }
-    }
+    const lista = codigos.slice(0, usable);
 
-    const codigosImpr = codigos.slice(0, usable);
     let etiquetasHTML = "";
-    let croquisRows = "";
-
-    codigosImpr.forEach((codigo, i) => {
+    lista.forEach(codigo => {
       const url = BASE_URL + encodeURIComponent(codigo);
-
       etiquetasHTML += `
-        <div class="label">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}">
-        </div>
-      `;
-
-      croquisRows += `
-        <tr>
-          <td>${i+1}</td>
-          <td>${Math.floor(i/cols) + 1}</td>
-          <td>${(i % cols) + 1}</td>
-          <td>${codigo}</td>
-        </tr>
-      `;
+      <div class="label">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}">
+      </div>`;
     });
 
-    // ========================
-    //   HTML COMPLETO A IMPRIMIR
-    // ========================
     const html = `
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Etiquetas TMP</title>
-
+<title>Etiquetas A5</title>
 <style>
-  @page {
-    size: A4;
-    margin: ${PAGE_MARGIN_MM}mm;
+  @page{
+    size: A5 portrait;
+    margin: ${PAGE_MARGIN}mm;
   }
-
   body{
     margin:0;
-    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
   }
-
-  /* HOJA DE ETIQUETAS */
   .sheet{
     display:grid;
-    grid-template-columns: repeat(${cols}, ${etiquetaMM}mm);
-    grid-auto-rows: ${etiquetaMM}mm;
+    justify-content:center;
+    align-content:start;
+    grid-template-columns:repeat(${cols}, ${etiquetaMM}mm);
+    grid-auto-rows:${etiquetaMM}mm;
     gap:${GAP_MM}mm;
     width:100%;
-    justify-content:center;
-    margin-top:0;
+    height:100%;
   }
-
   .label{
+    border:0.35mm dashed #444;
+    border-radius:3px;
     display:flex;
     justify-content:center;
     align-items:center;
+    background:white;
   }
-
   .label img{
     width:${etiquetaMM}mm;
     height:${etiquetaMM}mm;
-  }
-
-  /* HOJA CROQUIS (SEPARADA) */
-  .croquis{
-    page-break-before: always;
-    padding: 12mm;
-  }
-
-  h3{
-    margin:0 0 6px;
-    font-size:16px;
-  }
-
-  p{
-    margin:0 0 8px;
-    font-size:13px;
-  }
-
-  table{
-    width:100%;
-    border-collapse: collapse;
-    font-size:12px;
-  }
-  th,td{
-    padding:4px 6px;
-    border:1px solid #aaa;
-  }
-  th{
-    background:#e7e7e7;
   }
 </style>
 </head>
 
 <body>
-
-  <!-- HOJA 1: ETIQUETAS -->
-  <div class="sheet">${etiquetasHTML}</div>
-
-  <!-- HOJA 2: CROQUIS -->
-  <div class="croquis">
-    <h3>Esquema de colocación</h3>
-    <p>Orden de lectura: filas de arriba abajo, columnas de izquierda a derecha.</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Fila</th>
-          <th>Columna</th>
-          <th>Código</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${croquisRows}
-      </tbody>
-    </table>
-  </div>
-
-  <script>
-    window.onload = () => {
-      setTimeout(() => { window.print(); }, 350);
-    };
-  <\/script>
-
+<div class="sheet">${etiquetasHTML}</div>
+<script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script>
 </body>
-</html>
-    `;
+</html>`;
 
     const win = window.open("", "_blank");
     win.document.write(html);
@@ -742,10 +593,14 @@
   document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHoja);
 
   // ==========================
-  // INICIALIZACIÓN
+  // INIT
   // ==========================
-  window.addEventListener("load", () => {
+  window.onload = () => {
+    cargarInstrumentos();
     actualizarCapacidad();
-    setTimeout(cargarInstrumentos, 350);
-  });
+  };
 </script>
+
+</body>
+</html>
+
