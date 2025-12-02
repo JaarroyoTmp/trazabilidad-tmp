@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TMP · Guardar Calibración</title>
+
+<script type="module" src="../config.mjs"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:#0f172a;
+  color:white;
+  padding:20px;
+}
+.card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  max-width:720px;
+  margin:20px auto;
+  border:1px solid #334155;
+}
+h1{margin-top:0;}
+.btn{
+  background:#0ea5e9;
+  border:none;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  color:white;
+  font-weight:600;
+  margin-top:12px;
+}
+.btn:hover{background:#0284c7;}
+.ok{
+  padding:12px;
+  background:#0f5132;
+  border-radius:10px;
+  border:1px solid #198754;
+  color:#d1fae5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Guardando calibración…</h1>
+  <p id="estado">Procesando datos del informe…</p>
+</div>
+
+<script type="module">
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.5";
+
+// ========= CONFIG =========
+const SUPABASE_URL = window.SUPABASE_URL;
+const SUPABASE_KEY = window.SUPABASE_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ========= 1. RECIBIR DATOS =========
+const raw = new URLSearchParams(window.location.search).get("data");
+if (!raw){
+  document.getElementById("estado").innerHTML = "❌ No se recibió ningún dato.";
+  throw new Error("No data received");
+}
+
+const payload = JSON.parse(raw);
+
+document.getElementById("estado").innerHTML = "Datos recibidos. Generando PDF…";
+
+// ========= 2. CREAR NÚMERO DE INFORME =========
+function generarNumeroInforme(codigo){
+  const fecha = new Date();
+  const año = fecha.getFullYear();
+  const rand = Math.floor(Math.random()*9000+1000);
+  return `TMP-CAL-${codigo}-${año}-${rand}`;
+}
+
+const numeroInforme = generarNumeroInforme(payload.codigo);
+
+// ========= 3. GENERAR PDF DESDE CERO =========
+document.getElementById("estado").innerHTML = "Generando PDF profesional…";
+
+async function generarPDF(informe){
+  return new Promise(resolve => {
+
+    let html = `
+      <html><body>
+      <h1>Informe de Calibración TMP</h1>
+      <p><b>Nº Informe:</b> ${numeroInforme}</p>
+      <p><b>Instrumento:</b> ${payload.codigo}</p>
+      <p><b>Fecha calibración:</b> ${payload.fechaCal}</p>
+      <hr>
+      <h2>Resultados</h2>
+      <pre>${JSON.stringify(payload.resultados, null, 2)}</pre>
+      </body></html>
+    `;
+
+    // Convertir a base64 para PDF API
+    const base64 = btoa(unescape(encodeURIComponent(html)));
+    resolve(base64);
+  });
+}
+
+const pdfBase64 = await generarPDF(payload);
+
+// ========= 4. SUBIR PDF A SUPABASE =========
+document.getElementById("estado").innerHTML = "Subiendo PDF a Supabase…";
+
+const pdfName = `${numeroInforme}.pdf`;
+
+const { data: upPDF, error: errPDF } = await supabase.storage
+  .from("informes")
+  .upload(pdfName, b64toBlob(pdfBase64), { contentType: "application/pdf" });
+
+if (errPDF){
+  document.getElementById("estado").innerHTML = "❌ Error subiendo PDF.";
+  throw errPDF;
+}
+
+const { data: urlData } = supabase.storage.from("informes").getPublicUrl(pdfName);
+const pdfURL = urlData.publicUrl;
+
+// ========= 5. GUARDAR EN TABLA calibraciones =========
+document.getElementById("estado").innerHTML = "Guardando registro en la base de datos…";
+
+const { error: dbErr } = await supabase
+  .from("calibraciones")
+  .insert({
+    numero_informe: numeroInforme,
+    codigo_instrumento: payload.codigo,
+    fecha_cal: payload.fechaCal,
+    fecha_proxima: payload.proxCal,
+    usuario: payload.usuario,
+    patrones: payload.patrones,
+    plan: payload.plan,
+    mediciones: payload.mediciones,
+    resultados: payload.resultados,
+    decision_global: payload.resultados?.decision ?? "",
+    firma_base64: payload.firma_base64 ?? null,
+    pdf_url: pdfURL
+  });
+
+if (dbErr){
+  document.getElementById("estado").innerHTML = "❌ Error guardando en Supabase.";
+  throw dbErr;
+}
+
+// ========= 6. TODO OK =========
+document.body.innerHTML = `
+<div class="card">
+  <h1>✔ Calibración guardada correctamente</h1>
+  <div class="ok">
+    <p><b>Nº Informe:</b> ${numeroInforme}</p>
+    <p><b>Instrumento:</b> ${payload.codigo}</p>
+    <p><b>PDF generado y almacenado:</b></p>
+    <p><a href="${pdfURL}" target="_blank" style="color:#7dd3fc">${pdfURL}</a></p>
+  </div>
+  <br>
+  <button class="btn" onclick="window.location.href='calibraciones.html'">Volver al calibrador</button>
+</div>
+`;
+
+// ========= UTILIDAD BASE64 → BLOB =========
+function b64toBlob(base64){
+  const byteString = atob(base64);
+  const array = new Uint8Array(byteString.length);
+  for (let i = 0; i < byteString.length; i++){
+    array[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([array], { type: "application/pdf" });
+}
+
+</script>
+
+</body>
+</html>
