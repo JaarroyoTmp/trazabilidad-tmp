@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Historial de Calibraciones · TMP</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-slate-900 text-white p-6">
+
+  <main class="max-w-6xl mx-auto">
+
+    <h1 class="text-2xl font-semibold mb-6">Historial Profesional de Calibraciones</h1>
+
+    <!-- ======================= -->
+    <!-- FILTROS                 -->
+    <!-- ======================= -->
+    <section class="bg-slate-800 p-6 rounded-lg shadow mb-6">
+      <h2 class="text-lg mb-4">Filtros</h2>
+
+      <div class="grid grid-cols-4 gap-4">
+        <div>
+          <label class="text-sm">Código instrumento</label>
+          <input id="fCod" class="w-full mt-1 p-2 rounded bg-slate-700" placeholder="Ej: CAL-001">
+        </div>
+
+        <div>
+          <label class="text-sm">Cliente</label>
+          <input id="fCli" class="w-full mt-1 p-2 rounded bg-slate-700" placeholder="Empresa">
+        </div>
+
+        <div>
+          <label class="text-sm">Fecha desde</label>
+          <input id="fDesde" type="date" class="w-full mt-1 p-2 rounded bg-slate-700">
+        </div>
+
+        <div>
+          <label class="text-sm">Fecha hasta</label>
+          <input id="fHasta" type="date" class="w-full mt-1 p-2 rounded bg-slate-700">
+        </div>
+      </div>
+
+      <div class="mt-4 flex gap-3">
+        <button onclick="filtrar()"
+          class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 transition">
+          Filtrar
+        </button>
+
+        <button onclick="limpiarFiltros()"
+          class="px-4 py-2 bg-slate-700 rounded hover:bg-slate-600 transition">
+          Limpiar
+        </button>
+      </div>
+
+    </section>
+
+
+    <!-- ======================= -->
+    <!-- TABLA                   -->
+    <!-- ======================= -->
+    <section class="bg-slate-800 p-6 rounded-lg shadow">
+      <h2 class="text-lg mb-4">Resultados</h2>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          
+          <thead class="bg-slate-700 text-gray-200">
+            <tr>
+              <th class="p-2 text-left">Certificado</th>
+              <th class="p-2 text-left">Instrumento</th>
+              <th class="p-2 text-left">Cliente</th>
+              <th class="p-2 text-left">Fecha</th>
+              <th class="p-2 text-left">Estado</th>
+              <th class="p-2 text-left">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody id="tablaHistorial" class="divide-y divide-slate-700">
+            <!-- Aquí se cargan las filas dinámicamente -->
+            <tr>
+              <td colspan="6" class="text-center p-4 text-slate-500">
+                No hay registros cargados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ====================================== -->
+  <!-- SCRIPT PARA DATOS DINÁMICOS / FUTURO   -->
+  <!-- ====================================== -->
+  <script>
+    // Simulación (cuando conectemos Supabase esto se reemplaza):
+    const datosEjemplo = [
+      {
+        cert: "CC-2025-0001",
+        inst: "Calibre 0–150 mm",
+        cliente: "ACME S.A.",
+        fecha: "2025-02-10",
+        estado: "Firmado",
+        urlHtml: "calibraciones.ver.html?cert=CC-2025-0001",
+        urlPdf: "pdf/CC-2025-0001.pdf"
+      }
+    ];
+
+    function cargarHistorial(data) {
+      const tabla = document.getElementById("tablaHistorial");
+      tabla.innerHTML = "";
+
+      data.forEach(reg => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td class="p-2">${reg.cert}</td>
+          <td class="p-2">${reg.inst}</td>
+          <td class="p-2">${reg.cliente}</td>
+          <td class="p-2">${reg.fecha}</td>
+
+          <td class="p-2">
+            <span class="px-2 py-1 rounded ${
+              reg.estado === "Firmado" ? "bg-green-600" :
+              reg.estado === "Pendiente" ? "bg-yellow-600" :
+              "bg-red-600"
+            }">${reg.estado}</span>
+          </td>
+
+          <td class="p-2 flex gap-2">
+            <a href="${reg.urlHtml}" class="px-3 py-1 bg-blue-600 rounded">Ver</a>
+            <a href="${reg.urlPdf}"  class="px-3 py-1 bg-slate-600 rounded">PDF</a>
+          </td>
+        `;
+
+        tabla.appendChild(tr);
+      });
+    }
+
+    cargarHistorial(datosEjemplo);
+
+    function filtrar() { alert("Filtros activos (conectaremos a Supabase luego)"); }
+    function limpiarFiltros() { location.reload(); }
+  </script>
+
+</body>
+</html>
