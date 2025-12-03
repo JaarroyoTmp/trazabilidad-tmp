@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TMP · Certificados de Calibración</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0d1117;
+  --panel:#161b22;
+  --txt:#f0f6fc;
+  --muted:#8b949e;
+  --border:#30363d;
+  --card-bg:#1c2431;
+  --hover:#263041;
+  --accent:#22c55e;
+}
+
+/* GENERAL */
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 0 0,#111827 0,transparent 55%),
+    radial-gradient(circle at 100% 0,#0f172a 0,transparent 55%),
+    var(--bg);
+  color:var(--txt);
+  font-family:Inter,system-ui,Segoe UI,Roboto;
+}
+
+header{
+  background:linear-gradient(135deg,#020617,#020617 55%,#02141d);
+  border-bottom:1px solid var(--border);
+  padding:16px 26px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+header img{
+  height:48px;
+}
+
+header h1{
+  margin:0;
+  font-size:20px;
+  font-weight:700;
+}
+
+main{
+  max-width:1100px;
+  margin:26px auto;
+  padding:0 18px 40px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+  gap:18px;
+}
+
+/* TARJETAS TMP PRO-LINE */
+.card{
+  position:relative;
+  background:var(--panel);
+  border-radius:18px;
+  padding:20px 20px 18px;
+  border:1px solid var(--border);
+  text-decoration:none;
+  color:var(--txt);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  transition:transform .2s ease, box-shadow .25s ease;
+  overflow:hidden;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  background:conic-gradient(
+    from 180deg,
+    rgba(34,197,94,.9),
+    transparent 35%,
+    transparent 65%,
+    rgba(34,197,94,.8),
+    rgba(34,197,94,.9)
+  );
+  opacity:0;
+  transition:opacity .25s ease;
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+
+.card::after{
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:inherit;
+  background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
+             linear-gradient(135deg,#020617,#020617 40%,#020c1a);
+  z-index:0;
+}
+
+.card > *{ position:relative; z-index:1; }
+
+.card:hover{
+  transform:translateY(-4px) scale(1.01);
+  box-shadow:0 18px 40px rgba(0,0,0,.7);
+}
+.card:hover::before{ opacity:1; }
+
+.card-title{
+  font-size:17px;
+  font-weight:600;
+  color:var(--accent);
+}
+
+.card-desc{
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.3;
+}
+
+/* INPUT */
+.input-row{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+input{
+  flex:1;
+  background:#0b1627;
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:13px;
+  color:var(--txt);
+  outline:none;
+}
+
+input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(34,197,94,.4);
+}
+
+.btn{
+  border-radius:999px;
+  border:1px solid var(--accent);
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#ecfeff;
+  font-size:12px;
+  padding:8px 14px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.btn:hover{ filter:brightness(1.05); }
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="img/tmp-quality.png" alt="TMP">
+  <h1>Certificados de Calibración</h1>
+</header>
+
+<main>
+
+  <!-- VER UN CERTIFICADO PROFESIONAL -->
+  <div class="card">
+    <div class="card-title">📄 Ver certificado oficial</div>
+    <div class="card-desc">
+      Introduce el ID del certificado para cargar el informe profesional con firma, ILAC-G8, trazabilidad y PDF.
+    </div>
+
+    <div class="input-row">
+      <input id="idCert" type="text" placeholder="Ej: CC-2025-0001">
+      <button class="btn" onclick="abrirCertificado()">Abrir</button>
+    </div>
+  </div>
+
+  <!-- HISTORIAL (cuando esté conectado a Supabase) -->
+  <a class="card" href="calibraciones.historial.html">
+    <div class="card-title">🗂 Historial de certificados</div>
+    <div class="card-desc">
+      Consulta todos los certificados emitidos por el laboratorio TMP (requiere guardar informes en Supabase).
+    </div>
+  </a>
+
+  <!-- ACCESO AL MÓDULO ORIGINAL (CALIBRACIÓN REAL) -->
+  <a class="card" href="TMP_Calibraciones_Lab.html">
+    <div class="card-title">🧪 Calibración interna TMP</div>
+    <div class="card-desc">
+      Herramienta utilizada para realizar las calibraciones: plan, mediciones, resultado ILAC-G8, firma y registro.
+    </div>
+  </a>
+
+</main>
+
+<script>
+function abrirCertificado(){
+    const id = document.getElementById("idCert").value.trim();
+    if (!id) return alert("Introduce un ID de certificado.");
+    window.location.href = "calibraciones.ver.html?id=" + encodeURIComponent(id);
+}
+</script>
+
+</body>
+</html>
