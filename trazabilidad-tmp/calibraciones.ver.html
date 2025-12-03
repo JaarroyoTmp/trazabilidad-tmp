@@ -1,187 +1,200 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Certificado de Calibración · TMP</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
-  <style>
-    @page { size: A4; margin: 20mm; }
+<meta charset="UTF-8" />
+<title>Certificado de Calibración · TMP</title>
+
+<style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #e5e7eb;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #e6e6e6;
+        margin: 0;
+        padding: 20px;
     }
-  </style>
+
+    .documento {
+        background: white;
+        width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+        border: 1px solid #ccc;
+    }
+
+    h1, h2, h3 {
+        margin: 0;
+        padding: 0;
+        font-weight: normal;
+    }
+
+    h1 {
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+
+    h2 {
+        font-size: 16px;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+    }
+
+    .fila {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 6px;
+    }
+
+    .col {
+        flex: 1;
+    }
+
+    .label {
+        font-weight: bold;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+
+    table th {
+        background: #f2f2f2;
+        border: 1px solid #bbb;
+        padding: 4px;
+        text-align: left;
+    }
+
+    table td {
+        border: 1px solid #ccc;
+        padding: 4px;
+    }
+
+    .firma-box {
+        border: 1px solid #aaa;
+        height: 60px;
+        text-align: center;
+        font-size: 12px;
+        padding-top: 20px;
+        color: #555;
+        background: #fafafa;
+        margin-bottom: 5px;
+    }
+
+    .footer {
+        font-size: 10px;
+        text-align: left;
+        margin-top: 20px;
+        color: #555;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+    }
+</style>
+
 </head>
+<body>
 
-<body class="flex justify-center p-6">
-  <main class="bg-white shadow-lg max-w-4xl w-full p-10 text-sm rounded">
-    
-    <!-- ========================== -->
+<div class="documento">
+
     <!-- CABECERA -->
-    <!-- ========================== -->
-    <header class="flex justify-between items-center border-b pb-4 mb-6">
-      <div>
-        <img src="logo_tmp.png" alt="TMP" class="h-12">
-        <p class="text-[10px] text-slate-500 mt-1">
-          TMP · Sistema profesional de trazabilidad metrológica
-        </p>
-      </div>
-
-      <div class="text-right">
-        <p class="text-xs tracking-widest text-slate-500">CERTIFICADO DE CALIBRACIÓN</p>
-        <p id="certCodigo" class="font-semibold text-lg">CC-000000</p>
-        <p class="text-xs text-slate-500">
-          Revisión: <span id="certRevision">01</span> · 
-          Fecha: <span id="certFechaEmision">2025-01-01</span>
-        </p>
-      </div>
-    </header>
-
-
-    <!-- ========================== -->
-    <!-- DATOS INSTRUMENTO / CLIENTE -->
-    <!-- ========================== -->
-    <section class="border rounded-md p-5 mb-6">
-      <h2 class="text-xs font-semibold mb-3 uppercase text-slate-600">1. Datos del instrumento y del cliente</h2>
-
-      <div class="grid grid-cols-2 gap-6 text-xs">
-
-        <div class="space-y-1">
-          <div><span class="font-semibold">Instrumento:</span> <span id="instNombre">—</span></div>
-          <div><span class="font-semibold">Fabricante / Modelo:</span> <span id="instModelo">—</span></div>
-          <div><span class="font-semibold">Nº serie:</span> <span id="instSerie">—</span></div>
-          <div><span class="font-semibold">Rango:</span> <span id="instRango">—</span></div>
-          <div><span class="font-semibold">Resolución:</span> <span id="instResolucion">—</span></div>
+    <div class="fila" style="align-items:center; margin-bottom:20px;">
+        <div class="col">
+            <img src="logo_tmp.png" alt="TMP" style="height:50px;">
+            <div style="font-size:11px; color:#666;">
+                TMP · Sistema profesional de trazabilidad metrológica
+            </div>
         </div>
 
-        <div class="space-y-1">
-          <div><span class="font-semibold">Cliente:</span> <span id="cliNombre">—</span></div>
-          <div><span class="font-semibold">Ubicación:</span> <span id="cliUbicacion">—</span></div>
-          <div><span class="font-semibold">Fecha calibración:</span> <span id="fecCalibracion">—</span></div>
-          <div><span class="font-semibold">Próxima calibración:</span> <span id="fecProxima">—</span></div>
-          <div><span class="font-semibold">Condiciones ambientales:</span> 
-            <span id="condAmb">—</span>
-          </div>
+        <div class="col" style="text-align:right;">
+            <div style="font-size:12px; color:#666;">CERTIFICADO DE CALIBRACIÓN</div>
+            <div id="certCodigo" style="font-size:22px; font-weight:bold;">CC-000000</div>
+            <div style="font-size:12px; color:#666;">
+                Revisión: <span id="certRevision">01</span> · Fecha: <span id="certFechaEmision">2025-01-01</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- DATOS INSTRUMENTO -->
+    <h2>1. Datos del instrumento y del cliente</h2>
+
+    <div class="fila">
+        <div class="col">
+            <div><span class="label">Instrumento:</span> <span id="instNombre">—</span></div>
+            <div><span class="label">Fabricante / Modelo:</span> <span id="instModelo">—</span></div>
+            <div><span class="label">Nº serie:</span> <span id="instSerie">—</span></div>
+            <div><span class="label">Rango:</span> <span id="instRango">—</span></div>
+            <div><span class="label">Resolución:</span> <span id="instResolucion">—</span></div>
         </div>
 
-      </div>
-    </section>
+        <div class="col">
+            <div><span class="label">Cliente:</span> <span id="cliNombre">—</span></div>
+            <div><span class="label">Ubicación:</span> <span id="cliUbicacion">—</span></div>
+            <div><span class="label">Fecha calibración:</span> <span id="fecCalibracion">—</span></div>
+            <div><span class="label">Próxima calibración:</span> <span id="fecProxima">—</span></div>
+            <div><span class="label">Condiciones ambientales:</span> <span id="condAmb">—</span></div>
+        </div>
+    </div>
 
 
-
-    <!-- ========================== -->
     <!-- TRAZABILIDAD -->
-    <!-- ========================== -->
-    <section class="border rounded-md p-5 mb-6">
-      <h2 class="text-xs font-semibold mb-3 uppercase text-slate-600">2. Trazabilidad e información metrológica</h2>
+    <h2>2. Trazabilidad e información metrológica</h2>
 
-      <p class="text-xs text-slate-700 mb-2">
-        La calibración se ha realizado conforme a procedimientos internos TMP basados en ISO/IEC 17025 e ILAC-G8,
-        utilizando patrones trazables a patrones nacionales e internacionales.
-      </p>
+    <div id="trazaDescripcion" style="font-size:13px;">
+        —
+    </div>
 
-      <p class="text-xs text-slate-700 mb-2">
-        La incertidumbre expandida U se indica para k = 2, correspondiente a un nivel de confianza del 95 %.
-      </p>
-
-      <p class="text-[10px] text-slate-500">
-        Métodos, patrones y condiciones detalladas se custodian digitalmente en el sistema TMP.
-      </p>
-    </section>
+    <div id="trazaIncertidumbre" style="font-size:13px; margin-top:8px;">
+        —
+    </div>
 
 
+    <!-- RESULTADOS -->
+    <h2>3. Resultados de calibración</h2>
+    <div id="tablaResultados">No hay datos.</div>
 
 
-    <!-- ========================== -->
-    <!-- TABLA DE RESULTADOS -->
-    <!-- ========================== -->
-    <section class="border rounded-md p-5 mb-6">
-
-      <h2 class="text-xs font-semibold mb-3 uppercase text-slate-600">
-        3. Resultados de calibración
-      </h2>
-
-      <!-- Tabla dinámica -->
-      <div id="tablaResultados" class="overflow-x-auto mt-3">
-        <!-- Aquí se inyectarán tablas dinámicas por cada tipo de medición -->
-        <p class="text-xs text-slate-500">No hay resultados cargados.</p>
-      </div>
-
-    </section>
-
-
-
-
-    <!-- ========================== -->
     <!-- OBSERVACIONES -->
-    <!-- ========================== -->
-    <section class="border rounded-md p-5 mb-6">
-      <h2 class="text-xs font-semibold mb-3 uppercase text-slate-600">4. Observaciones</h2>
-
-      <p id="obsTexto" class="text-xs text-slate-700">
-        Sin observaciones adicionales.
-      </p>
-    </section>
+    <h2>4. Observaciones</h2>
+    <div id="obsTexto">—</div>
 
 
-
-
-    <!-- ========================== -->
     <!-- FIRMAS -->
-    <!-- ========================== -->
-    <section class="border rounded-md p-5 mb-4">
-      <h2 class="text-xs font-semibold mb-3 uppercase text-slate-600">5. Firmas y aprobación</h2>
+    <h2>5. Firmas y aprobación</h2>
 
-      <div class="grid grid-cols-3 gap-4 text-[11px]">
-
-        <div class="text-center">
-          <p class="font-semibold mb-2">Técnico</p>
-          <div id="firmaTecnico" class="h-14 border mb-1 flex items-center justify-center text-[10px]">
-            Firma digital visible
-          </div>
-          <p id="tecnicoNombre">Nombre Apellidos</p>
-          <p class="text-slate-500 text-[10px]">Fecha: <span id="tecnicoFecha">—</span></p>
+    <div class="fila">
+        <div class="col">
+            <div class="label">Técnico</div>
+            <div class="firma-box" id="firmaTecnico">Firma digital visible</div>
+            <div id="tecnicoNombre"></div>
+            <div style="font-size:11px">Fecha: <span id="tecnicoFecha">—</span></div>
         </div>
 
-        <div class="text-center">
-          <p class="font-semibold mb-2">Revisión</p>
-          <div id="firmaRevision" class="h-14 border mb-1 flex items-center justify-center text-[10px]">
-            Firma digital visible
-          </div>
-          <p id="revisionNombre">Nombre Apellidos</p>
-          <p class="text-slate-500 text-[10px]">Fecha: <span id="revisionFecha">—</span></p>
+        <div class="col">
+            <div class="label">Revisión</div>
+            <div class="firma-box" id="firmaRevision">Firma digital visible</div>
+            <div id="revisionNombre"></div>
+            <div style="font-size:11px">Fecha: <span id="revisionFecha">—</span></div>
         </div>
 
-        <div class="text-center">
-          <p class="font-semibold mb-2">Aprobación</p>
-          <div id="firmaAprobacion" class="h-14 border mb-1 flex items-center justify-center text-[10px]">
-            Firma digital visible
-          </div>
-          <p id="aprobNombre">Nombre Apellidos</p>
-          <p class="text-slate-500 text-[10px]">Fecha: <span id="aprobFecha">—</span></p>
+        <div class="col">
+            <div class="label">Aprobación</div>
+            <div class="firma-box" id="firmaAprobacion">Firma digital visible</div>
+            <div id="aprobNombre"></div>
+            <div style="font-size:11px">Fecha: <span id="aprobFecha">—</span></div>
         </div>
+    </div>
 
-      </div>
-    </section>
+    <div class="footer">
+        TMP · Sistema profesional de trazabilidad metrológica · v1.0<br>
+        Este documento es válido únicamente en PDF firmado digitalmente.
+    </div>
 
+</div>
 
-
-
-    <!-- ========================== -->
-    <!-- PIE DE PÁGINA -->
-    <!-- ========================== -->
-    <footer class="mt-4 pt-4 border-t flex justify-between items-center text-[9px] text-slate-500">
-      <div>
-        TMP · Sistema profesional de trazabilidad metrológica · v1.0  
-        <div>Documento válido únicamente en PDF firmado digitalmente.</div>
-      </div>
-
-      <div class="w-16 h-16 border flex items-center justify-center text-[8px] text-center">
-        QR verificación
-      </div>
-    </footer>
-
-  </main>
+<script src="calibraciones.cargar.js"></script>
 
 </body>
 </html>
