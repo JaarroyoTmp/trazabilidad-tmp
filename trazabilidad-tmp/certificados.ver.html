@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TMP · Certificado de Calibración</title>
+
+  <!-- Fuente -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#020617;
+      --bg1:#020c1a;
+      --panel:#020617;
+      --card:#0b1220;
+      --border:#1e293b;
+      --border-soft:#1f2937;
+      --txt:#e5f0ff;
+      --muted:#94a3b8;
+      --accent:#22c55e;
+      --accent-soft:#4ade80;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --ok:#22c55e;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 0 0,#0f172a 0,transparent 55%),
+        radial-gradient(circle at 100% 0,#020617 0,transparent 45%),
+        #020617;
+      color:var(--txt);
+    }
+
+    .shell{
+      max-width:1040px;
+      margin:20px auto 32px;
+      padding:0 16px 24px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:10px 16px 14px;
+      border-radius:18px;
+      background:radial-gradient(circle at 0 0,#0b1120 0,transparent 55%),
+                 linear-gradient(135deg,#020617,#020617 55%,#02141f);
+      border:1px solid #1f2937;
+      box-shadow:0 14px 40px rgba(0,0,0,.7);
+      position:relative;
+      overflow:hidden;
+    }
+
+    header::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      background:conic-gradient(
+        from 180deg,
+        rgba(34,197,94,.75),
+        transparent 35%,
+        transparent 65%,
+        rgba(56,189,248,.7),
+        rgba(34,197,94,.75)
+      );
+      opacity:0.18;
+      mix-blend-mode:screen;
+      pointer-events:none;
+    }
+
+    header > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand-logo{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      background:
+        radial-gradient(circle at 30% 20%,#f9fafb,transparent 55%),
+        linear-gradient(135deg,#22c55e,#16a34a);
+      box-shadow:
+        0 0 0 2px rgba(15,23,42,1),
+        0 10px 24px rgba(0,0,0,0.6);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      color:#022c22;
+      font-size:20px;
+    }
+
+    .brand-text h1{
+      margin:0;
+      font-size:18px;
+      font-weight:600;
+      letter-spacing:.03em;
+    }
+
+    .brand-text p{
+      margin:2px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .header-right{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .badge{
+      font-size:11px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:#020617;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .badge-ok{
+      border-color:var(--ok);
+      color:var(--ok);
+    }
+    .badge-bad{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+    .badge-warn{
+      border-color:var(--warn);
+      color:var(--warn);
+    }
+
+    .btn{
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:#020617;
+      color:var(--txt);
+      font-size:12px;
+      padding:6px 12px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      cursor:pointer;
+      transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover{
+      background:#0b1220;
+      transform:translateY(-1px);
+      box-shadow:0 10px 24px rgba(0,0,0,.7);
+    }
+    .btn-primary{
+      border-color:var(--accent);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#ecfeff;
+    }
+    .btn-primary:hover{
+      filter:brightness(1.04);
+    }
+
+    main{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:2.2fr 1.6fr;
+      gap:16px;
+    }
+
+    .panel{
+      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
+                 linear-gradient(145deg,#020617,#020617 55%,#020c1a);
+      border-radius:18px;
+      border:1px solid var(--border);
+      box-shadow:0 18px 40px rgba(0,0,0,.75);
+      padding:16px 16px 14px;
+    }
+
+    .panel h2{
+      margin:0 0 8px;
+      font-size:16px;
+      font-weight:600;
+      color:#e5f3ff;
+    }
+
+    .panel h3{
+      margin:0 0 6px;
+      font-size:14px;
+      font-weight:600;
+      color:#cbdff9;
+    }
+
+    .muted{
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 10px;
+    }
+
+    .kline{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      font-size:13px;
+      margin-bottom:4px;
+    }
+
+    .klabel{
+      min-width:120px;
+      color:var(--muted);
+    }
+
+    .kvalue{
+      font-weight:500;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 9px;
+      border-radius:999px;
+      font-size:11px;
+      border:1px solid var(--border-soft);
+      background:#020617;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .pill-ok{
+      border-color:var(--ok);
+      color:var(--ok);
+    }
+    .pill-bad{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+    .pill-warn{
+      border-color:var(--warn);
+      color:var(--warn);
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .box{
+      background:#020617;
+      border-radius:12px;
+      border:1px solid var(--border-soft);
+      padding:10px 12px;
+      font-size:12px;
+    }
+
+    .box ul{
+      padding-left:18px;
+      margin:4px 0 0;
+      color:var(--muted);
+    }
+    .box li{margin-bottom:2px;}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+      margin-top:6px;
+    }
+
+    th,td{
+      padding:6px 6px;
+      border-bottom:1px solid #1e293b;
+      text-align:left;
+    }
+
+    thead th{
+      background:#020617;
+      color:#cbd5f5;
+      font-weight:600;
+    }
+
+    tbody tr:nth-child(odd){
+      background:#020617;
+    }
+
+    .badge-small{
+      padding:2px 6px;
+      border-radius:999px;
+      font-size:10px;
+      border:1px solid var(--border-soft);
+      display:inline-block;
+      white-space:nowrap;
+    }
+
+    .text-center{text-align:center;}
+    .text-right{text-align:right;}
+
+    .mt-8{margin-top:8px;}
+    .mt-4{margin-top:4px;}
+
+    footer{
+      margin-top:18px;
+      font-size:11px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .taglist{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:4px;
+    }
+
+    .tag{
+      font-size:10px;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:#020617;
+      color:var(--muted);
+    }
+
+    .alert{
+      font-size:12px;
+      color:var(--danger);
+      margin-top:4px;
+    }
+
+    /* Loader / estado */
+    .state-msg{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:10px;
+    }
+
+    .state-msg strong{
+      color:#e5f0ff;
+    }
+
+    /* ================== MODO IMPRESIÓN ================== */
+    @media print{
+      body{
+        background:#ffffff;
+        color:#000000;
+      }
+      .shell{
+        margin:0;
+        max-width:none;
+        padding:0 18mm 10mm;
+      }
+      header{
+        box-shadow:none;
+        border-radius:0;
+        margin:0 -18mm 8mm;
+        border-bottom:1px solid #cbd5e1;
+        background:#ffffff;
+      }
+      header::before{display:none;}
+      .brand-logo{
+        background:#ffffff;
+        border-radius:0;
+        box-shadow:none;
+        border:1px solid #0f172a;
+      }
+      .brand-text h1{
+        color:#000000;
+      }
+      .brand-text p{
+        color:#1e293b;
+      }
+      .header-right .btn,
+      .header-right .badge{
+        display:none !important;
+      }
+      main{
+        display:block;
+      }
+      .panel{
+        background:#ffffff;
+        border:1px solid #cbd5e1;
+        box-shadow:none;
+        border-radius:0;
+        padding:10px 12px;
+        margin-bottom:6mm;
+      }
+      .box{
+        background:#ffffff;
+        border-color:#cbd5e1;
+      }
+      footer{
+        margin-top:6mm;
+        color:#0f172a;
+        font-size:10px;
+      }
+      a[href]:after{content:"";}
+    }
+
+    @media (max-width:820px){
+      main{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">T</div>
+      <div class="brand-text">
+        <h1>Certificado de calibración TMP</h1>
+        <p>ID: <span id="certIdHeader">—</span> · Trazabilidad metrológica profesional</p>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <span id="decisionBadge" class="badge">Decisión global: —</span>
+      <a href="certificados.html" class="btn">⟵ Volver a certificados</a>
+      <button id="btnPrint" class="btn">🖨 Imprimir</button>
+      <a id="btnPdf" href="#" target="_blank" class="btn btn-primary" style="display:none;">
+        📄 Abrir PDF oficial
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- PANEL IZQUIERDO: Datos e informe -->
+    <section class="panel" id="panelDatos">
+      <h2>1. Datos del certificado e instrumento</h2>
+      <p class="muted">
+        Informe generado por el laboratorio TMP a partir de la calibración registrada en el sistema
+        de trazabilidad. La información numérica procede de Supabase (tablas <code>certificados</code> y
+        <code>calibraciones_log</code>).
+      </p>
+
+      <div class="grid-2">
+        <div class="box">
+          <h3>Identificación</h3>
+          <div class="kline"><span class="klabel">Certificado nº</span><span class="kvalue" id="certNumero">—</span></div>
+          <div class="kline"><span class="klabel">Decisión global</span>
+            <span class="kvalue" id="certDecisionGlobal">—</span>
+          </div>
+          <div class="kline"><span class="klabel">Regla de decisión</span><span class="kvalue" id="certReglaDecision">—</span></div>
+          <div class="kline"><span class="klabel">UID calibración</span><span class="kvalue" id="certUid">—</span></div>
+
+          <div class="mt-4">
+            <span class="pill" id="pillEstado">Estado: desconocido</span>
+          </div>
+
+          <div class="taglist">
+            <span class="tag">TMP · ISO/IEC 17025</span>
+            <span class="tag">ILAC-G8 · toma de decisiones</span>
+            <span class="tag">Firma digital visible en PDF</span>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Instrumento y cliente</h3>
+          <div class="kline"><span class="klabel">Código instrumento</span><span class="kvalue" id="insCodigo">—</span></div>
+          <div class="kline"><span class="klabel">Descripción</span><span class="kvalue" id="insDescripcion">—</span></div>
+          <div class="kline"><span class="klabel">Cliente</span><span class="kvalue" id="clienteNombre">—</span></div>
+          <div class="kline"><span class="klabel">Fecha calibración</span><span class="kvalue" id="fechaCalibracion">—</span></div>
+          <div class="kline"><span class="klabel">Próxima calibración</span><span class="kvalue" id="fechaProxima">—</span></div>
+        </div>
+      </div>
+
+      <div class="box mt-8">
+        <h3>2. Resumen metrológico</h3>
+        <p class="muted" id="resumenMetrologico">
+          Pendiente de recibir detalles numéricos de la calibración. Cuando la tabla
+          <code>calibraciones_log</code> incluya el resumen (errores máximos, U, tolerancias),
+          se mostrará aquí la síntesis apto/no apto siguiendo ILAC-G8.
+        </p>
+
+        <table id="tablaResumen" style="display:none;">
+          <thead>
+            <tr>
+              <th>Magnitud / bloque</th>
+              <th>Máx |E| (µm)</th>
+              <th>Máx (|E| + U) (µm)</th>
+              <th>Tolerancia (µm)</th>
+              <th>Decisión</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyResumen"></tbody>
+        </table>
+      </div>
+
+      <div class="box mt-8">
+        <h3>3. Trazabilidad e información metrológica</h3>
+        <p class="muted" id="textoTrazabilidad">
+          La calibración se realiza conforme a los procedimientos internos TMP basados en ISO/IEC 17025 e ILAC-G8,
+          utilizando patrones trazables a patrones nacionales e internacionales. Los patrones empleados y su
+          situación de calibración se gestionan en el módulo de patrones del sistema de trazabilidad TMP.
+        </p>
+        <ul>
+          <li>Modelo general: calibración por comparación con patrón materializado.</li>
+          <li>Cálculo de error <code>E = I − R</code>, incertidumbre combinada y expandida <code>U(k=2)</code>.</li>
+          <li>Regla de decisión: ILAC-G8 (zona apto / no apto / indeterminado).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO: Método, firmas y PDF -->
+    <section class="panel" id="panelFirmas">
+      <h2>4. Método, firmas y documento PDF</h2>
+
+      <div class="box">
+        <h3>Método aplicado</h3>
+        <p class="muted">
+          El método de calibración utilizado para este certificado es el definido en el procedimiento interno
+          correspondiente (dimensional, par, balanza, dureza, etc.), incluyendo:
+        </p>
+        <ul>
+          <li>Verificación de condiciones ambientales antes y durante la calibración.</li>
+          <li>Lecturas repetidas para estimar repetibilidad y estabilidad del instrumento.</li>
+          <li>Cálculo de los errores de indicación por punto de medida.</li>
+          <li>Estimación de incertidumbre considerando patrón, repetibilidad y resolución.</li>
+        </ul>
+      </div>
+
+      <div class="box mt-8">
+        <h3>Firmas y validación</h3>
+        <p class="muted">
+          La copia oficial de este certificado incluye la firma digital visible del técnico y, en su caso,
+          del responsable del laboratorio, integrada en el PDF guardado en el sistema TMP.
+        </p>
+        <div class="kline">
+          <span class="klabel">Técnico</span><span class="kvalue" id="firmanteTecnico">—</span>
+        </div>
+        <div class="kline">
+          <span class="klabel">Revisión / aprobación</span><span class="kvalue" id="firmanteRevision">—</span>
+        </div>
+        <p class="muted mt-4">
+          El presente visor muestra un resumen profesional. Para la copia con validez legal y la firma digital
+          debe utilizarse el PDF asociado.
+        </p>
+        <p class="alert" id="alertSinPdf" style="display:none;">
+          No se ha encontrado aún una URL de PDF asociada al certificado en la tabla <code>certificados</code>.
+        </p>
+      </div>
+
+      <div class="box mt-8">
+        <h3>Acceso al documento PDF</h3>
+        <p class="muted">
+          Utiliza el botón <strong>“Abrir PDF oficial”</strong> de la parte superior para descargar o visualizar el
+          certificado completo. Si el enlace está vacío, significa que todavía no se ha archivado el PDF en el sistema.
+        </p>
+        <p class="muted">
+          Número de certificado actual: <strong id="certNumeroMini">—</strong>
+        </p>
+      </div>
+
+      <p class="state-msg" id="stateMsg">
+        Cargando certificado desde Supabase…
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    Talleres Mecánicos Paramio · Sistema profesional de trazabilidad metrológica ·
+    Documento generado automáticamente desde el sistema TMP.
+  </footer>
+</div>
+
+<script type="module">
+  // ========= CONFIG SUPABASE (misma que en el resto del sistema) =========
+  const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+
+  const params = new URLSearchParams(location.search);
+  const CERT_ID = params.get("id") || "";
+
+  const $ = (q) => document.querySelector(q);
+
+  const elCertIdHeader    = $("#certIdHeader");
+  const elNumero          = $("#certNumero");
+  const elNumeroMini      = $("#certNumeroMini");
+  const elDecisionGlobal  = $("#certDecisionGlobal");
+  const elReglaDecision   = $("#certReglaDecision");
+  const elUid             = $("#certUid");
+  const elPillEstado      = $("#pillEstado");
+  const elDecisionBadge   = $("#decisionBadge");
+  const elStateMsg        = $("#stateMsg");
+  const elBtnPdf          = $("#btnPdf");
+  const elAlertSinPdf     = $("#alertSinPdf");
+
+  const elInsCodigo       = $("#insCodigo");
+  const elInsDescripcion  = $("#insDescripcion");
+  const elClienteNombre   = $("#clienteNombre");
+  const elFechaCal        = $("#fechaCalibracion");
+  const elFechaProx       = $("#fechaProxima");
+  const elFirmanteTec     = $("#firmanteTecnico");
+  const elFirmanteRev     = $("#firmanteRevision");
+
+  if (CERT_ID) {
+    elCertIdHeader.textContent = CERT_ID;
+  } else {
+    elCertIdHeader.textContent = "— (sin id en la URL)";
+  }
+
+  $("#btnPrint").addEventListener("click", () => window.print());
+
+  function setDecision(decision){
+    const d = (decision || "").toUpperCase().trim();
+    let txt = "Decisión global: " + (decision || "—");
+    let cls = "badge";
+
+    let pillTxt = "Estado: " + (decision || "desconocido");
+    let pillCls = "pill";
+
+    if (d === "APTO") {
+      cls += " badge-ok";
+      pillCls += " pill-ok";
+    } else if (d === "NO APTO") {
+      cls += " badge-bad";
+      pillCls += " pill-bad";
+    } else if (d === "INDETERMINADO" || d === "INDETERMINADO ") {
+      cls += " badge-warn";
+      pillCls += " pill-warn";
+    }
+
+    elDecisionBadge.className = cls;
+    elDecisionBadge.textContent = txt;
+
+    elPillEstado.className = pillCls;
+    elPillEstado.textContent = pillTxt;
+  }
+
+  function fmtDate(iso){
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(+d)) return iso;
+    return d.toLocaleDateString("es-ES");
+  }
+
+  async function main(){
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      elStateMsg.innerHTML = "<strong>Modo local:</strong> configuración de Supabase no disponible.";
+      return;
+    }
+
+    let supabase;
+    try {
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.5");
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+      console.error(e);
+      elStateMsg.innerHTML = "No se ha podido inicializar Supabase (modo local).";
+      return;
+    }
+
+    if (!CERT_ID) {
+      elStateMsg.innerHTML = "No se ha indicado ningún ID de certificado en la URL (ej.: <code>?id=CC-2025-0001</code>).";
+      return;
+    }
+
+    // 1) Buscar el certificado por número
+    elStateMsg.textContent = "Buscando certificado en Supabase…";
+
+    const { data: cert, error } = await supabase
+      .from("certificados")
+      .select("*")
+      .eq("numero", CERT_ID)
+      .maybeSingle();
+
+    if (error) {
+      console.error(error);
+      elStateMsg.innerHTML = "Error al consultar la tabla <code>certificados</code> en Supabase.";
+      return;
+    }
+
+    if (!cert) {
+      elStateMsg.innerHTML = "No se ha encontrado ningún certificado con número <strong>" + CERT_ID + "</strong>.";
+      return;
+    }
+
+    // Rellenar datos básicos del certificado
+    elNumero.textContent     = cert.numero || "—";
+    elNumeroMini.textContent = cert.numero || "—";
+    elUid.textContent        = cert.calibracion_uid || "—";
+    elReglaDecision.textContent  = cert.regla_decision || "ILAC-G8 (por defecto)";
+    elDecisionGlobal.textContent = cert.decision_global || "—";
+
+    setDecision(cert.decision_global || "");
+
+    // PDF
+    if (cert.certificado_pdf_url) {
+      elBtnPdf.href = cert.certificado_pdf_url;
+      elBtnPdf.style.display = "inline-flex";
+      elAlertSinPdf.style.display = "none";
+    } else {
+      elBtnPdf.style.display = "none";
+      elAlertSinPdf.style.display = "block";
+    }
+
+    // 2) Intentar completar datos desde calibraciones_log (si existe uid)
+    if (cert.calibracion_uid) {
+      const { data: cal, error: errCal } = await supabase
+        .from("calibraciones_log")
+        .select("*")
+        .eq("uid", cert.calibracion_uid)
+        .maybeSingle();
+
+      if (!errCal && cal) {
+        elInsCodigo.textContent      = cal.codigo_instrumento || cal.instrumento_codigo || "—";
+        elInsDescripcion.textContent = cal.instrumento_descripcion || cal.instrumento || "—";
+        elClienteNombre.textContent  = cal.cliente_nombre || cal.cliente || "—";
+        elFechaCal.textContent       = fmtDate(cal.fecha_calibracion || cal.fecha || null);
+        elFechaProx.textContent      = fmtDate(cal.fecha_proxima || cal.proxima_calibracion || null);
+
+        elFirmanteTec.textContent    = cal.firmante_tecnico || cal.operario || "—";
+        elFirmanteRev.textContent    = cal.firmante_revision || cal.responsable || "—";
+
+        // Si en el futuro guardas un resumen JSON con resultados, aquí lo interpretamos
+        if (cal.resumen_global && typeof cal.resumen_global === "object") {
+          const resumen = cal.resumen_global;
+          const filas = [];
+
+          if (Array.isArray(resumen.bloques)) {
+            resumen.bloques.forEach(b => {
+              filas.push({
+                nombre: b.nombre || b.tipo || "Bloque",
+                maxAbsE: b.max_abs_error_um,
+                maxAbsEplusU: b.max_abs_error_plus_u_um,
+                tol: b.tolerancia_um,
+                decision: b.decision || "-"
+              });
+            });
+          }
+
+          if (filas.length > 0) {
+            const tbody = document.getElementById("tbodyResumen");
+            tbody.innerHTML = filas.map(f => `
+              <tr>
+                <td>${f.nombre}</td>
+                <td class="text-right">${f.maxAbsE ?? "—"}</td>
+                <td class="text-right">${f.maxAbsEplusU ?? "—"}</td>
+                <td class="text-right">${f.tol ?? "—"}</td>
+                <td>
+                  <span class="badge-small ${
+                    f.decision === "APTO" ? "badge-ok" :
+                    f.decision === "NO APTO" ? "badge-bad" :
+                    f.decision === "INDETERMINADO" ? "badge-warn" : ""
+                  }">${f.decision}</span>
+                </td>
+              </tr>
+            `).join("");
+
+            document.getElementById("tablaResumen").style.display = "table";
+            document.getElementById("resumenMetrologico").textContent =
+              "Resumen numérico obtenido del registro de calibración en Supabase. Se muestran los valores máximos de error e incertidumbre por bloque/magnitud, así como la decisión ILAC-G8 asociada.";
+          }
+        }
+      }
+    }
+
+    elStateMsg.innerHTML = "Certificado cargado correctamente desde Supabase.";
+  }
+
+  main();
+</script>
+</body>
+</html>
