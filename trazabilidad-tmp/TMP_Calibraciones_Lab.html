@@ -1098,7 +1098,7 @@ function dibujarGraficaErrores(){
   });
 }
 
-/* ========= GUARDADO LOCAL + SUPABASE ========= */
+/* ========= GUARDAR TODO: PDF + CERTIFICADOS + INSTRUMENTOS ========= */
 $("#btnGuardarTodo").addEventListener("click", async () => {
   const codigo = $("#insCodigo").value.trim();
   if (!codigo) { alert("Introduce el código del instrumento."); return; }
@@ -1106,14 +1106,137 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
   const fechaCal = $("#condFechaCal").value;
   const proxCal  = $("#firmanteProxima").value;
 
+  if (!fechaCal || !proxCal) {
+    alert("Faltan fechas en Resultados → Validación del informe.");
+    return;
+  }
+
+  if (!$("#firmanteNombre").value.trim()) {
+    alert("El nombre del operario responsable es obligatorio.");
+    return;
+  }
+
+  // CONFIRMACIONES
   const c1 = confirm("¿Ha guardado el PDF EN SU ORDENADOR?");
   if (!c1) return;
   const c2 = confirm("¿Seguro que ha archivado el PDF en la carpeta interna?");
   if (!c2) return;
 
-  const ok = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
-  if (ok) alert("Fechas actualizadas en Supabase correctamente.");
-  else alert("No se pudieron actualizar fechas en Supabase (offline/error).");
+  await ensureSupabase();
+  if (!supabase) {
+    alert("Supabase no disponible. No se puede guardar el certificado.");
+    return;
+  }
+
+  /* ===========================================================
+     1) GENERAR ID DE CERTIFICADO
+     =========================================================== */
+  const año = new Date().getFullYear();
+  const numeroSec = String(Math.floor(Math.random()*9999)).padStart(4,"0");
+  const certID = `CC-${año}-${numeroSec}`;
+
+  /* ===========================================================
+     2) EXPORTAR PDF (html2canvas + jsPDF)
+     =========================================================== */
+  async function exportPDF() {
+    const { jsPDF } = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.es.min.js");
+    const pdf = new jsPDF({ unit: "mm", format: "a4" });
+
+    const pagina = document.body;
+    const canvas = await html2canvas(pagina, { scale: 2 });
+    const img = canvas.toDataURL("image/png");
+
+    const width = pdf.internal.pageSize.getWidth();
+    const height = pdf.internal.pageSize.getHeight();
+    pdf.addImage(img, "PNG", 0, 0, width, height);
+
+    return pdf.output("blob");
+  }
+
+  // Crea el blob del PDF
+  const pdfBlob = await exportPDF();
+
+  /* ===========================================================
+     3) SUBIR PDF A SUPABASE
+     =========================================================== */
+  const fileName = `${certID}.pdf`;
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from("certificados")
+    .upload(fileName, pdfBlob, { upsert: true });
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert("Error al subir el PDF a Supabase.");
+    return;
+  }
+
+  const { data: publicURL } = supabase.storage
+    .from("certificados")
+    .getPublicUrl(fileName);
+
+  const pdfURL = publicURL.publicUrl;
+
+  /* ===========================================================
+     4) BUSCAR ID REAL DEL INSTRUMENTO
+     =========================================================== */
+  const { data: insData, error: insError } = await supabase
+    .from("instrumentos")
+    .select("id_instrumento")
+    .eq("codigo", codigo)
+    .maybeSingle();
+
+  if (insError || !insData) {
+    alert("No se pudo obtener el ID interno del instrumento.");
+    return;
+  }
+
+  const instrumentoID = insData.id_instrumento;
+
+  /* ===========================================================
+     5) INSERTAR CERTIFICADO EN TABLA
+     =========================================================== */
+  const decisionGlobal = ($("#resumenGlobalBox").innerText.includes("NO APTO"))
+    ? "NO APTO"
+    : ($("#resumenGlobalBox").innerText.includes("INDETERMINADO"))
+      ? "INDETERMINADO"
+      : "APTO";
+
+  const { error: certError } = await supabase
+    .from("certificados")
+    .insert({
+      certificado_id: certID,
+      instrumento_id: instrumentoID,
+      numero: codigo,
+      regla_decision: "ILAC-G8",
+      decision_global: decisionGlobal,
+      certificado_pdf_url: pdfURL
+    });
+
+  if (certError) {
+    console.error(certError);
+    alert("No se pudo registrar el certificado en Supabase.");
+    return;
+  }
+
+  /* ===========================================================
+     6) ACTUALIZAR FECHAS EN INSTRUMENTO
+     =========================================================== */
+  const { error: updError } = await supabase
+    .from("instrumentos")
+    .update({
+      fecha_calibracion: fechaCal,
+      proxima_calibracion: proxCal
+    })
+    .eq("id_instrumento", instrumentoID);
+
+  if (updError) {
+    console.error(updError);
+    alert("No se pudo actualizar la ficha del instrumento.");
+    return;
+  }
+
+  alert(`✔ Certificado guardado correctamente.\nID: ${certID}`);
 });
 
 
@@ -1238,5 +1361,6 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
+
 
 
