@@ -716,7 +716,7 @@ function pintarInstrumento(){
   $("#unidadBase").value = ins.unidad_base||"mm";
 
   const fechaCal = ins.fecha_calibracion ?? ins.fecha_ultima_cal ?? null;
-  const proxCal = ins.proxima_cal ?? ins.proxima_calibracion ?? null;
+  const proxCal = ins.fecha_proxima_calibracion ?? null;
 
   $("#insUltima").value = fechaCal || "—";
   $("#insProx").value = proxCal || "—";
@@ -1361,6 +1361,7 @@ setBadge(false); switchTab('plan');
 </script>
 </body>
 </html>
+
 
 
 
