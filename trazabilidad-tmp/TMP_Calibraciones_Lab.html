@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
   :root{
     --bg0:#0e2235; --bg1:#122b43; --bg2:#1a3b57; --card:#183049;
@@ -30,17 +31,27 @@
   .grid{display:grid;gap:12px}
   .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
   .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .card{background:linear-gradient(180deg,#1a3551aa,#163049aa);border:1px solid #20466866;border-radius:14px;padding:16px}
+  .card{
+    background:linear-gradient(180deg,#1a3551aa,#163049aa);
+    border:1px solid #20466866;
+    border-radius:14px;
+    padding:16px
+  }
   .card h3{margin:0 0 10px;font-size:14px;font-weight:700;color:#d8e9f8}
   label{display:block;font-size:12px;color:#a7c0d6;margin-bottom:6px}
   input,select,textarea,button{font-family:inherit;color:inherit}
   input[type="text"],input[type="number"],select,textarea{
-    width:100%;background:#102030;border:1px solid #2a537a;border-radius:10px;padding:10px 12px;color:#e9f4ff;outline:none
+    width:100%;background:#102030;border:1px solid #2a537a;border-radius:10px;
+    padding:10px 12px;color:#e9f4ff;outline:none
   }
   input:focus,select:focus,textarea:focus{border-color:var(--accent)}
   textarea{min-height:70px;resize:vertical}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .btn{background:var(--accent-2);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-weight:600;cursor:pointer;transition:.15s transform}
+  .btn{
+    background:var(--accent-2);border:none;border-radius:10px;
+    padding:10px 14px;color:#fff;font-weight:600;cursor:pointer;
+    transition:.15s transform
+  }
   .btn:hover{transform:translateY(-1px)}
   .btn.secondary{background:#214360}
   .btn.ghost{background:transparent;border:1px solid #2a537a}
@@ -63,52 +74,16 @@
   .success{background:#1c4c2b;color:#bff5d6}
   dialog::backdrop{background:#0008}
   dialog{border:none;border-radius:14px;background:#10243a;color:#e7f2fb;padding:16px 16px 10px;max-width:980px;width:min(96vw,980px)}
-  dialog h4{margin:0 0 10px}
-  .table-box{max-height:380px;overflow:auto;border:1px solid #2a537a;border-radius:12px}
-  .sel-row{cursor:pointer}
-  .help{font-size:12px;color:#96b7cf;margin-top:6px}
-  .footer-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-  .hidden{display:none}
-  .mt-8{margin-top:8px}
-  .right{margin-left:auto}
-  .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700}
-  .logo{height:22px;width:22px;border-radius:4px;background:linear-gradient(135deg,#3dd2ff,#1bb3ff);display:inline-block}
-  canvas.sig{background:#0b2035;border:1px dashed #2a537a;border-radius:10px}
-  .mini{font-size:11px;color:#9eb9cf}
   .local-banner{
-    display:none;
-    background:#4b3a10;
-    color:#ffe8b3;
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:11px;
-    margin-left:auto;
+    display:none;background:#4b3a10;color:#ffe8b3;
+    padding:6px 10px;border-radius:999px;font-size:11px;margin-left:auto
   }
   .local-banner.show{display:inline-flex;align-items:center;gap:6px}
-
-@media print {
-  canvas {
-    display: block;
-    page-break-inside: avoid;
-    margin-bottom: 20px;
-  }
-  .no-print-overlap {
-    margin-top: 40px !important;
-    display: block;
-  }
-}
-
-@media print {
-  #insProx,
-  #insUltima,
-  #insEstado {
-    display: none !important;
-  }
-}
-
 </style>
+
 </head>
 <body>
+
 <div class="wrap">
   <header>
     <div class="badge">TMP · Calibraciones v9.8</div>
@@ -116,7 +91,6 @@
     <span id="localBanner" class="local-banner">Modo local: Supabase no guardará cambios.</span>
     <span id="onlineBadge" class="badge offline right">Offline</span>
   </header>
-
   <!-- Instrumento -->
   <div class="card">
     <h3>Instrumento</h3>
@@ -180,7 +154,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="plan">Plan</div>
     <div class="tab" data-tab="medicion">Medición</div>
-    <div class="tab" data-tab="resultados">Resultados</div>
+    <div classtab="tab" data-tab="resultados">Resultados</div>
     <div class="tab" data-tab="anexo">Anexo técnico / Fórmulas</div>
   </div>
 
@@ -236,18 +210,20 @@
         <input id="uBase" type="text" value="0.002">
       </div>
     </div>
+
     <div id="medicionBloques"></div>
+
     <div class="row" style="margin-top:10px;justify-content:flex-end">
       <button id="btnGuardarMed" class="btn">Guardar mediciones</button>
       <button class="btn secondary" id="goResultados">Ir a Resultados</button>
     </div>
   </section>
 
-  <!-- RESULTADOS / INFORME PREMIUM -->
+  <!-- RESULTADOS -->
   <section id="tab-resultados" class="card hidden">
     <h3>Informe de calibración (ILAC-G8 / estilo laboratorio)</h3>
 
-    <!-- Ficha instrumento para informe -->
+    <!-- Ficha instrumento -->
     <div class="card" style="margin-top:8px">
       <h3>1. Ficha del instrumento</h3>
       <div id="resumenInstrumento" class="mini note">
@@ -278,37 +254,32 @@
       </div>
     </div>
 
-    <!-- Método y gráfico -->
+    <!-- Método -->
     <div class="card" style="margin-top:8px">
       <h3>3. Método de calibración y criterio de aceptación</h3>
       <p class="mini">
         La calibración se realiza comparando las indicaciones del instrumento con los valores nominales de un patrón
         materializado trazable. Para cada punto se calcula el error:
-        <br><strong>E = I − R</strong>, donde I es la media de las indicaciones y R la referencia (patrón o nominal del instrumento).
-        La incertidumbre expandida U(k=2) se compone de la incertidumbre del patrón y contribuciones del proceso
-        de medida. El criterio de aceptación aplicado es el recomendado en ILAC-G8:
-        <br>|E| + U ≤ T → APTO · |E| − U &gt; T → NO APTO · resto → INDETERMINADO.
+        <br><strong>E = I − R</strong>, donde I es la media y R la referencia.
       </p>
       <div class="grid g-2" style="margin-top:8px">
         <div>
           <label class="mini">Gráfica de errores (primer bloque)</label>
           <canvas id="grafErrores" width="420" height="200" style="background:#0b2035;border-radius:10px;border:1px solid #2a537a"></canvas>
-          <p class="mini">Se representa el error (µm) en función del valor nominal del patrón para el primer bloque del plan.</p>
+          <p class="mini">Se representa el error (µm) respecto al patrón.</p>
         </div>
         <div>
           <label class="mini">Resumen del método</label>
           <ul class="mini">
-            <li>Lecturas repetidas (hasta 5) por punto para estimar la repetibilidad (σ).</li>
-            <li>Cálculo de la media aritmética de las indicaciones.</li>
-            <li>Cálculo del error E respecto al valor de referencia.</li>
-            <li>Conversión a micras (µm) para la interpretación.</li>
-            <li>Aplicación de U(k=2) global y comparación con la tolerancia T.</li>
+            <li>Lecturas repetidas por punto.</li>
+            <li>Media, σ, error y U(k=2).</li>
+            <li>ILAC-G8: APTO / NO APTO / INDETERMINADO.</li>
           </ul>
         </div>
       </div>
     </div>
 
-    <!-- Resultados detallados -->
+    <!-- Resultados -->
     <div class="card" style="margin-top:8px">
       <h3>4. Resultados detallados por bloque y punto</h3>
       <div id="resultadosBox"></div>
@@ -322,19 +293,16 @@
       </div>
     </div>
 
-    <!-- Trazabilidad y referencias -->
+    <!-- Trazabilidad -->
     <div class="card" style="margin-top:8px">
       <h3>6. Trazabilidad metrológica y referencias</h3>
       <div id="trazabilidadBox" class="mini note">
-        (Se completará con los patrones utilizados y la situación de calibración.)
+        (Se completará con los patrones utilizados.)
       </div>
-      <p class="mini" style="margin-top:6px">
-        Referencias normativas utilizadas: ISO/IEC 17025, guía ILAC-G8 para la evaluación de la conformidad y buenas
-        prácticas metrológicas del laboratorio TMP.
-      </p>
+      <p class="mini">Cumple ISO/IEC 17025 • ILAC-G8 • GUM.</p>
     </div>
 
-    <!-- Firma y validación -->
+    <!-- Firma -->
     <div class="card" style="margin-top:8px">
       <h3>7. Validación del informe</h3>
       <div class="grid g-3">
@@ -352,200 +320,32 @@
           <div class="row mt-8"><button id="sigClear" class="btn secondary">Borrar firma</button></div>
         </div>
       </div>
-      <p class="mini">La firma, nombre y fecha de próxima calibración quedarán documentadas en el informe impreso.</p>
     </div>
 
+    <!-- Botonera final -->
     <div class="row" style="margin-top:10px;justify-content:flex-end">
       <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
       <button id="btnGuardarTodo" class="btn">Guardar todo (local + Supabase)</button>
     </div>
-    <p class="note">Criterio ILAC-G8: |Error| + U ≤ T → <span class="pill success">APTO</span> · |Error| − U &gt; T → <span class="pill danger">NO APTO</span> · resto → INDETERMINADO</p>
   </section>
 
-  <!-- ANEXO TÉCNICO / FÓRMULAS -->
+  <!-- ANEXO -->
   <section id="tab-anexo" class="card hidden">
-    <h3>Anexo técnico · Modelo de cálculo, fórmulas y normas aplicadas</h3>
-
-    <div class="card" style="margin-top:8px">
-      <h3>A. Modelo general de medida</h3>
-      <p class="mini">
-        La calibración de un instrumento consiste en comparar sus indicaciones con los valores de referencia de un
-        patrón trazable. Para cada punto se tiene:
-      </p>
-      <ul class="mini">
-        <li><strong>Valor de referencia R:</strong> valor verdadero convencional del patrón o del nominal del instrumento.</li>
-        <li><strong>Indicaciones I<sub>i</sub>:</strong> lecturas individuales del instrumento.</li>
-        <li><strong>Media de indicaciones:</strong>
-          <code>I = (1/n) · Σ I<sub>i</sub></code>
-        </li>
-        <li><strong>Error de indicación:</strong>
-          <code>E = I − R</code>
-        </li>
-      </ul>
-    </div>
-
-    <div class="card" style="margin-top:8px">
-      <h3>B. Estimación de la repetibilidad</h3>
-      <p class="mini">
-        A partir de las lecturas individuales se calcula la desviación típica:
-      </p>
-      <p class="mini">
-        <code>σ = √( Σ (I<sub>i</sub> − I)² / (n − 1) )</code>
-      </p>
-      <p class="mini">
-        La incertidumbre debida a la repetibilidad de la media es:
-        <code>u<sub>rep</sub> = σ / √n</code>.
-      </p>
-      <p class="mini">
-        En la práctica, una repetibilidad alta (σ grande) indica que el instrumento no es estable y puede requerir ajuste
-        o mantenimiento antes incluso de evaluar la conformidad.
-      </p>
-    </div>
-
-    <div class="card" style="margin-top:8px">
-      <h3>C. Resolución del instrumento</h3>
-      <p class="mini">
-        Si la resolución del instrumento es <code>d</code> (por ejemplo 0.01 mm), la incertidumbre típica asociada a
-        la cuantificación por resolución se aproxima por:
-      </p>
-      <p class="mini">
-        <code>u<sub>res</sub> = d / √12</code>
-      </p>
-      <p class="mini">
-        Esta expresión proviene de suponer que el error de redondeo se distribuye uniformemente en el intervalo
-        [−d/2, +d/2]. La desviación típica de una distribución rectangular de semiancho a es:
-        <code>a / √3</code>, y como a = d/2, queda <code>d / √12</code>.
-      </p>
-      <p class="mini">
-        Este término se introduce en el panel de Medición como “Resolución instrumento (d)”.
-      </p>
-    </div>
-
-    <div class="card" style="margin-top:8px">
-      <h3>D. Incertidumbre del patrón y factor k</h3>
-      <p class="mini">
-        Los patrones utilizados (bloques patrón, bancos de medida, patrones de par, etc.) disponen de un certificado
-        de calibración que declara una incertidumbre expandida <code>U<sub>patrón</sub></code> para un determinado factor
-        de cobertura <code>k<sub>cert</sub></code> (habitualmente k = 2).
-      </p>
-      <p class="mini">
-        El sistema trabaja internamente con incertidumbre típica del patrón:
-      </p>
-      <p class="mini">
-        <code>u<sub>patrón</sub> = U<sub>patrón</sub> / k</code>
-      </p>
-      <p class="mini">
-        Además, el usuario puede cambiar el factor de cobertura global <code>k</code> en la pestaña de Medición.
-        Siempre que se cambie ese factor, la incertidumbre expandida calculada en los resultados se ajustará a dicho valor.
-      </p>
-    </div>
-
-    <div class="card" style="margin-top:8px">
-      <h3>E. Incertidumbre combinada y expandida</h3>
-      <p class="mini">
-        El modelo implementado en la app es:
-      </p>
-      <p class="mini">
-        <code>u<sub>c</sub> = √(u<sub>patrón</sub>² + u<sub>rep</sub>² + u<sub>res</sub>²)</code>
-      </p>
-      <p class="mini">
-        y la incertidumbre expandida:
-      </p>
-      <p class="mini">
-        <code>U = k · u<sub>c</sub></code>
-      </p>
-      <p class="mini">
-        donde <code>k</code> es el factor de cobertura configurable en el modelo de Medición
-        (normalmente k = 2 para ≈95&nbsp;% de nivel de confianza, según GUM e ISO/IEC 17025).
-      </p>
-      <p class="mini">
-        Este enfoque permite adaptar el nivel de confianza si se requiere un criterio más exigente (k &gt; 2) o más laxo.
-      </p>
-    </div>
-
-    <div class="card" style="margin-top:8px">
-      <h3>F. Criterio de conformidad ILAC-G8</h3>
-      <p class="mini">
-        El criterio de aceptación está basado en la guía ILAC-G8 para la toma de decisiones con incertidumbre:
-      </p>
-      <ul class="mini">
-        <li><strong>Conformidad segura (APTO):</strong>
-          <code>|E| + U ≤ T</code> → el error máximo posible sigue dentro de la tolerancia.
-        </li>
-        <li><strong>No conformidad segura (NO APTO):</strong>
-          <code>|E| − U &gt; T</code> → incluso descontando la incertidumbre, el error supera la tolerancia.
-        </li>
-        <li><strong>Zona gris (INDETERMINADO):</strong>
-          el valor verdadero puede estar dentro o fuera de la tolerancia; requiere decisión técnica
-          (experiencia, criticidad del uso, requisitos del cliente, etc.).
-        </li>
-      </ul>
-      <p class="mini">
-        Este criterio evita aceptar instrumentos que estén claramente fuera de tolerancia o rechazar instrumentos
-        que claramente cumplen, teniendo en cuenta la incertidumbre de medida.
-      </p>
-    </div>
-
-    <div class="card" style="margin-top:8px">
-      <h3>G. Calibraciones de roscas (galgas, tampones, anillos)</h3>
-      <p class="mini">
-        Para instrumentos de rosca (galgas pasa/no pasa, anillos roscados, tampones roscados) se aplican los mismos
-        principios de error e incertidumbre, pero la magnitud de interés suele ser el <strong>diámetro eficaz</strong>,
-        el <strong>paso</strong> y, en algunos casos, el <strong>ángulo</strong>.
-      </p>
-      <ul class="mini">
-        <li>El banco de roscas o equipo de medición proporciona indicaciones de diámetro eficaz
-          que se comparan con los valores de referencia del patrón.</li>
-        <li>Si se utiliza el método de los tres hilos, el diámetro eficaz <code>E</code> se obtiene a partir de la
-          dimensión sobre hilos y la geometría de la rosca (ángulo de filete, paso, etc.).</li>
-        <li>Una vez calculado el valor de referencia <code>R</code> (diámetro eficaz nominal) y el valor medido
-          <code>I</code>, se aplica <code>E = I − R</code> y las mismas fórmulas de incertidumbre <code>u<sub>c</sub></code> y
-          <code>U</code>.</li>
-        <li>Las tolerancias de aceptación de la rosca se basan en ISO 1502 / ISO 965 (clases 6H, 6g, etc.).</li>
-      </ul>
-      <p class="mini">
-        En esta versión, la parte numérica (errores, incertidumbres, ILAC-G8) está preparada para aplicarse también
-        a roscas; la obtención del valor de referencia de diámetro eficaz se realiza según el procedimiento interno
-        del laboratorio (tres hilos, banco de roscas, etc.) y se introduce como valor nominal o como patrón.
-      </p>
-    </div>
-
-    <div class="card" style="margin-top:8px">
-      <h3>H. Tipos de instrumentos cubiertos por el modelo</h3>
-      <ul class="mini">
-        <li><strong>Dimensional lineal:</strong> calibres pie de rey, micrómetros exteriores/interiores, relojes comparadores,
-          columnas de altura, tampón P/NP, galgas lisas.</li>
-        <li><strong>Instrumentos de atributo (GO/NO&nbsp;GO):</strong> evaluación de tamaños límite con criterio de aceptación
-          ILAC-G8 aplicado sobre el error de tamaño efectivo.</li>
-        <li><strong>Roscas:</strong> galgas, tampones, anillos (diámetro eficaz, paso, ángulo) usando ISO 1502 / ISO 965.</li>
-        <li><strong>Dinamométricas:</strong> llaves de par, bancos de par, según ISO 6789/ISO 5393, aplicando el mismo modelo
-          de error e incertidumbre en N·m.</li>
-        <li><strong>Balanzas:</strong> según OIML R76; el modelo admite errores de indicación por carga, repetibilidad y
-          resolución en gramos.</li>
-        <li><strong>Durometría:</strong> Rockwell, Brinell, Vickers; el modelo numérico se aplica sobre la escala de dureza,
-          con contribuciones de repetibilidad, resolución y patrón de dureza.</li>
-      </ul>
-      <p class="mini">
-        El resultado final APTO/NO APTO es coherente con ISO/IEC 17025 y la guía ILAC-G8, pudiendo documentarse en informes
-        internos o externos a clientes.
-      </p>
-    </div>
+    <h3>Anexo técnico</h3>
+    <p class="mini">Fórmulas, incertidumbres, ILAC-G8...</p>
   </section>
 
 </div>
 
-<!-- DIALOGO: Seleccionar patrón(es) -->
+<!-- DIALOGO PATRONES -->
 <dialog id="dlgPatrones">
   <h4>Selecciona patrón(es)</h4>
   <div class="row">
-    <input id="patronFilter" type="text" placeholder="Filtrar por texto (código / descripción)..." />
-    <span class="muted mini right">Puedes marcar varios. Se cargan desde Supabase.</span>
+    <input id="patronFilter" type="text" placeholder="Filtrar código / descripción">
   </div>
   <div class="table-box mt-8">
     <table>
-      <thead>
-        <tr><th></th><th>Código</th><th>Descripción</th><th>U(k=2)</th><th>Nota</th></tr>
-      </thead>
+      <thead><tr><th></th><th>Código</th><th>Descripción</th><th>U(k=2)</th></tr></thead>
       <tbody id="patronRows"></tbody>
     </table>
   </div>
@@ -555,37 +355,26 @@
   </div>
 </dialog>
 
-<!-- DIALOGO: Seleccionar puntos -->
+<!-- DIALOGO PUNTOS -->
 <dialog id="dlgPuntos">
   <h4>Selecciona puntos del patrón</h4>
-
   <div class="row">
-    <input id="puntoSearchExacto" type="text" placeholder="Nominal exacto (p. ej. 8.001)" />
-    <button id="btnBuscarPunto" class="btn">Buscar nominal exacto</button>
-    <span class="muted mini">Si el punto no existe en Supabase no se mostrará (calibración requiere nominal exacto).</span>
+    <input id="puntoSearchExacto" type="text" placeholder="Nominal exacto">
+    <button id="btnBuscarPunto" class="btn">Buscar</button>
   </div>
-
   <div class="table-box mt-8">
     <table>
-      <thead>
-        <tr><th></th><th>#</th><th>Nominal</th><th>U(k=2)</th><th>Corrección</th><th>Caract.</th></tr>
-      </thead>
+      <thead><tr><th></th><th>#</th><th>Nominal</th><th>U(k=2)</th><th>Corr.</th></tr></thead>
       <tbody id="puntosRows"></tbody>
     </table>
   </div>
-
-  <div class="row mt-8">
-    <button id="btnCargarMas" class="btn secondary">Cargar más (lote +1000)</button>
-    <span class="muted mini">Navega por lotes si necesitas revisar el banco completo.</span>
-  </div>
-
   <div class="footer-bar">
     <button class="btn secondary" id="cancelPuntos">Cancelar</button>
-    <button class="btn" id="okPuntos">Usar seleccionados</button>
+    <button class="btn" id="okPuntos">Seleccionar</button>
   </div>
 </dialog>
-
 <script type="module">
+
 /* ========= CONFIG SUPABASE ========= */
 const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
@@ -608,12 +397,12 @@ const $$ = q => Array.from(document.querySelectorAll(q));
 const fmt = (n,d=3) => Number(n).toFixed(d);
 const parseNum = (v) => {
   if (typeof v === 'number') return v;
-  if (v===null || v===undefined) return 0;
-  const n = Number(String(v).trim().replace(',','.'));
-  return Number.isFinite(n)? n : 0;
+  if (!v) return 0;
+  const n = Number(String(v).replace(",", "."));
+  return isFinite(n) ? n : 0;
 };
 const uid = () => Math.random().toString(36).slice(2,9);
-const fechaISO = s => { if(!s) return null; const d=new Date(s); return Number.isNaN(+d)? null : d; };
+const fechaISO = s => { if(!s) return null; const d=new Date(s); return isNaN(d)? null : d; };
 const setBadge = ok => {
   const b = $("#onlineBadge");
   b.textContent = ok ? "Online (Supabase)" : "Offline";
@@ -627,447 +416,520 @@ if (location.protocol === "file:") $("#localBanner").classList.add("show");
 
 /* ========= SUPABASE ========= */
 let supabase = null;
+
 async function ensureSupabase(){
-  if (!SUPABASE_URL.startsWith("http")) { setBadge(false); return null; }
-  if (!supabase) {
-    try {
+  try {
+    if (!supabase) {
       const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.5");
       supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch(e){ console.warn(e); supabase=null; }
+    }
+    setBadge(true);
+  } catch(e){
+    console.warn("Error creando cliente:", e);
+    setBadge(false);
+    supabase = null;
   }
-  setBadge(!!supabase);
   return supabase;
 }
 
-/**
- * Guarda en la tabla instrumentos:
- *  - fecha_calibracion
- *  - proxima_cal
- *  - informe_calibracion (JSON del informe completo)
- */
-async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
-  const client = await ensureSupabase();
-  if (!client) return false;
-
+/* ================================================================
+   ACTUALIZAR FECHAS EN SUPABASE (CORREGIDO)
+   ================================================================*/
+async function actualizarFechasEnSupabase(idInstrumento, fechaCal, proxCal){
+  if (!supabase) return false;
   try {
-    const { error } = await client
+    const { error } = await supabase
       .from("instrumentos")
       .update({
-        fecha_calibracion: fechaCal || null,
-        fecha_proxima_calibracion:      proxCal  || null,
-        estado: "calibrado"
+        fecha_calibracion: fechaCal,
+        fecha_proxima_calibracion: proxCal   // <-- CORRECTO
       })
-      .eq("codigo", codigoInstrumento);
+      .eq("id_instrumento", idInstrumento);
 
     if (error) {
-      console.error("Error Supabase al actualizar fechas:", error);
+      console.error("Error actualizando fechas:", error);
       return false;
     }
     return true;
-  } catch(e){
-    console.error("Excepción al actualizar fechas en Supabase:", e);
+
+  } catch (e) {
+    console.error("Excepción en actualizarFechas:", e);
     return false;
   }
 }
 
-/* ========= CARGA INSTRUMENTO ========= */
+/* ========= CARGAR INSTRUMENTO ========= */
 async function cargarInstrumento(){
   const codigo = $("#insCodigo").value.trim();
-  if (!codigo) return alert("Teclea un código de instrumento.");
+  if (!codigo) return alert("Introduce un código.");
+
   await ensureSupabase();
 
-  let inst=null;
+  let inst = null;
   if (supabase){
-    const { data, error } = await supabase.from("instrumentos").select("*").eq("codigo", codigo).maybeSingle();
+    const { data, error } = await supabase
+      .from("instrumentos")
+      .select("*")
+      .eq("codigo", codigo)
+      .maybeSingle();
+
     if (error) console.warn(error);
-    inst=data;
-  } else {
-    // Modo demo/offline
-    inst={
-      codigo,
-      descripcion:"Tampón liso P/NP",
-      fabricante_tipo:"N/A",
-      rango:"Ø8 H7",
-      unidad_base:"mm",
-      fecha_calibracion:"2024-11-03",
-      proxima_cal:"2025-11-03"
-    };
+    inst = data;
+  }
+
+  if (!inst){
+    alert("Instrumento no encontrado.");
+    return;
   }
 
   state.instrumento = inst;
   pintarInstrumento();
-
   await cargarPatrones();
 
-  state.plan=[]; state.mediciones={}; state.resultados={};
-  $("#planBloques").innerHTML=""; $("#medicionBloques").innerHTML=""; $("#resultadosBox").innerHTML="";
-  $("#resumenInstrumento").textContent = "(Pendiente de cálculo de resultados)";
-  $("#resumenGlobalBox").textContent = "(Pendiente de cálculo de resultados)";
-  $("#trazabilidadBox").textContent = "(Pendiente de cálculo de resultados)";
-  $("#patronesSelChips").innerHTML=""; state.patronesSeleccionados=[];
-  alert("Instrumento cargado correctamente.");
+  state.plan = [];
+  state.mediciones = {};
+  $("#planBloques").innerHTML = "";
+  $("#medicionBloques").innerHTML = "";
+  $("#resultadosBox").innerHTML = "";
+  $("#resumenInstrumento").textContent = "(Pendiente)";
+  $("#resumenGlobalBox").textContent = "(Pendiente)";
+  $("#trazabilidadBox").textContent = "(Pendiente)";
+  $("#patronesSelChips").innerHTML = "";
+  state.patronesSeleccionados = [];
+
+  alert("Instrumento cargado.");
 }
 
+/* ========= PINTAR INSTRUMENTO (CORREGIDO) ========= */
 function pintarInstrumento(){
-  const ins=state.instrumento||{};
-  $("#insDescripcion").value = ins.descripcion||"";
-  $("#insFabTipo").value = ins.fabricante_tipo||"";
-  $("#insRango").value = ins.rango||"";
-  $("#unidadBase").value = ins.unidad_base||"mm";
+  const ins = state.instrumento || {};
+
+  $("#insDescripcion").value = ins.descripcion || "";
+  $("#insFabTipo").value = ins.fabricante_tipo || "";
+  $("#insRango").value = ins.rango || "";
+  $("#unidadBase").value = ins.unidad_base || "mm";
 
   const fechaCal = ins.fecha_calibracion ?? ins.fecha_ultima_cal ?? null;
-  const proxCal = ins.fecha_proxima_calibracion ?? null;
+  const proxCal  = ins.fecha_proxima_calibracion ?? null;   // <-- CORRECTO
 
   $("#insUltima").value = fechaCal || "—";
-  $("#insProx").value = proxCal || "—";
+  $("#insProx").value   = proxCal  || "—";
 
+  // Estado
   const est = $("#insEstado");
-  let cl="ok", txt="OK";
-  const prox = fechaISO(proxCal);
+  let cl = "ok", txt = "OK";
+
+  const proxDate = fechaISO(proxCal);
   const hoy = new Date();
-  if (prox && hoy>prox){ cl="bad"; txt="FUERA"; }
-  else if (prox && (+prox - +hoy) < 1000*60*60*24*30){ cl="warn"; txt="PRÓXIMA"; }
-  est.className="status "+cl; est.textContent=txt;
+
+  if (proxDate && hoy > proxDate){ cl="bad"; txt="FUERA"; }
+  else if (proxDate && (proxDate - hoy) < 1000*60*60*24*30){ cl="warn"; txt="PRÓXIMA"; }
+
+  est.className = "status " + cl;
+  est.textContent = txt;
 }
 
-/* ========= CATALOGO DE PATRONES ========= */
+/* ========= CARGAR PATRONES ========= */
 async function cargarPatrones(){
   await ensureSupabase();
-  if (supabase){
-    const { data, error } = await supabase.from("patrones").select("*").order("descripcion",{ascending:true});
-    if (error) console.warn(error);
-    state.patrones = data||[];
-  } else {
-    state.patrones = [
-      {id:"1288", codigo:"1288", descripcion:"Banco TRIMOS TELMA 500 — Máquina de una coordenada horizontal", u_k2:0.002, nota:"—"},
-      {id:"180456", codigo:"180456", descripcion:"Juego de bloques patrón 0–100 mm", u_k2:0.001, nota:"—"}
-    ];
+  if (!supabase){
+    state.patrones = [];
+    return;
   }
+  const { data, error } = await supabase
+    .from("patrones")
+    .select("*")
+    .order("descripcion", { ascending:true });
+  if (error) console.warn(error);
+  state.patrones = data || [];
 }
 
-/* ========= DIALOGO PATRONES (MULTI) ========= */
+/* ========= SELECTOR DE PATRONES ========= */
 $("#btnSelPatrones").addEventListener("click", async ()=>{
   if (!state.patrones.length) await cargarPatrones();
-  const dlg=$("#dlgPatrones"), rows=$("#patronRows"), filter=$("#patronFilter");
-  const draw=()=>{
-    const f=(filter.value||"").toLowerCase();
+
+  const dlg = $("#dlgPatrones");
+  const rows = $("#patronRows");
+  const filter = $("#patronFilter");
+
+  const draw = ()=>{
+    const f = (filter.value || "").toLowerCase();
     rows.innerHTML = state.patrones
-      .filter(p=> !f || (p.descripcion||"").toLowerCase().includes(f) || (p.codigo||"").toLowerCase().includes(f))
+      .filter(p =>
+        !f ||
+        (p.codigo||"").toLowerCase().includes(f) ||
+        (p.descripcion||"").toLowerCase().includes(f)
+      )
       .map(p=>`
-        <tr class="sel-row">
+        <tr>
           <td><input type="checkbox" value="${p.id}"></td>
-          <td>${p.codigo||p.id}</td>
-          <td>${p.descripcion||"—"}</td>
-          <td>${fmt(p.u_k2??0.002)}</td>
-          <td>${p.nota||"—"}</td>
-        </tr>`).join('');
+          <td>${p.codigo}</td>
+          <td>${p.descripcion}</td>
+          <td>${fmt(p.u_k2)}</td>
+        </tr>
+      `).join('');
   };
-  draw(); filter.oninput=draw;
+
+  filter.oninput = draw;
+  draw();
   dlg.showModal();
 
-  $("#cancelPatrones").onclick=()=>dlg.close();
-  $("#okPatrones").onclick=()=>{
-    const ids = Array.from(rows.querySelectorAll('input[type="checkbox"]:checked')).map(x=>x.value);
-    if (!ids.length) return alert("Selecciona al menos un patrón.");
-    state.patronesSeleccionados = state.patrones.filter(p=> ids.includes(String(p.id)));
-    $("#patronesSelChips").innerHTML = state.patronesSeleccionados.map(p=>`<span class="chip">${p.codigo||p.id} · ${p.descripcion}</span>`).join('');
+  $("#cancelPatrones").onclick = ()=> dlg.close();
+  $("#okPatrones").onclick = ()=>{
+    const ids = Array.from(rows.querySelectorAll("input:checked")).map(x=>x.value);
+    if (!ids.length) return alert("Selecciona al menos uno.");
+    state.patronesSeleccionados = state.patrones.filter(p => ids.includes(String(p.id)));
+    $("#patronesSelChips").innerHTML = state.patronesSeleccionados
+      .map(p=>`<span class="chip">${p.codigo} · ${p.descripcion}</span>`).join('');
     dlg.close();
   };
 });
 
-/* ========= ELECCIÓN PATRÓN CUANDO HAY VARIOS ========= */
+/* ========= ELECCIÓN CUANDO HAY VARIOS ========= */
 async function elegirUnoDeSeleccionados(){
   return await new Promise(res=>{
-    const options = state.patronesSeleccionados.map((p,i)=>`${i+1}. ${p.codigo||p.id} · ${p.descripcion}`).join('\n');
-    const ans = prompt(`Hay varios patrones seleccionados. Indica el número:\n${options}\n\n`, "1");
-    const idx = parseInt(ans,10)-1;
-    if (Number.isFinite(idx) && idx>=0 && idx<state.patronesSeleccionados.length) res(state.patronesSeleccionados[idx]); else res(null);
+    const list = state.patronesSeleccionados.map((p,i)=>`${i+1}. ${p.codigo} · ${p.descripcion}`).join("\n");
+    const ans = prompt("Hay varios patrones.\nIndica nº:\n\n"+list, "1");
+    const idx = Number(ans)-1;
+    if (idx>=0 && idx < state.patronesSeleccionados.length) res(state.patronesSeleccionados[idx]);
+    else res(null);
   });
 }
 
-/* ========= PLAN: Añadir bloque ========= */
-$$('button[data-addblock]').forEach(b=>{
+/* ========= AÑADIR BLOQUE DE PLAN ========= */
+$$("button[data-addblock]").forEach(b=>{
   b.addEventListener("click", async ()=>{
-    if (!state.instrumento) return alert("Carga un instrumento primero.");
-    if (!state.patronesSeleccionados.length) return alert("Selecciona primero 1 o varios patrones.");
+    if (!state.instrumento) return alert("Carga un instrumento.");
+    if (!state.patronesSeleccionados.length) return alert("Selecciona patrón.");
+
     const patron = (state.patronesSeleccionados.length===1)
       ? state.patronesSeleccionados[0]
       : await elegirUnoDeSeleccionados();
     if (!patron) return;
+
     const puntos = await dialogSelectPuntosExactos(patron.id);
     if (!puntos?.length) return;
+
     const bloque = {
       id: uid(),
       tipo: b.dataset.addblock,
       patron,
       puntos,
-      nombrePatron: `${patron.codigo||patron.id} · ${patron.descripcion}`,
-      lado: ($("#ladoMed") ? $("#ladoMed").value : "GO")
+      nombrePatron: `${patron.codigo} · ${patron.descripcion}`,
+      lado: $("#ladoMed").value
     };
+
     state.plan.push(bloque);
-    renderPlan(); renderMedicion();
+    renderPlan();
+    renderMedicion();
   });
 });
 
 /* ========= RENDER PLAN ========= */
 function renderPlan(){
   const box=$("#planBloques");
-  if (!state.plan.length){ box.innerHTML=`<p class="note">No hay bloques. Añade alguno con los botones superiores.</p>`; return; }
+  if (!state.plan.length){
+    box.innerHTML = `<p class="note">No hay bloques definidos.</p>`;
+    return;
+  }
+
   box.innerHTML = state.plan.map(b=>`
     <div class="card" style="margin-top:10px">
       <div class="row">
         <div class="pill">${b.tipo}</div>
         <div class="chip">${b.nombrePatron}</div>
         <div class="chip">
-          Lado GO/NO GO:
+          Lado:
           <select class="lado-bloque" data-bid="${b.id}">
-            <option value="GO" ${(b.lado||"GO")==="GO" ? "selected" : ""}>GO</option>
-            <option value="NOGO" ${(b.lado||"GO")==="NOGO" ? "selected" : ""}>NO GO</option>
+            <option value="GO" ${b.lado==="GO"?"selected":""}>GO</option>
+            <option value="NOGO" ${b.lado==="NOGO"?"selected":""}>NO GO</option>
           </select>
         </div>
-        <span class="right mini muted">${b.puntos.length} punto(s) seleccionados</span>
-      </div>
-      <div class="table-box mt-8">
-        <table>
-          <thead><tr><th>#</th><th>Nominal</th><th>U(k=2)</th><th>Corrección</th><th>Caract.</th></tr></thead>
-          <tbody>
-            ${b.puntos.map((p,i)=>`<tr><td>${i+1}</td><td>${fmt(p.valor_nominal)}</td><td>${fmt(p.u_k2)}</td><td>${fmt(p.correccion_patron)}</td><td>${p.caracteristica||"—"}</td></tr>`).join('')}
-          </tbody>
-        </table>
+        <span class="right mini">${b.puntos.length} punto(s)</span>
       </div>
     </div>
   `).join('');
 
-  $$('#planBloques select.lado-bloque').forEach(sel => {
-    sel.addEventListener('change', () => {
-      const bloque = state.plan.find(b => b.id === sel.dataset.bid);
-      if (bloque) bloque.lado = sel.value;
+  $$(".lado-bloque").forEach(sel=>{
+    sel.addEventListener("change", ()=> {
+      const bl = state.plan.find(x=>x.id===sel.dataset.bid);
+      if (bl) bl.lado = sel.value;
     });
   });
 }
 
-/* ========= MEDICION ========= */
+/* ========= RENDER MEDICIÓN ========= */
 function renderMedicion(){
   const box=$("#medicionBloques");
-  if (!state.plan.length){ box.innerHTML=`<p class="note">Primero define el plan (bloques y puntos).</p>`; return; }
+
+  if (!state.plan.length){
+    box.innerHTML = `<p class="note">Define primero el plan.</p>`;
+    return;
+  }
+
   box.innerHTML = state.plan.map(b=>{
-    const filas = b.puntos.map(p=>{
-      const key=`${b.id}|${p.id}`;
-      const med=state.mediciones[key]||{r:[null,null,null,null,null],media:null,s:null};
+    const filas = b.puntos.map((p,i)=>{
+      const key = `${b.id}|${p.id}`;
+      const med = state.mediciones[key] || { r:[null,null,null,null,null], media:null, s:null };
+
       return `
         <tr data-key="${key}">
-          <td>${p.valor_nominal.toFixed(3)}</td>
-          ${[0,1,2,3,4].map(i=>`<td><input class="rep" data-idx="${i}" type="text" inputmode="decimal" placeholder="—" value="${med.r[i]??""}"></td>`).join('')}
-          <td class="media">${med.media??"0.000"}</td><td class="s">${med.s??"0.000"}</td>
-        </tr>`;
-    }).join('');
+          <td>${fmt(p.valor_nominal)}</td>
+          ${[0,1,2,3,4].map(idx=>`
+            <td><input class="rep" data-idx="${idx}" type="text" placeholder="—" value="${med.r[idx]??""}"></td>
+          `).join("")}
+          <td class="media">${med.media??"0.000"}</td>
+          <td class="s">${med.s??"0.000"}</td>
+        </tr>
+      `;
+    }).join("");
+
     return `
       <div class="card" style="margin-top:12px">
-        <div class="row"><div class="pill">${b.tipo}</div><div class="chip">${b.nombrePatron}</div></div>
+        <div class="row">
+          <div class="pill">${b.tipo}</div>
+          <div class="chip">${b.nombrePatron}</div>
+        </div>
         <div class="table-box mt-8">
           <table>
-            <thead><tr><th>Nominal (ref. patrón exacto)</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>Media</th><th>σ</th></tr></thead>
+            <thead>
+              <tr><th>Nominal</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>Media</th><th>σ</th></tr>
+            </thead>
             <tbody>${filas}</tbody>
           </table>
         </div>
-      </div>`;
-  }).join('');
+      </div>
+    `;
+  }).join("");
 
   $$("#medicionBloques input.rep").forEach(inp=>{
-    inp.addEventListener('input',()=>{ inp.value = inp.value.replace(',', '.'); });
-    inp.addEventListener('change',()=>{
-      const tr=inp.closest('tr'); const key=tr.dataset.key; const idx=+inp.dataset.idx;
-      const med=state.mediciones[key]||{r:[null,null,null,null,null]};
-      med.r[idx]=parseNum(inp.value);
-      const vals=med.r.filter(x=>typeof x==='number'&&isFinite(x));
-      const n=vals.length; const media=n? (vals.reduce((a,b)=>a+b,0)/n) : 0;
-      const s=n>1? Math.sqrt(vals.reduce((a,b)=>a+(b-media)**2,0)/(n-1)) : 0;
-      med.media=fmt(media); med.s=fmt(s); state.mediciones[key]=med;
-      tr.querySelector('.media').textContent=med.media; tr.querySelector('.s').textContent=med.s;
+    inp.addEventListener("input",()=> inp.value = inp.value.replace(",", "."));
+    inp.addEventListener("change",()=>{
+      const tr = inp.closest("tr");
+      const key = tr.dataset.key;
+      const idx = Number(inp.dataset.idx);
+
+      const med = state.mediciones[key] || { r:[null,null,null,null,null] };
+      med.r[idx] = parseNum(inp.value);
+
+      const vals = med.r.filter(v=>typeof v==="number" && !isNaN(v));
+      const n = vals.length;
+      const media = n? vals.reduce((a,b)=>a+b,0)/n : 0;
+      const s = n>1 ? Math.sqrt(vals.reduce((a,b)=>a+(b-media)**2,0)/(n-1)) : 0;
+
+      med.media = fmt(media);
+      med.s = fmt(s);
+      state.mediciones[key] = med;
+
+      tr.querySelector(".media").textContent = med.media;
+      tr.querySelector(".s").textContent = med.s;
     });
   });
 }
 
 $("#btnGuardarMed").addEventListener("click",()=>{
-  const codigo=$("#insCodigo").value.trim();
+  const codigo = $("#insCodigo").value.trim();
   localStorage.setItem(`mediciones:${codigo}`, JSON.stringify(state.mediciones));
   alert("Mediciones guardadas localmente.");
 });
-$("#goResultados").addEventListener("click",()=>{ calcularResultados(); switchTab('resultados'); });
 
-/* ========= RESULTADOS + INFORME ========= */
+$("#goResultados").addEventListener("click",()=>{
+  calcularResultados();
+  switchTab("resultados");
+});
+
+/* ========= RESULTADOS ========= */
 function calcularResultados(){
-  const ladoGlobal=$("#ladoMed").value;
-  const nominalGO=parseNum($("#nominalGO").value);
-  const nominalNOGO=parseNum($("#nominalNOGO").value);
-  const ref=$("#refError").value; 
-  const tol=parseNum($("#tolGlobal").value);
-  const uBase=parseNum($("#uBase").value);
+  const ladoGlobal = $("#ladoMed").value;
+  const nominalGO = parseNum($("#nominalGO").value);
+  const nominalNOGO = parseNum($("#nominalNOGO").value);
+  const ref = $("#refError").value;
+  const tol = parseNum($("#tolGlobal").value);
+  const uBase = parseNum($("#uBase").value);
 
-  const box=$("#resultadosBox");
-  if (!state.plan.length){ box.innerHTML=`<p class="note">No hay plan definido.</p>`; return; }
+  const box = $("#resultadosBox");
+  if (!state.plan.length){
+    box.innerHTML = `<p class="note">No hay plan definido.</p>`;
+    return;
+  }
 
-  // --- 4. Resultados detallados ---
-  let html="";
+  let html = "";
   let maxAbsError = 0;
   let maxAbsErrorPlusU = 0;
   let totalPuntos = 0;
   let hayNoApto = false;
   let hayIndeterminado = false;
 
-  for (const b of state.plan){
+  for (const b of state.plan) {
     const ladoBloque = b.lado || ladoGlobal;
-    const nominalBloque = (ladoBloque === "GO" ? nominalGO : nominalNOGO);
+    const nominalBloque = (ladoBloque==="GO")? nominalGO : nominalNOGO;
+
     html += `
       <div class="card" style="margin-top:12px">
         <div class="row">
           <div class="pill">${b.tipo}</div>
           <div class="chip">${b.nombrePatron}</div>
-          <span class="right mini muted">Nominal bloque (${ladoBloque}): ${fmt(nominalBloque)} mm</span>
+          <span class="right mini">Nominal (${ladoBloque}): ${fmt(nominalBloque)}</span>
         </div>
         <div class="table-box mt-8">
           <table>
-            <thead><tr><th>#</th><th>Nominal patrón (mm)</th><th>Corrección (µm)</th><th>Media (mm)</th><th>Error (µm)</th><th>U_total (µm)</th><th>Tolerancia (µm)</th><th>Decisión</th></tr></thead>
+            <thead>
+              <tr>
+                <th>#</th><th>Nominal (mm)</th><th>Correc. (µm)</th>
+                <th>Media (mm)</th><th>Error (µm)</th>
+                <th>U_total (µm)</th><th>Tolerancia</th><th>Decisión</th>
+              </tr>
+            </thead>
             <tbody>
     `;
+
     b.puntos.forEach((p,i)=>{
-      const key=`${b.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
-      let refVal = (ref==="patron") ? p.valor_nominal : nominalBloque;
-      const error = (media - refVal)*1000; // µm
-      const U = (uBase*1000);            // µm
-      const T = tol*1000;                // µm
+      const key = `${b.id}|${p.id}`;
+      const med = state.mediciones[key] || {};
+      const media = parseNum(med.media);
+
+      const refVal = (ref==="patron") ? p.valor_nominal : nominalBloque;
+
+      const error = (media - refVal) * 1000;
+      const U = uBase * 1000;
+      const T = tol * 1000;
+
       const absE = Math.abs(error);
-      const absEplusU = Math.abs(error)+U;
+      const absEplusU = absE + U;
+
       if (absE > maxAbsError) maxAbsError = absE;
       if (absEplusU > maxAbsErrorPlusU) maxAbsErrorPlusU = absEplusU;
+
       totalPuntos++;
 
-      const decision = (Math.abs(error)+U<=T) ? "APTO" : ((Math.abs(error)-U>T) ? "NO APTO" : "INDETERMINADO");
+      const decision =
+        (absE + U <= T) ? "APTO" :
+        (absE - U >  T) ? "NO APTO" : "INDETERMINADO";
+
       if (decision==="NO APTO") hayNoApto = true;
       if (decision==="INDETERMINADO") hayIndeterminado = true;
-      const badge = decision==="APTO" ? "success" : (decision==="NO APTO" ? "danger" : "");
+
+      const badge = decision==="APTO" ? "success"
+                 : decision==="NO APTO" ? "danger" : "";
+
       html += `
         <tr>
           <td>${i+1}</td>
           <td>${fmt(p.valor_nominal)}</td>
-          <td>${fmt(p.correccion_patron*1000,3)}</td>
+          <td>${fmt(p.correccion_patron*1000)}</td>
           <td>${fmt(media)}</td>
           <td>${fmt(error,1)}</td>
           <td>${fmt(U,1)}</td>
           <td>${fmt(T,1)}</td>
           <td><span class="pill ${badge}">${decision}</span></td>
-        </tr>`;
+        </tr>
+      `;
     });
     html += `</tbody></table></div></div>`;
   }
-  box.innerHTML=html;
 
-  // --- 1. Ficha instrumento (para informe) ---
+  box.innerHTML = html;
+
+  /* --- RESUMEN INSTRUMENTO (CORREGIDO) --- */
   const ins = state.instrumento || {};
-  const resumenInst = `
+  $("#resumenInstrumento").innerHTML = `
     <p class="mini">
       <strong>Código:</strong> ${ins.codigo || "-"} ·
-      <strong>Descripción:</strong> ${ins.descripcion || "-"} ·
-      <strong>Fabricante / Tipo:</strong> ${ins.fabricante_tipo || "-"}<br>
-      <strong>Rango de medida:</strong> ${ins.rango || "-"} ·
-      <strong>Unidad base:</strong> ${ins.unidad_base || "mm"}<br>
-      <strong>Última calibración registrada:</strong> ${ins.fecha_ultima_cal || ins.fecha_calibracion || "-"} ·
-      <strong>Próxima calibración registrada:</strong> ${ins.proxima_cal || ins.proxima_calibracion || "-"}
+      <strong>Descripción:</strong> ${ins.descripcion || "-"}<br>
+      <strong>Fabricante / Tipo:</strong> ${ins.fabricante_tipo || "-"} ·
+      <strong>Rango:</strong> ${ins.rango || "-"}<br>
+      <strong>Última calibración registrada:</strong> ${ins.fecha_calibracion || "-"} ·
+      <strong>Próxima calibración registrada:</strong> ${ins.fecha_proxima_calibracion || "-"}
     </p>
   `;
-  $("#resumenInstrumento").innerHTML = resumenInst;
 
-  // --- 5. Resumen global ---
+  /* --- RESUMEN GLOBAL --- */
   let decisionGlobal = "APTO";
   if (hayNoApto) decisionGlobal = "NO APTO";
   else if (hayIndeterminado) decisionGlobal = "INDETERMINADO";
 
-  const resumenGlobal = `
+  $("#resumenGlobalBox").innerHTML = `
     <p class="mini">
-      <strong>Número de bloques:</strong> ${state.plan.length} ·
-      <strong>Número total de puntos evaluados:</strong> ${totalPuntos}<br>
-      <strong>Máx |E| (µm):</strong> ${fmt(maxAbsError,1)} ·
-      <strong>Máx (|E| + U) (µm):</strong> ${fmt(maxAbsErrorPlusU,1)} ·
-      <strong>Tolerancia global (µm):</strong> ${fmt(tol*1000,1)}<br>
-      <strong>Decisión global según ILAC-G8:</strong>
+      <strong>Bloques:</strong> ${state.plan.length} ·
+      <strong>Puntos:</strong> ${totalPuntos}<br>
+      <strong>Máx |E|:</strong> ${fmt(maxAbsError)} µm ·
+      <strong>Máx |E| + U:</strong> ${fmt(maxAbsErrorPlusU)} µm<br>
+      <strong>Decisión global:</strong>
       <span class="pill ${decisionGlobal==="APTO"?"success":(decisionGlobal==="NO APTO"?"danger":"")}">
         ${decisionGlobal}
       </span>
     </p>
   `;
-  $("#resumenGlobalBox").innerHTML = resumenGlobal;
 
-  // --- 6. Trazabilidad ---
-  const patronesTxt = (state.patronesSeleccionados||[]).map(p=>`${p.codigo||p.id} · ${p.descripcion||""}`).join("; ");
-  const traz = `
+  /* --- TRAZABILIDAD --- */
+  const patronesTxt = (state.patronesSeleccionados||[])
+    .map(p=>`${p.codigo} · ${p.descripcion}`).join("; ");
+
+  $("#trazabilidadBox").innerHTML = `
     <p class="mini">
-      La trazabilidad metrológica se garantiza mediante el uso de patrones materializados cuyo estado de calibración
-      se controla en el sistema de gestión de patrones del laboratorio TMP. Para esta calibración se han utilizado
-      los siguientes patrones:<br>
-      <strong>Patrones empleados:</strong> ${patronesTxt || "No informado"}.
-    </p>
-    <p class="mini">
-      Los valores indicados de corrección del patrón (columna "Corrección") proceden del certificado de calibración
-      o, en puntos intermedios, de la interpolación matemática aplicada por el laboratorio. La incertidumbre informada
-      corresponde a la incertidumbre expandida U(k=2), con un nivel de confianza aproximado del 95 %.
+      <strong>Patrones empleados:</strong> ${patronesTxt || "No definido"}.
     </p>
   `;
-  $("#trazabilidadBox").innerHTML = traz;
 
-  // --- Gráfica de errores (primer bloque) ---
   dibujarGraficaErrores();
 }
 
-/* ========= GRÁFICA DE ERRORES (primer bloque) ========= */
+/* ========= GRÁFICA ========= */
 function dibujarGraficaErrores(){
   const canvas = document.getElementById("grafErrores");
   if (!canvas) return;
+
   const ctxG = canvas.getContext("2d");
   ctxG.clearRect(0,0,canvas.width,canvas.height);
+
   const bloque = state.plan[0];
-  if (!bloque) {
+  if (!bloque){
     ctxG.fillStyle="#9eb9cf";
-    ctxG.font="12px Inter";
-    ctxG.fillText("Sin datos de bloques.", 10, 20);
+    ctxG.fillText("Sin datos", 10,20);
     return;
   }
 
-  const ladoGlobal=$("#ladoMed").value;
-  const nominalGO=parseNum($("#nominalGO").value);
-  const nominalNOGO=parseNum($("#nominalNOGO").value);
-  const ref=$("#refError").value;
-  const uBase=parseNum($("#uBase").value);
-  const tol=parseNum($("#tolGlobal").value);
-  const ladoBloque = bloque.lado || ladoGlobal;
+  const ladoGlobal = $("#ladoMed").value;
+  const nominalGO = parseNum($("#nominalGO").value);
+  const nominalNOGO = parseNum($("#nominalNOGO").value);
+  const ref = $("#refError").value;
 
   const puntosGraf = [];
+
   bloque.puntos.forEach(p=>{
-    const key=`${bloque.id}|${p.id}`; const med=state.mediciones[key]||{}; const media=parseNum(med.media);
-    let refVal = (ref==="patron") ? p.valor_nominal : (ladoBloque==="GO" ? nominalGO : nominalNOGO);
+    const key = `${bloque.id}|${p.id}`;
+    const med = state.mediciones[key] || {};
+    const media = parseNum(med.media);
+
+    let refVal = (ref==="patron")
+      ? p.valor_nominal
+      : (bloque.lado==="GO" ? nominalGO : nominalNOGO);
+
     const error = (media - refVal)*1000;
-    puntosGraf.push({x:p.valor_nominal, y:error});
+    puntosGraf.push({ x:p.valor_nominal, y:error });
   });
+
   if (!puntosGraf.length){
     ctxG.fillStyle="#9eb9cf";
-    ctxG.font="12px Inter";
-    ctxG.fillText("Sin mediciones en el primer bloque.", 10, 20);
+    ctxG.fillText("Sin mediciones", 10,20);
     return;
   }
 
-  const margin = {left:40,right:10,top:10,bottom:25};
   const xs = puntosGraf.map(p=>p.x);
   const ys = puntosGraf.map(p=>p.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const maxAbsY = Math.max(...ys.map(v=>Math.abs(v)), tol*1000, uBase*1000);
-  const minY = -maxAbsY, maxY = maxAbsY;
+  const maxAbsY = Math.max(...ys.map(v=>Math.abs(v)));
 
-  const sx = v => margin.left + ( (v-minX)/(maxX-minX || 1) ) * (canvas.width - margin.left - margin.right);
-  const sy = v => margin.top + ( (maxY-v)/(maxY-minY || 1) ) * (canvas.height - margin.top - margin.bottom);
+  const margin = {left:40,right:10,top:10,bottom:25};
 
+  const sx = v => margin.left + ((v-minX)/(maxX-minX||1))*(canvas.width - margin.left - margin.right);
+  const sy = v => margin.top + ((maxAbsY - v)/(maxAbsY*2||1))*(canvas.height - margin.top - margin.bottom);
+
+  // Ejes
   ctxG.strokeStyle="#2a4f74";
-  ctxG.lineWidth=1;
   ctxG.strokeRect(margin.left,margin.top,canvas.width-margin.left-margin.right,canvas.height-margin.top-margin.bottom);
 
+  // Línea horizontal (error=0)
   const y0 = sy(0);
   ctxG.strokeStyle="#3f6fa3";
   ctxG.beginPath();
@@ -1075,132 +937,93 @@ function dibujarGraficaErrores(){
   ctxG.lineTo(canvas.width-margin.right,y0);
   ctxG.stroke();
 
-  const yTolUp = sy(tol*1000);
-  const yTolDown = sy(-tol*1000);
-  ctxG.strokeStyle="#66501d";
-  ctxG.setLineDash([4,3]);
-  ctxG.beginPath(); ctxG.moveTo(margin.left,yTolUp); ctxG.lineTo(canvas.width-margin.right,yTolUp); ctxG.stroke();
-  ctxG.beginPath(); ctxG.moveTo(margin.left,yTolDown); ctxG.lineTo(canvas.width-margin.right,yTolDown); ctxG.stroke();
-  ctxG.setLineDash([]);
-
-  ctxG.fillStyle="#9eb9cf";
-  ctxG.font="10px Inter";
-  ctxG.fillText("Error (µm)", margin.left+4, margin.top+10);
-  ctxG.fillText("Nominal patrón (mm)", canvas.width/2-40, canvas.height-5);
-
+  // Puntos
   ctxG.fillStyle="#58a6ff";
   puntosGraf.forEach(p=>{
-    const x = sx(p.x);
-    const y = sy(p.y);
     ctxG.beginPath();
-    ctxG.arc(x,y,3,0,Math.PI*2);
+    ctxG.arc(sx(p.x), sy(p.y), 3, 0, Math.PI*2);
     ctxG.fill();
   });
 }
 
-/* ========= GUARDAR TODO: PDF + CERTIFICADOS + INSTRUMENTOS ========= */
+/* ========= GUARDAR TODO — CORREGIDO ========= */
 $("#btnGuardarTodo").addEventListener("click", async () => {
+
   const codigo = $("#insCodigo").value.trim();
-  if (!codigo) { alert("Introduce el código del instrumento."); return; }
+  if (!codigo) return alert("Introduce código del instrumento.");
 
   const fechaCal = $("#condFechaCal").value;
   const proxCal  = $("#firmanteProxima").value;
 
-  if (!fechaCal || !proxCal) {
-    alert("Faltan fechas en Resultados → Validación del informe.");
-    return;
-  }
+  if (!fechaCal || !proxCal)
+    return alert("Faltan fechas obligatorias.");
 
-  if (!$("#firmanteNombre").value.trim()) {
-    alert("El nombre del operario responsable es obligatorio.");
-    return;
-  }
-
-  // CONFIRMACIONES
-  const c1 = confirm("¿Ha guardado el PDF EN SU ORDENADOR?");
-  if (!c1) return;
-  const c2 = confirm("¿Seguro que ha archivado el PDF en la carpeta interna?");
-  if (!c2) return;
+  if (!$("#firmanteNombre").value.trim())
+    return alert("El nombre del operario es obligatorio.");
 
   await ensureSupabase();
-  if (!supabase) {
-    alert("Supabase no disponible. No se puede guardar el certificado.");
+  if (!supabase){
+    alert("Supabase no disponible.");
     return;
   }
 
-  /* ===========================================================
-     1) GENERAR ID DE CERTIFICADO
-     =========================================================== */
+  // Confirmaciones
+  if (!confirm("¿Ha guardado el PDF en su ordenador?")) return;
+  if (!confirm("¿Seguro que lo ha archivado en carpeta interna?")) return;
+
+  /* 1) GENERAR ID CERTIFICADO */
   const año = new Date().getFullYear();
-  const numeroSec = String(Math.floor(Math.random()*9999)).padStart(4,"0");
-  const certID = `CC-${año}-${numeroSec}`;
+  const sec = String(Math.floor(Math.random()*9999)).padStart(4,"0");
+  const certID = `CC-${año}-${sec}`;
 
-  /* ===========================================================
-     2) EXPORTAR PDF (html2canvas + jsPDF)
-     =========================================================== */
-  async function exportPDF() {
+  /* 2) EXPORTAR PDF */
+  async function exportPDF(){
     const { jsPDF } = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.es.min.js");
-    const pdf = new jsPDF({ unit: "mm", format: "a4" });
-
-    const pagina = document.body;
-    const canvas = await html2canvas(pagina, { scale: 2 });
+    const pdf = new jsPDF({ unit:"mm", format:"a4" });
+    const canvas = await html2canvas(document.body, { scale:2 });
     const img = canvas.toDataURL("image/png");
-
-    const width = pdf.internal.pageSize.getWidth();
-    const height = pdf.internal.pageSize.getHeight();
-    pdf.addImage(img, "PNG", 0, 0, width, height);
-
+    const w = pdf.internal.pageSize.getWidth();
+    const h = pdf.internal.pageSize.getHeight();
+    pdf.addImage(img, "PNG", 0, 0, w, h);
     return pdf.output("blob");
   }
 
-  // Crea el blob del PDF
   const pdfBlob = await exportPDF();
 
-  /* ===========================================================
-     3) SUBIR PDF A SUPABASE
-     =========================================================== */
+  /* 3) SUBIR A STORAGE */
   const fileName = `${certID}.pdf`;
 
-  const { data: uploadData, error: uploadError } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("certificados")
-    .upload(fileName, pdfBlob, { upsert: true });
+    .upload(fileName, pdfBlob, { upsert:true });
 
-  if (uploadError) {
+  if (uploadError){
     console.error(uploadError);
-    alert("Error al subir el PDF a Supabase.");
-    return;
+    return alert("Error subiendo PDF.");
   }
 
-  const { data: publicURL } = supabase.storage
+  const { data: urlData } = supabase.storage
     .from("certificados")
     .getPublicUrl(fileName);
+  const pdfURL = urlData.publicUrl;
 
-  const pdfURL = publicURL.publicUrl;
-
-  /* ===========================================================
-     4) BUSCAR ID REAL DEL INSTRUMENTO
-     =========================================================== */
-  const { data: insData, error: insError } = await supabase
+  /* 4) ID interno de instrumento */
+  const { data: insData, error: insErr } = await supabase
     .from("instrumentos")
     .select("id_instrumento")
     .eq("codigo", codigo)
     .maybeSingle();
 
-  if (insError || !insData) {
-    alert("No se pudo obtener el ID interno del instrumento.");
-    return;
-  }
+  if (insErr || !insData)
+    return alert("No se pudo obtener ID interno de instrumento.");
 
   const instrumentoID = insData.id_instrumento;
 
-  /* ===========================================================
-     5) INSERTAR CERTIFICADO EN TABLA
-     =========================================================== */
-  const decisionGlobal = ($("#resumenGlobalBox").innerText.includes("NO APTO"))
-    ? "NO APTO"
-    : ($("#resumenGlobalBox").innerText.includes("INDETERMINADO"))
-      ? "INDETERMINADO"
-      : "APTO";
+  /* 5) INSERTAR CERTIFICADO */
+  const decisionGlobal =
+    ($("#resumenGlobalBox").innerText.includes("NO APTO")) ? "NO APTO" :
+    ($("#resumenGlobalBox").innerText.includes("INDETERMINADO")) ? "INDETERMINADO" :
+    "APTO";
 
   const { error: certError } = await supabase
     .from("certificados")
@@ -1213,68 +1036,50 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
       certificado_pdf_url: pdfURL
     });
 
-  if (certError) {
+  if (certError){
     console.error(certError);
-    alert("No se pudo registrar el certificado en Supabase.");
-    return;
+    return alert("Error guardando certificado.");
   }
 
-  /* ===========================================================
-     6) ACTUALIZAR FECHAS EN INSTRUMENTO
-     =========================================================== */
-  const { error: updError } = await supabase
-    .from("instrumentos")
-    .update({
-      fecha_calibracion: fechaCal,
-      proxima_calibracion: proxCal
-    })
-    .eq("id_instrumento", instrumentoID);
+  /* 6) ACTUALIZAR FECHAS DEL INSTRUMENTO — CORREGIDO */
+  await actualizarFechasEnSupabase(instrumentoID, fechaCal, proxCal);
 
-  if (updError) {
-    console.error(updError);
-    alert("No se pudo actualizar la ficha del instrumento.");
-    return;
-  }
-
-  alert(`✔ Certificado guardado correctamente.\nID: ${certID}`);
+  alert("✔ Certificado guardado correctamente.\nID: " + certID);
 });
 
-
+/* ========= IMPRIMIR ========= */
 $("#btnImprimir").addEventListener("click",()=>{
-  if (!$("#firmanteNombre").value.trim() || !$("#firmanteProxima").value) {
-    alert("Completa el nombre y la fecha de próxima calibración antes de imprimir.");
-    return;
-  }
+  if (!$("#firmanteNombre").value.trim() || !$("#firmanteProxima").value)
+    return alert("Completa nombre y próxima calibración.");
   window.print();
 });
 
-/* ========= SELECTOR DE PUNTOS (NOMINAL EXACTO) ========= */
+/* ========= SELECTOR PUNTOS (PROC_PUNTOS) ========= */
 async function dialogSelectPuntosExactos(patronId){
   await ensureSupabase();
-  const dlg=$("#dlgPuntos"), rows=$("#puntosRows"), input=$("#puntoSearchExacto");
-  const btnBuscar=$("#btnBuscarPunto"), btnMas=$("#btnCargarMas");
+  const dlg=$("#dlgPuntos"), rows=$("#puntosRows");
+  const input=$("#puntoSearchExacto"), btnBuscar=$("#btnBuscarPunto");
+
   state.puntosPage = { patronId, from:0, size:1000, cache:[] };
 
-  const draw = () => {
-    const puntos = state.puntosPage.cache;
-    rows.innerHTML = puntos.map((p,i)=>`
+  const draw = ()=>{
+    rows.innerHTML = state.puntosPage.cache.map((p,i)=>`
       <tr>
         <td><input type="checkbox" value="${p.id}"></td>
         <td>${i+1}</td>
         <td>${fmt(p.valor_nominal)}</td>
         <td>${fmt(p.u_k2)}</td>
         <td>${fmt(p.correccion_patron)}</td>
-        <td>${p.caracteristica||"—"}</td>
-      </tr>`).join('');
+      </tr>
+    `).join("");
   };
 
   async function loadPage(){
     if (!supabase){
-      state.puntosPage.cache = [
-        {id:patronId+"_0",valor_nominal:8.000,u_k2:0.002,correccion_patron:0,caracteristica:"Interpolado automático"}
-      ];
-      draw(); return;
+      state.puntosPage.cache = [];
+      return draw();
     }
+
     const { from, size } = state.puntosPage;
     const { data, error } = await supabase
       .from("proc_puntos")
@@ -1282,83 +1087,110 @@ async function dialogSelectPuntosExactos(patronId){
       .eq("patron_id", patronId)
       .order("valor_nominal",{ascending:true})
       .range(from, from+size-1);
-    if (error) { console.warn(error); return; }
-    state.puntosPage.from += size;
-    state.puntosPage.cache = (state.puntosPage.cache||[]).concat((data||[]).map(mapPoint));
+
+    if (!error){
+      state.puntosPage.from += size;
+      state.puntosPage.cache =
+        (state.puntosPage.cache||[]).concat((data||[]).map(mapPoint));
+    }
+
     draw();
   }
 
   async function buscarExacto(){
-    const str = input.value.trim().replace(',','.');
-    if (!str) return alert("Introduce un nominal exacto (ej. 8.001)");
-    const exact = Number(str);
-    if (!Number.isFinite(exact)) return alert("Valor no válido.");
-    const { data, error } = await supabase
+    const v = parseNum(input.value);
+    if (isNaN(v)) return alert("Nominal no válido.");
+
+    const { data } = await supabase
       .from("proc_puntos")
       .select("*")
       .eq("patron_id", patronId)
-      .eq("valor_nominal", exact)
-      .order("valor_nominal",{ascending:true})
-      .limit(50);
-    if (error) { console.warn(error); return; }
-    const list = (data||[]).map(mapPoint);
-    state.puntosPage.cache = list; draw();
-    if (!list.length) alert("No existe ese nominal exacto para este patrón.");
+      .eq("valor_nominal", v)
+      .limit(10);
+
+    state.puntosPage.cache = (data||[]).map(mapPoint);
+    draw();
+
+    if (!data?.length) alert("Nominal exacto no encontrado.");
   }
 
-  dlg.showModal(); rows.innerHTML=""; await loadPage();
-  btnMas.onclick=loadPage; btnBuscar.onclick=buscarExacto;
+  dlg.showModal();
+  await loadPage();
+
+  btnBuscar.onclick = buscarExacto;
 
   return await new Promise(res=>{
-    $("#cancelPuntos").onclick=()=>{ dlg.close(); res(null); };
-    $("#okPuntos").onclick=()=>{
-      const ids = Array.from(rows.querySelectorAll('input[type="checkbox"]:checked')).map(x=>x.value);
+    $("#cancelPuntos").onclick = ()=>{ dlg.close(); res(null); };
+    $("#okPuntos").onclick = ()=>{
+      const ids = Array.from(rows.querySelectorAll("input:checked")).map(x=>x.value);
       if (!ids.length) return alert("Selecciona al menos un punto.");
+
       const sel = state.puntosPage.cache.filter(p=> ids.includes(String(p.id)));
       dlg.close(); res(sel);
     };
   });
 }
+
 function mapPoint(p){
   return {
-    id: p.id || p.uuid || p.pk || uid(),
-    valor_nominal: parseNum(p.valor_nominal ?? p.nominal_mm ?? p.nominal ?? 0),
-    u_k2: parseNum(p.u_k2 ?? p.u_patron ?? 0),
-    correccion_patron: parseNum(p.correccion_patron ?? p.correccion ?? 0),
-    caracteristica: p.caracteristica || p.tipo_medicion || ""
+    id: p.id || uid(),
+    valor_nominal: parseNum(p.valor_nominal),
+    u_k2: parseNum(p.u_k2),
+    correccion_patron: parseNum(p.correccion_patron),
+    caracteristica: p.caracteristica || ""
   };
 }
 
 /* ========= TABS ========= */
 function switchTab(name){
-  $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
-  $('#tab-plan').classList.toggle('hidden', name!=='plan');
-  $('#tab-medicion').classList.toggle('hidden', name!=='medicion');
-  $('#tab-resultados').classList.toggle('hidden', name!=='resultados');
-  const anexo = $('#tab-anexo');
-  if (anexo) anexo.classList.toggle('hidden', name!=='anexo');
+  $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab===name));
+  $("#tab-plan").classList.toggle("hidden", name!=="plan");
+  $("#tab-medicion").classList.toggle("hidden", name!=="medicion");
+  $("#tab-resultados").classList.toggle("hidden", name!=="resultados");
+  $("#tab-anexo")?.classList.toggle("hidden", name!=="anexo");
 }
-$$('.tab').forEach(t=> t.addEventListener('click',()=> switchTab(t.dataset.tab)));
+
+$$(".tab").forEach(t=> t.addEventListener("click",()=> switchTab(t.dataset.tab)));
 
 /* ========= FIRMA ========= */
-const sigCanvas = document.getElementById('sigPad');
-const ctx = sigCanvas.getContext('2d');
-ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 2.2; ctx.lineCap='round';
+const sigCanvas = document.getElementById("sigPad");
+const ctxF = sigCanvas.getContext("2d");
+
+ctxF.strokeStyle = "#58a6ff";
+ctxF.lineWidth = 2.2;
+ctxF.lineCap = "round";
+
 let drawing=false, last=null;
-function pos(ev){ const r=sigCanvas.getBoundingClientRect(); return {x:(ev.clientX-r.left), y:(ev.clientY-r.top)}; }
-sigCanvas.addEventListener('mousedown', e=>{ drawing=true; last=pos(e); });
-sigCanvas.addEventListener('mousemove', e=>{ if(!drawing) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; });
-sigCanvas.addEventListener('mouseup', ()=>drawing=false);
-sigCanvas.addEventListener('mouseleave', ()=>drawing=false);
-document.getElementById('sigClear').addEventListener('click', ()=>{ ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height); });
+const pos = ev=>{
+  const r=sigCanvas.getBoundingClientRect();
+  return { x:ev.clientX-r.left, y:ev.clientY-r.top };
+};
+
+sigCanvas.addEventListener("mousedown", e=>{ drawing=true; last=pos(e); });
+sigCanvas.addEventListener("mousemove", e=>{
+  if (!drawing) return;
+  const p=pos(e);
+  ctxF.beginPath();
+  ctxF.moveTo(last.x,last.y);
+  ctxF.lineTo(p.x,p.y);
+  ctxF.stroke();
+  last=p;
+});
+sigCanvas.addEventListener("mouseup", ()=> drawing=false);
+sigCanvas.addEventListener("mouseleave", ()=> drawing=false);
+
+$("#sigClear").addEventListener("click", ()=> ctxF.clearRect(0,0,sigCanvas.width,sigCanvas.height));
 
 /* ========= BOTONES CABECERA ========= */
 $("#btnCargar").addEventListener("click", cargarInstrumento);
-$("#btnLimpiar").addEventListener("click", ()=>location.reload());
+$("#btnLimpiar").addEventListener("click", ()=> location.reload());
 
-/* ========= ARRANQUE ========= */
-setBadge(false); switchTab('plan');
+/* ========= ARRANQUE (CORREGIDO) ========= */
+ensureSupabase();   // <-- ahora arranca conectado automáticamente
+switchTab("plan");
+
 </script>
+
 </body>
 </html>
 
