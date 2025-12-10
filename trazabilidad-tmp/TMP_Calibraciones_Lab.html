@@ -946,6 +946,11 @@ function dibujarGraficaErrores(){
 
 /* ========= GUARDAR TODO (PDF en navegador + Supabase) ========= */
 $("#btnGuardarTodo").addEventListener("click", async () => {
+
+  const certJSON = buildCertJSON();
+  console.log("CERT JSON →", certJSON);
+
+  
   const codigo = $("#insCodigo").value.trim();
   if (!codigo) { alert("Introduce el código del instrumento."); return; }
 
@@ -1202,9 +1207,86 @@ $("#btnLimpiar").addEventListener("click", ()=>location.reload());
 
 /* ========= ARRANQUE ========= */
 setBadge(false); switchTab('plan');
+
+/* ========= FUNCIÓN buildCertJSON() ========= */
+function buildCertJSON() {
+
+  // Firma manuscrita en base64
+  const sigCanvas = document.getElementById("sigPad");
+  const firmaBase64 = sigCanvas.toDataURL("image/png");
+
+  // Condiciones ambientales
+  const condiciones = {
+    temperatura: $("#condTemp").value || null,
+    humedad: $("#condHum").value || null,
+    fecha_calibracion: $("#condFechaCal").value || null,
+    observaciones: $("#condObs").value || ""
+  };
+
+  // Patrones
+  const patrones = (state.patronesSeleccionados || []).map(p => ({
+    id: p.id,
+    codigo: p.codigo,
+    descripcion: p.descripcion,
+    u_k2: p.u_k2,
+    nota: p.nota || ""
+  }));
+
+  // Bloques y puntos con mediciones
+  const bloques = state.plan.map(b => ({
+    id: b.id,
+    tipo: b.tipo,
+    lado: b.lado,
+    patron: {
+      id: b.patron.id,
+      codigo: b.patron.codigo,
+      descripcion: b.patron.descripcion,
+      u_k2: b.patron.u_k2
+    },
+    puntos: b.puntos.map(p => {
+      const key = `${b.id}|${p.id}`;
+      const med = state.mediciones[key] || {};
+      return {
+        id: p.id,
+        nominal: p.valor_nominal,
+        correccion_patron: p.correccion_patron,
+        caracteristica: p.caracteristica || "",
+        repeticiones: med.r || [],
+        media: med.media ? Number(med.media) : null,
+        sigma: med.s ? Number(med.s) : null
+      };
+    })
+  }));
+
+  // Resumen global en texto
+  const resumenGlobal = $("#resumenGlobalBox").innerText || "";
+
+  // Instrumento
+  const instrumento = state.instrumento || {};
+
+  return {
+    certificado: {
+      fecha_generacion: new Date().toISOString(),
+      norma: "ISO/IEC 17025 · ILAC-G8"
+    },
+    instrumento,
+    condiciones,
+    patrones,
+    bloques,
+    resumen_global: resumenGlobal,
+    firma: {
+      nombre: $("#firmanteNombre").value || "",
+      proxima_calibracion: $("#firmanteProxima").value || "",
+      firma_base64: firmaBase64
+    },
+    qr: {
+      url_verificacion: null
+    }
+  };
+}
+
+  
 </script>
 </body>
 </html>
-
-
 
