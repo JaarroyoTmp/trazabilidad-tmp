@@ -1291,25 +1291,23 @@ function buildCertJSON() {
   };
 }
 
-  /* ========= EMITIR CERTIFICADO OFICIAL (backend) ========= */
+/* ========= EMITIR CERTIFICADO OFICIAL (backend real) ========= */
 $("#btnEmitirOficial").addEventListener("click", async () => {
 
   // 1. Generar JSON completo con todo el certificado
   const certJSON = buildCertJSON();
 
-  // Seguridad básica
   if (!certJSON.instrumento?.codigo) {
     alert("Debe cargar un instrumento antes de emitir el certificado oficial.");
     return;
   }
 
-  // Confirmación
   const ok = confirm("¿Desea emitir el certificado oficial?");
   if (!ok) return;
 
   try {
-    // 2. Enviar JSON al backend oficial
-    const resp = await fetch("/api/generar-certificado-oficial", {
+    // 2. Enviar JSON al backend REAL
+    const resp = await fetch("https://tmp-backend-certificados.vercel.app/api/generar-certificado-oficial", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(certJSON)
@@ -1323,7 +1321,7 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
       return;
     }
 
-    // 3. Mostrar resultado al usuario
+    // 3. Mostrar detalles
     alert(
       "✔ CERTIFICADO OFICIAL GENERADO\n\n" +
       "Número: " + data.certificado.numero + "\n" +
@@ -1331,18 +1329,20 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
       "Verificación: " + data.certificado.verificacion_url
     );
 
-    // 4. Abrir el PDF automáticamente
+    // 4. Abrir PDF
     window.open(data.certificado.pdf_url, "_blank");
 
   } catch (err) {
     console.error("ERROR:", err);
-    alert("Error de red al emitir certificado.");
+    alert("Error de red al emitir certificado (no se pudo contactar con el backend).");
   }
 });
+
 
   
 </script>
 </body>
 </html>
+
 
 
