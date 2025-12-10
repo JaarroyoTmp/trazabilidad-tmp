@@ -364,6 +364,12 @@
       <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
       <button id="btnGuardarTodo" class="btn">Guardar todo (local + Supabase)</button>
     </div>
+
+<button id="btnEmitirOficial" class="btn" style="background:#1fae64">
+  Emitir certificado oficial (backend)
+</button>
+
+    
     <p class="note">Criterio ILAC-G8: |Error| + U ≤ T → <span class="pill success">APTO</span> · |Error| − U &gt; T → <span class="pill danger">NO APTO</span> · resto → INDETERMINADO</p>
   </section>
 
@@ -1285,8 +1291,58 @@ function buildCertJSON() {
   };
 }
 
+  /* ========= EMITIR CERTIFICADO OFICIAL (backend) ========= */
+$("#btnEmitirOficial").addEventListener("click", async () => {
+
+  // 1. Generar JSON completo con todo el certificado
+  const certJSON = buildCertJSON();
+
+  // Seguridad básica
+  if (!certJSON.instrumento?.codigo) {
+    alert("Debe cargar un instrumento antes de emitir el certificado oficial.");
+    return;
+  }
+
+  // Confirmación
+  const ok = confirm("¿Desea emitir el certificado oficial?");
+  if (!ok) return;
+
+  try {
+    // 2. Enviar JSON al backend oficial
+    const resp = await fetch("/api/generar-certificado-oficial", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(certJSON)
+    });
+
+    const data = await resp.json();
+
+    if (!data.ok) {
+      console.error(data);
+      alert("Error emitiendo certificado: " + data.error);
+      return;
+    }
+
+    // 3. Mostrar resultado al usuario
+    alert(
+      "✔ CERTIFICADO OFICIAL GENERADO\n\n" +
+      "Número: " + data.certificado.numero + "\n" +
+      "PDF: " + data.certificado.pdf_url + "\n" +
+      "Verificación: " + data.certificado.verificacion_url
+    );
+
+    // 4. Abrir el PDF automáticamente
+    window.open(data.certificado.pdf_url, "_blank");
+
+  } catch (err) {
+    console.error("ERROR:", err);
+    alert("Error de red al emitir certificado.");
+  }
+});
+
   
 </script>
 </body>
 </html>
+
 
