@@ -361,7 +361,6 @@
     </div>
 
     <div class="row" style="margin-top:10px;justify-content:flex-end">
-      <button id="btnImprimir" class="btn secondary">Imprimir informe</button>
       <button id="btnGuardarTodo" class="btn">Guardar todo (local + Supabase)</button>
     </div>
 
@@ -1100,21 +1099,16 @@ if (supabase) {
 
   if (nuevoInst) {
     state.instrumento = nuevoInst;
-    pintarInstrumento();  // <-- actualiza visualmente los recuadros
+    pintarInstrumento(); // Actualiza visualmente los recuadros
+  } else {
+    console.warn("Instrumento no encontrado al recargar datos.");
   }
+
 } else {
   console.warn("Supabase no está disponible, no se pudo recargar el instrumento.");
 }
 
 
-/* ========= IMPRIMIR ========= */
-$("#btnImprimir").addEventListener("click",()=>{
-  if (!$("#firmanteNombre").value.trim() || !$("#firmanteProxima").value) {
-    alert("Completa el nombre y la fecha de próxima calibración antes de imprimir.");
-    return;
-  }
-  window.print();
-});
 
 /* ========= SELECTOR DE PUNTOS ========= */
 async function dialogSelectPuntosExactos(patronId){
@@ -1356,6 +1350,7 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
 </script>
 </body>
 </html>
+
 
 
 
