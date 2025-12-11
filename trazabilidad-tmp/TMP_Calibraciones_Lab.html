@@ -1084,20 +1084,28 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
     return;
   }
 
-  // Volver a cargar el instrumento desde Supabase
-const nuevoInst = await supabase
-  .from("instrumentos")
-  .select("*")
-  .eq("codigo", codigo)
-  .maybeSingle();
+// Volver a cargar el instrumento desde Supabase (FORMA SEGURA)
+await ensureSupabase();
 
-if (nuevoInst.data) {
-  state.instrumento = nuevoInst.data;
-  pintarInstrumento();   // <-- actualiza visualmente los recuadros
+if (supabase) {
+  const { data: nuevoInst, error } = await supabase
+    .from("instrumentos")
+    .select("*")
+    .eq("codigo", codigo)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Error recargando instrumento:", error);
+  }
+
+  if (nuevoInst) {
+    state.instrumento = nuevoInst;
+    pintarInstrumento();  // <-- actualiza visualmente los recuadros
+  }
+} else {
+  console.warn("Supabase no está disponible, no se pudo recargar el instrumento.");
 }
 
-alert(`✔ Certificado guardado correctamente.\nID: ${certID}`);
-});
 
 /* ========= IMPRIMIR ========= */
 $("#btnImprimir").addEventListener("click",()=>{
@@ -1348,6 +1356,7 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
 </script>
 </body>
 </html>
+
 
 
 
