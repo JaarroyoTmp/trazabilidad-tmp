@@ -1084,15 +1084,20 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
     return;
   }
 
-  // Actualizar ficha en pantalla
-  if (state.instrumento) {
-    state.instrumento.fecha_calibracion = fechaCal;
-    state.instrumento.fecha_proxima_calibracion = proxCal;
-    pintarInstrumento();
-  }
+  // Volver a cargar el instrumento desde Supabase
+const nuevoInst = await supabase
+  .from("instrumentos")
+  .select("*")
+  .eq("codigo", codigo)
+  .maybeSingle();
 
-  alert(`✔ Certificado guardado correctamente.\nID: ${certID}`);
-});
+if (nuevoInst.data) {
+  state.instrumento = nuevoInst.data;
+  pintarInstrumento();   // <-- actualiza visualmente los recuadros
+}
+
+alert(`✔ Certificado guardado correctamente.\nID: ${certID}`);
+
 
 /* ========= IMPRIMIR ========= */
 $("#btnImprimir").addEventListener("click",()=>{
@@ -1343,6 +1348,7 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
 </script>
 </body>
 </html>
+
 
 
 
