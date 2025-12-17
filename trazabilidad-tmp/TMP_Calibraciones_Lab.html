@@ -499,26 +499,37 @@ async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
   const client = await ensureSupabase();
   if (!client) return false;
 
+  const codigo = String(codigoInstrumento).trim();
+
   try {
-    const { error } = await client
+    const { data, error } = await client
       .from("instrumentos")
       .update({
-        fecha_calibracion: fechaCal || null,
-        fecha_proxima_calibracion: proxCal || null,
+        fecha_calibracion: fechaCal,
+        fecha_proxima_calibracion: proxCal,
         estado: "calibrado"
       })
-      .eq("codigo", codigoInstrumento);
+      .eq("codigo", codigo)
+      .select("codigo");
 
     if (error) {
       console.error("Error Supabase al actualizar fechas:", error);
       return false;
     }
+
+    if (!data || data.length === 0) {
+      console.warn("No se actualizó ningún instrumento con código:", codigo);
+      return false;
+    }
+
     return true;
+
   } catch(e){
     console.error("Excepción al actualizar fechas en Supabase:", e);
     return false;
   }
 }
+
 
 /* ========= CARGA INSTRUMENTO ========= */
 async function cargarInstrumento(){
@@ -1511,5 +1522,6 @@ switchTab('plan');
 </script>
 </body>
 </html>
+
 
 
