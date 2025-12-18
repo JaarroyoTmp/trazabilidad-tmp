@@ -495,40 +495,38 @@ async function ensureSupabase(){
  *  - fecha_proxima_calibracion
  *  - estado (opcional)
  */
-async function actualizarFechasEnSupabase(codigoInstrumento, fechaCal, proxCal){
+async function actualizarFechasEnSupabase(instrumentoId, fechaCal, proxCal) {
   const client = await ensureSupabase();
   if (!client) return false;
 
-  const codigo = String(codigoInstrumento).trim();
-
-  try {
-    const { data, error } = await client
-      .from("instrumentos")
-      .update({
-        fecha_calibracion: fechaCal,
-        fecha_proxima_calibracion: proxCal,
-        estado: "calibrado"
-      })
-      .eq("codigo", codigo)
-      .select("codigo");
-
-    if (error) {
-      console.error("Error Supabase al actualizar fechas:", error);
-      return false;
-    }
-
-    if (!data || data.length === 0) {
-      console.warn("No se actualizó ningún instrumento con código:", codigo);
-      return false;
-    }
-
-    return true;
-
-  } catch(e){
-    console.error("Excepción al actualizar fechas en Supabase:", e);
+  if (!instrumentoId) {
+    console.error("No se recibió instrumentoId para actualizar fechas");
     return false;
   }
+
+  const { data, error } = await client
+    .from("instrumentos")
+    .update({
+      fecha_calibracion: fechaCal,
+      fecha_proxima_calibracion: proxCal
+    })
+    .eq("id", instrumentoId)
+    .select("id");
+
+  if (error) {
+    console.error("Error Supabase actualizando fechas:", error);
+    return false;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("No se actualizó ninguna fila en instrumentos");
+    return false;
+  }
+
+  console.log("Fechas actualizadas en instrumento:", data[0].id);
+  return true;
 }
+
 
 
 /* ========= CARGA INSTRUMENTO ========= */
@@ -1343,6 +1341,28 @@ const proxCal =
     return;
   }
 
+// 6) ACTUALIZAR FECHAS EN INSTRUMENTOS (POR ID, NO POR CÓDIGO)
+const instrumentoId = state.instrumento?.id;
+
+if (!instrumentoId) {
+  alert("No se pudo identificar el instrumento para actualizar fechas.");
+  return;
+}
+
+const okUpdate = await actualizarFechasEnSupabase(
+  instrumentoId,
+  fechaCal,
+  proxCal
+);
+
+if (!okUpdate) {
+  alert(
+    "El certificado se ha guardado, pero NO se pudieron actualizar las fechas del instrumento."
+  );
+  return;
+}
+
+  
   // 3) Subir PDF a bucket 'certificados'
   const fileName = `${certID}.pdf`;
 
@@ -1522,6 +1542,7 @@ switchTab('plan');
 </script>
 </body>
 </html>
+
 
 
 
