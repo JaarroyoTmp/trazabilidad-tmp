@@ -1328,20 +1328,28 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
   if (!ok) return;
 
   try {
-    // 2. Enviar JSON al backend REAL
-    const resp = await fetch("https://tmp-backend-certificados.vercel.app/api/generar-certificado-oficial", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(certJSON)
-    });
+    const certLimpio = limpiarParaBackend(certJSON);
 
-    const data = await resp.json();
+const resp = await fetch(
+  "https://tmp-backend-certificados.vercel.app/api/generar-certificado-oficial",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...certLimpio,
+      firma_base64: certJSON.firma?.firma_base64 || null
+    })
+  }
+);
 
-    if (!data.ok) {
-      console.error(data);
-      alert("Error emitiendo certificado: " + data.error);
-      return;
-    }
+const data = await resp.json();
+
+if (!data.ok) {
+  console.error(data);
+  alert("Error emitiendo certificado: " + data.error);
+  return;
+}
+
 
     // 3. Mostrar detalles
     alert(
@@ -1411,3 +1419,4 @@ switchTab('plan');
 </script>
 </body>
 </html>
+
