@@ -360,8 +360,10 @@
       <p class="mini">La firma, nombre y fecha de próxima calibración quedarán documentadas en el informe impreso.</p>
     </div>
 
+    <!-- ✅ BOTONES PULIDOS -->
     <div class="row" style="margin-top:10px;justify-content:flex-end">
-      <button id="btnGuardarTodo" class="btn">Guardar todo (local + Supabase)</button>
+      <button id="btnGuardarSupabase" class="btn">Guardar calibración (Supabase)</button>
+      <button id="btnGenerarPDF" class="btn secondary">Generar y subir PDF (Supabase)</button>
     </div>
 
     <button id="btnEmitirOficial" class="btn" style="background:#1fae64;margin-top:10px">
@@ -446,7 +448,14 @@ const state = {
   puntosPage: { patronId:null, from:0, size:1000, cache:[] },
   plan: [],
   mediciones: {},
-  resultados: {}
+  resultados: {},
+
+  // ✅ Nuevo: último certificado guardado en Supabase
+  lastCert: {
+    numero: null,
+    calibracion_id_uuid: null,
+    pdf_url: null
+  }
 };
 
 /* ========= UTILIDADES ========= */
@@ -490,10 +499,9 @@ async function ensureSupabase(){
 }
 
 /**
- * Actualiza en la tabla instrumentos:
+ * ✅ Actualiza en la tabla instrumentos (SIEMPRE por id):
  *  - fecha_calibracion
  *  - fecha_proxima_calibracion
- *  - estado (opcional)
  */
 async function actualizarFechasEnSupabase(instrumentoId, fechaCal, proxCal) {
   const client = await ensureSupabase();
@@ -519,15 +527,13 @@ async function actualizarFechasEnSupabase(instrumentoId, fechaCal, proxCal) {
   }
 
   if (!data || data.length === 0) {
-    console.warn("No se actualizó ninguna fila en instrumentos");
+    console.warn("No se actualizó ninguna fila en instrumentos (¿ID correcto?)");
     return false;
   }
 
   console.log("Fechas actualizadas en instrumento:", data[0].id);
   return true;
 }
-
-
 
 /* ========= CARGA INSTRUMENTO ========= */
 async function cargarInstrumento(){
@@ -550,6 +556,7 @@ async function cargarInstrumento(){
   } else {
     // Modo demo/offline
     inst={
+      id:"demo-id",
       codigo,
       descripcion:"Tampón liso P/NP",
       fabricante_tipo:"N/A",
@@ -565,7 +572,17 @@ async function cargarInstrumento(){
     return;
   }
 
-  state.instrumento = inst;
+  // ✅ Normalización del ID (por seguridad si tu PK real fuera instrumento_id o uuid)
+  state.instrumento = {
+    ...inst,
+    id: inst.id ?? inst.instrumento_id ?? inst.uuid
+  };
+
+  if (!state.instrumento || !state.instrumento.id) {
+    alert("Instrumento cargado, pero sin ID válido. Revisa la tabla instrumentos (PK).");
+    return;
+  }
+
   pintarInstrumento();
 
   await cargarPatrones();
@@ -576,6 +593,8 @@ async function cargarInstrumento(){
   $("#resumenGlobalBox").textContent = "(Pendiente de cálculo de resultados)";
   $("#trazabilidadBox").textContent = "(Pendiente de cálculo de resultados)";
   $("#patronesSelChips").innerHTML=""; state.patronesSeleccionados=[];
+  state.lastCert = { numero:null, calibracion_id_uuid:null, pdf_url:null };
+
   alert("Instrumento cargado correctamente.");
 }
 
@@ -1255,10 +1274,39 @@ function buildCertJSON() {
   };
 }
 
-/* ========= GUARDAR TODO (PDF en navegador + Supabase) ========= */
-$("#btnGuardarTodo").addEventListener("click", async () => {
+/* ========= NUEVO: Export PDF (html2canvas + jsPDF) ========= */
+async function exportPDFBlobDesdePagina() {
+  const { jsPDF } = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.es.min.js");
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+
+  const pagina = document.body;
+  const canvas = await html2canvas(pagina, { scale: 2, useCORS: true });
+  const imgData = canvas.toDataURL("image/png");
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgWidth = pageWidth;
+  const imgHeight = canvas.height * imgWidth / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  return pdf.output("blob");
+}
+
+/* ========= NUEVO: Guardar calibración en Supabase (datos + fechas) ========= */
+async function guardarCalibracionSupabase() {
   const certJSON = buildCertJSON();
-  console.log("CERT JSON →", certJSON);
 
   const codigo = $("#insCodigo").value.trim();
   if (!codigo) {
@@ -1266,18 +1314,23 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
     return;
   }
 
- const fechaCal =
-  $("#condFechaCal").value ||
-  state.instrumento?.fecha_calibracion ||
-  null;
+  if (!state.instrumento || !state.instrumento.id) {
+    alert("Instrumento no cargado correctamente.");
+    return;
+  }
 
-const proxCal =
-  $("#firmanteProxima").value ||
-  state.instrumento?.fecha_proxima_calibracion ||
-  null;
+  const fechaCal =
+    $("#condFechaCal").value ||
+    state.instrumento?.fecha_calibracion ||
+    null;
+
+  const proxCal =
+    $("#firmanteProxima").value ||
+    state.instrumento?.fecha_proxima_calibracion ||
+    null;
 
   if (!fechaCal || !proxCal) {
-    alert("Faltan fechas en Resultados → Validación del informe.");
+    alert("Faltan fechas (Fecha de calibración y Próxima calibración).");
     return;
   }
 
@@ -1286,119 +1339,38 @@ const proxCal =
     return;
   }
 
-  const c1 = confirm("¿Ha guardado el PDF EN SU ORDENADOR?");
-  if (!c1) return;
-  const c2 = confirm("¿Seguro que ha archivado el PDF en la carpeta interna?");
-  if (!c2) return;
-
   await ensureSupabase();
   if (!supabase) {
-    alert("Supabase no disponible. No se puede guardar el certificado.");
+    alert("Supabase no disponible. No se puede guardar.");
     return;
   }
 
-  // 1) Generar ID certificado
-  const año = new Date(fechaCal || Date.now()).getFullYear();
-  const numeroSec = String(Math.floor(Math.random()*9999)).padStart(4,"0");
-  const certID = `CC-${año}-${numeroSec}`;
-
-  // 2) Generar PDF con html2canvas + jsPDF (cliente)
-  async function exportPDF() {
-    const { jsPDF } = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.es.min.js");
-    const pdf = new jsPDF({ unit: "mm", format: "a4" });
-
-    const pagina = document.body;
-    const canvas = await html2canvas(pagina, { scale: 2, useCORS: true });
-    const imgData = canvas.toDataURL("image/png");
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = canvas.height * imgWidth / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    return pdf.output("blob");
-  }
-
-  let pdfBlob;
-  try {
-    pdfBlob = await exportPDF();
-  } catch(e) {
-    console.error("Error generando PDF:", e);
-    alert("No se pudo generar el PDF en el navegador.");
-    return;
-  }
-
-// 6) ACTUALIZAR FECHAS EN INSTRUMENTOS (POR ID, NO POR CÓDIGO)
-const instrumentoId = state.instrumento?.id;
-
-if (!instrumentoId) {
-  alert("No se pudo identificar el instrumento para actualizar fechas.");
-  return;
-}
-
-const okUpdate = await actualizarFechasEnSupabase(
-  instrumentoId,
-  fechaCal,
-  proxCal
-);
-
-if (!okUpdate) {
-  alert(
-    "El certificado se ha guardado, pero NO se pudieron actualizar las fechas del instrumento."
-  );
-  return;
-}
-
-  
-  // 3) Subir PDF a bucket 'certificados'
-  const fileName = `${certID}.pdf`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("certificados")
-    .upload(fileName, pdfBlob, { upsert: true });
-
-  if (uploadError) {
-    console.error(uploadError);
-    alert("Error al subir el PDF a Supabase.");
-    return;
-  }
-
-  const { data: publicURL } = supabase.storage
-    .from("certificados")
-    .getPublicUrl(fileName);
-
-  const pdfURL = publicURL.publicUrl;
-
-  // 4) Determinar decisión global
+  // Determinar decisión global (sin tocar cálculos)
   const resumenTxt = $("#resumenGlobalBox").innerText || "";
   let decisionGlobal = "APTO";
   if (resumenTxt.includes("NO APTO")) decisionGlobal = "NO APTO";
   else if (resumenTxt.includes("INDETERMINADO")) decisionGlobal = "INDETERMINADO";
 
-  // 5) Insertar fila en tabla 'certificados'
+  // Generar número de certificado
+  const año = new Date(fechaCal || Date.now()).getFullYear();
+  const numeroSec = String(Math.floor(Math.random()*9999)).padStart(4,"0");
+  const certID = `CC-${año}-${numeroSec}`;
+
+  const calibracionUUID = (crypto.randomUUID ? crypto.randomUUID() : uid());
+
+  // 1) Insert en certificados (sin PDF aún)
   const certRow = {
-    calibracion_id_uuid: (crypto.randomUUID ? crypto.randomUUID() : uid()),
+    calibracion_id_uuid: calibracionUUID,
     numero: certID,
     regla_decision: "ILAC-G8",
     decision_global: decisionGlobal,
-    certificado_pdf_url: pdfURL,
+    certificado_pdf_url: null,
     datos: {
       instrumento_codigo: codigo,
+      instrumento_id: state.instrumento.id,
       fecha_calibracion: fechaCal,
-      fecha_proxima_calibracion: proxCal
+      fecha_proxima_calibracion: proxCal,
+      cert_json: certJSON
     }
   };
 
@@ -1408,40 +1380,115 @@ if (!okUpdate) {
 
   if (certError) {
     console.error(certError);
-    alert("No se pudo registrar el certificado en Supabase.");
+    alert("No se pudo guardar la calibración en Supabase (tabla certificados).");
     return;
   }
 
- 
-  // 7) Volver a cargar el instrumento desde Supabase y refrescar encabezado
-  await ensureSupabase();
-  if (supabase) {
-    const { data: nuevoInst, error } = await supabase
-      .from("instrumentos")
-      .select("*")
-      .eq("codigo", codigo)
-      .maybeSingle();
+  // 2) Update fechas instrumento (SIEMPRE POR ID)
+  const okUpdate = await actualizarFechasEnSupabase(
+    state.instrumento.id,
+    fechaCal,
+    proxCal
+  );
 
-    if (error) {
-      console.warn("Error recargando instrumento:", error);
-    }
-
-    if (nuevoInst) {
-      state.instrumento = nuevoInst;
-      pintarInstrumento(); // Actualiza visualmente los recuadros
-    } else {
-      console.warn("Instrumento no encontrado al recargar datos.");
-    }
-  } else {
-    console.warn("Supabase no está disponible, no se pudo recargar el instrumento.");
+  if (!okUpdate) {
+    alert("Calibración guardada, pero NO se pudieron actualizar las fechas del instrumento.");
+    return;
   }
 
-  alert("Certificado guardado y registrado correctamente en Supabase.");
+  // 3) Recargar instrumento para refrescar cabecera
+  const { data: nuevoInst, error } = await supabase
+    .from("instrumentos")
+    .select("*")
+    .eq("codigo", codigo)
+    .maybeSingle();
+
+  if (error) console.warn("Error recargando instrumento:", error);
+  if (nuevoInst) {
+    state.instrumento = { ...nuevoInst, id: nuevoInst.id ?? nuevoInst.instrumento_id ?? nuevoInst.uuid };
+    pintarInstrumento();
+  }
+
+  // Guardamos referencia para el botón PDF
+  state.lastCert = {
+    numero: certID,
+    calibracion_id_uuid: calibracionUUID,
+    pdf_url: null
+  };
+
+  alert(`✔ Calibración guardada en Supabase.\n\nCertificado: ${certID}\n(Ya puedes generar el PDF)`);
+}
+
+/* ========= NUEVO: Generar y subir PDF (y actualizar url en certificados) ========= */
+async function generarYSubirPDFSupabase() {
+  if (!state.lastCert?.numero || !state.lastCert?.calibracion_id_uuid) {
+    alert("Primero guarda la calibración en Supabase (botón Guardar calibración).");
+    return;
+  }
+
+  await ensureSupabase();
+  if (!supabase) {
+    alert("Supabase no disponible. No se puede generar/subir el PDF.");
+    return;
+  }
+
+  let pdfBlob;
+  try {
+    pdfBlob = await exportPDFBlobDesdePagina();
+  } catch(e) {
+    console.error("Error generando PDF:", e);
+    alert("No se pudo generar el PDF en el navegador.");
+    return;
+  }
+
+  const fileName = `${state.lastCert.numero}.pdf`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("certificados")
+    .upload(fileName, pdfBlob, { upsert: true });
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert("Error al subir el PDF a Supabase Storage.");
+    return;
+  }
+
+  const { data: publicURL } = supabase.storage
+    .from("certificados")
+    .getPublicUrl(fileName);
+
+  const pdfURL = publicURL.publicUrl;
+
+  // Actualizar fila en certificados con la URL del PDF
+  const { error: updErr } = await supabase
+    .from("certificados")
+    .update({ certificado_pdf_url: pdfURL })
+    .eq("calibracion_id_uuid", state.lastCert.calibracion_id_uuid);
+
+  if (updErr) {
+    console.error(updErr);
+    alert("PDF subido, pero no se pudo actualizar la URL en la tabla certificados.");
+    return;
+  }
+
+  state.lastCert.pdf_url = pdfURL;
+
+  alert(`✔ PDF generado y subido.\n\nPDF: ${pdfURL}`);
+  // Opcional: abrir el PDF
+  window.open(pdfURL, "_blank");
+}
+
+/* ========= BOTONES (NUEVOS) ========= */
+$("#btnGuardarSupabase").addEventListener("click", async () => {
+  await guardarCalibracionSupabase();
+});
+
+$("#btnGenerarPDF").addEventListener("click", async () => {
+  await generarYSubirPDFSupabase();
 });
 
 /* ========= EMITIR CERTIFICADO OFICIAL (backend real) ========= */
 $("#btnEmitirOficial").addEventListener("click", async () => {
-  // 1. Generar JSON completo con todo el certificado
   const certJSON = buildCertJSON();
 
   if (!certJSON.instrumento?.codigo) {
@@ -1453,7 +1500,6 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
   if (!ok) return;
 
   try {
-    // 2. Enviar JSON al backend REAL
     const resp = await fetch("https://tmp-backend-certificados.vercel.app/api/generar-certificado-oficial", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1468,7 +1514,6 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
       return;
     }
 
-    // 3. Mostrar detalles
     alert(
       "✔ CERTIFICADO OFICIAL GENERADO\n\n" +
       "Número: " + data.certificado.numero + "\n" +
@@ -1476,7 +1521,6 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
       "Verificación: " + data.certificado.verificacion_url
     );
 
-    // 4. Abrir PDF
     window.open(data.certificado.pdf_url, "_blank");
 
   } catch (err) {
@@ -1536,8 +1580,3 @@ switchTab('plan');
 </script>
 </body>
 </html>
-
-
-
-
-
