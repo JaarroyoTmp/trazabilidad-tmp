@@ -1412,13 +1412,7 @@ if (!okUpdate) {
     return;
   }
 
-  // 6) Actualizar fechas en instrumentos
-  const okUpdate = await actualizarFechasEnSupabase(codigo, fechaCal, proxCal);
-  if (!okUpdate) {
-    alert("El certificado se ha guardado, pero no se pudieron actualizar las fechas en 'instrumentos'. Revisa Supabase.");
-    return;
-  }
-
+ 
   // 7) Volver a cargar el instrumento desde Supabase y refrescar encabezado
   await ensureSupabase();
   if (supabase) {
@@ -1542,6 +1536,7 @@ switchTab('plan');
 </script>
 </body>
 </html>
+
 
 
 
