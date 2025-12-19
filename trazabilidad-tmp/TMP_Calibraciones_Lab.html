@@ -1315,6 +1315,19 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
 
 
 /* ========= EMITIR CERTIFICADO OFICIAL (backend real) ========= */
+  function limpiarParaBackend(certJSON) {
+  // Copia profunda para no modificar el original
+  const copia = JSON.parse(JSON.stringify(certJSON));
+
+  // ⚠️ La firma en base64 NO debe ir dentro del JSON principal
+  // (ya se envía aparte en el fetch)
+  if (copia.firma && copia.firma.firma_base64) {
+    delete copia.firma.firma_base64;
+  }
+
+  return copia;
+}
+
 $("#btnEmitirOficial").addEventListener("click", async () => {
 
   console.log("🟢 CLICK en Emitir certificado");
@@ -1428,5 +1441,6 @@ switchTab('plan');
 </script>
 </body>
 </html>
+
 
 
