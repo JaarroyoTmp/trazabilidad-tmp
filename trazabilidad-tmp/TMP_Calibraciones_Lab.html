@@ -1316,57 +1316,66 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
 
 /* ========= EMITIR CERTIFICADO OFICIAL (backend real) ========= */
 $("#btnEmitirOficial").addEventListener("click", async () => {
-  // 1. Generar JSON completo con todo el certificado
-  const certJSON = buildCertJSON();
 
-  if (!certJSON.instrumento?.codigo) {
-    alert("Debe cargar un instrumento antes de emitir el certificado oficial.");
-    return;
-  }
-
-  const ok = confirm("¿Desea emitir el certificado oficial?");
-  if (!ok) return;
+  console.log("🟢 CLICK en Emitir certificado");
 
   try {
+    console.log("🟡 Antes de buildCertJSON");
+
+    const certJSON = buildCertJSON();
+    console.log("🟢 certJSON generado", certJSON);
+
+    if (!certJSON.instrumento?.codigo) {
+      alert("Debe cargar un instrumento antes de emitir el certificado oficial.");
+      return;
+    }
+
+    const ok = confirm("¿Desea emitir el certificado oficial?");
+    if (!ok) return;
+
+    console.log("🟡 Antes de limpiarParaBackend");
+
     const certLimpio = limpiarParaBackend(certJSON);
+    console.log("🟢 certLimpio", certLimpio);
 
-const resp = await fetch(
-  "https://tmp-backend-certificados.vercel.app/api/generar-certificado-oficial",
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...certLimpio,
-      firma_base64: certJSON.firma?.firma_base64 || null
-    })
-  }
-);
+    console.log("🟡 JUSTO ANTES DEL FETCH");
 
-const data = await resp.json();
-
-if (!data.ok) {
-  console.error(data);
-  alert("Error emitiendo certificado: " + data.error);
-  return;
-}
-
-
-    // 3. Mostrar detalles
-    alert(
-      "✔ CERTIFICADO OFICIAL GENERADO\n\n" +
-      "Número: " + data.certificado.numero + "\n" +
-      "PDF: " + data.certificado.pdf_url + "\n" +
-      "Verificación: " + data.certificado.verificacion_url
+    const resp = await fetch(
+      "https://tmp-backend-certificados.vercel.app/api/generar-certificado-oficial",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...certLimpio,
+          firma_base64: certJSON.firma?.firma_base64 || null
+        })
+      }
     );
 
-    // 4. Abrir PDF
+    console.log("🟢 RESPUESTA FETCH", resp);
+
+    const data = await resp.json();
+    console.log("🟢 DATA BACKEND", data);
+
+    if (!data.ok) {
+      alert("Error backend: " + data.error);
+      return;
+    }
+
+    alert(
+      "CERTIFICADO OFICIAL GENERADO\n\n" +
+      "Número: " + data.certificado.numero + "\n" +
+      "PDF: " + data.certificado.pdf_url
+    );
+
     window.open(data.certificado.pdf_url, "_blank");
 
   } catch (err) {
-    console.error("ERROR:", err);
-    alert("Error de red al emitir certificado (no se pudo contactar con el backend).");
+    console.error("🔴 ERROR EN CLICK EMITIR", err);
+    alert("Error de red al emitir certificado");
   }
 });
+
 
 /* ========= TABS ========= */
 function switchTab(name){
@@ -1419,4 +1428,5 @@ switchTab('plan');
 </script>
 </body>
 </html>
+
 
