@@ -11,12 +11,10 @@
       --bg-grad1:#0f172a;
       --bg-grad2:#020617;
       --card:#020617;
-      --card-soft:#02081a;
       --border:#1f2937;
       --txt:#e5e7eb;
       --muted:#9ca3af;
       --accent:#22d3ee;
-      --accent-soft:#0ea5e9;
       --danger:#fb7185;
       --warn:#facc15;
       --ok:#4ade80;
@@ -41,7 +39,6 @@
         radial-gradient(circle at 50% 110%, #0f172a 0, transparent 60%),
         linear-gradient(180deg,var(--bg-grad1),var(--bg-grad2));
       color:var(--txt);
-      -webkit-font-smoothing:antialiased;
     }
 
     #volverHome{
@@ -57,10 +54,7 @@
       background:#0f172a;
       color:#e5e7eb;
       border:1px solid rgba(148,163,184,.4);
-      box-shadow:0 10px 25px rgba(15,23,42,.9);
     }
-
-    #volverHome:hover{ background:#111827; }
 
     header{
       display:flex;
@@ -68,10 +62,7 @@
       gap:12px;
       padding:14px 16px;
       border-bottom:1px solid rgba(148,163,184,.25);
-      background:
-        radial-gradient(circle at 0% 0%, rgba(56,189,248,.22) 0, transparent 60%),
-        radial-gradient(circle at 100% 0%, rgba(59,130,246,.25) 0, transparent 60%),
-        linear-gradient(135deg,#020617,#020617f0);
+      background:linear-gradient(135deg,#020617,#020617f0);
       position:sticky;
       top:0;
       z-index:20;
@@ -81,20 +72,6 @@
     .logo{
       height:40px;
       width:auto;
-      filter:drop-shadow(0 0 8px rgba(56,189,248,.45));
-    }
-
-    .h-titles{ display:flex; flex-direction:column; }
-
-    .h-titles h1{
-      margin:0;
-      font-size:18px;
-      letter-spacing:.04em;
-    }
-
-    .h-titles span{
-      font-size:12px;
-      color:var(--muted);
     }
 
     .wrap{
@@ -106,100 +83,10 @@
       gap:14px;
     }
 
-    .hero-card{
-      position:relative;
-      border-radius:18px;
-      padding:14px;
-      background:
-        radial-gradient(circle at 0% 0%, rgba(56,189,248,.18) 0, transparent 55%),
-        radial-gradient(circle at 100% 0%, rgba(59,130,246,.20) 0, transparent 60%),
-        linear-gradient(135deg,#020617,#020617);
-      border:1px solid rgba(148,163,184,.35);
-      box-shadow:
-        0 18px 45px rgba(15,23,42,.95),
-        0 0 40px rgba(56,189,248,.18);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .hero-main{ max-width:70%; }
-    .hero-code{
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.18em;
-      color:var(--muted);
-      margin-bottom:4px;
-    }
-    .hero-title{ font-size:18px; font-weight:700; margin-bottom:4px; }
-
-    .hero-location{
-      margin-top:8px;
-      font-size:16px;
-      font-weight:700;
-      color:#7dd3fc;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      text-shadow:0 0 8px rgba(125,213,252,0.35);
-    }
-    .hero-location .pin{ font-size:20px; }
-
-    .hero-status{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:6px;
-      font-size:12px;
-    }
-
-    .status-pill{
-      padding:6px 14px;
-      border-radius:999px;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      font-size:12px;
-      border:1px solid rgba(148,163,184,.5);
-      background:rgba(15,23,42,.9);
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.1em;
-    }
-    .status-pill .dot{ width:8px; height:8px; border-radius:50%; }
-
-    .status-ok{ border-color:rgba(74,222,128,.6); color:#bbf7d0; box-shadow:0 0 14px rgba(74,222,128,.6); }
-    .status-ok .dot{ background:var(--ok); }
-
-    .status-warn{ border-color:rgba(250,204,21,.6); color:#fef3c7; box-shadow:0 0 14px rgba(250,204,21,.6); }
-    .status-warn .dot{ background:var(--warn); }
-
-    .status-bad{ border-color:rgba(248,113,113,.8); color:#fee2e2; box-shadow:0 0 18px rgba(248,113,113,.9); }
-    .status-bad .dot{ background:var(--danger); }
-
-    .status-info{ border-color:rgba(56,189,248,.6); color:#e0f2fe; box-shadow:0 0 14px rgba(56,189,248,.6); }
-    .status-info .dot{ background:#38bdf8; }
-
-    .status-caption{ font-size:11px; color:var(--muted); text-align:right; max-width:200px; }
-
-    .hero-observ{
-      margin-top:8px;
-      padding:10px;
-      border-radius:12px;
-      background:rgba(15,23,42,.9);
-      border:1px solid rgba(148,163,184,.25);
-      font-size:12px;
-      line-height:1.4;
-    }
-    .hero-observ .label{ font-weight:600; color:#a5b4fc; }
-
     .card{
       border-radius:16px;
       padding:14px;
-      background:
-        radial-gradient(circle at 0% 0%, rgba(15,118,110,.15) 0, transparent 55%),
-        linear-gradient(135deg,#020617,#02081a);
+      background:rgba(2,6,23,.65);
       border:1px solid rgba(31,41,55,.9);
       box-shadow:0 16px 35px rgba(15,23,42,.95);
     }
@@ -207,80 +94,6 @@
     h2{ margin:0 0 6px; font-size:16px; }
     .card-sub{ font-size:12px; color:var(--muted); margin-bottom:10px; }
 
-    .item{ display:flex; flex-direction:column; margin-bottom:8px; }
-    .item .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px; }
-    .item .value{ font-size:13px; }
-
-    .muted{ color:var(--muted); font-size:12px; }
-
-    .error-box{
-      border-radius:14px;
-      padding:12px;
-      background:#3f1d1d;
-      border:1px solid #7f1d1d;
-      color:#fee2e2;
-      font-size:14px;
-      box-shadow:0 12px 30px rgba(0,0,0,.65);
-    }
-
-    .mov-item{
-      border-radius:12px;
-      padding:10px;
-      background:#020617;
-      border:1px solid rgba(31,41,55,.8);
-      margin-bottom:10px;
-      font-size:12px;
-    }
-    .mov-header{ display:flex; justify-content:space-between; margin-bottom:4px; }
-    .mov-type{ font-weight:600; }
-    .mov-date{ font-size:11px; color:var(--muted); }
-    .mov-body-line{ display:flex; justify-content:space-between; margin-top:3px; }
-    .mov-body-label{ color:var(--muted); min-width:70px; }
-
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 12px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:600;
-      margin-right:6px;
-      margin-bottom:6px;
-    }
-    .chip-op1{
-      background:var(--op1-bg);
-      border:1px solid var(--op1-bd);
-      color:var(--op1-tx);
-      box-shadow:0 0 12px rgba(56,189,248,.35);
-    }
-    .chip-op2{
-      background:var(--op2-bg);
-      border:1px solid var(--op2-bd);
-      color:var(--op2-tx);
-      box-shadow:0 0 12px rgba(255,159,64,.35);
-    }
-
-    /* NUEVO: Certificados */
-    .cert-grid{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:flex-start;
-    }
-    .qr-box{
-      width:140px;
-      padding:10px;
-      border-radius:14px;
-      background:rgba(15,23,42,.85);
-      border:1px solid rgba(148,163,184,.25);
-      text-align:center;
-    }
-    .qr-box canvas, .qr-box img{
-      max-width:120px;
-      height:auto;
-      margin:0 auto;
-      border-radius:10px;
-    }
     .btn{
       display:inline-flex;
       align-items:center;
@@ -292,48 +105,44 @@
       padding:10px 14px;
       font-weight:700;
       font-size:13px;
-      background:linear-gradient(135deg, rgba(34,211,238,.25), rgba(59,130,246,.25));
+      background:rgba(34,211,238,.15);
       border:1px solid rgba(56,189,248,.35);
       color:#e0f2fe;
-      box-shadow:0 10px 30px rgba(2,6,23,.8);
       text-decoration:none;
     }
-    .btn:hover{ transform:translateY(-1px); }
 
-    .cert-list{
+    .cert-grid{
       display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top:10px;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:flex-start;
     }
-    .cert-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+
+    .qr-box{
+      width:140px;
       padding:10px;
       border-radius:14px;
-      border:1px solid rgba(148,163,184,.22);
-      background:rgba(2,6,23,.55);
+      background:rgba(15,23,42,.85);
+      border:1px solid rgba(148,163,184,.25);
+      text-align:center;
     }
-    .cert-item .left{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width:0;
+
+    .qr-box canvas{
+      max-width:120px;
+      height:auto;
+      margin:0 auto;
+      border-radius:10px;
     }
-    .cert-item .num{
-      font-weight:800;
-      color:#7dd3fc;
-      letter-spacing:.02em;
-      font-size:13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .cert-item .meta{
-      font-size:11px;
-      color:var(--muted);
+
+    .muted{ color:var(--muted); font-size:12px; }
+
+    .error-box{
+      border-radius:14px;
+      padding:12px;
+      background:#3f1d1d;
+      border:1px solid #7f1d1d;
+      color:#fee2e2;
+      font-size:14px;
     }
   </style>
 </head>
@@ -344,9 +153,9 @@
 
 <header>
   <img src="../img/tmp-quality.png" alt="TMP" class="logo">
-  <div class="h-titles">
-    <h1>Ficha del instrumento</h1>
-    <span id="subTitle">Cargando código…</span>
+  <div>
+    <h1 style="margin:0;font-size:18px;">Ficha del instrumento</h1>
+    <span id="subTitle" style="font-size:12px;color:#9ca3af;">Cargando código…</span>
   </div>
 </header>
 
@@ -354,82 +163,22 @@
 
   <div id="errorBox" class="error-box" style="display:none"></div>
 
-  <!-- HERO -->
-  <section id="hero" class="hero-card" style="display:none">
-    <div class="hero-main">
-      <div class="hero-code" id="heroCode">CÓDIGO —</div>
-      <div class="hero-title" id="heroTitle">Instrumento</div>
-      <div id="heroSub">—</div>
-    </div>
-
-    <div class="hero-status">
-      <div id="heroStatusPill" class="status-pill"><span class="dot"></span><span id="heroStatusLabel">—</span></div>
-      <div class="status-caption" id="heroStatusCaption">Estado</div>
-    </div>
-  </section>
-
-  <section id="heroObserv" class="hero-observ" style="display:none"></section>
-
-  <!-- Responsables -->
-  <section id="responsablesCard" class="card" style="display:none">
-    <h2>Responsables actuales</h2>
-    <div class="card-sub">Asignados en la última salida del instrumento.</div>
-    <div id="respBody"></div>
-  </section>
-
-  <!-- Info -->
-  <section id="infoCard" class="card" style="display:none">
-    <h2>Información básica</h2>
-    <div class="card-sub">Datos generales del instrumento leído por QR.</div>
-    <div id="infoBody"></div>
-  </section>
-
-  <!-- Estado calibración -->
-  <section id="calCard" class="card" style="display:none">
-    <h2>Estado de calibración</h2>
-    <div class="card-sub">Situación frente al plan de calibración.</div>
-    <div id="calBody"></div>
-  </section>
-
-  <!-- ✅ NUEVO: Último certificado oficial -->
-  <section id="lastCertCard" class="card" style="display:none">
+  <!-- ✅ CERTIFICADO -->
+  <section id="certCard" class="card" style="display:none">
     <h2>Última calibración oficial</h2>
     <div class="card-sub">Último certificado emitido para este instrumento.</div>
-    <div id="lastCertBody"></div>
-  </section>
-
-  <!-- ✅ NUEVO: Historial certificados -->
-  <section id="histCertCard" class="card" style="display:none">
-    <h2>Historial de certificados</h2>
-    <div class="card-sub">Listado completo de certificados emitidos (más reciente primero).</div>
-    <div id="histCertBody"></div>
-  </section>
-
-  <!-- Movimientos -->
-  <section id="movCard" class="card" style="display:none">
-    <h2>Últimos movimientos</h2>
-    <div class="card-sub">Trazabilidad reciente.</div>
-    <div id="movBody"></div>
-    <p class="muted" id="movHint"></p>
+    <div id="certBody"></div>
   </section>
 
 </div>
 
 <script type="module" src="../config.mjs"></script>
-
-<!-- ✅ Librería QR (CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script type="module">
   const supa = window.supabase;
 
   let codigo = new URLSearchParams(window.location.search).get("codigo");
-
-  if (!codigo) {
-    const parts = location.pathname.split("/").filter(Boolean);
-    const last = parts[parts.length - 1];
-    if (last && !last.includes(".html")) codigo = decodeURIComponent(last);
-  }
 
   document.getElementById("subTitle").textContent =
     codigo ? `Código: ${codigo}` : "Código no especificado";
@@ -440,295 +189,65 @@
     b.innerHTML = `<h2>Error</h2><p>${msg}</p>`;
   }
 
-  const fDateShort = iso => {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (isNaN(d)) return "—";
-    return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
-  };
-
-  const fDateTime = iso => {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
-  };
-
-  const daysDiff = iso =>{
-    if (!iso) return null;
-    const d = new Date(iso);
-    if (isNaN(d)) return null;
-    return Math.round((d - new Date())/86400000);
-  };
-
-  function computeEstado(iso){
-    const diff = daysDiff(iso);
-    if (diff === null) return { clase:"status-info", texto:"Sin próxima calibración", detalle:"Fecha no asignada", dias:null, icono:"🛈" };
-    if (diff < 0) return { clase:"status-bad", texto:"Fuera de calibración", detalle:"Vencida", dias:diff, icono:"⛔" };
-    if (diff <= 30) return { clase:"status-warn", texto:"Próxima a vencer", detalle:"Planificar calibración", dias:diff, icono:"⚠" };
-    return { clase:"status-ok", texto:"En regla", detalle:"Correcta", dias:diff, icono:"✔" };
-  }
-
-  function safeTxt(x){
-    return (x === null || x === undefined || x === "" || x === "null") ? "—" : String(x);
-  }
-
   function renderQR(containerId, url){
     const el = document.getElementById(containerId);
     if (!el || !url) return;
     el.innerHTML = "";
-    new QRCode(el, {
-      text: url,
-      width: 120,
-      height: 120,
-      correctLevel: QRCode.CorrectLevel.M
-    });
+    new QRCode(el, { text:url, width:120, height:120 });
   }
 
   async function main(){
     if (!codigo) return showError("No se indicó código.");
 
-    /* ============================================================
-       1) INSTRUMENTO
-    ============================================================ */
-    const { data: inst, error } = await supa
-      .from("instrumentos")
-      .select("*")
-      .eq("codigo", codigo)
-      .maybeSingle();
-
-    if (error) return showError("Error consultando DB (instrumentos).");
-    if (!inst) return showError(`No existe el código ${codigo}`);
-
-    /* ============================================================
-       2) MOVIMIENTOS (último)
-    ============================================================ */
-    const { data: movs } = await supa
-      .from("movimientos")
-      .select("*")
-      .eq("codigo_instrumento", codigo)
-      .order("fecha", { ascending:false })
-      .limit(1);
-
-    let ubic = "Sin movimientos registrados";
-    let ultimoMov = null;
-
-    if (movs && movs.length>0){
-      ultimoMov = movs[0];
-      ubic = ultimoMov.destino || ubic;
-    }
-
-    /* ============================================================
-       HERO
-    ============================================================ */
-    document.getElementById("hero").style.display="flex";
-    document.getElementById("heroCode").textContent = `CÓDIGO · ${codigo}`;
-    document.getElementById("heroTitle").textContent = inst.descripcion || "Instrumento";
-
-    const fabricante = inst.fabricante || "Fabricante N/D";
-
-    document.getElementById("heroSub").innerHTML = `
-      <strong>${fabricante}</strong>
-      <div class="hero-location">
-        <span class="pin">📍</span>
-        <span>${ubic}</span>
-      </div>
-    `;
-
-    const prox = inst.fecha_proxima_calibracion || null;
-    const est = computeEstado(prox);
-
-    const pill = document.getElementById("heroStatusPill");
-    const lab = document.getElementById("heroStatusLabel");
-    const cap = document.getElementById("heroStatusCaption");
-
-    pill.className = "status-pill "+est.clase;
-    lab.textContent = `${est.icono} ${est.texto}`;
-    cap.textContent = est.detalle;
-
-    let obs = inst.observaciones;
-    if (!obs || obs==="null" || obs.trim()==="") obs = "Propiedad de Talleres Mecánicos Paramio";
-    const obsBox = document.getElementById("heroObserv");
-    obsBox.style.display="block";
-    obsBox.innerHTML = `<span class="label">📝 Observaciones</span> ${obs}`;
-
-    /* ============================================================
-       RESPONSABLES (solo si último es salida)
-    ============================================================ */
-    if (ultimoMov && ultimoMov.tipo_movimiento === "Salida") {
-      const resp = document.getElementById("responsablesCard");
-      const body = document.getElementById("respBody");
-
-      resp.style.display = "block";
-
-      let html = "";
-      if (ultimoMov.operario1) html += `<span class="chip chip-op1">👤 ${ultimoMov.operario1}</span>`;
-      if (ultimoMov.operario2) html += `<span class="chip chip-op2">👥 ${ultimoMov.operario2}</span>`;
-      if (!html.trim()) html = `<span class="muted">No hay operarios asignados en esta salida.</span>`;
-      body.innerHTML = html;
-    }
-
-    /* ============================================================
-       INFO BÁSICA
-    ============================================================ */
-    document.getElementById("infoCard").style.display="block";
-    document.getElementById("infoBody").innerHTML = `
-      <div class="item"><span class="label">Descripción</span><span class="value">${safeTxt(inst.descripcion)}</span></div>
-      <div class="item"><span class="label">Fabricante</span><span class="value">${safeTxt(inst.fabricante)}</span></div>
-      <div class="item"><span class="label">Rango / Especificación</span><span class="value">${safeTxt(inst.rango)}</span></div>
-      <div class="item"><span class="label">Precisión</span><span class="value">${safeTxt(inst.precision)}</span></div>
-      <div class="item"><span class="label">Tipo de calibración</span><span class="value">${safeTxt(inst.tipo_calibracion)}</span></div>
-    `;
-
-    /* ============================================================
-       ESTADO CALIBRACIÓN (plan)
-    ============================================================ */
-    document.getElementById("calCard").style.display="block";
-
-    const ult = inst.fecha_ultima_calibracion;
-    const prox2 = inst.fecha_proxima_calibracion;
-
-    let detalle = est.detalle;
-    if (est.dias!==null){
-      if (est.dias<0) detalle += ` (hace ${Math.abs(est.dias)} días)`;
-      else detalle += ` (en ${est.dias} días)`;
-    }
-
-    document.getElementById("calBody").innerHTML = `
-      <div class="item"><span class="label">Última calibración</span><span class="value">${ult ? fDateShort(ult):"—"}</span></div>
-      <div class="item"><span class="label">Próxima calibración</span><span class="value">${prox2 ? fDateShort(prox2):"—"}</span></div>
-      <div class="item" style="margin-top:8px;">
-        <span class="status-pill ${est.clase}"><span class="dot"></span>${est.icono} ${est.texto}</span>
-      </div>
-      <p class="muted">${detalle}</p>
-    `;
-
-    /* ============================================================
-       ✅ NUEVO: CERTIFICADOS (último + historial)
-       Requiere columna certificados.codigo_instrumento
-    ============================================================ */
-
-    const { data: certs, error: certErr } = await supa
+    // ✅ BUSCAR ÚLTIMO CERTIFICADO POR JSON: datos.instrumento.codigo
+    const { data: certs, error } = await supa
       .from("certificados")
-      .select("id, numero, certificado_pdf_url, created_at")
-      .eq("codigo_instrumento", codigo)
-      .order("created_at", { ascending: false });
+      .select("numero, certificado_pdf_url, datos, created_at")
+      .order("created_at", { ascending:false });
 
-    if (certErr) {
-      // Si hay error no rompemos la página, solo lo mostramos en consola
-      console.warn("Error consultando certificados:", certErr);
-    }
+    if (error) return showError("Error buscando certificados.");
 
-    if (certs && certs.length > 0) {
-      /* ---- Último certificado ---- */
-      const last = certs[0];
+    // Filtrar en JS porque Supabase no filtra jsonb fácil en cliente
+    const cert = (certs || []).find(c => {
+      return c?.datos?.instrumento?.codigo == codigo;
+    });
 
-      document.getElementById("lastCertCard").style.display = "block";
-      document.getElementById("lastCertBody").innerHTML = `
-        <div class="cert-grid">
-          <div style="flex:1; min-width:240px;">
-            <div class="item">
-              <span class="label">Número</span>
-              <span class="value" style="font-weight:800; color:#7dd3fc;">${safeTxt(last.numero)}</span>
-            </div>
-            <div class="item">
-              <span class="label">Fecha emisión</span>
-              <span class="value">${last.created_at ? fDateShort(last.created_at) : "—"}</span>
-            </div>
-            <div class="item">
-              <span class="label">Acciones</span>
-              ${last.certificado_pdf_url ? `
-                <a class="btn" href="${last.certificado_pdf_url}" target="_blank">📄 Abrir PDF</a>
-              ` : `<span class="muted">No hay PDF asociado.</span>`}
-            </div>
-            <p class="muted" style="margin-top:10px;">
-              Escanea el QR para abrir/descargar el certificado en el móvil.
-            </p>
-          </div>
-
-          <div class="qr-box">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">QR · PDF</div>
-            <div id="qrLastPdf"></div>
-          </div>
-        </div>
+    if (!cert){
+      document.getElementById("certCard").style.display = "block";
+      document.getElementById("certBody").innerHTML = `
+        <p class="muted">No existe ningún certificado para este instrumento todavía.</p>
       `;
-
-      // Pintar QR
-      if (last.certificado_pdf_url) renderQR("qrLastPdf", last.certificado_pdf_url);
-
-      /* ---- Historial completo ---- */
-      document.getElementById("histCertCard").style.display = "block";
-      const histHtml = certs.map(c => `
-        <div class="cert-item">
-          <div class="left">
-            <div class="num">${safeTxt(c.numero)}</div>
-            <div class="meta">${c.created_at ? "Emitido: " + fDateShort(c.created_at) : ""}</div>
-          </div>
-          <div class="right">
-            ${c.certificado_pdf_url
-              ? `<a class="btn" href="${c.certificado_pdf_url}" target="_blank">📄 PDF</a>`
-              : `<span class="muted">Sin PDF</span>`}
-          </div>
-        </div>
-      `).join("");
-
-      document.getElementById("histCertBody").innerHTML = `
-        <div class="cert-list">${histHtml}</div>
-      `;
-    } else {
-      // Si no hay certificados, no mostramos cards
-      document.getElementById("lastCertCard").style.display = "none";
-      document.getElementById("histCertCard").style.display = "none";
-    }
-
-    /* ============================================================
-       HISTORIAL MOVIMIENTOS (últimos 10)
-    ============================================================ */
-    document.getElementById("movCard").style.display="block";
-
-    const { data: movList } = await supa
-      .from("movimientos")
-      .select("*")
-      .eq("codigo_instrumento", codigo)
-      .order("fecha",{ascending:false})
-      .limit(10);
-
-    const movBody = document.getElementById("movBody");
-
-    if (!movList || movList.length===0){
-      movBody.innerHTML = `<div class="muted">No existen movimientos.</div>`;
       return;
     }
 
-    movBody.innerHTML = movList.map(m=>`
-      <div class="mov-item">
-        <div class="mov-header">
-          <div class="mov-type">${m.tipo_movimiento}</div>
-          <div class="mov-date">${fDateTime(m.fecha)}</div>
+    const pdfURL = cert.certificado_pdf_url || null;
+    const verifURL = cert?.datos?.qr?.url_verificacion || null;
+
+    document.getElementById("certCard").style.display = "block";
+    document.getElementById("certBody").innerHTML = `
+      <div class="cert-grid">
+        <div style="flex:1; min-width:240px;">
+          <p><strong>Número:</strong> ${cert.numero}</p>
+          <p><strong>Emitido:</strong> ${cert.created_at ? cert.created_at.slice(0,10) : "—"}</p>
+
+          ${pdfURL ? `<a class="btn" href="${pdfURL}" target="_blank">📄 Abrir PDF</a>` : `<p class="muted">Sin PDF</p>`}
+          ${verifURL ? `<a class="btn" href="${verifURL}" target="_blank" style="margin-left:8px;">✅ Verificación</a>` : ""}
         </div>
 
-        <div class="mov-body-line">
-          <span class="mov-body-label">Responsable</span>
-          <span>${safeTxt(m.responsable)}</span>
+        <div class="qr-box">
+          <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;">QR · PDF</div>
+          <div id="qrPdf"></div>
         </div>
 
-        ${m.operario1 ? `<div class="mov-body-line"><span class="mov-body-label">Operario 1</span><span style="color:#7dd3fc;font-weight:600">${m.operario1}</span></div>` : ""}
-
-        ${m.operario2 ? `<div class="mov-body-line"><span class="mov-body-label">Operario 2</span><span style="color:#ff9f40;font-weight:600">${m.operario2}</span></div>` : ""}
-
-        <div class="mov-body-line">
-          <span class="mov-body-label">Destino</span>
-          <span>${safeTxt(m.destino)}</span>
+        <div class="qr-box">
+          <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;">QR · Verificación</div>
+          <div id="qrVerif"></div>
         </div>
-
-        ${m.observaciones ? `
-        <div class="mov-body-line">
-          <span class="mov-body-label">Obs.</span>
-          <span>${String(m.observaciones).replace(/\n/g,"<br>")}</span>
-        </div>` : ""}
       </div>
-    `).join("");
+    `;
 
-    document.getElementById("movHint").textContent = "Se muestran los 10 movimientos más recientes.";
+    if (pdfURL) renderQR("qrPdf", pdfURL);
+    if (verifURL) renderQR("qrVerif", verifURL);
   }
 
   main();
