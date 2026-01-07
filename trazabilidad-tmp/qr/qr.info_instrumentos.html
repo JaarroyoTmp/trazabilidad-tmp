@@ -5,6 +5,9 @@
   <title>TMP · Ficha del instrumento</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- QR GENERATOR (no instala nada) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
   <style>
     :root{
       --bg:#020617;
@@ -60,9 +63,7 @@
       box-shadow:0 10px 25px rgba(15,23,42,.9);
     }
 
-    #volverHome:hover{
-      background:#111827;
-    }
+    #volverHome:hover{ background:#111827; }
 
     header{
       display:flex;
@@ -86,10 +87,7 @@
       filter:drop-shadow(0 0 8px rgba(56,189,248,.45));
     }
 
-    .h-titles{
-      display:flex;
-      flex-direction:column;
-    }
+    .h-titles{ display:flex; flex-direction:column; }
 
     .h-titles h1{
       margin:0;
@@ -272,39 +270,47 @@
       box-shadow:0 0 12px rgba(255,159,64,.35);
     }
 
-    /* BOTONES CERTIFICADO */
-    .btn{
-      border:none;
-      cursor:pointer;
-      border-radius:12px;
+    .btn-row{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn-pill{
       padding:10px 14px;
-      font-weight:700;
-      margin-right:8px;
-      margin-top:10px;
-      font-size:13px;
+      border-radius:999px;
       background:#0f172a;
       color:#e5e7eb;
       border:1px solid rgba(148,163,184,.35);
+      text-decoration:none;
+      font-weight:700;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
     }
-    .btn:hover{
-      background:#111827;
+    .btn-pill:hover{ background:#111827; }
+
+    .btn-accent{
+      background:rgba(56,189,248,.18);
+      color:#7dd3fc;
+      border:1px solid rgba(56,189,248,.5);
     }
-    .btn-primary{
-      background:linear-gradient(135deg,#0ea5e9,#22d3ee);
-      color:#001018;
-      border:none;
-    }
-    .btn-primary:hover{
-      filter:brightness(1.05);
+    .btn-accent:hover{
+      background:rgba(56,189,248,.25);
     }
 
-    iframe{
-      width:100%;
-      height:540px;
-      border:none;
-      border-radius:14px;
-      margin-top:12px;
-      box-shadow:0 12px 30px rgba(0,0,0,.55);
+    .qr-wrap{
+      margin-top:14px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      gap:10px;
+    }
+    .qr-caption{
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
     }
   </style>
 </head>
@@ -325,6 +331,7 @@
 
   <div id="errorBox" class="error-box" style="display:none"></div>
 
+  <!-- HERO -->
   <section id="hero" class="hero-card" style="display:none">
     <div class="hero-main">
       <div class="hero-code" id="heroCode">CÓDIGO —</div>
@@ -340,18 +347,21 @@
 
   <section id="heroObserv" class="hero-observ" style="display:none"></section>
 
+  <!-- Responsables -->
   <section id="responsablesCard" class="card" style="display:none">
     <h2>Responsables actuales</h2>
     <div class="card-sub">Asignados en la última salida del instrumento.</div>
     <div id="respBody"></div>
   </section>
 
+  <!-- Info -->
   <section id="infoCard" class="card" style="display:none">
     <h2>Información básica</h2>
     <div class="card-sub">Datos generales del instrumento leído por QR.</div>
     <div id="infoBody"></div>
   </section>
 
+  <!-- Estado calibración -->
   <section id="calCard" class="card" style="display:none">
     <h2>Estado de calibración</h2>
     <div class="card-sub">Situación frente al plan de calibración.</div>
@@ -360,11 +370,16 @@
 
   <!-- ✅ NUEVO: ÚLTIMO CERTIFICADO -->
   <section id="certCard" class="card" style="display:none">
-    <h2>Último certificado emitido</h2>
-    <div class="card-sub">Informe oficial en PDF generado desde el backend.</div>
+    <h2>Último certificado</h2>
+    <div class="card-sub">Acceso rápido al informe de calibración (PDF).</div>
     <div id="certBody"></div>
+    <div class="qr-wrap" id="qrWrap" style="display:none">
+      <div id="qrBox"></div>
+      <div class="qr-caption">Escanea el QR para acceder a la verificación.</div>
+    </div>
   </section>
 
+  <!-- Movimientos -->
   <section id="movCard" class="card" style="display:none">
     <h2>Últimos movimientos</h2>
     <div class="card-sub">Trazabilidad reciente.</div>
@@ -405,6 +420,7 @@
   const fDateTime = iso => {
     if (!iso) return "—";
     const d = new Date(iso);
+    if (isNaN(d)) return "—";
     return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
   };
 
@@ -423,26 +439,6 @@
     return { clase:"status-ok", texto:"En regla", detalle:"Correcta", dias:diff, icono:"✔" };
   }
 
-  async function cargarUltimoCertificado(codigo){
-    try{
-      // Trae los últimos 30 certificados y filtra por el JSON (por instrumento.codigo)
-      const { data, error } = await supa
-        .from("certificados")
-        .select("numero, decision_global, certificado_pdf_url, created_at, datos")
-        .order("created_at",{ascending:false})
-        .limit(30);
-
-      if(error) throw error;
-      if(!data || data.length===0) return null;
-
-      const match = data.find(c => c?.datos?.instrumento?.codigo === codigo);
-      return match || null;
-    }catch(e){
-      console.error("Error cargando certificados:", e);
-      return null;
-    }
-  }
-
   async function main(){
     if (!codigo) return showError("No se indicó código.");
 
@@ -455,7 +451,6 @@
     if (error) return showError("Error consultando DB.");
     if (!inst) return showError(`No existe el código ${codigo}`);
 
-    // MOVIMIENTOS → Último movimiento
     const { data: movs } = await supa
       .from("movimientos")
       .select("*")
@@ -485,9 +480,9 @@
       </div>
     `;
 
-    // ESTADO
     const prox = inst.fecha_proxima_calibracion || null;
     const est = computeEstado(prox);
+
     const pill = document.getElementById("heroStatusPill");
     const lab = document.getElementById("heroStatusLabel");
     const cap = document.getElementById("heroStatusCaption");
@@ -516,7 +511,7 @@
       body.innerHTML = html;
     }
 
-    // INFO BÁSICA
+    // INFO
     document.getElementById("infoCard").style.display="block";
     document.getElementById("infoBody").innerHTML = `
       <div class="item"><span class="label">Descripción</span><span class="value">${inst.descripcion || "-"}</span></div>
@@ -546,27 +541,58 @@
       <p class="muted">${detalle}</p>
     `;
 
-    // ✅ CERTIFICADO
-    const cert = await cargarUltimoCertificado(codigo);
-    if(cert){
-      const certCard = document.getElementById("certCard");
-      const certBody = document.getElementById("certBody");
-      certCard.style.display = "block";
+    // ✅ ÚLTIMO CERTIFICADO (nuevo)
+    const { data: cert } = await supa
+      .from("certificados")
+      .select("numero, certificado_pdf_url, datos, created_at")
+      .eq("codigo_instrumento", codigo)
+      .order("created_at", { ascending:false })
+      .limit(1)
+      .maybeSingle();
 
-      certBody.innerHTML = `
-        <div class="item"><span class="label">Número</span><span class="value">${cert.numero || "-"}</span></div>
-        <div class="item"><span class="label">Decisión global</span><span class="value">${cert.decision_global || "-"}</span></div>
-        <div class="item"><span class="label">Fecha emisión</span><span class="value">${cert.created_at ? fDateShort(cert.created_at) : "-"}</span></div>
+    if (cert) {
+      document.getElementById("certCard").style.display = "block";
 
-        <button class="btn btn-primary" onclick="window.open('${cert.certificado_pdf_url}','_blank')">📄 Abrir PDF</button>
-        <a class="btn" href="${cert.certificado_pdf_url}" download>⬇ Descargar</a>
+      const urlVerif = cert?.datos?.qr?.url_verificacion || null;
+      const urlPDF = cert.certificado_pdf_url || null;
 
-        <iframe src="${cert.certificado_pdf_url}"></iframe>
+      document.getElementById("certBody").innerHTML = `
+        <div class="item">
+          <span class="label">Número</span>
+          <span class="value">${cert.numero || "-"}</span>
+        </div>
+        <div class="item">
+          <span class="label">Emitido</span>
+          <span class="value">${fDateTime(cert.created_at)}</span>
+        </div>
+
+        <div class="btn-row">
+          ${urlPDF ? `
+            <a class="btn-pill" href="${urlPDF}" target="_blank">📄 Ver PDF</a>
+          ` : ""}
+
+          ${urlVerif ? `
+            <a class="btn-pill btn-accent" href="${urlVerif}" target="_blank">✅ Verificación</a>
+          ` : ""}
+        </div>
       `;
+
+      // QR
+      if (urlVerif) {
+        document.getElementById("qrWrap").style.display = "flex";
+        document.getElementById("qrBox").innerHTML = "";
+
+        new QRCode(document.getElementById("qrBox"), {
+          text: urlVerif,
+          width: 120,
+          height: 120
+        });
+      }
     }
 
-    // MOVIMIENTOS (últimos 10)
+    // MOVIMIENTOS LISTA
     document.getElementById("movCard").style.display="block";
+
     const { data: movList } = await supa
       .from("movimientos")
       .select("*")
@@ -575,6 +601,7 @@
       .limit(10);
 
     const movBody = document.getElementById("movBody");
+
     if (!movList || movList.length===0){
       movBody.innerHTML = `<div class="muted">No existen movimientos.</div>`;
       return;
@@ -598,13 +625,13 @@
 
         <div class="mov-body-line">
           <span class="mov-body-label">Destino</span>
-          <span>${m.destino}</span>
+          <span>${m.destino || "-"}</span>
         </div>
 
         ${m.observaciones ? `
         <div class="mov-body-line">
           <span class="mov-body-label">Obs.</span>
-          <span>${m.observaciones.replace(/\n/g,"<br>")}</span>
+          <span>${String(m.observaciones).replace(/\n/g,"<br>")}</span>
         </div>` : ""}
       </div>
     `).join("");
@@ -617,4 +644,3 @@
 
 </body>
 </html>
-
