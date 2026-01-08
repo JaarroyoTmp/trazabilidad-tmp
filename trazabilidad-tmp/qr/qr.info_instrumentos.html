@@ -275,6 +275,76 @@
       color:var(--op2-tx);
       box-shadow:0 0 12px rgba(255,159,64,.35);
     }
+
+    /* ============================================================
+       ✅ NUEVO: Botones / Acciones (Router)
+    ============================================================ */
+    .btnAccion{
+      width:100%;
+      padding:12px 14px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:14px;
+      text-align:left;
+      background:rgba(148,163,184,.12);
+      color:#e5e7eb;
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:0 10px 25px rgba(15,23,42,.6);
+      transition: transform .05s ease, filter .12s ease;
+    }
+    .btnAccion:hover{
+      filter:brightness(1.07);
+    }
+    .btnAccion:active{
+      transform:scale(0.99);
+    }
+
+    .btnEntrada{ background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.35); }
+    .btnSalida{ background:rgba(249,115,22,.18); border-color:rgba(249,115,22,.35); }
+    .btnPrestamo{ background:rgba(14,165,233,.18); border-color:rgba(14,165,233,.35); }
+    .btnRevision{ background:rgba(168,85,247,.18); border-color:rgba(168,85,247,.35); }
+    .btnEnvio{ background:rgba(239,68,68,.18); border-color:rgba(239,68,68,.35); }
+    .btnCalibracion{ background:rgba(59,130,246,.18); border-color:rgba(59,130,246,.35); }
+    .btnInfo{ background:rgba(34,211,238,.14); border-color:rgba(34,211,238,.28); }
+
+    .acciones-grid{
+      display:grid;
+      gap:10px;
+      grid-template-columns:1fr;
+    }
+
+    .acciones-foot{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    .acciones-foot .mini{
+      flex:1;
+      min-width:160px;
+      text-align:center;
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:800;
+      font-size:13px;
+      cursor:pointer;
+      border:none;
+      background:rgba(148,163,184,.12);
+      color:#e5e7eb;
+      border:1px solid rgba(148,163,184,.18);
+    }
+    .acciones-foot .mini:hover{ filter:brightness(1.07); }
+
+    .link-soft{
+      color:#7dd3fc;
+      text-decoration:none;
+      font-weight:800;
+    }
+    .link-soft:hover{ text-decoration:underline; }
+
   </style>
 </head>
 
@@ -309,6 +379,46 @@
   </section>
 
   <section id="heroObserv" class="hero-observ" style="display:none"></section>
+
+  <!-- ============================================================
+       ✅ NUEVO: Tarjeta Router (Acciones)
+       (Se muestra tras cargar el instrumento)
+  ============================================================ -->
+  <section id="accionesCard" class="card" style="display:none">
+    <h2>¿Qué deseas hacer?</h2>
+    <div class="card-sub">Selecciona una acción rápida para este instrumento.</div>
+
+    <div class="acciones-grid">
+      <button class="btnAccion btnInfo" id="btnSoloInfo">ℹ️ Solo información del equipo</button>
+
+      <button class="btnAccion btnEntrada" id="btnEntrada">📥 Entrada</button>
+      <button class="btnAccion btnSalida" id="btnSalida">📤 Salida</button>
+
+      <button class="btnAccion btnPrestamo" id="btnPrestamo">🚚 Préstamo externo</button>
+      <button class="btnAccion btnRevision" id="btnRevision">🛠️ Revisión / Reparación</button>
+      <button class="btnAccion btnEnvio" id="btnEnvio">📦 Envío a calibración externa</button>
+
+      <button class="btnAccion btnCalibracion" id="btnCalibracion">🧪 Calibración (Laboratorio)</button>
+    </div>
+
+    <div class="acciones-foot">
+      <button class="mini" id="btnIrMovimientos">📜 Ver movimientos</button>
+      <button class="mini" id="btnRecargar">🔄 Recargar ficha</button>
+    </div>
+
+    <p class="muted" style="margin-top:10px;">
+      Tip: desde aquí se abrirá <b>movimiento.html</b> o <b>TMP_Calibraciones_Lab.html</b> con el código ya precargado.
+    </p>
+  </section>
+
+  <!-- ============================================================
+       ✅ NUEVO (Opcional recomendado): Último certificado PDF
+  ============================================================ -->
+  <section id="certCard" class="card" style="display:none">
+    <h2>Último certificado</h2>
+    <div class="card-sub">Acceso rápido al último certificado PDF asociado al instrumento (si existe).</div>
+    <div id="certBody" class="muted">Cargando certificado…</div>
+  </section>
 
   <!-- Tarjeta de responsables actuales -->
   <section id="responsablesCard" class="card" style="display:none">
@@ -391,6 +501,111 @@
     return { clase:"status-ok", texto:"En regla", detalle:"Correcta", dias:diff, icono:"✔" };
   }
 
+  /* ============================================================
+     ✅ NUEVO: Router / Acciones
+  ============================================================ */
+  function irMovimiento(tipo){
+    if(!codigo) return;
+    const url = `movimiento.html?codigo=${encodeURIComponent(codigo)}&tipo=${encodeURIComponent(tipo)}`;
+    window.location.href = url;
+  }
+
+  function irCalibracion(){
+    if(!codigo) return;
+    const url = `TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(codigo)}`;
+    window.location.href = url;
+  }
+
+  function scrollInfo(){
+    const el = document.getElementById("infoCard");
+    if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function scrollMovimientos(){
+    const el = document.getElementById("movCard");
+    if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function activarAcciones(){
+    const card = document.getElementById("accionesCard");
+    card.style.display = "block";
+
+    document.getElementById("btnSoloInfo").onclick = () => scrollInfo();
+
+    document.getElementById("btnEntrada").onclick = () => irMovimiento("Entrada");
+    document.getElementById("btnSalida").onclick = () => irMovimiento("Salida");
+    document.getElementById("btnPrestamo").onclick = () => irMovimiento("Prestamo Externo");
+    document.getElementById("btnRevision").onclick = () => irMovimiento("Revision/Reparacion");
+    document.getElementById("btnEnvio").onclick = () => irMovimiento("Envio a calibracion externa");
+    document.getElementById("btnCalibracion").onclick = () => irCalibracion();
+
+    document.getElementById("btnIrMovimientos").onclick = () => scrollMovimientos();
+    document.getElementById("btnRecargar").onclick = () => window.location.reload();
+  }
+
+  /* ============================================================
+     ✅ NUEVO (Opcional): Último certificado PDF
+     - Busca por instrumento_codigo = codigo
+     - Si no existe ese campo, no rompe: muestra "no hay"
+  ============================================================ */
+  async function cargarUltimoCertificado(){
+    const certCard = document.getElementById("certCard");
+    const certBody = document.getElementById("certBody");
+
+    try{
+      // Intento principal: campo instrumento_codigo
+      let { data, error } = await supa
+        .from("certificados")
+        .select("numero, certificado_pdf_url, created_at")
+        .eq("instrumento_codigo", codigo)
+        .order("created_at", { ascending:false })
+        .limit(1);
+
+      // Si el proyecto no tiene instrumento_codigo, error podría ocurrir.
+      // En ese caso, no rompemos: intentamos un fallback simple por "datos->>codigo" (si existe)
+      if(error){
+        // Fallback ultra seguro: mostramos que no se pudo encontrar
+        certCard.style.display = "block";
+        certBody.innerHTML = `<i>No se pudo consultar el certificado (verifica si existe el campo <b>instrumento_codigo</b> en la tabla certificados).</i>`;
+        return;
+      }
+
+      certCard.style.display = "block";
+
+      if(!data || data.length === 0){
+        certBody.innerHTML = `<i>No hay certificado asociado a este instrumento.</i>`;
+        return;
+      }
+
+      const cert = data[0];
+
+      if(!cert.certificado_pdf_url){
+        certBody.innerHTML = `
+          <div><b>Número:</b> ${cert.numero || "-"}</div>
+          <div class="muted" style="margin-top:6px;"><i>Existe registro pero no hay URL de PDF guardada.</i></div>
+        `;
+        return;
+      }
+
+      certBody.innerHTML = `
+        <div class="item">
+          <span class="label">Número</span>
+          <span class="value"><b>${cert.numero || "-"}</b></span>
+        </div>
+        <div class="item">
+          <span class="label">Fecha</span>
+          <span class="value">${cert.created_at ? fDateTime(cert.created_at) : "-"}</span>
+        </div>
+
+        <a class="link-soft" href="${cert.certificado_pdf_url}" target="_blank">📄 Abrir certificado PDF</a>
+      `;
+    }catch(e){
+      certCard.style.display = "block";
+      certBody.innerHTML = `<i>Error inesperado al cargar certificado.</i>`;
+      console.error(e);
+    }
+  }
+
   async function main(){
     if (!codigo) return showError("No se indicó código.");
 
@@ -402,6 +617,12 @@
 
     if (error) return showError("Error consultando DB.");
     if (!inst) return showError(`No existe el código ${codigo}`);
+
+    // ✅ NUEVO: Activar el router (acciones)
+    activarAcciones();
+
+    // ✅ NUEVO: Cargar último certificado (opcional)
+    cargarUltimoCertificado();
 
     // MOVIMIENTOS → Último movimiento
     const { data: movs } = await supa
