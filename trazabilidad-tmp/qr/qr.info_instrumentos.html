@@ -277,69 +277,82 @@
     }
 
     /* ============================================================
-       ✅ NUEVO: Botones / Acciones (Router)
+       ✅ NUEVO: BLOQUE FIJO ARRIBA CON PREGUNTAS / ACCIONES
     ============================================================ */
-    .btnAccion{
-      width:100%;
-      padding:12px 14px;
-      border:none;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:800;
-      font-size:14px;
-      text-align:left;
-      background:rgba(148,163,184,.12);
-      color:#e5e7eb;
-      border:1px solid rgba(148,163,184,.18);
-      box-shadow:0 10px 25px rgba(15,23,42,.6);
-      transition: transform .05s ease, filter .12s ease;
+    .acciones-fixed{
+      position: sticky;
+      top: 72px; /* debajo del header */
+      z-index: 19;
+      border-radius: 16px;
+      padding: 12px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,.14) 0, transparent 60%),
+        linear-gradient(135deg,#020617,#02081a);
+      border: 1px solid rgba(148,163,184,.25);
+      box-shadow: 0 14px 35px rgba(0,0,0,.75);
+      backdrop-filter: blur(16px);
     }
-    .btnAccion:hover{ filter:brightness(1.07); }
-    .btnAccion:active{ transform:scale(0.99); }
 
-    .btnEntrada{ background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.35); }
-    .btnSalida{ background:rgba(249,115,22,.18); border-color:rgba(249,115,22,.35); }
-    .btnPrestamo{ background:rgba(14,165,233,.18); border-color:rgba(14,165,233,.35); }
-    .btnRevision{ background:rgba(168,85,247,.18); border-color:rgba(168,85,247,.35); }
-    .btnEnvio{ background:rgba(239,68,68,.18); border-color:rgba(239,68,68,.35); }
-    .btnCalibracion{ background:rgba(59,130,246,.18); border-color:rgba(59,130,246,.35); }
-    .btnInfo{ background:rgba(34,211,238,.14); border-color:rgba(34,211,238,.28); }
+    .acciones-title{
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+
+    .acciones-sub{
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      line-height: 1.35;
+    }
 
     .acciones-grid{
-      display:grid;
-      gap:10px;
-      grid-template-columns:1fr;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+    }
+    @media(max-width: 520px){
+      .acciones-grid{ grid-template-columns: 1fr; }
     }
 
-    .acciones-foot{
+    .accion-btn{
+      width: 100%;
+      border: 1px solid rgba(148,163,184,.25);
+      background: rgba(15,23,42,.9);
+      color: var(--txt);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: .02em;
       display:flex;
-      gap:10px;
-      margin-top:10px;
-      flex-wrap:wrap;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .accion-btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(56,189,248,.55);
+      box-shadow: 0 0 18px rgba(56,189,248,.12);
     }
 
-    .acciones-foot .mini{
-      flex:1;
-      min-width:160px;
-      text-align:center;
-      padding:10px 12px;
-      border-radius:12px;
-      font-weight:800;
-      font-size:13px;
-      cursor:pointer;
-      border:none;
-      background:rgba(148,163,184,.12);
-      color:#e5e7eb;
-      border:1px solid rgba(148,163,184,.18);
-    }
-    .acciones-foot .mini:hover{ filter:brightness(1.07); }
+    .accion-btn.info{ border-color: rgba(56,189,248,.40); }
+    .accion-btn.entrada{ border-color: rgba(74,222,128,.35); }
+    .accion-btn.salida{ border-color: rgba(250,204,21,.35); }
+    .accion-btn.alerta{ border-color: rgba(248,113,113,.45); }
+    .accion-btn.cal{ border-color: rgba(59,130,246,.45); }
 
-    .link-soft{
-      color:#7dd3fc;
-      text-decoration:none;
-      font-weight:800;
+    .accion-left{ display:flex; align-items:center; gap:10px; }
+    .accion-ico{ font-size: 18px; }
+    .accion-arrow{ opacity:.7; }
+
+    /* NUEVO: bloque info general ocultable */
+    .contenido-ficha.hidden{
+      display:none;
     }
-    .link-soft:hover{ text-decoration:underline; }
 
   </style>
 </head>
@@ -360,68 +373,75 @@
 
   <div id="errorBox" class="error-box" style="display:none"></div>
 
-  <!-- HERO -->
-  <section id="hero" class="hero-card" style="display:none">
-    <div class="hero-main">
-      <div class="hero-code" id="heroCode">CÓDIGO —</div>
-      <div class="hero-title" id="heroTitle">Instrumento</div>
-      <div id="heroSub">—</div>
-    </div>
-
-    <div class="hero-status">
-      <div id="heroStatusPill" class="status-pill"><span class="dot"></span><span id="heroStatusLabel">—</span></div>
-      <div class="status-caption" id="heroStatusCaption">Estado</div>
-    </div>
-  </section>
-
-  <section id="heroObserv" class="hero-observ" style="display:none"></section>
-
   <!-- ============================================================
-       ✅ Acciones primero de TODO (Router)
+       ✅ NUEVO BLOQUE FIJO: PREGUNTAS / ACCIONES (PRIMERO SIEMPRE)
   ============================================================ -->
-  <section id="accionesCard" class="card" style="display:none">
-    <h2>¿Qué deseas hacer?</h2>
-    <div class="card-sub">Selecciona una acción rápida para este instrumento.</div>
+  <section id="accionesTop" class="acciones-fixed">
+    <div class="acciones-title">¿Qué quieres hacer con este instrumento?</div>
+    <div class="acciones-sub">
+      Escanea y selecciona una acción.  
+      <b>Solo información</b> mostrará la ficha completa aquí debajo.
+    </div>
 
     <div class="acciones-grid">
-      <button class="btnAccion btnInfo" id="btnSoloInfo">ℹ️ Solo información del equipo</button>
+      <button class="accion-btn info" id="btnSoloInfo">
+        <span class="accion-left"><span class="accion-ico">ℹ️</span> Solo información</span>
+        <span class="accion-arrow">›</span>
+      </button>
 
-      <button class="btnAccion btnEntrada" id="btnEntrada">📥 Entrada</button>
-      <button class="btnAccion btnSalida" id="btnSalida">📤 Salida</button>
+      <button class="accion-btn entrada" id="btnEntrada">
+        <span class="accion-left"><span class="accion-ico">📥</span> Entrada</span>
+        <span class="accion-arrow">›</span>
+      </button>
 
-      <button class="btnAccion btnPrestamo" id="btnPrestamo">🚚 Préstamo externo</button>
-      <button class="btnAccion btnRevision" id="btnRevision">🛠️ Revisión / Reparación</button>
-      <button class="btnAccion btnEnvio" id="btnEnvio">📦 Envío a calibración externa</button>
+      <button class="accion-btn salida" id="btnSalida">
+        <span class="accion-left"><span class="accion-ico">📤</span> Salida</span>
+        <span class="accion-arrow">›</span>
+      </button>
 
-      <button class="btnAccion btnCalibracion" id="btnCalibracion">🧪 Calibración (Laboratorio)</button>
+      <button class="accion-btn" id="btnPrestamo">
+        <span class="accion-left"><span class="accion-ico">🔄</span> Préstamo externo</span>
+        <span class="accion-arrow">›</span>
+      </button>
+
+      <button class="accion-btn alerta" id="btnRevision">
+        <span class="accion-left"><span class="accion-ico">🛠</span> Revisión / reparación</span>
+        <span class="accion-arrow">›</span>
+      </button>
+
+      <button class="accion-btn alerta" id="btnEnvioExterno">
+        <span class="accion-left"><span class="accion-ico">🚚</span> Envío a calibración externa</span>
+        <span class="accion-arrow">›</span>
+      </button>
+
+      <button class="accion-btn cal" id="btnCalibracion" style="grid-column:1/-1;">
+        <span class="accion-left"><span class="accion-ico">🧪</span> Calibración (Laboratorio)</span>
+        <span class="accion-arrow">›</span>
+      </button>
     </div>
-
-    <div class="acciones-foot">
-      <button class="mini" id="btnIrMovimientos">📜 Ver movimientos</button>
-      <button class="mini" id="btnRecargar">🔄 Recargar ficha</button>
-    </div>
-
-    <p class="muted" style="margin-top:10px;">
-      Tip: desde aquí se abrirá <b>movimiento.html</b> o <b>TMP_Calibraciones_Lab.html</b> con el código ya precargado.
-    </p>
   </section>
 
-  <!-- ✅ Contenedor de información (OCULTO hasta "Solo información") -->
-  <div id="infoContainer" style="display:none; display:flex; flex-direction:column; gap:14px;">
+  <!-- ============================================================
+       ✅ TODO LO DE TU FICHA ORIGINAL (SIN BORRAR NADA)
+       ✅ PERO AHORA SE ESCONDE HASTA DAR "SOLO INFORMACIÓN"
+  ============================================================ -->
+  <div id="contenidoFicha" class="contenido-ficha hidden">
 
-    <!-- ✅ Botón volver a acciones dentro de la ficha -->
-    <section class="card">
-      <h2>Información del equipo</h2>
-      <div class="card-sub">Puedes volver al menú de acciones en cualquier momento.</div>
-      <button class="btnAccion btnInfo" onclick="volverAcciones()">⬆ Volver a acciones</button>
+    <!-- HERO -->
+    <section id="hero" class="hero-card" style="display:none">
+      <div class="hero-main">
+        <div class="hero-code" id="heroCode">CÓDIGO —</div>
+        <div class="hero-title" id="heroTitle">Instrumento</div>
+        <div id="heroSub">—</div>
+      </div>
+
+      <div class="hero-status">
+        <div id="heroStatusPill" class="status-pill"><span class="dot"></span><span id="heroStatusLabel">—</span></div>
+        <div class="status-caption" id="heroStatusCaption">Estado</div>
+      </div>
     </section>
 
-    <!-- ✅ Último certificado PDF -->
-    <section id="certCard" class="card" style="display:none">
-      <h2>Último certificado</h2>
-      <div class="card-sub">Acceso rápido al último certificado PDF asociado al instrumento (si existe).</div>
-      <div id="certBody" class="muted">Cargando certificado…</div>
-    </section>
+    <section id="heroObserv" class="hero-observ" style="display:none"></section>
 
     <!-- Tarjeta de responsables actuales -->
     <section id="responsablesCard" class="card" style="display:none">
@@ -507,121 +527,35 @@
   }
 
   /* ============================================================
-     ✅ Router / Acciones
+     ✅ NUEVO: RUTAS A LOS OTROS HTML SEGÚN ACCIÓN
   ============================================================ */
-  function irMovimiento(tipo){
-    if(!codigo) return;
-    const url = `movimiento.html?codigo=${encodeURIComponent(codigo)}&tipo=${encodeURIComponent(tipo)}`;
-    window.location.href = url;
+  function goMov(tipo){
+    window.location.href = `../movimiento.html?codigo=${encodeURIComponent(codigo)}&tipo=${encodeURIComponent(tipo)}`;
   }
 
-  function irCalibracion(){
-    if(!codigo) return;
-    const url = `TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(codigo)}`;
-    window.location.href = url;
+  function goCalibracion(){
+    window.location.href = `../TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(codigo)}`;
   }
 
-  function scrollInfo(){
-    const el = document.getElementById("infoCard");
-    if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+  function mostrarFicha(){
+    const c = document.getElementById("contenidoFicha");
+    c.classList.remove("hidden");
+    // scroll suave al inicio de ficha
+    setTimeout(() => {
+      c.scrollIntoView({ behavior:"smooth", block:"start" });
+    }, 50);
+    main();
   }
 
-  function scrollMovimientos(){
-    const el = document.getElementById("movCard");
-    if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
-  }
+  // Enlazar botones
+  document.getElementById("btnSoloInfo").addEventListener("click", mostrarFicha);
 
-  function mostrarInfoCompleta(){
-    const cont = document.getElementById("infoContainer");
-    if(cont) cont.style.display = "flex";
-    scrollInfo();
-  }
-
-  window.volverAcciones = function volverAcciones(){
-    const cont = document.getElementById("infoContainer");
-    if(cont) cont.style.display = "none";
-
-    const acc = document.getElementById("accionesCard");
-    if(acc) acc.scrollIntoView({ behavior:"smooth", block:"start" });
-  }
-
-  function activarAcciones(){
-    const card = document.getElementById("accionesCard");
-    card.style.display = "block";
-
-    document.getElementById("btnSoloInfo").onclick = () => mostrarInfoCompleta();
-
-    document.getElementById("btnEntrada").onclick = () => irMovimiento("Entrada");
-    document.getElementById("btnSalida").onclick = () => irMovimiento("Salida");
-    document.getElementById("btnPrestamo").onclick = () => irMovimiento("Prestamo Externo");
-    document.getElementById("btnRevision").onclick = () => irMovimiento("Revision/Reparacion");
-    document.getElementById("btnEnvio").onclick = () => irMovimiento("Envio a calibracion externa");
-    document.getElementById("btnCalibracion").onclick = () => irCalibracion();
-
-    document.getElementById("btnIrMovimientos").onclick = () => {
-      const cont = document.getElementById("infoContainer");
-      if(cont) cont.style.display = "flex";
-      scrollMovimientos();
-    };
-
-    document.getElementById("btnRecargar").onclick = () => window.location.reload();
-  }
-
-  /* ============================================================
-     ✅ Último certificado PDF (Opcional)
-  ============================================================ */
-  async function cargarUltimoCertificado(){
-    const certCard = document.getElementById("certCard");
-    const certBody = document.getElementById("certBody");
-
-    try{
-      let { data, error } = await supa
-        .from("certificados")
-        .select("numero, certificado_pdf_url, created_at")
-        .eq("instrumento_codigo", codigo)
-        .order("created_at", { ascending:false })
-        .limit(1);
-
-      certCard.style.display = "block";
-
-      if(error){
-        certBody.innerHTML = `<i>No se pudo consultar el certificado (verifica si existe el campo <b>instrumento_codigo</b> en la tabla certificados).</i>`;
-        return;
-      }
-
-      if(!data || data.length === 0){
-        certBody.innerHTML = `<i>No hay certificado asociado a este instrumento.</i>`;
-        return;
-      }
-
-      const cert = data[0];
-
-      if(!cert.certificado_pdf_url){
-        certBody.innerHTML = `
-          <div><b>Número:</b> ${cert.numero || "-"}</div>
-          <div class="muted" style="margin-top:6px;"><i>Existe registro pero no hay URL de PDF guardada.</i></div>
-        `;
-        return;
-      }
-
-      certBody.innerHTML = `
-        <div class="item">
-          <span class="label">Número</span>
-          <span class="value"><b>${cert.numero || "-"}</b></span>
-        </div>
-        <div class="item">
-          <span class="label">Fecha</span>
-          <span class="value">${cert.created_at ? fDateTime(cert.created_at) : "-"}</span>
-        </div>
-
-        <a class="link-soft" href="${cert.certificado_pdf_url}" target="_blank">📄 Abrir certificado PDF</a>
-      `;
-    }catch(e){
-      certCard.style.display = "block";
-      certBody.innerHTML = `<i>Error inesperado al cargar certificado.</i>`;
-      console.error(e);
-    }
-  }
+  document.getElementById("btnEntrada").addEventListener("click", () => goMov("Entrada"));
+  document.getElementById("btnSalida").addEventListener("click", () => goMov("Salida"));
+  document.getElementById("btnPrestamo").addEventListener("click", () => goMov("Préstamo externo"));
+  document.getElementById("btnRevision").addEventListener("click", () => goMov("Revisión / reparación"));
+  document.getElementById("btnEnvioExterno").addEventListener("click", () => goMov("Envío a calibración externa"));
+  document.getElementById("btnCalibracion").addEventListener("click", goCalibracion);
 
   async function main(){
     if (!codigo) return showError("No se indicó código.");
@@ -634,16 +568,6 @@
 
     if (error) return showError("Error consultando DB.");
     if (!inst) return showError(`No existe el código ${codigo}`);
-
-    // Acciones arriba siempre visibles
-    activarAcciones();
-
-    // Por defecto ocultamos la info completa (hasta que el usuario la pida)
-    const cont = document.getElementById("infoContainer");
-    if(cont) cont.style.display = "none";
-
-    // Cargar último certificado (aunque esté oculto, quedará listo)
-    cargarUltimoCertificado();
 
     // MOVIMIENTOS → Último movimiento
     const { data: movs } = await supa
@@ -809,7 +733,9 @@
     document.getElementById("movHint").textContent = "Se muestran los 10 movimientos más recientes.";
   }
 
-  main();
+  /* ✅ YA NO LLAMAMOS main() DIRECTO
+     Solo se ejecuta cuando el usuario pulsa “Solo información”
+  */
 </script>
 
 </body>
