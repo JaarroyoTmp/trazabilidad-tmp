@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TMP · Generador de Códigos QR</title>
+  <title>TMP · Generador de Códigos QR (LAB PRO)</title>
 
   <!-- Librería QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,6 +17,9 @@
       --muted:#8b949e;
       --accent:#58a6ff;
       --ok:#238636;
+      --warn:#f59e0b;
+      --chip:#0b1220;
+      --chip2:#0c1c33;
     }
 
     *{box-sizing:border-box;}
@@ -24,8 +27,11 @@
     body{
       margin:0;
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:var(--bg);
+      background:radial-gradient(circle at 0% 0%, #142b48 0%, transparent 60%),
+                 radial-gradient(circle at 100% 0%, #17325a 0%, transparent 60%),
+                 var(--bg);
       color:var(--txt);
+      min-height:100vh;
     }
 
     header{
@@ -33,15 +39,20 @@
       align-items:center;
       gap:14px;
       padding:14px 16px;
-      background:var(--panel);
+      background:rgba(22,27,34,.92);
       border-bottom:1px solid var(--border);
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter: blur(10px);
     }
+
     header img.logo{height:40px}
     header h1{margin:0;font-size:18px}
     header span.sub{font-size:12px;color:var(--muted)}
 
     .wrap{
-      max-width:980px;
+      max-width:1050px;
       margin:22px auto;
       padding:0 16px 32px;
       display:grid;
@@ -54,27 +65,29 @@
     }
 
     .card{
-      background:var(--panel);
-      border-radius:16px;
-      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(22,27,34,.96), rgba(13,17,23,.92));
+      border-radius:18px;
+      border:1px solid rgba(88,166,255,.18);
+      box-shadow:0 18px 35px rgba(0,0,0,.45);
       padding:18px 16px 16px;
     }
 
     h2{margin:0 0 8px;font-size:16px}
     label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
 
-    input{
+    input, select{
       width:100%;
       padding:9px 11px;
-      border-radius:10px;
-      border:1px solid var(--border);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
       background:#0d1117;
       color:var(--txt);
       font-size:14px;
       outline:none;
+      transition:.15s border-color;
     }
 
-    input:focus{border-color:var(--accent);}
+    input:focus, select:focus{border-color:var(--accent);}
 
     .row{
       display:flex;
@@ -90,22 +103,25 @@
       padding:9px 16px;
       font-size:13px;
       cursor:pointer;
-      font-weight:600;
+      font-weight:700;
       display:inline-flex;
       align-items:center;
       gap:6px;
+      transition:.15s transform, .15s box-shadow;
     }
+    button:hover{transform:translateY(-1px)}
 
     .btn-main{
-      background:var(--ok);
+      background:linear-gradient(135deg, #1fae64, #238636);
       color:#fff;
+      box-shadow:0 10px 22px rgba(0,0,0,.35);
     }
-    .btn-main:hover{background:#2ea043;}
+    .btn-main:hover{box-shadow:0 14px 28px rgba(0,0,0,.55);}
 
     .btn-ghost{
       background:transparent;
       color:var(--accent);
-      border:1px solid var(--border);
+      border:1px solid rgba(255,255,255,.16);
     }
     .btn-ghost:hover{border-color:var(--accent);}
 
@@ -123,28 +139,41 @@
 
     .sizes button.active{
       background:var(--accent);
-      color:#0d1117;
+      color:#06111f;
       border-color:var(--accent);
     }
 
+    .select-box{
+      margin-top:12px;
+      padding:12px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(11,18,32,.95), rgba(12,28,51,.85));
+    }
+
     #qrResult{
-      margin-top:20px;
+      margin-top:18px;
       display:flex;
       flex-direction:column;
       align-items:center;
-      min-height:120px;
+      min-height:170px;
+      gap:10px;
     }
 
     #qrResult canvas{
       background:#ffffff;
-      padding:10px;
-      border-radius:12px;
+      padding:12px;
+      border-radius:14px;
+      box-shadow:0 10px 20px rgba(0,0,0,.35);
     }
 
     .hint{
       font-size:12px;
       color:var(--muted);
-      margin-top:8px
+      margin-top:6px;
+      text-align:center;
+      max-width:360px;
+      line-height:1.35;
     }
 
     .badge{
@@ -152,21 +181,21 @@
       align-items:center;
       gap:6px;
       font-size:11px;
-      padding:4px 9px;
+      padding:6px 10px;
       border-radius:999px;
-      border:1px solid var(--border);
+      border:1px solid rgba(255,255,255,.10);
       background:#0d1117;
       color:var(--muted);
     }
 
-    .search-box{margin-top:4px;}
+    .search-box{margin-top:10px;}
     .search-box input{font-size:13px;}
 
     .list-instrumentos{
       margin-top:10px;
       max-height:260px;
-      border-radius:12px;
-      border:1px solid var(--border);
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
       overflow:auto;
       background:#0d1117;
     }
@@ -175,17 +204,18 @@
       display:flex;
       align-items:flex-start;
       gap:8px;
-      padding:6px 8px;
-      border-bottom:1px solid #21262d;
+      padding:8px 10px;
+      border-bottom:1px solid rgba(255,255,255,.06);
       font-size:13px;
       cursor:pointer;
+      transition:.12s background;
     }
     .inst-row:last-child{border-bottom:none;}
-    .inst-row:hover{background:#111827;}
+    .inst-row:hover{background:#101827;}
 
-    .inst-row input[type="checkbox"]{margin-top:2px;}
-    .inst-code{font-weight:600;margin-right:4px;}
-    .inst-desc{color:var(--muted);font-size:12px;}
+    .inst-row input[type="checkbox"]{margin-top:3px;}
+    .inst-code{font-weight:800;margin-right:6px;letter-spacing:.04em;}
+    .inst-desc{color:var(--muted);font-size:12px;line-height:1.25;}
 
     .panel-footer{
       margin-top:10px;
@@ -202,60 +232,62 @@
       display:flex;
       flex-wrap:wrap;
       gap:8px;
-      margin-top:10px;
+      margin-top:12px;
     }
 
     #volverHome{
       position:fixed;
       bottom:18px;
       right:18px;
-      background:#238636;
+      background:linear-gradient(135deg, #1fae64, #238636);
       padding:12px 18px;
       font-size:14px;
-      border-radius:12px;
-      border:1px solid #2ea043;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
       cursor:pointer;
       color:white;
-      box-shadow:0 0 10px rgba(0,0,0,.4);
+      box-shadow:0 18px 35px rgba(0,0,0,.55);
       z-index:50;
     }
-    #volverHome:hover{background:#2ea043;}
+    #volverHome:hover{filter:brightness(1.08);}
 
     .preview-sheet{
-      margin-top:10px;
-      border-radius:12px;
-      border:1px solid var(--border);
+      margin-top:12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
       background:#0d1117;
-      padding:10px;
+      padding:12px;
     }
 
     .preview-grid{
       display:grid;
-      gap:3px;
+      gap:4px;
       justify-content:flex-start;
       align-content:flex-start;
       max-height:260px;
       overflow:auto;
       background:#02040a;
-      padding:6px;
+      padding:8px;
+      border-radius:10px;
+      border:1px dashed rgba(255,255,255,.10);
     }
 
     .preview-cell{
-      width:16px;
-      height:16px;
-      border-radius:3px;
+      width:18px;
+      height:18px;
+      border-radius:4px;
       background:#1f2937;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:9px;
+      font-size:10px;
       color:#9ca3af;
     }
 
     .preview-cell.filled{
       background:#22c55e;
       color:#022c22;
-      font-weight:700;
+      font-weight:900;
     }
   </style>
 </head>
@@ -268,7 +300,7 @@
   <img src="../img/tmp-quality.png" alt="TMP" class="logo">
   <div>
     <h1>Generador de códigos QR</h1>
-    <span class="sub">Trazabilidad de instrumentos · TMP</span>
+    <span class="sub">Etiquetas de laboratorio · Trazabilidad TMP (LAB PRO)</span>
   </div>
 </header>
 
@@ -283,6 +315,7 @@
 
     <div class="row">
       <button class="btn-main" id="btnGenerar">Generar QR</button>
+      <button class="btn-ghost" id="btnImprimirUno">Imprimir etiqueta</button>
     </div>
 
     <div class="sizes">
@@ -291,9 +324,24 @@
       <button class="btn-ghost size-btn" data-mm="15">Etiqueta 15 mm</button>
     </div>
 
+    <!-- ✅ Selector de plantilla -->
+    <div class="select-box">
+      <label>Plantilla profesional</label>
+      <select id="tplEtiqueta">
+        <option value="minimal">Minimal (QR + Código)</option>
+        <option value="lab" selected>LAB PRO (TMP + QR + Código + borde)</option>
+        <option value="full">FULL (TMP + QR + Código + borde + microtexto)</option>
+      </select>
+      <div class="hint" style="margin-top:8px">
+        Recomendado: <b>LAB PRO</b>. Se imprime bien incluso en 10 mm sin perder legibilidad.
+      </div>
+    </div>
+
     <div id="qrResult"></div>
 
-    <p class="hint">El QR generado apunta a la ficha del instrumento en el sistema TMP.</p>
+    <p class="hint">
+      El QR apunta a la ficha del instrumento. El código impreso debajo ayuda en caso de QR dañado o sucio.
+    </p>
   </div>
 
   <!-- PANEL DERECHO -->
@@ -309,8 +357,9 @@
     <div class="list-instrumentos" id="listaInstrumentos"></div>
 
     <div class="panel-footer">
-      <span><strong>Tamaño actual QR:</strong> <span id="lblTamano">10 mm</span></span>
-      <span><strong>Capacidad fija hoja A4:</strong> 12 etiquetas</span>
+      <span><strong>Tamaño actual:</strong> <span id="lblTamano">10 mm</span></span>
+      <span><strong>Plantilla:</strong> <span id="lblTpl">LAB PRO</span></span>
+      <span><strong>Capacidad hoja A4:</strong> 12 etiquetas</span>
       <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
     </div>
 
@@ -321,12 +370,13 @@
     </div>
 
     <div class="preview-sheet">
-      <div class="hint">Esquema (3x4):</div>
+      <div class="hint">Esquema A4 (3×4):</div>
       <div id="previewGrid" class="preview-grid"></div>
     </div>
 
   </div>
 </div>
+
 <!-- =========================
       CARGA SUPABASE
 ========================= -->
@@ -338,8 +388,6 @@
 // ==================================
 const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-const PRINT_COLS = 3;
-const PRINT_ROWS = 4;
 const MAX_PER_PAGE = 12;
 
 let etiquetaMM = 10;
@@ -349,21 +397,39 @@ const selectedCodigos = new Set();
 const qrResult = document.getElementById("qrResult");
 const codigoInput = document.getElementById("codigo");
 const sizeButtons = document.querySelectorAll(".size-btn");
+const tplSelect = document.getElementById("tplEtiqueta");
 
 const badgeEstado = document.getElementById("badgeEstado");
 const listaInstrumentos = document.getElementById("listaInstrumentos");
 const buscadorInput = document.getElementById("buscador");
 
 const lblTamano = document.getElementById("lblTamano");
+const lblTpl = document.getElementById("lblTpl");
 const lblSeleccionados = document.getElementById("lblSeleccionados");
 const previewGrid = document.getElementById("previewGrid");
 
+// ==================================
+// UTILIDADES
+// ==================================
+function plantillaNombre(v){
+  if (v==="minimal") return "MINIMAL";
+  if (v==="lab") return "LAB PRO";
+  if (v==="full") return "FULL";
+  return "LAB PRO";
+}
+
+function esc(text){
+  return String(text).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
 
 // ==================================
 // PREVIEW 3×4
 // ==================================
 function actualizarCapacidad(){
   lblTamano.textContent = etiquetaMM + " mm";
+  lblTpl.textContent = plantillaNombre(tplSelect.value);
   lblSeleccionados.textContent = selectedCodigos.size;
 
   previewGrid.style.gridTemplateColumns = "repeat(3, 1fr)";
@@ -380,6 +446,67 @@ function actualizarCapacidad(){
   }
 }
 
+// ==================================
+// RENDER QR INDIVIDUAL CON DISEÑO PRO
+// ==================================
+function renderEtiquetaHTML(codigo, url, mm, tpl){
+  const basePx = mm * 8; // escala visual QR en pantalla
+  const codeFont = mm <= 10 ? 12 : mm <= 13 ? 13 : 14;
+
+  const hdr = (tpl==="minimal") ? "" : `
+    <div style="
+      font-size:${mm<=10?9:10}px;
+      font-weight:900;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#0b1220;
+      text-align:center;
+      margin-bottom:4px;
+    ">TMP</div>
+  `;
+
+  const micro = (tpl==="full") ? `
+    <div style="
+      margin-top:2px;
+      font-size:${mm<=10?7:8}px;
+      letter-spacing:.06em;
+      color:#111;
+      text-align:center;
+    ">Trazabilidad · Laboratorio TMP</div>
+  ` : "";
+
+  const border = (tpl==="minimal") ? "" : `border:1px solid #222;`;
+
+  return `
+  <div style="
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    background:#fff;
+    ${border}
+    border-radius:10px;
+    padding:8px 10px 9px;
+    box-shadow:0 10px 18px rgba(0,0,0,.25);
+  ">
+    ${hdr}
+    <div class="qr-box"></div>
+    <div style="
+      margin-top:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #222;
+      background:#f2f2f2;
+      font-weight:900;
+      font-size:${codeFont}px;
+      letter-spacing:.10em;
+      color:#111;
+      text-transform:uppercase;
+      line-height:1;
+    ">${esc(codigo)}</div>
+    ${micro}
+  </div>`;
+}
 
 // ==================================
 // GENERAR QR INDIVIDUAL
@@ -392,34 +519,23 @@ function generarQR(){
   }
 
   const url = BASE_URL + encodeURIComponent(codigo);
+  const tpl = tplSelect.value;
 
-  qrResult.innerHTML = "";
-  const qrDiv = document.createElement("div");
-  qrResult.appendChild(qrDiv);
+  qrResult.innerHTML = renderEtiquetaHTML(codigo, url, etiquetaMM, tpl);
 
-  new QRCode(qrDiv, {
+  const qrBox = qrResult.querySelector(".qr-box");
+  qrBox.innerHTML = "";
+  new QRCode(qrBox, {
     text: url,
     width: etiquetaMM * 8,
     height: etiquetaMM * 8
   });
 
-  const p = document.createElement("p");
-  p.className = "hint";
-  p.textContent = "URL: " + url;
-  qrResult.appendChild(p);
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.textContent = "URL: " + url;
+  qrResult.appendChild(hint);
 }
-
-sizeButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    sizeButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    etiquetaMM = parseInt(btn.dataset.mm, 10);
-    actualizarCapacidad();
-
-    if (codigoInput.value.trim()) generarQR();
-  });
-});
 
 document.getElementById("btnGenerar").addEventListener("click", generarQR);
 
@@ -430,6 +546,114 @@ codigoInput.addEventListener("keydown", e => {
   }
 });
 
+tplSelect.addEventListener("change", () => {
+  actualizarCapacidad();
+  if (codigoInput.value.trim()) generarQR();
+});
+
+// ==================================
+// IMPRIMIR ETIQUETA INDIVIDUAL (VENTANA NUEVA)
+// ==================================
+function imprimirEtiquetaIndividual(){
+  const codigo = codigoInput.value.trim();
+  if (!codigo){
+    alert("Introduce el código del instrumento");
+    return;
+  }
+  const url = BASE_URL + encodeURIComponent(codigo);
+  const tpl = tplSelect.value;
+  const mm = etiquetaMM;
+
+  const html = buildPrintSingleHTML(codigo, url, mm, tpl);
+
+  const win = window.open("", "_blank");
+  win.document.write(html);
+  win.document.close();
+}
+document.getElementById("btnImprimirUno").addEventListener("click", imprimirEtiquetaIndividual);
+
+// ==================================
+// BUILD PRINT SINGLE HTML (impresión 1 etiqueta)
+// ==================================
+function buildPrintSingleHTML(codigo, url, mm, tpl){
+  const extra = (tpl==="minimal") ? 4 : (tpl==="lab") ? 7 : 9; // mm de alto extra
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Etiqueta TMP</title>
+<style>
+  @page { margin: 10mm; }
+  body{ margin:0; font-family: Arial, sans-serif; display:flex; justify-content:center; align-items:center; height:100vh;}
+  .label{
+    width:${mm}mm;
+    height:${mm + extra}mm;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    background:#fff;
+    border:${tpl==="minimal" ? "0" : "0.25mm solid #111"};
+    border-radius:2mm;
+    padding:1.2mm;
+  }
+  .tmp{
+    font-size:${mm<=10?2.6:2.8}mm;
+    font-weight:900;
+    letter-spacing:0.35mm;
+    margin-top:0.2mm;
+  }
+  .qr{
+    width:${mm}mm;
+    height:${mm}mm;
+    margin-top:${tpl==="minimal" ? "0" : "0.6mm"};
+  }
+  .code{
+    margin-top:0.6mm;
+    font-size:${mm<=10?2.6:2.8}mm;
+    font-weight:900;
+    letter-spacing:0.25mm;
+    padding:0.5mm 1.3mm;
+    border:0.2mm solid #111;
+    border-radius:999px;
+    background:#f2f2f2;
+  }
+  .micro{
+    margin-top:0.4mm;
+    font-size:${mm<=10?1.7:1.8}mm;
+    letter-spacing:0.1mm;
+  }
+</style>
+</head>
+<body>
+  <div class="label">
+    ${tpl==="minimal" ? "" : `<div class="tmp">TMP</div>`}
+    <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}">
+    <div class="code">${esc(codigo)}</div>
+    ${tpl==="full" ? `<div class="micro">Trazabilidad · Laboratorio TMP</div>` : ""}
+  </div>
+<script>
+  window.onload = () => setTimeout(() => window.print(), 250);
+<\/script>
+</body>
+</html>`;
+}
+
+// ==================================
+// TAMAÑOS
+// ==================================
+sizeButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    sizeButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    etiquetaMM = parseInt(btn.dataset.mm, 10);
+    actualizarCapacidad();
+    if (codigoInput.value.trim()) generarQR();
+  });
+});
 
 // ==================================
 // CARGAR INSTRUMENTOS DESDE SUPABASE
@@ -456,10 +680,8 @@ async function cargarInstrumentos(){
 
   allInstrumentos = data;
   badgeEstado.textContent = `Instrumentos cargados: ${allInstrumentos.length}`;
-
   renderInstrumentList();
 }
-
 
 function renderInstrumentList(filtro = ""){
   const term = filtro.toLowerCase();
@@ -475,7 +697,7 @@ function renderInstrumentList(filtro = ""){
 
   if (!filtrados.length){
     listaInstrumentos.innerHTML =
-      `<div style="padding:8px;font-size:13px;color:#777;">Sin resultados</div>`;
+      `<div style="padding:10px;font-size:13px;color:#777;">Sin resultados</div>`;
     return;
   }
 
@@ -522,9 +744,8 @@ document.getElementById("btnLimpiarSeleccion").addEventListener("click", () => {
   renderInstrumentList(buscadorInput.value);
 });
 
-
 // ==================================
-// IMPRESIÓN A4 (3x4) CON LÍNEAS DE CORTE
+// IMPRESIÓN A4 (3x4) CON CÓDIGO + TMP + BORDE
 // ==================================
 function imprimirHoja(){
   if (!selectedCodigos.size){
@@ -533,31 +754,31 @@ function imprimirHoja(){
   }
 
   const codigos = Array.from(selectedCodigos).slice(0, 12);
-  const etiqueta = etiquetaMM;
+  const mm = etiquetaMM;
+  const tpl = tplSelect.value;
+
+  const extra = (tpl==="minimal") ? 4 : (tpl==="lab") ? 7 : 9;
 
   let etiquetasHTML = "";
-  let index = 0;
+  codigos.forEach(codigo => {
+    const url = BASE_URL + encodeURIComponent(codigo);
 
-  for (let fila = 0; fila < 4; fila++){
-    for (let col = 0; col < 3; col++){
-      const codigo = codigos[index++];
-      if (!codigo) break;
+    etiquetasHTML += `
+      <div class="cell">
+        <div class="cut-top"></div>
+        <div class="cut-right"></div>
+        <div class="cut-bottom"></div>
+        <div class="cut-left"></div>
 
-      const url = BASE_URL + encodeURIComponent(codigo);
-
-      etiquetasHTML += `
-        <div class="cell">
-          <div class="cut-top"></div>
-          <div class="cut-right"></div>
-          <div class="cut-bottom"></div>
-          <div class="cut-left"></div>
-
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}"
-               class="qr">
+        <div class="label">
+          ${tpl==="minimal" ? "" : `<div class="tmp">TMP</div>`}
+          <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}">
+          <div class="code">${esc(codigo)}</div>
+          ${tpl==="full" ? `<div class="micro">Trazabilidad TMP</div>` : ""}
         </div>
-      `;
-    }
-  }
+      </div>
+    `;
+  });
 
   const html = `
 <!DOCTYPE html>
@@ -565,10 +786,9 @@ function imprimirHoja(){
 <head>
 <meta charset="UTF-8">
 <title>Etiquetas TMP – A4</title>
-
 <style>
   @page { size: A4; margin: 10mm; }
-  body{ margin:0; padding:0; font-family:sans-serif; }
+  body{ margin:0; font-family: Arial, sans-serif; }
 
   .sheet{
     display:grid;
@@ -582,60 +802,83 @@ function imprimirHoja(){
 
   .cell{
     position:relative;
-    width:${etiqueta}mm;
-    height:${etiqueta}mm;
+    width:${mm}mm;
+    height:${mm + extra}mm;
     display:flex;
     align-items:center;
     justify-content:center;
   }
 
+  .label{
+    width:${mm}mm;
+    height:${mm + extra}mm;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    background:#fff;
+    border:${tpl==="minimal" ? "0" : "0.25mm solid #111"};
+    border-radius:2mm;
+    padding:1.2mm;
+  }
+
+  .tmp{
+    font-size:${mm<=10?2.6:2.8}mm;
+    font-weight:900;
+    letter-spacing:0.35mm;
+    margin-top:0.2mm;
+  }
+
   .qr{
-    width:${etiqueta}mm;
-    height:${etiqueta}mm;
+    width:${mm}mm;
+    height:${mm}mm;
+    margin-top:${tpl==="minimal" ? "0" : "0.6mm"};
   }
 
+  .code{
+    margin-top:0.6mm;
+    font-size:${mm<=10?2.6:2.8}mm;
+    font-weight:900;
+    letter-spacing:0.25mm;
+    padding:0.5mm 1.3mm;
+    border:0.2mm solid #111;
+    border-radius:999px;
+    background:#f2f2f2;
+    line-height:1;
+  }
+
+  .micro{
+    margin-top:0.4mm;
+    font-size:${mm<=10?1.7:1.8}mm;
+    letter-spacing:0.1mm;
+    line-height:1;
+  }
+
+  /* Guías de corte discretas (nivel pro) */
   .cut-top{
-    position:absolute;
-    top:-4mm;
-    left:0;
-    right:0;
-    border-top:0.4mm dashed #444;
+    position:absolute; top:-4mm; left:0; right:0;
+    border-top:0.35mm dashed rgba(0,0,0,.55);
   }
-
   .cut-bottom{
-    position:absolute;
-    bottom:-4mm;
-    left:0;
-    right:0;
-    border-bottom:0.4mm dashed #444;
+    position:absolute; bottom:-4mm; left:0; right:0;
+    border-bottom:0.35mm dashed rgba(0,0,0,.55);
   }
-
   .cut-left{
-    position:absolute;
-    top:0;
-    bottom:0;
-    left:-4mm;
-    border-left:0.4mm dashed #444;
+    position:absolute; top:0; bottom:0; left:-4mm;
+    border-left:0.35mm dashed rgba(0,0,0,.55);
+  }
+  .cut-right{
+    position:absolute; top:0; bottom:0; right:-4mm;
+    border-right:0.35mm dashed rgba(0,0,0,.55);
   }
 
-  .cut-right{
-    position:absolute;
-    top:0;
-    bottom:0;
-    right:-4mm;
-    border-right:0.4mm dashed #444;
-  }
 </style>
 </head>
-
 <body>
-
   <div class="sheet">${etiquetasHTML}</div>
-
 <script>
   window.onload = () => setTimeout(() => window.print(), 300);
 <\/script>
-
 </body>
 </html>
   `;
@@ -647,9 +890,8 @@ function imprimirHoja(){
 
 document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHoja);
 
-
 // ==================================
-// INICIALIZACIÓN
+// INIT
 // ==================================
 window.addEventListener("load", () => {
   actualizarCapacidad();
@@ -659,5 +901,4 @@ window.addEventListener("load", () => {
 
 </body>
 </html>
-
 
