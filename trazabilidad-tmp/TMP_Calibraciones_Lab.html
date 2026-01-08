@@ -1438,9 +1438,49 @@ $("#btnLimpiar").addEventListener("click", ()=>location.reload());
 /* ========= ARRANQUE ========= */
 setBadge(false);
 switchTab('plan');
+
+
+/* ===========================================================
+   ✅✅✅ AUTOLOAD DESDE QR.INFO / URL PARAM (AÑADIDO)
+   NO TOCA TU FLUJO: SOLO RELLENA #insCodigo Y DISPARA CARGA
+=========================================================== */
+function extraerCodigoDesdeURL() {
+  try {
+    const url = new URL(window.location.href);
+    const codigo = url.searchParams.get("codigo");
+    if (codigo) return codigo.trim();
+
+    // Si vienen rutas tipo .../11217 o .../qr/11217
+    const partes = url.pathname.split("/").filter(Boolean);
+    const last = partes[partes.length - 1];
+    if (last && !last.includes(".html") && /^\d{2,}$/.test(last)) {
+      return decodeURIComponent(last);
+    }
+  } catch (e) {}
+  return "";
+}
+
+async function autoloadCodigoDesdeURL() {
+  const codigo = extraerCodigoDesdeURL();
+  if (!codigo) return;
+
+  const input = $("#insCodigo");
+  if (!input) return;
+
+  // Rellenar campo
+  input.value = codigo;
+
+  // Espera mínima para que DOM + módulos estén estables
+  setTimeout(() => {
+    cargarInstrumento();
+  }, 120);
+}
+
+// Ejecutar autoload al cargar la página
+autoloadCodigoDesdeURL();
+
 </script>
 </body>
 </html>
-
 
 
