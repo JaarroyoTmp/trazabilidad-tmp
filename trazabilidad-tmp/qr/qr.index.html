@@ -315,33 +315,34 @@
       color:#222;
     }
 
-    /* TALADRO / ANILLO 4mm - PREVIEW */
+    /* TALADRO / ANILLO 4mm - PEQUEÑO Y LATERAL IZQUIERDO */
     .hole{
       position:absolute;
-      top:6px;
-      left:50%;
-      transform:translateX(-50%);
-      width:16px;
-      height:16px;
+      top:8px;
+      left:8px;
+      width:10px;
+      height:10px;
       border-radius:50%;
-      border:2px solid #111;
-      background:rgba(0,0,0,.03);
+      border:1px solid rgba(0,0,0,.9);
+      background:rgba(0,0,0,.04);
       display:flex;
       align-items:center;
       justify-content:center;
     }
     .hole::after{
       content:"";
-      width:9px;height:9px;border-radius:50%;
-      border:1px solid rgba(0,0,0,.55);
+      width:6px;height:6px;border-radius:50%;
+      border:1px solid rgba(0,0,0,.45);
       background:transparent;
     }
     .hole::before{
       content:"+";
       position:absolute;
-      font-size:10px;
+      font-size:9px;
       font-weight:900;
-      color:rgba(0,0,0,.65);
+      color:rgba(0,0,0,.55);
+      line-height:1;
+      transform:translateY(-0.2px);
     }
 
     /* ===== PANEL DERECHA ===== */
@@ -486,7 +487,7 @@
 
       <div class="hint">
         ✅ Las <b>líneas de corte</b> se imprimen siempre. <br>
-        ✅ El círculo de arriba es la <b>guía para taladro 4mm</b> (anillo acero).
+        ✅ El círculo lateral es la <b>guía para taladro 4mm</b> (anillo acero).
       </div>
     </div>
 
@@ -631,9 +632,9 @@ function generar(){
 }
 
 /* ==================================
-   BUILD PRINT LABEL (A4 and SINGLE)
-   - Includes CUT LINES ALWAYS
-   - Includes HOLE (4mm)
+   BUILD LABEL HTML (PRINT)
+   - CUT LINES ALWAYS
+   - HOLE: lateral izquierdo pequeño
 ================================== */
 function buildLabelHTML(codigo, url, mm, tpl){
   const extra = (tpl==="minimal") ? 4 : (tpl==="lab") ? 8 : 10;
@@ -762,35 +763,35 @@ function buildPrintHTML(labelsHTML, mm, tpl, single=false){
     border-right:0.35mm dashed rgba(0,0,0,.55);
   }
 
-  /* HOLE GUIDE 4mm (with optional outer ring) */
+  /* HOLE GUIDE LATERAL IZQUIERDO (pequeño) */
   .hole{
     position:absolute;
-    top:1.3mm;
-    left:50%;
-    transform:translateX(-50%);
-    width:6mm; height:6mm;
+    top:1.4mm;
+    left:1.4mm;
+    width:5mm;
+    height:5mm;
     display:flex;
     align-items:center;
     justify-content:center;
   }
   .hole-outer{
     position:absolute;
-    width:6mm; height:6mm;
+    width:5mm; height:5mm;
     border-radius:50%;
-    border:0.25mm solid rgba(0,0,0,.65);
+    border:0.25mm solid rgba(0,0,0,.60);
   }
   .hole-inner{
     position:absolute;
-    width:4mm; height:4mm;
+    width:3.5mm; height:3.5mm;
     border-radius:50%;
     border:0.25mm solid rgba(0,0,0,.95);
     background:transparent;
   }
   .hole-cross{
     position:absolute;
-    font-size:3mm;
+    font-size:2.6mm;
     font-weight:900;
-    color:rgba(0,0,0,.60);
+    color:rgba(0,0,0,.55);
     line-height:1;
     transform:translateY(-0.1mm);
   }
@@ -977,4 +978,6 @@ window.addEventListener("load", ()=>{
 
 </body>
 </html>
+
+
 
