@@ -21,7 +21,6 @@
       --accent:#58a6ff;
       --accent2:#27d3ff;
       --ok:#22c55e;
-      --warn:#f59e0b;
       --bad:#ff6b6b;
       --shadow:0 18px 42px rgba(0,0,0,.60);
     }
@@ -38,7 +37,6 @@
       min-height:100vh;
     }
 
-    /* ===== APP SHELL ===== */
     .topbar{
       position:sticky;
       top:0;
@@ -138,7 +136,6 @@
       .pill{display:none;}
     }
 
-    /* ===== CARDS ===== */
     .card{
       background:linear-gradient(180deg, rgba(17,28,51,.92), rgba(11,18,32,.88));
       border:1px solid rgba(88,166,255,.16);
@@ -257,13 +254,13 @@
       line-height:1.35;
     }
 
-    /* ===== PREVIEW LABEL (ON SCREEN) ===== */
+    /* ===== PREVIEW LABEL ===== */
     .preview{
       margin-top:14px;
       display:flex;
       justify-content:center;
       align-items:center;
-      min-height:190px;
+      min-height:220px;
       gap:10px;
       flex-direction:column;
     }
@@ -279,6 +276,41 @@
       align-items:center;
       justify-content:flex-start;
       position:relative;
+
+      /* ✅ reserva zona superior para que el agujero NO toque el QR */
+      padding-top:18px;
+    }
+
+    /* ✅ agujero ARRIBA IZQUIERDA, fuera del QR */
+    .hole{
+      position:absolute;
+      top:6px;
+      left:6px;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      border:1px solid rgba(0,0,0,.9);
+      background:rgba(0,0,0,.04);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:5;
+      pointer-events:none;
+    }
+    .hole::after{
+      content:"";
+      width:6px;height:6px;border-radius:50%;
+      border:1px solid rgba(0,0,0,.45);
+      background:transparent;
+    }
+    .hole::before{
+      content:"+";
+      position:absolute;
+      font-size:9px;
+      font-weight:900;
+      color:rgba(0,0,0,.55);
+      line-height:1;
+      transform:translateY(-0.2px);
     }
 
     .label-preview .tmp{
@@ -306,43 +338,6 @@
       letter-spacing:.12em;
       color:#111;
       line-height:1;
-    }
-
-    .label-preview .micro{
-      margin-top:3px;
-      font-size:9px;
-      letter-spacing:.06em;
-      color:#222;
-    }
-
-    /* TALADRO / ANILLO 4mm - PEQUEÑO Y LATERAL IZQUIERDO */
-    .hole{
-      position:absolute;
-      top:8px;
-      left:8px;
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      border:1px solid rgba(0,0,0,.9);
-      background:rgba(0,0,0,.04);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .hole::after{
-      content:"";
-      width:6px;height:6px;border-radius:50%;
-      border:1px solid rgba(0,0,0,.45);
-      background:transparent;
-    }
-    .hole::before{
-      content:"+";
-      position:absolute;
-      font-size:9px;
-      font-weight:900;
-      color:rgba(0,0,0,.55);
-      line-height:1;
-      transform:translateY(-0.2px);
     }
 
     /* ===== PANEL DERECHA ===== */
@@ -486,8 +481,8 @@
       </select>
 
       <div class="hint">
-        ✅ Las <b>líneas de corte</b> se imprimen siempre. <br>
-        ✅ El círculo lateral es la <b>guía para taladro 4mm</b> (anillo acero).
+        ✅ Líneas de corte siempre.<br>
+        ✅ Agujero guía <b>ARRIBA IZQUIERDA</b> para anillo acero 4mm (sin tocar QR).
       </div>
     </div>
 
@@ -532,9 +527,6 @@
 <script type="module" src="../config.mjs"></script>
 
 <script>
-/* ==================================
-   CONFIG
-================================== */
 const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 const MAX_PER_PAGE = 12;
 
@@ -572,9 +564,6 @@ function esc(text){
   }[m]));
 }
 
-/* ==================================
-   PREVIEW GRID
-================================== */
 function actualizarPreview(){
   lblTamano.textContent = etiquetaMM + " mm";
   lblTpl.textContent = plantillaNombre(tplSelect.value);
@@ -592,27 +581,19 @@ function actualizarPreview(){
   }
 }
 
-/* ==================================
-   RENDER PREVIEW LABEL (SCREEN)
-================================== */
 function renderEtiquetaPreview(codigo, url, mm, tpl){
   const showHeader = (tpl !== "minimal");
-  const showMicro = (tpl === "full");
-
   qrResult.innerHTML = `
     <div class="label-preview">
-      <div class="hole" title="Guía de taladro 4mm (anillo acero)"></div>
+      <div class="hole"></div>
       ${showHeader ? `<div class="tmp">TMP</div>` : ``}
       <div class="qr-box"></div>
       <div class="code">${esc(codigo)}</div>
-      ${showMicro ? `<div class="micro">Trazabilidad · Laboratorio TMP</div>` : ``}
     </div>
     <div class="hint">URL: ${esc(url)}</div>
   `;
-
   const qrBox = qrResult.querySelector(".qr-box");
   qrBox.innerHTML = "";
-
   new QRCode(qrBox, {
     text: url,
     width: mm * 8,
@@ -620,237 +601,13 @@ function renderEtiquetaPreview(codigo, url, mm, tpl){
   });
 }
 
-/* ==================================
-   GENERAR
-================================== */
 function generar(){
   const codigo = codigoInput.value.trim();
   if(!codigo){ alert("Introduce el código"); return; }
   const url = BASE_URL + encodeURIComponent(codigo);
-
   renderEtiquetaPreview(codigo, url, etiquetaMM, tplSelect.value);
 }
 
-/* ==================================
-   BUILD LABEL HTML (PRINT)
-   - CUT LINES ALWAYS
-   - HOLE: lateral izquierdo pequeño
-================================== */
-function buildLabelHTML(codigo, url, mm, tpl){
-  const extra = (tpl==="minimal") ? 4 : (tpl==="lab") ? 8 : 10;
-  return `
-    <div class="cell">
-      <div class="cut-top"></div>
-      <div class="cut-right"></div>
-      <div class="cut-bottom"></div>
-      <div class="cut-left"></div>
-
-      <div class="label">
-        <div class="hole">
-          <div class="hole-outer"></div>
-          <div class="hole-inner"></div>
-          <div class="hole-cross">+</div>
-        </div>
-
-        ${tpl==="minimal" ? "" : `<div class="tmp">TMP</div>`}
-
-        <img class="qr"
-          src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}">
-
-        <div class="code">${esc(codigo)}</div>
-
-        ${tpl==="full" ? `<div class="micro">Trazabilidad · Laboratorio TMP</div>` : ""}
-      </div>
-    </div>
-  `;
-}
-
-function buildPrintHTML(labelsHTML, mm, tpl, single=false){
-  const extra = (tpl==="minimal") ? 4 : (tpl==="lab") ? 8 : 10;
-
-  return `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Etiquetas TMP</title>
-<style>
-  @page { size: ${single ? "auto" : "A4"}; margin: 10mm; }
-  body{ margin:0; font-family: Arial, sans-serif; }
-
-  .sheet{
-    display:${single ? "flex" : "grid"};
-    ${single ? "justify-content:center;align-items:center;height:100vh;" : ""}
-    grid-template-columns: repeat(3, auto);
-    grid-template-rows: repeat(4, auto);
-    justify-content:center;
-    align-items:center;
-    gap: 10mm;
-    margin-top: 5mm;
-  }
-
-  .cell{
-    position:relative;
-    width:${mm}mm;
-    height:${mm + extra}mm;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-
-  .label{
-    width:${mm}mm;
-    height:${mm + extra}mm;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    background:#fff;
-    border:0.25mm solid #111;
-    border-radius:2mm;
-    padding:1.4mm;
-    position:relative;
-  }
-
-  .tmp{
-    font-size:${mm<=10?2.6:2.8}mm;
-    font-weight:900;
-    letter-spacing:0.35mm;
-    margin-top:0.2mm;
-    text-transform:uppercase;
-  }
-
-  .qr{
-    width:${mm}mm;
-    height:${mm}mm;
-    margin-top:0.6mm;
-  }
-
-  .code{
-    margin-top:0.7mm;
-    font-size:${mm<=10?2.6:2.8}mm;
-    font-weight:900;
-    letter-spacing:0.25mm;
-    padding:0.5mm 1.3mm;
-    border:0.2mm solid #111;
-    border-radius:999px;
-    background:#f2f2f2;
-    line-height:1;
-  }
-
-  .micro{
-    margin-top:0.4mm;
-    font-size:${mm<=10?1.7:1.8}mm;
-    letter-spacing:0.1mm;
-    line-height:1;
-  }
-
-  /* CUT LINES ALWAYS */
-  .cut-top{
-    position:absolute; top:-4mm; left:0; right:0;
-    border-top:0.35mm dashed rgba(0,0,0,.55);
-  }
-  .cut-bottom{
-    position:absolute; bottom:-4mm; left:0; right:0;
-    border-bottom:0.35mm dashed rgba(0,0,0,.55);
-  }
-  .cut-left{
-    position:absolute; top:0; bottom:0; left:-4mm;
-    border-left:0.35mm dashed rgba(0,0,0,.55);
-  }
-  .cut-right{
-    position:absolute; top:0; bottom:0; right:-4mm;
-    border-right:0.35mm dashed rgba(0,0,0,.55);
-  }
-
-  /* HOLE GUIDE LATERAL IZQUIERDO (pequeño) */
-  .hole{
-    position:absolute;
-    top:1.4mm;
-    left:1.4mm;
-    width:5mm;
-    height:5mm;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .hole-outer{
-    position:absolute;
-    width:5mm; height:5mm;
-    border-radius:50%;
-    border:0.25mm solid rgba(0,0,0,.60);
-  }
-  .hole-inner{
-    position:absolute;
-    width:3.5mm; height:3.5mm;
-    border-radius:50%;
-    border:0.25mm solid rgba(0,0,0,.95);
-    background:transparent;
-  }
-  .hole-cross{
-    position:absolute;
-    font-size:2.6mm;
-    font-weight:900;
-    color:rgba(0,0,0,.55);
-    line-height:1;
-    transform:translateY(-0.1mm);
-  }
-</style>
-</head>
-<body>
-  <div class="sheet">${labelsHTML}</div>
-<script>
-  window.onload = () => setTimeout(() => window.print(), 250);
-<\/script>
-</body>
-</html>`;
-}
-
-/* ==================================
-   PRINT SINGLE
-================================== */
-function imprimirEtiqueta(){
-  const codigo = codigoInput.value.trim();
-  if(!codigo){ alert("Introduce el código"); return; }
-  const url = BASE_URL + encodeURIComponent(codigo);
-
-  const labelHTML = buildLabelHTML(codigo, url, etiquetaMM, tplSelect.value);
-  const html = buildPrintHTML(labelHTML, etiquetaMM, tplSelect.value, true);
-
-  const w = window.open("", "_blank");
-  w.document.write(html);
-  w.document.close();
-}
-
-/* ==================================
-   PRINT A4
-================================== */
-function imprimirHoja(){
-  if (!selectedCodigos.size){
-    alert("Selecciona al menos un instrumento.");
-    return;
-  }
-
-  const tpl = tplSelect.value;
-  const mm = etiquetaMM;
-
-  const codigos = Array.from(selectedCodigos).slice(0, 12);
-  let htmlLabels = "";
-
-  codigos.forEach(codigo=>{
-    const url = BASE_URL + encodeURIComponent(codigo);
-    htmlLabels += buildLabelHTML(codigo, url, mm, tpl);
-  });
-
-  const html = buildPrintHTML(htmlLabels, mm, tpl, false);
-  const w = window.open("", "_blank");
-  w.document.write(html);
-  w.document.close();
-}
-
-/* ==================================
-   SIZE + TEMPLATE EVENTS
-================================== */
 sizeButtons.forEach(btn=>{
   btn.addEventListener("click",()=>{
     sizeButtons.forEach(b=>b.classList.remove("active"));
@@ -867,15 +624,11 @@ tplSelect.addEventListener("change",()=>{
 });
 
 document.getElementById("btnGenerar").addEventListener("click", generar);
-document.getElementById("btnImprimirUno").addEventListener("click", imprimirEtiqueta);
 
 codigoInput.addEventListener("keydown", e=>{
   if(e.key==="Enter"){ e.preventDefault(); generar(); }
 });
 
-/* ==================================
-   SUPABASE LOAD
-================================== */
 async function checkSupabase(){
   const sb = window.supabase;
   if(sb){
@@ -887,97 +640,11 @@ async function checkSupabase(){
   }
 }
 
-async function cargarInstrumentos(){
-  const supabase = window.supabase;
-  if(!supabase){
-    badgeEstado.textContent="Supabase no disponible.";
-    return;
-  }
-
-  badgeEstado.textContent="Cargando instrumentos…";
-
-  const { data, error } = await supabase
-    .from("instrumentos")
-    .select("codigo, descripcion")
-    .order("codigo", { ascending:true });
-
-  if(error){
-    badgeEstado.textContent="Error al cargar.";
-    return;
-  }
-
-  allInstrumentos=data||[];
-  badgeEstado.textContent=`Instrumentos cargados: ${allInstrumentos.length}`;
-  renderInstrumentList();
-}
-
-function renderInstrumentList(filtro=""){
-  const term=filtro.toLowerCase();
-  const filtrados = term
-    ? allInstrumentos.filter(i =>
-        String(i.codigo).toLowerCase().includes(term) ||
-        (i.descripcion||"").toLowerCase().includes(term)
-      )
-    : allInstrumentos;
-
-  listaInstrumentos.innerHTML="";
-
-  if(!filtrados.length){
-    listaInstrumentos.innerHTML=`<div style="padding:10px;font-size:13px;color:#777;">Sin resultados</div>`;
-    return;
-  }
-
-  filtrados.forEach(inst=>{
-    const row=document.createElement("label");
-    row.className="inst-row";
-
-    const chk=document.createElement("input");
-    chk.type="checkbox";
-    chk.checked = selectedCodigos.has(inst.codigo);
-
-    chk.addEventListener("change",()=>{
-      if(chk.checked) selectedCodigos.add(inst.codigo);
-      else selectedCodigos.delete(inst.codigo);
-      actualizarPreview();
-    });
-
-    const code=document.createElement("div");
-    code.className="inst-code";
-    code.textContent=inst.codigo;
-
-    const desc=document.createElement("div");
-    desc.className="inst-desc";
-    desc.textContent=inst.descripcion || "";
-
-    row.appendChild(chk);
-    row.appendChild(code);
-    row.appendChild(desc);
-    listaInstrumentos.appendChild(row);
-  });
-
-  actualizarPreview();
-}
-
-buscadorInput.addEventListener("input",()=>renderInstrumentList(buscadorInput.value));
-document.getElementById("btnRefrescarLista").addEventListener("click", cargarInstrumentos);
-document.getElementById("btnLimpiarSeleccion").addEventListener("click",()=>{
-  selectedCodigos.clear();
-  renderInstrumentList(buscadorInput.value);
-});
-document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHoja);
-
-/* ==================================
-   INIT
-================================== */
 window.addEventListener("load", ()=>{
   actualizarPreview();
   checkSupabase();
-  setTimeout(cargarInstrumentos, 350);
 });
 </script>
 
 </body>
 </html>
-
-
-
