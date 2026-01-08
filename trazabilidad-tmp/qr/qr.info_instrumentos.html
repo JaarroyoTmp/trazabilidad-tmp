@@ -294,12 +294,8 @@
       box-shadow:0 10px 25px rgba(15,23,42,.6);
       transition: transform .05s ease, filter .12s ease;
     }
-    .btnAccion:hover{
-      filter:brightness(1.07);
-    }
-    .btnAccion:active{
-      transform:scale(0.99);
-    }
+    .btnAccion:hover{ filter:brightness(1.07); }
+    .btnAccion:active{ transform:scale(0.99); }
 
     .btnEntrada{ background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.35); }
     .btnSalida{ background:rgba(249,115,22,.18); border-color:rgba(249,115,22,.35); }
@@ -381,8 +377,7 @@
   <section id="heroObserv" class="hero-observ" style="display:none"></section>
 
   <!-- ============================================================
-       ✅ NUEVO: Tarjeta Router (Acciones)
-       (Se muestra tras cargar el instrumento)
+       ✅ Acciones primero de TODO (Router)
   ============================================================ -->
   <section id="accionesCard" class="card" style="display:none">
     <h2>¿Qué deseas hacer?</h2>
@@ -411,43 +406,53 @@
     </p>
   </section>
 
-  <!-- ============================================================
-       ✅ NUEVO (Opcional recomendado): Último certificado PDF
-  ============================================================ -->
-  <section id="certCard" class="card" style="display:none">
-    <h2>Último certificado</h2>
-    <div class="card-sub">Acceso rápido al último certificado PDF asociado al instrumento (si existe).</div>
-    <div id="certBody" class="muted">Cargando certificado…</div>
-  </section>
+  <!-- ✅ Contenedor de información (OCULTO hasta "Solo información") -->
+  <div id="infoContainer" style="display:none; display:flex; flex-direction:column; gap:14px;">
 
-  <!-- Tarjeta de responsables actuales -->
-  <section id="responsablesCard" class="card" style="display:none">
-    <h2>Responsables actuales</h2>
-    <div class="card-sub">Asignados en la última salida del instrumento.</div>
-    <div id="respBody"></div>
-  </section>
+    <!-- ✅ Botón volver a acciones dentro de la ficha -->
+    <section class="card">
+      <h2>Información del equipo</h2>
+      <div class="card-sub">Puedes volver al menú de acciones en cualquier momento.</div>
+      <button class="btnAccion btnInfo" onclick="volverAcciones()">⬆ Volver a acciones</button>
+    </section>
 
-  <!-- Información básica -->
-  <section id="infoCard" class="card" style="display:none">
-    <h2>Información básica</h2>
-    <div class="card-sub">Datos generales del instrumento leído por QR.</div>
-    <div id="infoBody"></div>
-  </section>
+    <!-- ✅ Último certificado PDF -->
+    <section id="certCard" class="card" style="display:none">
+      <h2>Último certificado</h2>
+      <div class="card-sub">Acceso rápido al último certificado PDF asociado al instrumento (si existe).</div>
+      <div id="certBody" class="muted">Cargando certificado…</div>
+    </section>
 
-  <!-- Estado calibración -->
-  <section id="calCard" class="card" style="display:none">
-    <h2>Estado de calibración</h2>
-    <div class="card-sub">Situación frente al plan de calibración.</div>
-    <div id="calBody"></div>
-  </section>
+    <!-- Tarjeta de responsables actuales -->
+    <section id="responsablesCard" class="card" style="display:none">
+      <h2>Responsables actuales</h2>
+      <div class="card-sub">Asignados en la última salida del instrumento.</div>
+      <div id="respBody"></div>
+    </section>
 
-  <!-- Movimientos -->
-  <section id="movCard" class="card" style="display:none">
-    <h2>Últimos movimientos</h2>
-    <div class="card-sub">Trazabilidad reciente.</div>
-    <div id="movBody"></div>
-    <p class="muted" id="movHint"></p>
-  </section>
+    <!-- Información básica -->
+    <section id="infoCard" class="card" style="display:none">
+      <h2>Información básica</h2>
+      <div class="card-sub">Datos generales del instrumento leído por QR.</div>
+      <div id="infoBody"></div>
+    </section>
+
+    <!-- Estado calibración -->
+    <section id="calCard" class="card" style="display:none">
+      <h2>Estado de calibración</h2>
+      <div class="card-sub">Situación frente al plan de calibración.</div>
+      <div id="calBody"></div>
+    </section>
+
+    <!-- Movimientos -->
+    <section id="movCard" class="card" style="display:none">
+      <h2>Últimos movimientos</h2>
+      <div class="card-sub">Trazabilidad reciente.</div>
+      <div id="movBody"></div>
+      <p class="muted" id="movHint"></p>
+    </section>
+
+  </div>
 
 </div>
 
@@ -502,7 +507,7 @@
   }
 
   /* ============================================================
-     ✅ NUEVO: Router / Acciones
+     ✅ Router / Acciones
   ============================================================ */
   function irMovimiento(tipo){
     if(!codigo) return;
@@ -526,11 +531,25 @@
     if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
   }
 
+  function mostrarInfoCompleta(){
+    const cont = document.getElementById("infoContainer");
+    if(cont) cont.style.display = "flex";
+    scrollInfo();
+  }
+
+  window.volverAcciones = function volverAcciones(){
+    const cont = document.getElementById("infoContainer");
+    if(cont) cont.style.display = "none";
+
+    const acc = document.getElementById("accionesCard");
+    if(acc) acc.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
   function activarAcciones(){
     const card = document.getElementById("accionesCard");
     card.style.display = "block";
 
-    document.getElementById("btnSoloInfo").onclick = () => scrollInfo();
+    document.getElementById("btnSoloInfo").onclick = () => mostrarInfoCompleta();
 
     document.getElementById("btnEntrada").onclick = () => irMovimiento("Entrada");
     document.getElementById("btnSalida").onclick = () => irMovimiento("Salida");
@@ -539,21 +558,23 @@
     document.getElementById("btnEnvio").onclick = () => irMovimiento("Envio a calibracion externa");
     document.getElementById("btnCalibracion").onclick = () => irCalibracion();
 
-    document.getElementById("btnIrMovimientos").onclick = () => scrollMovimientos();
+    document.getElementById("btnIrMovimientos").onclick = () => {
+      const cont = document.getElementById("infoContainer");
+      if(cont) cont.style.display = "flex";
+      scrollMovimientos();
+    };
+
     document.getElementById("btnRecargar").onclick = () => window.location.reload();
   }
 
   /* ============================================================
-     ✅ NUEVO (Opcional): Último certificado PDF
-     - Busca por instrumento_codigo = codigo
-     - Si no existe ese campo, no rompe: muestra "no hay"
+     ✅ Último certificado PDF (Opcional)
   ============================================================ */
   async function cargarUltimoCertificado(){
     const certCard = document.getElementById("certCard");
     const certBody = document.getElementById("certBody");
 
     try{
-      // Intento principal: campo instrumento_codigo
       let { data, error } = await supa
         .from("certificados")
         .select("numero, certificado_pdf_url, created_at")
@@ -561,16 +582,12 @@
         .order("created_at", { ascending:false })
         .limit(1);
 
-      // Si el proyecto no tiene instrumento_codigo, error podría ocurrir.
-      // En ese caso, no rompemos: intentamos un fallback simple por "datos->>codigo" (si existe)
+      certCard.style.display = "block";
+
       if(error){
-        // Fallback ultra seguro: mostramos que no se pudo encontrar
-        certCard.style.display = "block";
         certBody.innerHTML = `<i>No se pudo consultar el certificado (verifica si existe el campo <b>instrumento_codigo</b> en la tabla certificados).</i>`;
         return;
       }
-
-      certCard.style.display = "block";
 
       if(!data || data.length === 0){
         certBody.innerHTML = `<i>No hay certificado asociado a este instrumento.</i>`;
@@ -618,10 +635,14 @@
     if (error) return showError("Error consultando DB.");
     if (!inst) return showError(`No existe el código ${codigo}`);
 
-    // ✅ NUEVO: Activar el router (acciones)
+    // Acciones arriba siempre visibles
     activarAcciones();
 
-    // ✅ NUEVO: Cargar último certificado (opcional)
+    // Por defecto ocultamos la info completa (hasta que el usuario la pida)
+    const cont = document.getElementById("infoContainer");
+    if(cont) cont.style.display = "none";
+
+    // Cargar último certificado (aunque esté oculto, quedará listo)
     cargarUltimoCertificado();
 
     // MOVIMIENTOS → Último movimiento
@@ -793,7 +814,3 @@
 
 </body>
 </html>
-
-
-
-
