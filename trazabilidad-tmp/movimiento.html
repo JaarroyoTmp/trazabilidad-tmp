@@ -713,6 +713,55 @@ function actualizarBotonRegistrar() {
 }
 
 /* ===========================================================
+   ✅ NUEVO: PRECARGA DESDE URL (codigo + tipo)
+   - Carga el instrumento automáticamente
+   - Selecciona el tipo de movimiento automáticamente
+=========================================================== */
+(function precargarDesdeURL(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const codigoParam = params.get("codigo");
+    const tipoParam = params.get("tipo");
+
+    if (!codigoParam) return;
+
+    const codigoClean = (codigoParam || "").trim();
+    if (!codigoClean) return;
+
+    const inp = document.getElementById("codigoInput");
+    if (inp) inp.value = codigoClean;
+
+    setTimeout(async () => {
+      await cargarInstrumento(); // 1) primero carga datos del equipo
+
+      // 2) luego asigna el tipo elegido (si viene)
+      if (tipoParam) {
+        const tipoClean = (tipoParam || "").trim();
+
+        const sel = document.getElementById("tipoMovimiento");
+        if (sel) {
+          const opciones = Array.from(sel.options).map(o => o.value);
+          if (opciones.includes(tipoClean)) {
+            sel.value = tipoClean;
+          } else {
+            const match = opciones.find(v => v.toLowerCase() === tipoClean.toLowerCase());
+            if (match) sel.value = match;
+          }
+        }
+      }
+
+      // 3) resto manual → foco en responsable
+      const resp = document.getElementById("responsable");
+      if (resp) resp.focus();
+
+    }, 200);
+
+  } catch(e){
+    console.warn("No se pudo precargar desde URL:", e);
+  }
+})();
+
+/* ===========================================================
    CARGAR INSTRUMENTO
 =========================================================== */
 async function cargarInstrumento() {
@@ -1162,3 +1211,4 @@ actualizarBotonRegistrar();
 
 </body>
 </html>
+
