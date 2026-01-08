@@ -2,478 +2,654 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>TMP · Ficha del instrumento</title>
+  <title>TMP · QR Info (Instrumento)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     :root{
       --bg:#020617;
-      --bg-grad1:#0f172a;
-      --bg-grad2:#020617;
-      --card:#020617;
-      --card-soft:#02081a;
-      --border:#1f2937;
+      --bg2:#0b1224;
+      --card:#071022;
+      --card2:#0a1530;
+      --border: rgba(148,163,184,.18);
+      --border2: rgba(148,163,184,.28);
       --txt:#e5e7eb;
       --muted:#9ca3af;
+
       --accent:#22d3ee;
-      --accent-soft:#0ea5e9;
-      --danger:#fb7185;
-      --warn:#facc15;
+      --accent2:#0ea5e9;
+      --vio:#a78bfa;
+
       --ok:#4ade80;
+      --warn:#facc15;
+      --bad:#fb7185;
+      --info:#38bdf8;
 
-      /* NUEVO: colores chips operarios */
-      --op1-bg: rgba(56,189,248,0.25);   /* azul */
-      --op1-bd: rgba(56,189,248,.65);    /* azul */
-      --op1-tx: #7dd3fc;
-
-      --op2-bg: rgba(255,159,64,0.25);   /* naranja */
-      --op2-bd: rgba(255,159,64,.65);    /* naranja */
-      --op2-tx: #ff9f40;
+      --shadow: 0 18px 45px rgba(0,0,0,.65);
+      --shadow2: 0 12px 28px rgba(0,0,0,.55);
     }
 
     *{ box-sizing:border-box; }
-
     body{
       margin:0;
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:
-        radial-gradient(circle at 0% 0%, #0f172a 0, transparent 55%),
-        radial-gradient(circle at 100% 0%, #0b1120 0, transparent 55%),
-        radial-gradient(circle at 50% 110%, #0f172a 0, transparent 60%),
-        linear-gradient(180deg,var(--bg-grad1),var(--bg-grad2));
+        radial-gradient(circle at 20% 0%, rgba(56,189,248,.18) 0, transparent 50%),
+        radial-gradient(circle at 80% 0%, rgba(167,139,250,.14) 0, transparent 55%),
+        radial-gradient(circle at 50% 120%, rgba(14,165,233,.13) 0, transparent 55%),
+        linear-gradient(180deg, #020617, #020617);
       color:var(--txt);
-      -webkit-font-smoothing:antialiased;
+      -webkit-font-smoothing: antialiased;
     }
 
-    #volverHome{
-      position:fixed;
-      right:14px;
-      bottom:16px;
-      z-index:40;
-      border:none;
-      border-radius:999px;
-      padding:8px 16px;
-      font-size:14px;
-      cursor:pointer;
-      background:#0f172a;
-      color:#e5e7eb;
-      border:1px solid rgba(148,163,184,.4);
-      box-shadow:0 10px 25px rgba(15,23,42,.9);
-    }
-
-    #volverHome:hover{
-      background:#111827;
-    }
-
-    header{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px 16px;
-      border-bottom:1px solid rgba(148,163,184,.25);
-      background:
-        radial-gradient(circle at 0% 0%, rgba(56,189,248,.22) 0, transparent 60%),
-        radial-gradient(circle at 100% 0%, rgba(59,130,246,.25) 0, transparent 60%),
-        linear-gradient(135deg,#020617,#020617f0);
+    /* =========================================================
+       HEADER FIXO (bloque premium)
+    ========================================================= */
+    .topbar{
       position:sticky;
       top:0;
-      z-index:20;
-      backdrop-filter:blur(18px);
+      z-index:50;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(135deg, rgba(2,6,23,.96), rgba(2,6,23,.82));
+      border-bottom:1px solid rgba(148,163,184,.12);
+      box-shadow: 0 12px 32px rgba(0,0,0,.55);
+    }
+
+    .topbar-inner{
+      max-width:980px;
+      margin:0 auto;
+      padding:12px 14px 10px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 220px;
     }
 
     .logo{
-      height:40px;
+      height:38px;
       width:auto;
-      filter:drop-shadow(0 0 8px rgba(56,189,248,.45));
+      filter: drop-shadow(0 0 12px rgba(56,189,248,.35));
     }
 
-    .h-titles{
+    .brand-title{
       display:flex;
       flex-direction:column;
+      line-height:1.05;
     }
-
-    .h-titles h1{
-      margin:0;
-      font-size:18px;
-      letter-spacing:.04em;
+    .brand-title b{
+      font-size:15px;
+      letter-spacing:.03em;
     }
-
-    .h-titles span{
-      font-size:12px;
+    .brand-title span{
+      font-size:11px;
       color:var(--muted);
+      letter-spacing:.06em;
+      margin-top:2px;
     }
 
-    .wrap{
-      max-width:760px;
-      margin:18px auto;
-      padding:0 16px 40px;
+    .inst-mini{
+      flex:1;
       display:flex;
       flex-direction:column;
-      gap:14px;
-    }
-
-    /* HERO CARD */
-    .hero-card{
-      position:relative;
-      border-radius:18px;
-      padding:14px;
-      background:
-        radial-gradient(circle at 0% 0%, rgba(56,189,248,.18) 0, transparent 55%),
-        radial-gradient(circle at 100% 0%, rgba(59,130,246,.20) 0, transparent 60%),
-        linear-gradient(135deg,#020617,#020617);
-      border:1px solid rgba(148,163,184,.35);
-      box-shadow:
-        0 18px 45px rgba(15,23,42,.95),
-        0 0 40px rgba(56,189,248,.18);
-      display:flex;
+      gap:6px;
       align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
     }
 
-    .hero-main{ max-width:70%; }
-
-    .hero-code{
-      font-size:12px;
-      text-transform:uppercase;
+    .inst-mini .code{
+      font-size:11px;
       letter-spacing:.18em;
-      color:var(--muted);
-      margin-bottom:4px;
+      color:rgba(229,231,235,.75);
+      text-transform:uppercase;
     }
-
-    .hero-title{
-      font-size:18px;
-      font-weight:700;
-      margin-bottom:4px;
+    .inst-mini .name{
+      font-size:15px;
+      font-weight:800;
+      letter-spacing:.02em;
+      text-shadow: 0 0 14px rgba(56,189,248,.18);
     }
-
-    .hero-location{
-      margin-top:8px;
-      font-size:16px;
-      font-weight:700;
+    .inst-mini .loc{
+      font-size:12px;
       color:#7dd3fc;
       display:flex;
       align-items:center;
-      gap:8px;
-      text-shadow:0 0 8px rgba(125,213,252,0.35);
+      gap:7px;
     }
-    .hero-location .pin{ font-size:20px; }
+    .inst-mini .loc .pin{ font-size:16px; }
 
-    .hero-status{
+    .status-wrap{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
       gap:6px;
-      font-size:12px;
+      min-width: 170px;
     }
 
-    .status-pill{
-      padding:6px 14px;
+    .pill{
+      padding:7px 14px;
       border-radius:999px;
       display:inline-flex;
       align-items:center;
-      gap:6px;
+      gap:8px;
       font-size:12px;
-      border:1px solid rgba(148,163,184,.5);
-      background:rgba(15,23,42,.9);
-      font-weight:700;
+      border:1px solid rgba(148,163,184,.35);
+      background: rgba(15,23,42,.85);
+      font-weight:800;
       text-transform:uppercase;
-      letter-spacing:.1em;
+      letter-spacing:.09em;
+      box-shadow: 0 0 22px rgba(56,189,248,.12);
     }
 
-    .status-pill .dot{ width:8px; height:8px; border-radius:50%; }
-
-    .status-ok{ border-color:rgba(74,222,128,.6); color:#bbf7d0; box-shadow:0 0 14px rgba(74,222,128,.6);}
-    .status-ok .dot{background:var(--ok);}
-
-    .status-warn{ border-color:rgba(250,204,21,.6); color:#fef3c7; box-shadow:0 0 14px rgba(250,204,21,.6);}
-    .status-warn .dot{background:var(--warn);}
-
-    .status-bad{ border-color:rgba(248,113,113,.8); color:#fee2e2; box-shadow:0 0 18px rgba(248,113,113,.9);}
-    .status-bad .dot{background:var(--danger);}
-
-    .status-info{ border-color:rgba(56,189,248,.6); color:#e0f2fe; box-shadow:0 0 14px rgba(56,189,248,.6);}
-    .status-info .dot{background:#38bdf8;}
-
-    .status-caption{ font-size:11px; color:var(--muted); text-align:right; max-width:200px; }
-
-    .hero-observ{
-      margin-top:8px;
-      padding:10px;
-      border-radius:12px;
-      background:rgba(15,23,42,.9);
-      border:1px solid rgba(148,163,184,.25);
-      font-size:12px;
-      line-height:1.4;
+    .pill .dot{
+      width:9px; height:9px;
+      border-radius:50%;
     }
-    .hero-observ .label{ font-weight:600; color:#a5b4fc; }
+
+    .ok{ border-color: rgba(74,222,128,.55); color:#bbf7d0;}
+    .ok .dot{ background: var(--ok); box-shadow: 0 0 10px rgba(74,222,128,.9);}
+
+    .warn{ border-color: rgba(250,204,21,.55); color:#fef3c7;}
+    .warn .dot{ background: var(--warn); box-shadow: 0 0 10px rgba(250,204,21,.9);}
+
+    .bad{ border-color: rgba(251,113,133,.7); color:#fee2e2;}
+    .bad .dot{ background: var(--bad); box-shadow: 0 0 12px rgba(251,113,133,.95);}
+
+    .info{ border-color: rgba(56,189,248,.55); color:#e0f2fe;}
+    .info .dot{ background: var(--info); box-shadow: 0 0 12px rgba(56,189,248,.9);}
+
+    .caption{
+      font-size:11px;
+      color: var(--muted);
+      text-align:right;
+      max-width:200px;
+    }
+
+    /* =========================================================
+       CONTENIDO GENERAL
+    ========================================================= */
+    .wrap{
+      max-width:980px;
+      margin: 18px auto;
+      padding: 0 14px 48px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
 
     .card{
-      border-radius:16px;
-      padding:14px;
+      border-radius:18px;
+      padding:16px;
       background:
-        radial-gradient(circle at 0% 0%, rgba(15,118,110,.15) 0, transparent 55%),
-        linear-gradient(135deg,#020617,#02081a);
-      border:1px solid rgba(31,41,55,.9);
-      box-shadow:0 16px 35px rgba(15,23,42,.95);
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,.10) 0, transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(167,139,250,.10) 0, transparent 55%),
+        linear-gradient(135deg, rgba(7,16,34,.92), rgba(10,21,48,.85));
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
     }
 
-    h2{ margin:0 0 6px; font-size:16px; }
-    .card-sub{ font-size:12px; color:var(--muted); margin-bottom:10px; }
+    .title{
+      font-size:16px;
+      font-weight:900;
+      margin:0;
+      letter-spacing:.02em;
+    }
+    .sub{
+      margin-top:6px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.45;
+    }
 
-    .item{ display:flex; flex-direction:column; margin-bottom:8px; }
-    .item .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px; }
+    /* =========================================================
+       PASO 1: SELECTOR DE ACCIÓN (las preguntas)
+    ========================================================= */
+    .action-grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    @media(max-width:720px){ .action-grid{ grid-template-columns:1fr; } }
+
+    .action{
+      cursor:pointer;
+      border-radius:16px;
+      padding:14px 14px 12px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(56,189,248,.18) 0, transparent 55%),
+        linear-gradient(135deg, rgba(2,6,23,.8), rgba(7,16,34,.9));
+      border:1px solid var(--border2);
+      box-shadow: var(--shadow2);
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .action:hover{
+      transform: translateY(-2px);
+      border-color: rgba(56,189,248,.45);
+      box-shadow: 0 18px 42px rgba(0,0,0,.65);
+    }
+
+    .action:active{ transform: translateY(0); }
+
+    .action .icon{
+      font-size:22px;
+      margin-bottom:8px;
+      filter: drop-shadow(0 0 14px rgba(56,189,248,.22));
+    }
+
+    .action b{
+      display:block;
+      font-size:14px;
+      letter-spacing:.02em;
+      margin-bottom:3px;
+    }
+    .action span{
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+    }
+
+    .action .tag{
+      position:absolute;
+      right:12px;
+      top:12px;
+      font-size:10px;
+      padding:4px 9px;
+      border-radius:999px;
+      border:1px solid rgba(56,189,248,.25);
+      background: rgba(2,6,23,.75);
+      color:#7dd3fc;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-weight:800;
+    }
+
+    /* =========================================================
+       BOTONERA inferior
+    ========================================================= */
+    .btn-row{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 16px;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color:#02121f;
+      box-shadow: 0 12px 30px rgba(14,165,233,.25);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(14,165,233,.35);
+    }
+
+    .btn.secondary{
+      background: transparent;
+      color: var(--txt);
+      border:1px solid rgba(148,163,184,.25);
+      box-shadow:none;
+    }
+    .btn.secondary:hover{
+      background: rgba(15,23,42,.75);
+    }
+
+    /* =========================================================
+       FICHA (paso 2)
+    ========================================================= */
+    .item{ display:flex; flex-direction:column; margin-bottom:10px; }
+    .item .label{
+      font-size:11px;
+      color: var(--muted);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:3px;
+    }
     .item .value{ font-size:13px; }
 
-    .muted{ color:var(--muted); font-size:12px; }
-
-    .error-box{
+    .mov-item{
       border-radius:14px;
       padding:12px;
-      background:#3f1d1d;
-      border:1px solid #7f1d1d;
-      color:#fee2e2;
-      font-size:14px;
-      box-shadow:0 12px 30px rgba(0,0,0,.65);
-    }
-
-    /* Movimientos */
-    .mov-item{
-      border-radius:12px;
-      padding:10px;
-      background:#020617;
-      border:1px solid rgba(31,41,55,.8);
+      background: rgba(2,6,23,.85);
+      border:1px solid rgba(31,41,55,.75);
       margin-bottom:10px;
       font-size:12px;
     }
-    .mov-header{ display:flex; justify-content:space-between; margin-bottom:4px; }
-    .mov-type{ font-weight:600; }
-    .mov-date{ font-size:11px; color:var(--muted); }
-    .mov-body-line{ display:flex; justify-content:space-between; margin-top:3px; }
-    .mov-body-label{ color:var(--muted); min-width:70px; }
-
-    /* Chips responsables */
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 12px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:600;
-      margin-right:6px;
-      margin-bottom:6px;
-    }
-    .chip-op1{
-      background:var(--op1-bg);
-      border:1px solid var(--op1-bd);
-      color:var(--op1-tx);
-      box-shadow:0 0 12px rgba(56,189,248,.35);
-    }
-    .chip-op2{
-      background:var(--op2-bg);
-      border:1px solid var(--op2-bd);
-      color:var(--op2-tx);
-      box-shadow:0 0 12px rgba(255,159,64,.35);
-    }
-
-    /* ============================================================
-       ✅ NUEVO: BLOQUE FIJO ARRIBA CON PREGUNTAS / ACCIONES
-    ============================================================ */
-    .acciones-fixed{
-      position: sticky;
-      top: 72px; /* debajo del header */
-      z-index: 19;
-      border-radius: 16px;
-      padding: 12px;
-      background:
-        radial-gradient(circle at 0% 0%, rgba(56,189,248,.14) 0, transparent 60%),
-        linear-gradient(135deg,#020617,#02081a);
-      border: 1px solid rgba(148,163,184,.25);
-      box-shadow: 0 14px 35px rgba(0,0,0,.75);
-      backdrop-filter: blur(16px);
-    }
-
-    .acciones-title{
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: .04em;
-      margin-bottom: 6px;
-    }
-
-    .acciones-sub{
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 10px;
-      line-height: 1.35;
-    }
-
-    .acciones-grid{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 8px;
-    }
-    @media(max-width: 520px){
-      .acciones-grid{ grid-template-columns: 1fr; }
-    }
-
-    .accion-btn{
-      width: 100%;
-      border: 1px solid rgba(148,163,184,.25);
-      background: rgba(15,23,42,.9);
-      color: var(--txt);
-      padding: 10px 12px;
-      border-radius: 14px;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 13px;
-      letter-spacing: .02em;
+    .mov-header{
       display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 10px;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      justify-content:space-between;
+      margin-bottom:6px;
+      gap:10px;
     }
-    .accion-btn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(56,189,248,.55);
-      box-shadow: 0 0 18px rgba(56,189,248,.12);
+    .mov-type{ font-weight:900; letter-spacing:.02em; }
+    .mov-date{ font-size:11px; color: var(--muted); }
+    .mov-body-line{
+      display:flex;
+      justify-content:space-between;
+      margin-top:4px;
+      gap:10px;
+    }
+    .mov-body-label{ color: var(--muted); min-width:80px; }
+
+    .error-box{
+      border-radius:16px;
+      padding:14px;
+      background: rgba(127,29,29,.55);
+      border:1px solid rgba(248,113,113,.75);
+      color:#fee2e2;
+      font-size:14px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.65);
     }
 
-    .accion-btn.info{ border-color: rgba(56,189,248,.40); }
-    .accion-btn.entrada{ border-color: rgba(74,222,128,.35); }
-    .accion-btn.salida{ border-color: rgba(250,204,21,.35); }
-    .accion-btn.alerta{ border-color: rgba(248,113,113,.45); }
-    .accion-btn.cal{ border-color: rgba(59,130,246,.45); }
+    /* Animación suave */
+    .fade-in{
+      animation: fade .35s ease both;
+    }
+    @keyframes fade{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
 
-    .accion-left{ display:flex; align-items:center; gap:10px; }
-    .accion-ico{ font-size: 18px; }
-    .accion-arrow{ opacity:.7; }
-
-    /* NUEVO: bloque info general ocultable */
-    .contenido-ficha.hidden{
+    /* =========================================================
+       MODAL MOVIMIENTOS (ESPECTACULAR)
+    ========================================================= */
+    .modal{
+      position:fixed;
+      inset:0;
+      z-index:90;
       display:none;
+      align-items:center;
+      justify-content:center;
     }
+
+    .modal.show{ display:flex; }
+
+    .modal-back{
+      position:absolute;
+      inset:0;
+      background: rgba(2,6,23,.82);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-box{
+      position:relative;
+      z-index:91;
+      width:min(720px, 92vw);
+      border-radius:18px;
+      padding:18px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,.18) 0, transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(167,139,250,.12) 0, transparent 55%),
+        linear-gradient(135deg, rgba(7,16,34,.95), rgba(10,21,48,.90));
+      border:1px solid rgba(148,163,184,.24);
+      box-shadow: 0 25px 70px rgba(0,0,0,.75);
+      animation: pop .22s ease both;
+    }
+
+    @keyframes pop{
+      from{ transform: scale(.96); opacity:0; }
+      to{ transform: scale(1); opacity:1; }
+    }
+
+    .modal-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .modal-title{
+      font-size:16px;
+      font-weight:900;
+      margin:0;
+    }
+    .modal-sub{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .modal-close{
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:10px 12px;
+      background: rgba(2,6,23,.6);
+      border:1px solid rgba(148,163,184,.25);
+      color: var(--txt);
+      font-weight:900;
+      transition: .12s transform ease, .12s background ease;
+    }
+    .modal-close:hover{
+      transform: translateY(-1px);
+      background: rgba(15,23,42,.75);
+    }
+
+    .mov-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    @media(max-width:720px){ .mov-grid{ grid-template-columns:1fr; } }
+
+    .mov-opt{
+      cursor:pointer;
+      border-radius:16px;
+      padding:14px;
+      border:1px solid rgba(148,163,184,.22);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(56,189,248,.14) 0, transparent 55%),
+        linear-gradient(135deg, rgba(2,6,23,.75), rgba(7,16,34,.88));
+      box-shadow: 0 14px 35px rgba(0,0,0,.55);
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+    }
+
+    .mov-opt:hover{
+      transform: translateY(-2px);
+      border-color: rgba(56,189,248,.45);
+      box-shadow: 0 20px 48px rgba(0,0,0,.65);
+    }
+
+    .mov-opt .i{
+      font-size:22px;
+      margin-bottom:8px;
+    }
+    .mov-opt b{
+      display:block;
+      font-size:14px;
+      font-weight:900;
+      margin-bottom:4px;
+      letter-spacing:.02em;
+    }
+    .mov-opt span{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .mov-opt.entry .i{ filter: drop-shadow(0 0 14px rgba(74,222,128,.25)); }
+    .mov-opt.exit  .i{ filter: drop-shadow(0 0 14px rgba(251,113,133,.25)); }
+    .mov-opt.other .i{ filter: drop-shadow(0 0 14px rgba(56,189,248,.22)); }
 
   </style>
 </head>
 
 <body>
 
-<button id="volverHome" onclick="window.location.href='../home.html'">🏠 Volver al panel</button>
+<!-- HEADER FIJO -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <img src="../img/tmp-quality.png" alt="TMP" class="logo">
+      <div class="brand-title">
+        <b>TMP · QR INFO</b>
+        <span>Ficha · Movimientos · Calibración</span>
+      </div>
+    </div>
 
-<header>
-  <img src="../img/tmp-quality.png" alt="TMP" class="logo">
-  <div class="h-titles">
-    <h1>Ficha del instrumento</h1>
-    <span id="subTitle">Cargando código…</span>
+    <div class="inst-mini">
+      <div class="code" id="heroCode">CÓDIGO · —</div>
+      <div class="name" id="heroTitle">Cargando instrumento…</div>
+      <div class="loc"><span class="pin">📍</span><span id="heroLoc">—</span></div>
+    </div>
+
+    <div class="status-wrap">
+      <div id="heroStatusPill" class="pill info">
+        <span class="dot"></span>
+        <span id="heroStatusLabel">CARGANDO</span>
+      </div>
+      <div class="caption" id="heroStatusCaption">Estado de calibración</div>
+    </div>
   </div>
-</header>
+</div>
 
 <div class="wrap">
 
   <div id="errorBox" class="error-box" style="display:none"></div>
 
-  <!-- ============================================================
-       ✅ NUEVO BLOQUE FIJO: PREGUNTAS / ACCIONES (PRIMERO SIEMPRE)
-  ============================================================ -->
-  <section id="accionesTop" class="acciones-fixed">
-    <div class="acciones-title">¿Qué quieres hacer con este instrumento?</div>
-    <div class="acciones-sub">
-      Escanea y selecciona una acción.  
-      <b>Solo información</b> mostrará la ficha completa aquí debajo.
+  <!-- PASO 1: PREGUNTAS -->
+  <section id="stepActions" class="card fade-in" style="display:none">
+    <h2 class="title">¿Qué quieres hacer con este instrumento?</h2>
+    <div class="sub">
+      Selecciona una opción. Este panel está diseñado para usarlo continuamente en taller/laboratorio.
     </div>
 
-    <div class="acciones-grid">
-      <button class="accion-btn info" id="btnSoloInfo">
-        <span class="accion-left"><span class="accion-ico">ℹ️</span> Solo información</span>
-        <span class="accion-arrow">›</span>
-      </button>
+    <div class="action-grid">
 
-      <button class="accion-btn entrada" id="btnEntrada">
-        <span class="accion-left"><span class="accion-ico">📥</span> Entrada</span>
-        <span class="accion-arrow">›</span>
-      </button>
+      <div class="action" id="actFicha">
+        <div class="tag">INFO</div>
+        <div class="icon">📄</div>
+        <b>Ver ficha completa</b>
+        <span>Mostrar toda la información del instrumento, estado y plan de calibración.</span>
+      </div>
 
-      <button class="accion-btn salida" id="btnSalida">
-        <span class="accion-left"><span class="accion-ico">📤</span> Salida</span>
-        <span class="accion-arrow">›</span>
-      </button>
+      <div class="action" id="actMovimiento">
+        <div class="tag">MOV</div>
+        <div class="icon">🧾</div>
+        <b>Registrar movimiento</b>
+        <span>Entrada / Salida / Préstamo / Reparación / Envío externo…</span>
+      </div>
 
-      <button class="accion-btn" id="btnPrestamo">
-        <span class="accion-left"><span class="accion-ico">🔄</span> Préstamo externo</span>
-        <span class="accion-arrow">›</span>
-      </button>
+      <div class="action" id="actCalibrar">
+        <div class="tag">CAL</div>
+        <div class="icon">🧪</div>
+        <b>Ir a calibraciones</b>
+        <span>Acceder al plan, medición y certificado con el código ya cargado.</span>
+      </div>
 
-      <button class="accion-btn alerta" id="btnRevision">
-        <span class="accion-left"><span class="accion-ico">🛠</span> Revisión / reparación</span>
-        <span class="accion-arrow">›</span>
-      </button>
+      <div class="action" id="actTraza">
+        <div class="tag">LOG</div>
+        <div class="icon">📦</div>
+        <b>Ver trazabilidad</b>
+        <span>Mostrar los últimos movimientos registrados con responsables y destinos.</span>
+      </div>
 
-      <button class="accion-btn alerta" id="btnEnvioExterno">
-        <span class="accion-left"><span class="accion-ico">🚚</span> Envío a calibración externa</span>
-        <span class="accion-arrow">›</span>
-      </button>
+    </div>
 
-      <button class="accion-btn cal" id="btnCalibracion" style="grid-column:1/-1;">
-        <span class="accion-left"><span class="accion-ico">🧪</span> Calibración (Laboratorio)</span>
-        <span class="accion-arrow">›</span>
-      </button>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="window.location.href='../home.html'">🏠 Volver al panel</button>
     </div>
   </section>
 
-  <!-- ============================================================
-       ✅ TODO LO DE TU FICHA ORIGINAL (SIN BORRAR NADA)
-       ✅ PERO AHORA SE ESCONDE HASTA DAR "SOLO INFORMACIÓN"
-  ============================================================ -->
-  <div id="contenidoFicha" class="contenido-ficha hidden">
+  <!-- PASO 2: FICHA -->
+  <section id="stepFicha" class="card fade-in" style="display:none">
+    <h2 class="title">Ficha completa del instrumento</h2>
+    <div class="sub">Información detallada leída desde Supabase a través del QR.</div>
+    <div id="infoBody"></div>
 
-    <!-- HERO -->
-    <section id="hero" class="hero-card" style="display:none">
-      <div class="hero-main">
-        <div class="hero-code" id="heroCode">CÓDIGO —</div>
-        <div class="hero-title" id="heroTitle">Instrumento</div>
-        <div id="heroSub">—</div>
+    <div class="btn-row">
+      <button class="btn secondary" id="btnBack1">← Volver</button>
+      <button class="btn" id="btnGoMov1">🧾 Registrar movimiento</button>
+      <button class="btn" id="btnGoCal1">🧪 Calibraciones</button>
+    </div>
+  </section>
+
+  <!-- PASO 3: TRAZABILIDAD -->
+  <section id="stepTraza" class="card fade-in" style="display:none">
+    <h2 class="title">Trazabilidad reciente</h2>
+    <div class="sub">Últimos movimientos del instrumento (máximo 10).</div>
+    <div id="movBody"></div>
+
+    <div class="btn-row">
+      <button class="btn secondary" id="btnBack2">← Volver</button>
+      <button class="btn" id="btnGoMov2">🧾 Registrar movimiento</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- MODAL MOVIMIENTOS -->
+<div id="movModal" class="modal">
+  <div class="modal-back"></div>
+
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h2 class="modal-title">Selecciona el tipo de movimiento</h2>
+        <div class="modal-sub">
+          El código del instrumento ya está cargado. Solo elige la operación y se abrirá automáticamente movimiento.html.
+        </div>
+      </div>
+      <button class="modal-close" id="movClose">✕</button>
+    </div>
+
+    <div class="mov-grid">
+
+      <div class="mov-opt entry" data-tipo="Entrada">
+        <div class="i">📥</div>
+        <b>Entrada</b>
+        <span>El equipo vuelve al laboratorio o queda almacenado dentro de TMP.</span>
       </div>
 
-      <div class="hero-status">
-        <div id="heroStatusPill" class="status-pill"><span class="dot"></span><span id="heroStatusLabel">—</span></div>
-        <div class="status-caption" id="heroStatusCaption">Estado</div>
+      <div class="mov-opt exit" data-tipo="Salida">
+        <div class="i">📤</div>
+        <b>Salida</b>
+        <span>El equipo se entrega a taller, operario o zona externa para su uso.</span>
       </div>
-    </section>
 
-    <section id="heroObserv" class="hero-observ" style="display:none"></section>
+      <div class="mov-opt other" data-tipo="Préstamo externo">
+        <div class="i">🤝</div>
+        <b>Préstamo externo</b>
+        <span>El equipo sale prestado a un cliente o proveedor externo.</span>
+      </div>
 
-    <!-- Tarjeta de responsables actuales -->
-    <section id="responsablesCard" class="card" style="display:none">
-      <h2>Responsables actuales</h2>
-      <div class="card-sub">Asignados en la última salida del instrumento.</div>
-      <div id="respBody"></div>
-    </section>
+      <div class="mov-opt other" data-tipo="Revisión / reparación">
+        <div class="i">🛠️</div>
+        <b>Revisión / reparación</b>
+        <span>Se envía para revisión técnica o reparación interna/externa.</span>
+      </div>
 
-    <!-- Información básica -->
-    <section id="infoCard" class="card" style="display:none">
-      <h2>Información básica</h2>
-      <div class="card-sub">Datos generales del instrumento leído por QR.</div>
-      <div id="infoBody"></div>
-    </section>
+      <div class="mov-opt other" data-tipo="Envío a calibración externa">
+        <div class="i">📦</div>
+        <b>Envío a calibración externa</b>
+        <span>Se envía a laboratorio externo para recalibración / certificación.</span>
+      </div>
 
-    <!-- Estado calibración -->
-    <section id="calCard" class="card" style="display:none">
-      <h2>Estado de calibración</h2>
-      <div class="card-sub">Situación frente al plan de calibración.</div>
-      <div id="calBody"></div>
-    </section>
+    </div>
 
-    <!-- Movimientos -->
-    <section id="movCard" class="card" style="display:none">
-      <h2>Últimos movimientos</h2>
-      <div class="card-sub">Trazabilidad reciente.</div>
-      <div id="movBody"></div>
-      <p class="muted" id="movHint"></p>
-    </section>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn secondary" id="movCancel">Cancelar</button>
+    </div>
 
   </div>
-
 </div>
 
 <script type="module" src="../config.mjs"></script>
@@ -482,20 +658,16 @@
   const supa = window.supabase;
 
   let codigo = new URLSearchParams(window.location.search).get("codigo");
-
   if (!codigo) {
     const parts = location.pathname.split("/").filter(Boolean);
     const last = parts[parts.length - 1];
     if (last && !last.includes(".html")) codigo = decodeURIComponent(last);
   }
 
-  document.getElementById("subTitle").textContent =
-    codigo ? `Código: ${codigo}` : "Código no especificado";
-
   function showError(msg){
     const b = document.getElementById("errorBox");
     b.style.display = "block";
-    b.innerHTML = `<h2>Error</h2><p>${msg}</p>`;
+    b.innerHTML = `<h2 style="margin:0 0 6px;">Error</h2><p style="margin:0;opacity:.9">${msg}</p>`;
   }
 
   const fDateShort = iso => {
@@ -520,42 +692,26 @@
 
   function computeEstado(iso){
     const diff = daysDiff(iso);
-    if (diff === null) return { clase:"status-info", texto:"Sin próxima calibración", detalle:"Fecha no asignada", dias:null, icono:"🛈" };
-    if (diff < 0) return { clase:"status-bad", texto:"Fuera de calibración", detalle:"Vencida", dias:diff, icono:"⛔" };
-    if (diff <= 30) return { clase:"status-warn", texto:"Próxima a vencer", detalle:"Planificar calibración", dias:diff, icono:"⚠" };
-    return { clase:"status-ok", texto:"En regla", detalle:"Correcta", dias:diff, icono:"✔" };
+    if (diff === null) return { clase:"info", texto:"Sin fecha", detalle:"Fecha no asignada", icono:"🛈", dias:null };
+    if (diff < 0) return { clase:"bad", texto:"Fuera", detalle:"Vencida", icono:"⛔", dias:diff };
+    if (diff <= 30) return { clase:"warn", texto:"Próxima", detalle:"Planificar", icono:"⚠", dias:diff };
+    return { clase:"ok", texto:"En regla", detalle:"Correcta", icono:"✔", dias:diff };
   }
 
-  /* ============================================================
-     ✅ NUEVO: RUTAS A LOS OTROS HTML SEGÚN ACCIÓN
-  ============================================================ */
-  function goMov(tipo){
-    window.location.href = `../movimiento.html?codigo=${encodeURIComponent(codigo)}&tipo=${encodeURIComponent(tipo)}`;
+  function showStep(stepId){
+    ["stepActions","stepFicha","stepTraza"].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.style.display = (id===stepId ? "block" : "none");
+    });
   }
 
-  function goCalibracion(){
-    window.location.href = `../TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(codigo)}`;
+  function openMovModal(){
+    document.getElementById("movModal").classList.add("show");
   }
 
-  function mostrarFicha(){
-    const c = document.getElementById("contenidoFicha");
-    c.classList.remove("hidden");
-    // scroll suave al inicio de ficha
-    setTimeout(() => {
-      c.scrollIntoView({ behavior:"smooth", block:"start" });
-    }, 50);
-    main();
+  function closeMovModal(){
+    document.getElementById("movModal").classList.remove("show");
   }
-
-  // Enlazar botones
-  document.getElementById("btnSoloInfo").addEventListener("click", mostrarFicha);
-
-  document.getElementById("btnEntrada").addEventListener("click", () => goMov("Entrada"));
-  document.getElementById("btnSalida").addEventListener("click", () => goMov("Salida"));
-  document.getElementById("btnPrestamo").addEventListener("click", () => goMov("Préstamo externo"));
-  document.getElementById("btnRevision").addEventListener("click", () => goMov("Revisión / reparación"));
-  document.getElementById("btnEnvioExterno").addEventListener("click", () => goMov("Envío a calibración externa"));
-  document.getElementById("btnCalibracion").addEventListener("click", goCalibracion);
 
   async function main(){
     if (!codigo) return showError("No se indicó código.");
@@ -569,7 +725,7 @@
     if (error) return showError("Error consultando DB.");
     if (!inst) return showError(`No existe el código ${codigo}`);
 
-    // MOVIMIENTOS → Último movimiento
+    // movimientos para ubicación
     const { data: movs } = await supa
       .from("movimientos")
       .select("*")
@@ -578,107 +734,42 @@
       .limit(1);
 
     let ubic = "Sin movimientos registrados";
-    let ultimoMov = null;
-
     if (movs && movs.length>0){
-      ultimoMov = movs[0];
-      ubic = ultimoMov.destino || ubic;
+      ubic = movs[0].destino || ubic;
     }
 
-    // HERO
-    document.getElementById("hero").style.display="flex";
+    // topbar
     document.getElementById("heroCode").textContent = `CÓDIGO · ${codigo}`;
     document.getElementById("heroTitle").textContent = inst.descripcion || "Instrumento";
+    document.getElementById("heroLoc").textContent = ubic;
 
-    const fabricante = inst.fabricante || "Fabricante N/D";
-
-    document.getElementById("heroSub").innerHTML = `
-      <strong>${fabricante}</strong>
-      <div class="hero-location">
-        <span class="pin">📍</span>
-        <span>${ubic}</span>
-      </div>
-    `;
-
-    // ESTADO EN HERO
+    // estado
     const prox = inst.fecha_proxima_calibracion || null;
     const est = computeEstado(prox);
-
     const pill = document.getElementById("heroStatusPill");
-    const lab = document.getElementById("heroStatusLabel");
-    const cap = document.getElementById("heroStatusCaption");
+    pill.className = "pill " + est.clase;
+    document.getElementById("heroStatusLabel").textContent = `${est.icono} ${est.texto}`;
+    document.getElementById("heroStatusCaption").textContent =
+      est.detalle +
+      (est.dias!==null ? (est.dias<0 ? ` · hace ${Math.abs(est.dias)} días` : ` · en ${est.dias} días`) : "");
 
-    pill.className = "status-pill "+est.clase;
-    lab.textContent = `${est.icono} ${est.texto}`;
-    cap.textContent = est.detalle;
+    // mostrar step 1
+    document.getElementById("stepActions").style.display="block";
+    showStep("stepActions");
 
-    // OBSERVACIONES
-    let obs = inst.observaciones;
-    if (!obs || obs==="null" || obs.trim()==="") obs = "Propiedad de Talleres Mecánicos Paramio";
-    const obsBox = document.getElementById("heroObserv");
-    obsBox.style.display="block";
-    obsBox.innerHTML = `<span class="label">📝 Observaciones</span> ${obs}`;
-
-    /* ============================================================
-       TARJETA DE RESPONSABLES ACTUALES (solo si último es salida)
-    ============================================================ */
-    if (ultimoMov && ultimoMov.tipo_movimiento === "Salida") {
-      const resp = document.getElementById("responsablesCard");
-      const body = document.getElementById("respBody");
-
-      resp.style.display = "block";
-
-      let html = "";
-
-      if (ultimoMov.operario1) {
-        html += `<span class="chip chip-op1">👤 ${ultimoMov.operario1}</span>`;
-      }
-
-      if (ultimoMov.operario2) {
-        html += `<span class="chip chip-op2">👥 ${ultimoMov.operario2}</span>`;
-      }
-
-      if (!html.trim()) {
-        html = `<span class="muted">No hay operarios asignados en esta salida.</span>`;
-      }
-
-      body.innerHTML = html;
-    }
-
-    // INFO BÁSICA
-    const info = document.getElementById("infoCard");
-    info.style.display="block";
+    // ficha completa
     document.getElementById("infoBody").innerHTML = `
       <div class="item"><span class="label">Descripción</span><span class="value">${inst.descripcion || "-"}</span></div>
       <div class="item"><span class="label">Fabricante</span><span class="value">${inst.fabricante || "-"}</span></div>
       <div class="item"><span class="label">Rango / Especificación</span><span class="value">${inst.rango || "-"}</span></div>
       <div class="item"><span class="label">Precisión</span><span class="value">${inst.precision || "-"}</span></div>
-      <div class="item"><span class="label">Tipo de calibración</span><span class="value">${inst.tipo_calibracion || "-"}</span></div>
+      <div class="item"><span class="label">Tipo calibración</span><span class="value">${inst.tipo_calibracion || "-"}</span></div>
+      <div class="item"><span class="label">Última calibración</span><span class="value">${inst.fecha_ultima_calibracion ? fDateShort(inst.fecha_ultima_calibracion) : "-"}</span></div>
+      <div class="item"><span class="label">Próxima calibración</span><span class="value">${inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "-"}</span></div>
+      <div class="item"><span class="label">Observaciones</span><span class="value">${(inst.observaciones && inst.observaciones.trim()) ? inst.observaciones : "Propiedad de Talleres Mecánicos Paramio"}</span></div>
     `;
 
-    // CALIBRACIÓN
-    document.getElementById("calCard").style.display="block";
-    const ult = inst.fecha_ultima_calibracion;
-    const prox2 = inst.fecha_proxima_calibracion;
-
-    let detalle = est.detalle;
-    if (est.dias!==null){
-      if (est.dias<0) detalle += ` (hace ${Math.abs(est.dias)} días)`;
-      else detalle += ` (en ${est.dias} días)`;
-    }
-
-    document.getElementById("calBody").innerHTML = `
-      <div class="item"><span class="label">Última calibración</span><span class="value">${ult ? fDateShort(ult):"-"}</span></div>
-      <div class="item"><span class="label">Próxima calibración</span><span class="value">${prox2 ? fDateShort(prox2):"-"}</span></div>
-      <div class="item" style="margin-top:8px;">
-        <span class="status-pill ${est.clase}"><span class="dot"></span>${est.icono} ${est.texto}</span>
-      </div>
-      <p class="muted">${detalle}</p>
-    `;
-
-    // HISTORIAL
-    document.getElementById("movCard").style.display="block";
-
+    // trazabilidad
     const { data: movList } = await supa
       .from("movimientos")
       .select("*")
@@ -687,56 +778,82 @@
       .limit(10);
 
     const movBody = document.getElementById("movBody");
-
     if (!movList || movList.length===0){
-      movBody.innerHTML = `<div class="muted">No existen movimientos.</div>`;
-      return;
+      movBody.innerHTML = `<div class="sub">No existen movimientos registrados.</div>`;
+    } else {
+      movBody.innerHTML = movList.map(m=>`
+        <div class="mov-item">
+          <div class="mov-header">
+            <div class="mov-type">${m.tipo_movimiento}</div>
+            <div class="mov-date">${fDateTime(m.fecha)}</div>
+          </div>
+
+          <div class="mov-body-line">
+            <span class="mov-body-label">Responsable</span>
+            <span>${m.responsable || "-"}</span>
+          </div>
+
+          ${m.operario1 ? `<div class="mov-body-line"><span class="mov-body-label">Operario 1</span><span style="color:#7dd3fc;font-weight:700">${m.operario1}</span></div>` : ""}
+          ${m.operario2 ? `<div class="mov-body-line"><span class="mov-body-label">Operario 2</span><span style="color:#ff9f40;font-weight:700">${m.operario2}</span></div>` : ""}
+
+          <div class="mov-body-line">
+            <span class="mov-body-label">Destino</span>
+            <span>${m.destino || "-"}</span>
+          </div>
+
+          ${m.observaciones ? `
+          <div class="mov-body-line">
+            <span class="mov-body-label">Obs.</span>
+            <span>${m.observaciones.replace(/\n/g,"<br>")}</span>
+          </div>` : ""}
+        </div>
+      `).join("");
     }
 
-    movBody.innerHTML = movList.map(m=>`
-      <div class="mov-item">
-        <div class="mov-header">
-          <div class="mov-type">${m.tipo_movimiento}</div>
-          <div class="mov-date">${fDateTime(m.fecha)}</div>
-        </div>
+    // acciones
+    document.getElementById("actFicha").onclick = ()=> showStep("stepFicha");
+    document.getElementById("actTraza").onclick = ()=> showStep("stepTraza");
 
-        <div class="mov-body-line">
-          <span class="mov-body-label">Responsable</span>
-          <span>${m.responsable || "-"}</span>
-        </div>
+    document.getElementById("actMovimiento").onclick = openMovModal;
 
-        ${
-          m.operario1
-          ? `<div class="mov-body-line"><span class="mov-body-label">Operario 1</span><span style="color:#7dd3fc;font-weight:600">${m.operario1}</span></div>`
-          : ""
-        }
+    document.getElementById("actCalibrar").onclick = ()=>{
+      window.location.href = `../TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(codigo)}`;
+    };
 
-        ${
-          m.operario2
-          ? `<div class="mov-body-line"><span class="mov-body-label">Operario 2</span><span style="color:#ff9f40;font-weight:600">${m.operario2}</span></div>`
-          : ""
-        }
+    // back buttons
+    document.getElementById("btnBack1").onclick = ()=> showStep("stepActions");
+    document.getElementById("btnBack2").onclick = ()=> showStep("stepActions");
 
-        <div class="mov-body-line">
-          <span class="mov-body-label">Destino</span>
-          <span>${m.destino}</span>
-        </div>
+    // CTA inside ficha/traza
+    document.getElementById("btnGoMov1").onclick = openMovModal;
+    document.getElementById("btnGoMov2").onclick = openMovModal;
 
-        ${m.observaciones ? `
-        <div class="mov-body-line">
-          <span class="mov-body-label">Obs.</span>
-          <span>${m.observaciones.replace(/\n/g,"<br>")}</span>
-        </div>` : ""}
-      </div>
-    `).join("");
+    document.getElementById("btnGoCal1").onclick = ()=>{
+      window.location.href = `../TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(codigo)}`;
+    };
 
-    document.getElementById("movHint").textContent = "Se muestran los 10 movimientos más recientes.";
+    // modal close
+    document.getElementById("movClose").onclick = closeMovModal;
+    document.getElementById("movCancel").onclick = closeMovModal;
+    document.querySelector("#movModal .modal-back").onclick = closeMovModal;
+
+    // opciones movimiento
+    document.querySelectorAll(".mov-opt").forEach(opt=>{
+      opt.onclick = ()=>{
+        const tipo = opt.dataset.tipo || "";
+        window.location.href = `../movimiento.html?codigo=${encodeURIComponent(codigo)}&tipo=${encodeURIComponent(tipo)}`;
+      };
+    });
+
+    // ESC para cerrar modal
+    window.addEventListener("keydown", (e)=>{
+      if (e.key === "Escape") closeMovModal();
+    });
   }
 
-  /* ✅ YA NO LLAMAMOS main() DIRECTO
-     Solo se ejecuta cuando el usuario pulsa “Solo información”
-  */
+  main();
 </script>
 
 </body>
 </html>
+
