@@ -202,7 +202,7 @@
     .toggle input{width:auto;padding:0;margin:0}
 
     /* Table-like details inside each result */
-    .kv{display:grid;grid-template-columns: 120px 1fr;gap:6px 12px;margin-top:10px}
+    .kv{display:grid;grid-template-columns: 140px 1fr;gap:6px 12px;margin-top:10px}
     .k{font-size:12px;color:var(--muted)}
     .v{font-size:12px;color:var(--text)}
   </style>
@@ -228,26 +228,27 @@
       <h2>Filtros</h2>
 
       <div class="hint" style="margin-top:-2px;">
-        Nuevo: puedes <b>detectar duplicados</b> por <b>Descripción</b> + <b>Rango</b> (ideal para ver cuántos “Tampones Rosca P/NP” tienes por medida).
+        Nuevo: este buscador está pensado para <b>inventario</b>. Verás los equipos desde el inicio y podrás filtrar por <b>Descripción</b> + <b>Rango</b> (ideal para “Tampones Rosca P/NP”).
       </div>
 
       <label for="q">Búsqueda global</label>
-      <input id="q" type="text" placeholder="Código, descripción, rango, ubicación, serie, fabricante..." autocomplete="off" />
+      <input id="q" type="text" placeholder="Código, descripción, rango, ubicación_id..." autocomplete="off" />
       <div class="hint">
-        Tip: usa varias palabras. Ej: <span class="kbd">micrómetro mitutoyo</span> o <span class="kbd">calibre calidad</span>
+        Tip: usa varias palabras. Ej: <span class="kbd">tampon P/NP</span> o <span class="kbd">micrómetro M14</span>
       </div>
 
       <label for="codigo">Código (contiene)</label>
-      <input id="codigo" type="text" placeholder="Ej: 3D-001, MIC-..." autocomplete="off" />
+      <input id="codigo" type="text" placeholder="Ej: METMP001, 3D-001..." autocomplete="off" />
 
       <label for="descripcion">Descripción (contiene)</label>
-      <input id="descripcion" type="text" placeholder="Ej: micrómetro, calibre..." autocomplete="off" />
+      <input id="descripcion" type="text" placeholder="Ej: Tampones Rosca P/NP" autocomplete="off" />
 
       <label for="rango">Rango (contiene)</label>
       <input id="rango" type="text" placeholder="Ej: M12, M14x1, 6H..." autocomplete="off" />
 
-      <label for="ubicacion">Ubicación (ID) (contiene)</label>
-      <input id="ubicacion" type="text" placeholder="Ej: metrología, planta, almacén..." autocomplete="off" />
+      <label for="ubicacion">Ubicación (ID exacto)</label>
+      <input id="ubicacion" type="text" placeholder="Ej: 12" autocomplete="off" />
+      <div class="hint">Nota: <b>ubicacion_id</b> es numérico. Aquí filtra por ID exacto.</div>
 
       <label for="estado">Estado calibración</label>
       <select id="estado">
@@ -262,8 +263,8 @@
       <select id="orden">
         <option value="codigo_asc">Código (A→Z)</option>
         <option value="codigo_desc">Código (Z→A)</option>
-        <option value="grupo_asc">Rango (A→Z)</option>
-        <option value="grupo_desc">Rango (Z→A)</option>
+        <option value="rango_asc">Rango (A→Z)</option>
+        <option value="rango_desc">Rango (Z→A)</option>
         <option value="prox_asc">Próxima calibración (antes)</option>
         <option value="prox_desc">Próxima calibración (después)</option>
       </select>
@@ -288,7 +289,7 @@
       </div>
 
       <div class="hint" style="margin-top:10px;">
-        Búsqueda inteligente: se buscan coincidencias en <b>código</b>, <b>descripción</b>, <b>rango</b>, <b>ubicación</b> y campos comunes.
+        Búsqueda inteligente: se buscan coincidencias en <b>código</b>, <b>descripción</b> y <b>rango</b>. (Ubicación se filtra por ID exacto).
       </div>
     </div>
 
@@ -298,14 +299,14 @@
         <div class="row" style="max-width:420px;gap:10px;">
           <select id="modo" style="padding:10px 12px;border-radius:10px;">
             <option value="list" selected>Listado</option>
-            <option value="dupes">Duplicados (Descripción + Rango)</option>
-            <option value="dupes_desc">Duplicados (solo Descripción)</option>
           </select>
         </div>
-        <div>
+
+        <div style="flex:1;">
           <div style="font-weight:700;">Resultados</div>
           <div class="meta" id="meta">—</div>
         </div>
+
         <div class="row" style="max-width:320px;">
           <button class="btn" id="btnCopy">Copiar lista (CSV)</button>
         </div>
@@ -349,10 +350,18 @@
   const btnReset = el('btnReset');
   const btnCopy = el('btnCopy');
 
+  // --- Guardas ---
+  if(!supabase){
+    box.innerHTML = `<div class="empty">
+      ❌ No se pudo conectar con Supabase.<br>
+      Revisa <b>config.mjs</b> y la consola del navegador (F12).
+    </div>`;
+    throw new Error("Supabase no está definido. Revisar config.mjs");
+  }
+
   // --- State ---
   let page = 0;
   let total = 0;
-  let lastQueryKey = '';
   let lastData = [];
   let debounceTimer = null;
 
@@ -399,44 +408,14 @@
     box.innerHTML = `<div class="empty">${msg}</div>`;
   }
 
-  function buildQueryKey(){
-    return JSON.stringify({
-      q: q.value.trim(),
-      codigo: codigo.value.trim(),
-      descripcion: descripcion.value.trim(),
-      rango: rango.value.trim(),
-      ubicacion: ubicacion.value.trim(),
-      estado: estado.value,
-      orden: orden.value,
-      limit: Number(limit.value),
-    });
-  }
-
   function getOrder(){
     const v = orden.value;
     if(v === 'codigo_desc') return {col:'codigo', asc:false};
-    if(v === 'grupo_asc') return {col:'rango', asc:true};
-    if(v === 'grupo_desc') return {col:'rango', asc:false};
+    if(v === 'rango_asc') return {col:'rango', asc:true};
+    if(v === 'rango_desc') return {col:'rango', asc:false};
     if(v === 'prox_asc') return {col:'proxima_calibracion', asc:true};
     if(v === 'prox_desc') return {col:'proxima_calibracion', asc:false};
     return {col:'codigo', asc:true};
-  }
-
-  function buildOrSearch(globalText){
-    // Búsqueda global por múltiples campos comunes.
-    // Ajusta aquí si tu tabla tiene otros campos: referencia, fabricante, n_serie, modelo...
-    const t = globalText.replaceAll('%','');
-    const like = `%${t}%`;
-    return [
-      `codigo.ilike.${like}`,
-      `descripcion.ilike.${like}`,
-      `rango.ilike.${like}`,
-      `ubicacion_id.ilike.${like}`,
-      `fabricante.ilike.${like}`,
-      `modelo.ilike.${like}`,
-      `n_serie.ilike.${like}`,
-      `referencia.ilike.${like}`,
-    ].join(',');
   }
 
   function render(data){
@@ -448,21 +427,22 @@
     const detail = showMore.checked;
 
     box.innerHTML = data.map(inst => {
-      const url = `qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(inst.codigo)}`;
+      const url = 'qr/qr.info_instrumentos.html?codigo=' + encodeURIComponent(inst.codigo);
+
       const chips = [
         inst.rango ? `<span class="chip">Rango: ${escapeHTML(inst.rango)}</span>` : '',
-        inst.ubicacion_id ? `<span class="chip">Ubicación (ID): ${escapeHTML(inst.ubicacion_id)}</span>` : '',
+        (inst.ubicacion_id !== null && inst.ubicacion_id !== undefined) ? `<span class="chip">Ubicación ID: ${escapeHTML(inst.ubicacion_id)}</span>` : '',
       ].filter(Boolean).join('');
 
       const extra = detail ? `
         <div class="kv">
-          <div class="k">Descripción</div><div class="v">${escapeHTML(inst.descripcion || '-') }</div>
-          <div class="k">Rango</div><div class="v">${escapeHTML(inst.rango || '-') }</div>
-          <div class="k">Ubicación (ID)</div><div class="v">${escapeHTML(inst.ubicacion_id || '-') }</div>
+          <div class="k">Descripción</div><div class="v">${escapeHTML(inst.descripcion || '-')}</div>
+          <div class="k">Rango</div><div class="v">${escapeHTML(inst.rango || '-')}</div>
+          <div class="k">Ubicación (ID)</div><div class="v">${escapeHTML(inst.ubicacion_id ?? '-')}</div>
           <div class="k">Próx. calib.</div><div class="v">${formatDate(inst.proxima_calibracion)}</div>
         </div>
       ` : `
-        <div class="r-desc">${escapeHTML(inst.descripcion || '-') }</div>
+        <div class="r-desc">${escapeHTML(inst.descripcion || '-')}</div>
       `;
 
       return `
@@ -470,7 +450,7 @@
           <div class="topline">
             <div>
               <div class="r-code">${escapeHTML(inst.codigo)}</div>
-              ${detail ? '' : `<div class="r-desc">${escapeHTML(inst.rango || '-') } · ${escapeHTML(inst.ubicacion_id || '-') }</div>`}
+              ${detail ? '' : `<div class="r-desc">${escapeHTML(inst.rango || '-')} · Ubic ID: ${escapeHTML(inst.ubicacion_id ?? '-')}</div>`}
             </div>
             ${estadoTag(inst)}
           </div>
@@ -487,7 +467,7 @@
     pager.style.display = total > 0 ? 'flex' : 'none';
     prevBtn.disabled = page <= 0;
     nextBtn.disabled = page >= totalPages - 1;
-    pageInfo.textContent = `Página ${page + 1} de ${totalPages}`;
+    pageInfo.textContent = 'Página ' + (page + 1) + ' de ' + totalPages;
   }
 
   function updateMeta(){
@@ -498,65 +478,54 @@
     const perPage = Number(limit.value);
     const start = page * perPage + 1;
     const end = Math.min(total, (page + 1) * perPage);
-    meta.textContent = `${total} instrumentos · mostrando ${start}-${end}`;
+    meta.textContent = total + ' instrumentos · mostrando ' + start + '-' + end;
   }
 
-  function applyEstadoFilter(data){(data){
+  function applyEstadoFilter(data){
     const s = estado.value;
     if(!s) return data;
     return data.filter(inst => estadoKey(inst) === s);
   }
 
   async function buscar({resetPage=false}={}){
-    const queryKey = buildQueryKey();
     if(resetPage) page = 0;
-
-    // Evitar búsquedas duplicadas si no ha cambiado nada.
-    if(queryKey === lastQueryKey && !resetPage) return;
-    lastQueryKey = queryKey;
 
     const perPage = Number(limit.value);
     const from = page * perPage;
     const to = from + perPage - 1;
 
-    // Validación ligera: si no hay nada, no bombardear.
-    // Permitir listado inicial sin filtros (con paginación).
-    // Si queréis obligar a escribir algo para evitar consultas grandes, volved a activar esta validación.
-    // const hasAny = [q.value, codigo.value, descripcion.value, rango.value, ubicacion.value, estado.value].some(v => (v||'').toString().trim() !== '');
-    // if(!hasAny){
-    //   total = 0;
-    //   updateMeta();
-    //   box.innerHTML = '';
-    //   pager.style.display = 'none';
-    //   return;
-    // }
-
-
     loading();
-
-    // Construcción de query Supabase
-    // Nota: El filtro de estado se aplica client-side (porque depende de cálculo de fechas).
-    // Si queréis 100% server-side, lo mejor es crear una VIEW/función en Postgres con un campo estado_calibracion.
 
     let req = supabase
       .from('instrumentos')
-      .select('*', { count: 'exact' });
+      .select('codigo, descripcion, rango, ubicacion_id, proxima_calibracion', { count: 'exact' });
 
     // Global
-    const globalText = q.value.trim();
-    if(globalText){
-      req = req.or(buildOrSearch(globalText));
+    const gt = q.value.trim();
+    if(gt){
+      const like = '%' + gt + '%';
+      req = req.or(
+        'codigo.ilike.' + like +
+        ',descripcion.ilike.' + like +
+        ',rango.ilike.' + like
+      );
     }
 
     // Campo a campo
     const c = codigo.value.trim();
     const d = descripcion.value.trim();
+    const r = rango.value.trim();
     const u = ubicacion.value.trim();
 
-    if(c) req = req.ilike('codigo', `%${c}%`);
-    if(d) req = req.ilike('descripcion', `%${d}%`);
-    if(rango.value.trim()) req = req.ilike('rango', `%${rango.value.trim()}%`);
-    if(u) req = req.ilike('ubicacion_id', `%${u}%`);
+    if(c) req = req.ilike('codigo', '%' + c + '%');
+    if(d) req = req.ilike('descripcion', '%' + d + '%');
+    if(r) req = req.ilike('rango', '%' + r + '%');
+
+    // ubicacion_id numérico
+    if(u){
+      const n = Number(u);
+      if(!Number.isNaN(n)) req = req.eq('ubicacion_id', n);
+    }
 
     const { col, asc } = getOrder();
     req = req.order(col, { ascending: asc, nullsFirst: false });
@@ -570,22 +539,17 @@
       console.error(error);
       total = 0;
       updateMeta();
-      empty('Error buscando datos');
+      empty('Error buscando datos (mira la consola F12)');
       pager.style.display = 'none';
       return;
     }
 
-    // count total
     total = count ?? 0;
 
     // Estado calibración (client-side)
     let filtered = applyEstadoFilter(data || []);
-
-    // Guardar para export
     lastData = filtered;
 
-    // Si aplicamos filtro client-side, el "total" visible puede no cuadrar.
-    // Para UX: informamos que el total es del servidor antes del filtro de estado.
     updateMeta();
 
     if(!filtered.length){
@@ -613,20 +577,24 @@
     orden.value = 'codigo_asc';
     limit.value = '50';
     showMore.checked = true;
+
     page = 0;
     total = 0;
-    lastQueryKey = '';
     lastData = [];
+
     meta.textContent = '—';
     box.innerHTML = '';
     pager.style.display = 'none';
+
+    // Recargar listado inicial
+    buscar({resetPage:true});
   }
 
   function toCSV(data){
     const headers = ['codigo','descripcion','rango','ubicacion_id','proxima_calibracion'];
     const esc = (v) => {
       const s = (v ?? '').toString().replaceAll('"','""');
-      return `"${s}"`;
+      return '"' + s + '"';
     };
     const lines = [headers.join(',')];
     data.forEach(r => {
@@ -651,7 +619,7 @@
   btnCopy.addEventListener('click', copyCSV);
 
   // Buscar al escribir (debounce)
-  [q, codigo, descripcion, ubicacion].forEach(inp => {
+  [q, codigo, descripcion, rango].forEach(inp => {
     inp.addEventListener('input', () => debouncedBuscar(true));
   });
 
@@ -660,8 +628,8 @@
     sel.addEventListener('change', () => buscar({resetPage:true}));
   });
 
-  // Rango (input)
-  rango.addEventListener('input', () => debouncedBuscar(true));
+  // Ubicación por ID (input)
+  ubicacion.addEventListener('input', () => debouncedBuscar(true));
 
   // Paginación
   prevBtn.addEventListener('click', () => {
@@ -678,12 +646,9 @@
     if(e.key === 'Enter') buscar({resetPage:true});
   });
 
-  // Init
-  // (Sin carga de rangos; se filtra escribiendo)
-  // Cargar listado inicial
+  // Init: cargar listado inicial
   buscar({resetPage:true});
 </script>
 
 </body>
 </html>
-
