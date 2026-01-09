@@ -1,192 +1,692 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TMP · Buscar Instrumento</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMP · Buscar Instrumento (Robusto)</title>
 
-<!-- Estilo TMP -->
-<style>
+  <!-- Estilo TMP (oscuro) -->
+  <style>
+    :root{
+      --bg:#0d1117;
+      --panel:#161b22;
+      --panel2:#0f172a;
+      --border:#30363d;
+      --border2:#21262d;
+      --text:#f0f6fc;
+      --muted:#8b949e;
+      --blue:#58a6ff;
+      --ok:#238636;
+      --warn:#d29922;
+      --bad:#e53935;
+      --info:#3b82f6;
+    }
+
+    *{box-sizing:border-box}
     body{
-        margin:0;
-        font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-        background:#0d1117;
-        color:#f0f6fc;
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
     header{
-        padding:14px 18px;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        background:#161b22;
-        border-bottom:1px solid #30363d;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:var(--panel);
+      border-bottom:1px solid var(--border);
+      gap:14px;
     }
-    .brand{
-        display:flex;
-        align-items:center;
-        gap:12px;
-    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:240px}
     .brand img{height:40px}
-    .brand h1{font-size:18px;margin:0;}
-    .brand span{font-size:12px;color:#8b949e;}
+    .brand h1{font-size:18px;margin:0;line-height:1.2;}
+    .brand span{font-size:12px;color:var(--muted);}
 
     .btn-back{
-        border-radius:10px;
-        padding:8px 14px;
-        border:1px solid #30363d;
-        background:transparent;
-        color:#f0f6fc;
-        cursor:pointer;
+      border-radius:10px;
+      padding:8px 14px;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      cursor:pointer;
+      white-space:nowrap;
     }
     .btn-back:hover{background:#1f2937;}
 
     .wrap{
-        max-width:900px;
-        margin:22px auto;
-        padding:0 16px;
+      max-width:1100px;
+      margin:22px auto;
+      padding:0 16px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+
+    @media(min-width: 980px){
+      .grid{grid-template-columns: 380px 1fr; align-items:start;}
     }
 
     .card{
-        background:#161b22;
-        padding:18px;
-        border-radius:16px;
-        border:1px solid #30363d;
-        margin-bottom:20px;
+      background:var(--panel);
+      padding:18px;
+      border-radius:16px;
+      border:1px solid var(--border);
     }
 
-    h2{margin:0 0 10px;font-size:17px;color:#58a6ff}
+    h2{margin:0 0 10px;font-size:17px;color:var(--blue)}
 
-    input{
-        width:100%;
-        padding:12px;
-        border-radius:10px;
-        border:1px solid #30363d;
-        background:#0d1117;
-        color:#f0f6fc;
-        font-size:15px;
-        outline:none;
+    /* Inputs */
+    input, select{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--bg);
+      color:var(--text);
+      font-size:14px;
+      outline:none;
     }
-    input:focus{border-color:#58a6ff;}
+    input:focus, select:focus{border-color:var(--blue);}
+
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px;}
+
+    .row{display:flex;gap:10px;align-items:center}
+    .row > *{flex:1}
+
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
+
+    .btn{
+      border-radius:10px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn:hover{background:#1f2937;}
+    .btn.primary{border-color:rgba(88,166,255,.55)}
+
+    /* Results */
+    .resultsCard{padding:0;overflow:hidden}
+    .resultsHeader{
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .meta{font-size:12px;color:var(--muted)}
 
     .result{
-        padding:14px;
-        border-bottom:1px solid #21262d;
-        cursor:pointer;
+      padding:14px 16px;
+      border-bottom:1px solid var(--border2);
+      cursor:pointer;
     }
-    .result:hover{
-        background:#0f172a;
-    }
+    .result:hover{background:var(--panel2);}
 
-    .r-code{
-        font-size:16px;
-        font-weight:600;
-    }
-    .r-desc{
-        font-size:13px;
-        color:#8b949e;
-    }
+    .topline{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+
+    .r-code{font-size:16px;font-weight:700;letter-spacing:.2px}
+    .r-desc{font-size:13px;color:var(--muted);margin-top:4px}
 
     .tag{
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        padding:3px 8px;
-        border-radius:999px;
-        font-size:11px;
-        margin-top:6px;
-        color:white;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 8px;
+      border-radius:999px;
+      font-size:11px;
+      color:white;
+      white-space:nowrap;
+      height:20px;
     }
-    .ok{background:#238636;}
-    .warn{background:#d29922;}
-    .bad{background:#e53935;}
-    .info{background:#3b82f6;}
+    .ok{background:var(--ok);}
+    .warn{background:var(--warn);}
+    .bad{background:var(--bad);}
+    .info{background:var(--info);}
+
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .chip{font-size:11px;color:var(--text);padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:transparent}
 
     .empty{
-        padding:14px;
-        font-size:14px;
-        color:#8b949e;
-        text-align:center;
+      padding:16px;
+      font-size:14px;
+      color:var(--muted);
+      text-align:center;
     }
-</style>
 
+    /* Pagination */
+    .pager{
+      padding:12px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .pager .btn{min-width:120px}
+    .pager .btn:disabled{opacity:.45;cursor:not-allowed}
+
+    /* Small badges */
+    .kbd{font-size:11px;border:1px solid var(--border);border-radius:8px;padding:2px 6px;color:var(--muted)}
+
+    /* Loading */
+    .loading{
+      padding:16px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .spinner{
+      width:14px;height:14px;border:2px solid rgba(255,255,255,.18);
+      border-top-color:rgba(88,166,255,.9);border-radius:999px;
+      animation:spin .9s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Toggle chips */
+    .toggles{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .toggle{
+      display:flex;align-items:center;gap:8px;
+      padding:8px 10px;border:1px solid var(--border);
+      border-radius:12px;cursor:pointer;user-select:none;
+      color:var(--muted);font-size:12px;
+    }
+    .toggle input{width:auto;padding:0;margin:0}
+
+    /* Table-like details inside each result */
+    .kv{display:grid;grid-template-columns: 120px 1fr;gap:6px 12px;margin-top:10px}
+    .k{font-size:12px;color:var(--muted)}
+    .v{font-size:12px;color:var(--text)}
+  </style>
 </head>
-<body>
 
+<body>
 <header>
-    <div class="brand">
-        <img src="img/tmp-quality.png">
-        <div>
-            <h1>Buscar instrumento</h1>
-            <span>Consulta rápida · Base de datos TMP</span>
-        </div>
+  <div class="brand">
+    <img src="img/tmp-quality.png" alt="TMP" />
+    <div>
+      <h1>Buscar instrumento</h1>
+      <span>Consulta avanzada · Base de datos TMP</span>
     </div>
-    <button class="btn-back" onclick="window.location.href='home.html'">← Volver</button>
+  </div>
+  <button class="btn-back" onclick="window.location.href='home.html'">← Volver</button>
 </header>
 
 <div class="wrap">
-    <div class="card">
-        <h2>Buscar</h2>
-        <input id="buscador" type="text" placeholder="Código o descripción…">
+  <div class="grid">
+
+    <!-- Filters -->
+    <div class="card" id="filtersCard">
+      <h2>Filtros</h2>
+
+      <label for="q">Búsqueda global</label>
+      <input id="q" type="text" placeholder="Código, descripción, grupo, ubicación, serie, fabricante..." autocomplete="off" />
+      <div class="hint">
+        Tip: usa varias palabras. Ej: <span class="kbd">micrómetro mitutoyo</span> o <span class="kbd">calibre calidad</span>
+      </div>
+
+      <label for="codigo">Código (contiene)</label>
+      <input id="codigo" type="text" placeholder="Ej: 3D-001, MIC-..." autocomplete="off" />
+
+      <label for="descripcion">Descripción (contiene)</label>
+      <input id="descripcion" type="text" placeholder="Ej: micrómetro, calibre..." autocomplete="off" />
+
+      <label for="grupo">Grupo</label>
+      <select id="grupo">
+        <option value="">(Todos)</option>
+      </select>
+
+      <label for="ubicacion">Ubicación (contiene)</label>
+      <input id="ubicacion" type="text" placeholder="Ej: metrología, planta, almacén..." autocomplete="off" />
+
+      <label for="estado">Estado calibración</label>
+      <select id="estado">
+        <option value="">(Todos)</option>
+        <option value="ok">En regla</option>
+        <option value="warn">Próxima (≤ 30 días)</option>
+        <option value="bad">Fuera de calibración</option>
+        <option value="nodata">Sin datos</option>
+      </select>
+
+      <label for="orden">Orden</label>
+      <select id="orden">
+        <option value="codigo_asc">Código (A→Z)</option>
+        <option value="codigo_desc">Código (Z→A)</option>
+        <option value="grupo_asc">Grupo (A→Z)</option>
+        <option value="grupo_desc">Grupo (Z→A)</option>
+        <option value="prox_asc">Próxima calibración (antes)</option>
+        <option value="prox_desc">Próxima calibración (después)</option>
+      </select>
+
+      <label for="limit">Resultados por página</label>
+      <select id="limit">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+
+      <div class="toggles">
+        <label class="toggle" title="Muestra más datos en la tarjeta de resultados">
+          <input type="checkbox" id="showMore" checked />
+          <span>Mostrar detalle</span>
+        </label>
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <button class="btn primary" id="btnBuscar">Buscar</button>
+        <button class="btn" id="btnReset">Limpiar</button>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        Búsqueda inteligente: se buscan coincidencias en <b>código</b>, <b>descripción</b>, <b>grupo</b>, <b>ubicación</b> y campos comunes.
+      </div>
     </div>
 
-    <div id="resultados" class="card" style="padding:0"></div>
+    <!-- Results -->
+    <div class="card resultsCard">
+      <div class="resultsHeader">
+        <div>
+          <div style="font-weight:700;">Resultados</div>
+          <div class="meta" id="meta">—</div>
+        </div>
+        <div class="row" style="max-width:320px;">
+          <button class="btn" id="btnCopy">Copiar lista (CSV)</button>
+        </div>
+      </div>
+
+      <div id="resultados"></div>
+
+      <div class="pager" id="pager" style="display:none;">
+        <button class="btn" id="prev" disabled>← Anterior</button>
+        <div class="meta" id="pageInfo">Página 1</div>
+        <button class="btn" id="next" disabled>Siguiente →</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script type="module" src="config.mjs"></script>
 
 <script type="module">
-    const supabase = window.supabase;
-    const input = document.getElementById("buscador");
-    const box = document.getElementById("resultados");
+  const supabase = window.supabase;
 
-    function estadoTag(inst){
-        if(!inst.proxima_calibracion)
-            return `<span class='tag info'>Sin datos</span>`;
+  // --- DOM ---
+  const el = (id) => document.getElementById(id);
+  const q = el('q');
+  const codigo = el('codigo');
+  const descripcion = el('descripcion');
+  const grupo = el('grupo');
+  const ubicacion = el('ubicacion');
+  const estado = el('estado');
+  const orden = el('orden');
+  const limit = el('limit');
+  const showMore = el('showMore');
+  const box = el('resultados');
+  const meta = el('meta');
+  const pager = el('pager');
+  const prevBtn = el('prev');
+  const nextBtn = el('next');
+  const pageInfo = el('pageInfo');
+  const btnBuscar = el('btnBuscar');
+  const btnReset = el('btnReset');
+  const btnCopy = el('btnCopy');
 
-        const hoy = new Date();
-        const prox = new Date(inst.proxima_calibracion);
-        const diff = (prox - hoy)/(1000*60*60*24);
+  // --- State ---
+  let page = 0;
+  let total = 0;
+  let lastQueryKey = '';
+  let lastData = [];
+  let debounceTimer = null;
 
-        if(diff < 0) return `<span class='tag bad'>Fuera de calibración</span>`;
-        if(diff <= 30) return `<span class='tag warn'>Próxima calibración</span>`;
-        return `<span class='tag ok'>En regla</span>`;
+  // --- Helpers ---
+  function formatDate(d){
+    if(!d) return '-';
+    const dt = new Date(d);
+    if(Number.isNaN(dt.getTime())) return '-';
+    return dt.toLocaleDateString('es-ES');
+  }
+
+  function estadoKey(inst){
+    if(!inst.proxima_calibracion) return 'nodata';
+    const hoy = new Date();
+    const prox = new Date(inst.proxima_calibracion);
+    const diff = (prox - hoy) / (1000*60*60*24);
+    if(diff < 0) return 'bad';
+    if(diff <= 30) return 'warn';
+    return 'ok';
+  }
+
+  function estadoTag(inst){
+    const k = estadoKey(inst);
+    if(k === 'nodata') return `<span class='tag info'>Sin datos</span>`;
+    if(k === 'bad') return `<span class='tag bad'>Fuera de calibración</span>`;
+    if(k === 'warn') return `<span class='tag warn'>Próxima calibración</span>`;
+    return `<span class='tag ok'>En regla</span>`;
+  }
+
+  function escapeHTML(str){
+    return (str ?? '').toString()
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#039;');
+  }
+
+  function loading(){
+    box.innerHTML = `<div class="loading"><span class="spinner"></span> Buscando…</div>`;
+  }
+
+  function empty(msg){
+    box.innerHTML = `<div class="empty">${msg}</div>`;
+  }
+
+  function buildQueryKey(){
+    return JSON.stringify({
+      q: q.value.trim(),
+      codigo: codigo.value.trim(),
+      descripcion: descripcion.value.trim(),
+      grupo: grupo.value,
+      ubicacion: ubicacion.value.trim(),
+      estado: estado.value,
+      orden: orden.value,
+      limit: Number(limit.value),
+    });
+  }
+
+  function getOrder(){
+    const v = orden.value;
+    if(v === 'codigo_desc') return {col:'codigo', asc:false};
+    if(v === 'grupo_asc') return {col:'grupo', asc:true};
+    if(v === 'grupo_desc') return {col:'grupo', asc:false};
+    if(v === 'prox_asc') return {col:'proxima_calibracion', asc:true};
+    if(v === 'prox_desc') return {col:'proxima_calibracion', asc:false};
+    return {col:'codigo', asc:true};
+  }
+
+  function buildOrSearch(globalText){
+    // Búsqueda global por múltiples campos comunes.
+    // Ajusta aquí si tu tabla tiene otros campos: referencia, fabricante, n_serie, modelo...
+    const t = globalText.replaceAll('%','');
+    const like = `%${t}%`;
+    return [
+      `codigo.ilike.${like}`,
+      `descripcion.ilike.${like}`,
+      `grupo.ilike.${like}`,
+      `ubicacion_actual.ilike.${like}`,
+      `fabricante.ilike.${like}`,
+      `modelo.ilike.${like}`,
+      `n_serie.ilike.${like}`,
+      `referencia.ilike.${like}`,
+    ].join(',');
+  }
+
+  function render(data){
+    if(!data?.length){
+      empty('No se encontraron instrumentos con los filtros actuales');
+      return;
     }
 
-    async function buscar(){
-        const t = input.value.trim().toLowerCase();
-        if(!t){
-            box.innerHTML = "";
-            return;
-        }
+    const detail = showMore.checked;
 
-        const {data, error} = await supabase
-            .from("instrumentos")
-            .select("*")
-            .or(`codigo.ilike.%${t}%, descripcion.ilike.%${t}%`)
-            .order("codigo",{ascending:true})
-            .limit(50);
+    box.innerHTML = data.map(inst => {
+      const url = `qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(inst.codigo)}`;
+      const chips = [
+        inst.grupo ? `<span class="chip">Grupo: ${escapeHTML(inst.grupo)}</span>` : '',
+        inst.ubicacion_actual ? `<span class="chip">Ubicación: ${escapeHTML(inst.ubicacion_actual)}</span>` : '',
+      ].filter(Boolean).join('');
 
-        if(error){
-            box.innerHTML = `<div class="empty">Error buscando datos</div>`;
-            return;
-        }
+      const extra = detail ? `
+        <div class="kv">
+          <div class="k">Descripción</div><div class="v">${escapeHTML(inst.descripcion || '-') }</div>
+          <div class="k">Grupo</div><div class="v">${escapeHTML(inst.grupo || '-') }</div>
+          <div class="k">Ubicación</div><div class="v">${escapeHTML(inst.ubicacion_actual || '-') }</div>
+          <div class="k">Próx. calib.</div><div class="v">${formatDate(inst.proxima_calibracion)}</div>
+        </div>
+      ` : `
+        <div class="r-desc">${escapeHTML(inst.descripcion || '-') }</div>
+      `;
 
-        if(!data.length){
-            box.innerHTML = `<div class="empty">No se encontraron instrumentos</div>`;
-            return;
-        }
-
-        box.innerHTML = data.map(inst => `
-            <div class="result" onclick="window.location.href='qr/qr.info_instrumentos.html?codigo=${inst.codigo}'">
-                <div class="r-code">${inst.codigo}</div>
-                <div class="r-desc">${inst.descripcion || "-"}</div>
-                ${estadoTag(inst)}
-                <div class="r-desc" style="margin-top:4px;">Ubicación: ${inst.ubicacion_actual || "-"}</div>
+      return `
+        <div class="result" onclick="window.location.href='${url}'">
+          <div class="topline">
+            <div>
+              <div class="r-code">${escapeHTML(inst.codigo)}</div>
+              ${detail ? '' : `<div class="r-desc">${escapeHTML(inst.grupo || '-') } · ${escapeHTML(inst.ubicacion_actual || '-') }</div>`}
             </div>
-        `).join("");
+            ${estadoTag(inst)}
+          </div>
+          ${chips ? `<div class="chips">${chips}</div>` : ''}
+          ${extra}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updatePager(){
+    const perPage = Number(limit.value);
+    const totalPages = Math.max(1, Math.ceil(total / perPage));
+    pager.style.display = total > 0 ? 'flex' : 'none';
+    prevBtn.disabled = page <= 0;
+    nextBtn.disabled = page >= totalPages - 1;
+    pageInfo.textContent = `Página ${page + 1} de ${totalPages}`;
+  }
+
+  function updateMeta(){
+    if(total === 0){
+      meta.textContent = '—';
+      return;
+    }
+    const perPage = Number(limit.value);
+    const start = page * perPage + 1;
+    const end = Math.min(total, (page + 1) * perPage);
+    meta.textContent = `${total} instrumentos · mostrando ${start}-${end}`;
+  }
+
+  async function loadGroups(){
+    // Carga lista de grupos distintos para el select.
+    // Nota: si el volumen es alto, conviene tener una tabla de grupos o una vista.
+    const { data, error } = await supabase
+      .from('instrumentos')
+      .select('grupo')
+      .not('grupo','is', null)
+      .order('grupo', { ascending: true });
+
+    if(error){
+      console.warn('Error cargando grupos', error);
+      return;
     }
 
-    input.addEventListener("input", buscar);
+    const set = new Set();
+    data.forEach(r => { if(r.grupo) set.add(r.grupo); });
+    const items = Array.from(set);
+
+    grupo.innerHTML = `<option value="">(Todos)</option>` +
+      items.map(g => `<option value="${escapeHTML(g)}">${escapeHTML(g)}</option>`).join('');
+  }
+
+  function applyEstadoFilter(data){
+    const s = estado.value;
+    if(!s) return data;
+    return data.filter(inst => estadoKey(inst) === s);
+  }
+
+  async function buscar({resetPage=false}={}){
+    const queryKey = buildQueryKey();
+    if(resetPage) page = 0;
+
+    // Evitar búsquedas duplicadas si no ha cambiado nada.
+    if(queryKey === lastQueryKey && !resetPage) return;
+    lastQueryKey = queryKey;
+
+    const perPage = Number(limit.value);
+    const from = page * perPage;
+    const to = from + perPage - 1;
+
+    // Validación ligera: si no hay nada, no bombardear.
+    const hasAny = [q.value, codigo.value, descripcion.value, grupo.value, ubicacion.value, estado.value].some(v => (v||'').toString().trim() !== '');
+    if(!hasAny){
+      total = 0;
+      updateMeta();
+      box.innerHTML = '';
+      pager.style.display = 'none';
+      return;
+    }
+
+    loading();
+
+    // Construcción de query Supabase
+    // Nota: El filtro de estado se aplica client-side (porque depende de cálculo de fechas).
+    // Si queréis 100% server-side, lo mejor es crear una VIEW/función en Postgres con un campo estado_calibracion.
+
+    let req = supabase
+      .from('instrumentos')
+      .select('*', { count: 'exact' });
+
+    // Global
+    const globalText = q.value.trim();
+    if(globalText){
+      req = req.or(buildOrSearch(globalText));
+    }
+
+    // Campo a campo
+    const c = codigo.value.trim();
+    const d = descripcion.value.trim();
+    const u = ubicacion.value.trim();
+
+    if(c) req = req.ilike('codigo', `%${c}%`);
+    if(d) req = req.ilike('descripcion', `%${d}%`);
+    if(grupo.value) req = req.eq('grupo', grupo.value);
+    if(u) req = req.ilike('ubicacion_actual', `%${u}%`);
+
+    const { col, asc } = getOrder();
+    req = req.order(col, { ascending: asc, nullsFirst: false });
+
+    // Paginar
+    req = req.range(from, to);
+
+    const { data, error, count } = await req;
+
+    if(error){
+      console.error(error);
+      total = 0;
+      updateMeta();
+      empty('Error buscando datos');
+      pager.style.display = 'none';
+      return;
+    }
+
+    // count total
+    total = count ?? 0;
+
+    // Estado calibración (client-side)
+    let filtered = applyEstadoFilter(data || []);
+
+    // Guardar para export
+    lastData = filtered;
+
+    // Si aplicamos filtro client-side, el "total" visible puede no cuadrar.
+    // Para UX: informamos que el total es del servidor antes del filtro de estado.
+    updateMeta();
+
+    if(!filtered.length){
+      empty('No se encontraron instrumentos con los filtros actuales');
+      updatePager();
+      return;
+    }
+
+    render(filtered);
+    updatePager();
+  }
+
+  function debouncedBuscar(resetPage=false){
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => buscar({resetPage}), 250);
+  }
+
+  function reset(){
+    q.value = '';
+    codigo.value = '';
+    descripcion.value = '';
+    grupo.value = '';
+    ubicacion.value = '';
+    estado.value = '';
+    orden.value = 'codigo_asc';
+    limit.value = '50';
+    showMore.checked = true;
+    page = 0;
+    total = 0;
+    lastQueryKey = '';
+    lastData = [];
+    meta.textContent = '—';
+    box.innerHTML = '';
+    pager.style.display = 'none';
+  }
+
+  function toCSV(data){
+    const headers = ['codigo','descripcion','grupo','ubicacion_actual','proxima_calibracion'];
+    const esc = (v) => {
+      const s = (v ?? '').toString().replaceAll('"','""');
+      return `"${s}"`;
+    };
+    const lines = [headers.join(',')];
+    data.forEach(r => {
+      lines.push(headers.map(h => esc(r[h])).join(','));
+    });
+    return lines.join('\n');
+  }
+
+  async function copyCSV(){
+    if(!lastData?.length){
+      alert('No hay resultados para copiar.');
+      return;
+    }
+    const csv = toCSV(lastData);
+    await navigator.clipboard.writeText(csv);
+    alert('Copiado al portapapeles (CSV).');
+  }
+
+  // --- Events ---
+  btnBuscar.addEventListener('click', () => buscar({resetPage:true}));
+  btnReset.addEventListener('click', reset);
+  btnCopy.addEventListener('click', copyCSV);
+
+  // Buscar al escribir (debounce)
+  [q, codigo, descripcion, ubicacion].forEach(inp => {
+    inp.addEventListener('input', () => debouncedBuscar(true));
+  });
+
+  // Cambios en select
+  [grupo, estado, orden, limit, showMore].forEach(sel => {
+    sel.addEventListener('change', () => buscar({resetPage:true}));
+  });
+
+  // Paginación
+  prevBtn.addEventListener('click', () => {
+    page = Math.max(0, page - 1);
+    buscar({resetPage:false});
+  });
+  nextBtn.addEventListener('click', () => {
+    page = page + 1;
+    buscar({resetPage:false});
+  });
+
+  // Enter para buscar
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') buscar({resetPage:true});
+  });
+
+  // Init
+  await loadGroups();
 </script>
 
 </body>
