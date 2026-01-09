@@ -243,10 +243,8 @@
       <label for="descripcion">Descripción (contiene)</label>
       <input id="descripcion" type="text" placeholder="Ej: micrómetro, calibre..." autocomplete="off" />
 
-      <label for="rango">Rango</label>
-      <select id="rango">
-        <option value="">(Todos)</option>
-      </select>
+      <label for="rango">Rango (contiene)</label>
+      <input id="rango" type="text" placeholder="Ej: M12, M14x1, 6H..." autocomplete="off" />
 
       <label for="ubicacion">Ubicación (ID) (contiene)</label>
       <input id="ubicacion" type="text" placeholder="Ej: metrología, planta, almacén..." autocomplete="off" />
@@ -406,7 +404,7 @@
       q: q.value.trim(),
       codigo: codigo.value.trim(),
       descripcion: descripcion.value.trim(),
-      rango: rango.value,
+      rango: rango.value.trim(),
       ubicacion: ubicacion.value.trim(),
       estado: estado.value,
       orden: orden.value,
@@ -503,29 +501,7 @@
     meta.textContent = `${total} instrumentos · mostrando ${start}-${end}`;
   }
 
-  async function loadGroups(){
-    // Carga lista de grupos distintos para el select.
-    // Nota: si el volumen es alto, conviene tener una tabla de grupos o una vista.
-    const { data, error } = await supabase
-      .from('instrumentos')
-      .select('rango')
-      .not('rango','is', null)
-      .order('rango', { ascending: true });
-
-    if(error){
-      console.warn('Error cargando grupos', error);
-      return;
-    }
-
-    const set = new Set();
-    data.forEach(r => { if(r.rango) set.add(r.rango); });
-    const items = Array.from(set);
-
-    rango.innerHTML = `<option value="">(Todos)</option>` +
-      items.map(g => `<option value="${escapeHTML(g)}">${escapeHTML(g)}</option>`).join('');
-  }
-
-  function applyEstadoFilter(data){
+  function applyEstadoFilter(data){(data){
     const s = estado.value;
     if(!s) return data;
     return data.filter(inst => estadoKey(inst) === s);
@@ -576,7 +552,7 @@
 
     if(c) req = req.ilike('codigo', `%${c}%`);
     if(d) req = req.ilike('descripcion', `%${d}%`);
-    if(rango.value) req = req.eq('rango', rango.value);
+    if(rango.value.trim()) req = req.ilike('rango', `%${rango.value.trim()}%`);
     if(u) req = req.ilike('ubicacion_id', `%${u}%`);
 
     const { col, asc } = getOrder();
@@ -677,9 +653,12 @@
   });
 
   // Cambios en select
-  [rango, estado, orden, limit, showMore].forEach(sel => {
+  [estado, orden, limit, showMore].forEach(sel => {
     sel.addEventListener('change', () => buscar({resetPage:true}));
   });
+
+  // Rango (input)
+  rango.addEventListener('input', () => debouncedBuscar(true));
 
   // Paginación
   prevBtn.addEventListener('click', () => {
@@ -697,8 +676,9 @@
   });
 
   // Init
-  await loadGroups();
+  // (Sin carga de rangos; se filtra escribiendo)
 </script>
 
 </body>
 </html>
+
