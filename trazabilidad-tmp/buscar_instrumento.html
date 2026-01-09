@@ -227,8 +227,12 @@
     <div class="card" id="filtersCard">
       <h2>Filtros</h2>
 
+      <div class="hint" style="margin-top:-2px;">
+        Nuevo: puedes <b>detectar duplicados</b> por <b>Descripción</b> + <b>Rango</b> (ideal para ver cuántos “Tampones Rosca P/NP” tienes por medida).
+      </div>
+
       <label for="q">Búsqueda global</label>
-      <input id="q" type="text" placeholder="Código, descripción, grupo, ubicación, serie, fabricante..." autocomplete="off" />
+      <input id="q" type="text" placeholder="Código, descripción, rango, ubicación, serie, fabricante..." autocomplete="off" />
       <div class="hint">
         Tip: usa varias palabras. Ej: <span class="kbd">micrómetro mitutoyo</span> o <span class="kbd">calibre calidad</span>
       </div>
@@ -239,12 +243,12 @@
       <label for="descripcion">Descripción (contiene)</label>
       <input id="descripcion" type="text" placeholder="Ej: micrómetro, calibre..." autocomplete="off" />
 
-      <label for="grupo">Grupo</label>
-      <select id="grupo">
+      <label for="rango">Rango</label>
+      <select id="rango">
         <option value="">(Todos)</option>
       </select>
 
-      <label for="ubicacion">Ubicación (contiene)</label>
+      <label for="ubicacion">Ubicación (ID) (contiene)</label>
       <input id="ubicacion" type="text" placeholder="Ej: metrología, planta, almacén..." autocomplete="off" />
 
       <label for="estado">Estado calibración</label>
@@ -260,8 +264,8 @@
       <select id="orden">
         <option value="codigo_asc">Código (A→Z)</option>
         <option value="codigo_desc">Código (Z→A)</option>
-        <option value="grupo_asc">Grupo (A→Z)</option>
-        <option value="grupo_desc">Grupo (Z→A)</option>
+        <option value="grupo_asc">Rango (A→Z)</option>
+        <option value="grupo_desc">Rango (Z→A)</option>
         <option value="prox_asc">Próxima calibración (antes)</option>
         <option value="prox_desc">Próxima calibración (después)</option>
       </select>
@@ -286,13 +290,20 @@
       </div>
 
       <div class="hint" style="margin-top:10px;">
-        Búsqueda inteligente: se buscan coincidencias en <b>código</b>, <b>descripción</b>, <b>grupo</b>, <b>ubicación</b> y campos comunes.
+        Búsqueda inteligente: se buscan coincidencias en <b>código</b>, <b>descripción</b>, <b>rango</b>, <b>ubicación</b> y campos comunes.
       </div>
     </div>
 
     <!-- Results -->
     <div class="card resultsCard">
       <div class="resultsHeader">
+        <div class="row" style="max-width:420px;gap:10px;">
+          <select id="modo" style="padding:10px 12px;border-radius:10px;">
+            <option value="list" selected>Listado</option>
+            <option value="dupes">Duplicados (Descripción + Rango)</option>
+            <option value="dupes_desc">Duplicados (solo Descripción)</option>
+          </select>
+        </div>
         <div>
           <div style="font-weight:700;">Resultados</div>
           <div class="meta" id="meta">—</div>
@@ -324,7 +335,7 @@
   const q = el('q');
   const codigo = el('codigo');
   const descripcion = el('descripcion');
-  const grupo = el('grupo');
+  const rango = el('rango');
   const ubicacion = el('ubicacion');
   const estado = el('estado');
   const orden = el('orden');
@@ -395,7 +406,7 @@
       q: q.value.trim(),
       codigo: codigo.value.trim(),
       descripcion: descripcion.value.trim(),
-      grupo: grupo.value,
+      rango: rango.value,
       ubicacion: ubicacion.value.trim(),
       estado: estado.value,
       orden: orden.value,
@@ -406,8 +417,8 @@
   function getOrder(){
     const v = orden.value;
     if(v === 'codigo_desc') return {col:'codigo', asc:false};
-    if(v === 'grupo_asc') return {col:'grupo', asc:true};
-    if(v === 'grupo_desc') return {col:'grupo', asc:false};
+    if(v === 'grupo_asc') return {col:'rango', asc:true};
+    if(v === 'grupo_desc') return {col:'rango', asc:false};
     if(v === 'prox_asc') return {col:'proxima_calibracion', asc:true};
     if(v === 'prox_desc') return {col:'proxima_calibracion', asc:false};
     return {col:'codigo', asc:true};
@@ -421,8 +432,8 @@
     return [
       `codigo.ilike.${like}`,
       `descripcion.ilike.${like}`,
-      `grupo.ilike.${like}`,
-      `ubicacion_actual.ilike.${like}`,
+      `rango.ilike.${like}`,
+      `ubicacion_id.ilike.${like}`,
       `fabricante.ilike.${like}`,
       `modelo.ilike.${like}`,
       `n_serie.ilike.${like}`,
@@ -441,15 +452,15 @@
     box.innerHTML = data.map(inst => {
       const url = `qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(inst.codigo)}`;
       const chips = [
-        inst.grupo ? `<span class="chip">Grupo: ${escapeHTML(inst.grupo)}</span>` : '',
-        inst.ubicacion_actual ? `<span class="chip">Ubicación: ${escapeHTML(inst.ubicacion_actual)}</span>` : '',
+        inst.rango ? `<span class="chip">Rango: ${escapeHTML(inst.rango)}</span>` : '',
+        inst.ubicacion_id ? `<span class="chip">Ubicación (ID): ${escapeHTML(inst.ubicacion_id)}</span>` : '',
       ].filter(Boolean).join('');
 
       const extra = detail ? `
         <div class="kv">
           <div class="k">Descripción</div><div class="v">${escapeHTML(inst.descripcion || '-') }</div>
-          <div class="k">Grupo</div><div class="v">${escapeHTML(inst.grupo || '-') }</div>
-          <div class="k">Ubicación</div><div class="v">${escapeHTML(inst.ubicacion_actual || '-') }</div>
+          <div class="k">Rango</div><div class="v">${escapeHTML(inst.rango || '-') }</div>
+          <div class="k">Ubicación (ID)</div><div class="v">${escapeHTML(inst.ubicacion_id || '-') }</div>
           <div class="k">Próx. calib.</div><div class="v">${formatDate(inst.proxima_calibracion)}</div>
         </div>
       ` : `
@@ -461,7 +472,7 @@
           <div class="topline">
             <div>
               <div class="r-code">${escapeHTML(inst.codigo)}</div>
-              ${detail ? '' : `<div class="r-desc">${escapeHTML(inst.grupo || '-') } · ${escapeHTML(inst.ubicacion_actual || '-') }</div>`}
+              ${detail ? '' : `<div class="r-desc">${escapeHTML(inst.rango || '-') } · ${escapeHTML(inst.ubicacion_id || '-') }</div>`}
             </div>
             ${estadoTag(inst)}
           </div>
@@ -497,9 +508,9 @@
     // Nota: si el volumen es alto, conviene tener una tabla de grupos o una vista.
     const { data, error } = await supabase
       .from('instrumentos')
-      .select('grupo')
-      .not('grupo','is', null)
-      .order('grupo', { ascending: true });
+      .select('rango')
+      .not('rango','is', null)
+      .order('rango', { ascending: true });
 
     if(error){
       console.warn('Error cargando grupos', error);
@@ -507,10 +518,10 @@
     }
 
     const set = new Set();
-    data.forEach(r => { if(r.grupo) set.add(r.grupo); });
+    data.forEach(r => { if(r.rango) set.add(r.rango); });
     const items = Array.from(set);
 
-    grupo.innerHTML = `<option value="">(Todos)</option>` +
+    rango.innerHTML = `<option value="">(Todos)</option>` +
       items.map(g => `<option value="${escapeHTML(g)}">${escapeHTML(g)}</option>`).join('');
   }
 
@@ -533,7 +544,7 @@
     const to = from + perPage - 1;
 
     // Validación ligera: si no hay nada, no bombardear.
-    const hasAny = [q.value, codigo.value, descripcion.value, grupo.value, ubicacion.value, estado.value].some(v => (v||'').toString().trim() !== '');
+    const hasAny = [q.value, codigo.value, descripcion.value, rango.value, ubicacion.value, estado.value].some(v => (v||'').toString().trim() !== '');
     if(!hasAny){
       total = 0;
       updateMeta();
@@ -565,8 +576,8 @@
 
     if(c) req = req.ilike('codigo', `%${c}%`);
     if(d) req = req.ilike('descripcion', `%${d}%`);
-    if(grupo.value) req = req.eq('grupo', grupo.value);
-    if(u) req = req.ilike('ubicacion_actual', `%${u}%`);
+    if(rango.value) req = req.eq('rango', rango.value);
+    if(u) req = req.ilike('ubicacion_id', `%${u}%`);
 
     const { col, asc } = getOrder();
     req = req.order(col, { ascending: asc, nullsFirst: false });
@@ -617,7 +628,7 @@
     q.value = '';
     codigo.value = '';
     descripcion.value = '';
-    grupo.value = '';
+    rango.value = '';
     ubicacion.value = '';
     estado.value = '';
     orden.value = 'codigo_asc';
@@ -633,7 +644,7 @@
   }
 
   function toCSV(data){
-    const headers = ['codigo','descripcion','grupo','ubicacion_actual','proxima_calibracion'];
+    const headers = ['codigo','descripcion','rango','ubicacion_id','proxima_calibracion'];
     const esc = (v) => {
       const s = (v ?? '').toString().replaceAll('"','""');
       return `"${s}"`;
@@ -666,7 +677,7 @@
   });
 
   // Cambios en select
-  [grupo, estado, orden, limit, showMore].forEach(sel => {
+  [rango, estado, orden, limit, showMore].forEach(sel => {
     sel.addEventListener('change', () => buscar({resetPage:true}));
   });
 
