@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TMP · Buscar Instrumento (Robusto)</title>
+  <title>TMP · Buscar Instrumento (Robusto + Test)</title>
 
-  <!-- Estilo TMP (oscuro) -->
   <style>
     :root{
       --bg:#0d1117;
@@ -79,7 +78,6 @@
 
     h2{margin:0 0 10px;font-size:17px;color:var(--blue)}
 
-    /* Inputs */
     input, select{
       width:100%;
       padding:12px;
@@ -111,7 +109,6 @@
     .btn:hover{background:#1f2937;}
     .btn.primary{border-color:rgba(88,166,255,.55)}
 
-    /* Results */
     .resultsCard{padding:0;overflow:hidden}
     .resultsHeader{
       padding:14px 16px;
@@ -131,7 +128,6 @@
     .result:hover{background:var(--panel2);}
 
     .topline{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-
     .r-code{font-size:16px;font-weight:700;letter-spacing:.2px}
     .r-desc{font-size:13px;color:var(--muted);margin-top:4px}
 
@@ -160,22 +156,6 @@
       color:var(--muted);
       text-align:center;
     }
-
-    /* Pagination */
-    .pager{
-      padding:12px 16px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-    }
-    .pager .btn{min-width:120px}
-    .pager .btn:disabled{opacity:.45;cursor:not-allowed}
-
-    /* Small badges */
-    .kbd{font-size:11px;border:1px solid var(--border);border-radius:8px;padding:2px 6px;color:var(--muted)}
-
-    /* Loading */
     .loading{
       padding:16px;
       display:flex;
@@ -191,17 +171,16 @@
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* Toggle chips */
-    .toggles{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-    .toggle{
-      display:flex;align-items:center;gap:8px;
-      padding:8px 10px;border:1px solid var(--border);
-      border-radius:12px;cursor:pointer;user-select:none;
-      color:var(--muted);font-size:12px;
+    .pager{
+      padding:12px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
     }
-    .toggle input{width:auto;padding:0;margin:0}
+    .pager .btn{min-width:120px}
+    .pager .btn:disabled{opacity:.45;cursor:not-allowed}
 
-    /* Table-like details inside each result */
     .kv{display:grid;grid-template-columns: 140px 1fr;gap:6px 12px;margin-top:10px}
     .k{font-size:12px;color:var(--muted)}
     .v{font-size:12px;color:var(--text)}
@@ -224,18 +203,15 @@
   <div class="grid">
 
     <!-- Filters -->
-    <div class="card" id="filtersCard">
+    <div class="card">
       <h2>Filtros</h2>
 
       <div class="hint" style="margin-top:-2px;">
-        Nuevo: este buscador está pensado para <b>inventario</b>. Verás los equipos desde el inicio y podrás filtrar por <b>Descripción</b> + <b>Rango</b> (ideal para “Tampones Rosca P/NP”).
+        Este buscador está pensado para <b>inventario</b>. Carga la lista inicial y puedes filtrar por <b>Descripción</b> + <b>Rango</b>.
       </div>
 
       <label for="q">Búsqueda global</label>
-      <input id="q" type="text" placeholder="Código, descripción, rango, ubicación_id..." autocomplete="off" />
-      <div class="hint">
-        Tip: usa varias palabras. Ej: <span class="kbd">tampon P/NP</span> o <span class="kbd">micrómetro M14</span>
-      </div>
+      <input id="q" type="text" placeholder="Código, descripción, rango..." autocomplete="off" />
 
       <label for="codigo">Código (contiene)</label>
       <input id="codigo" type="text" placeholder="Ej: METMP001, 3D-001..." autocomplete="off" />
@@ -248,7 +224,7 @@
 
       <label for="ubicacion">Ubicación (ID exacto)</label>
       <input id="ubicacion" type="text" placeholder="Ej: 12" autocomplete="off" />
-      <div class="hint">Nota: <b>ubicacion_id</b> es numérico. Aquí filtra por ID exacto.</div>
+      <div class="hint">Filtra por <b>ubicacion_id</b> (numérico). Ej: 12.</div>
 
       <label for="estado">Estado calibración</label>
       <select id="estado">
@@ -276,37 +252,19 @@
         <option value="100">100</option>
       </select>
 
-      <div class="toggles">
-        <label class="toggle" title="Muestra más datos en la tarjeta de resultados">
-          <input type="checkbox" id="showMore" checked />
-          <span>Mostrar detalle</span>
-        </label>
-      </div>
-
       <div class="row" style="margin-top:14px;">
         <button class="btn primary" id="btnBuscar">Buscar</button>
         <button class="btn" id="btnReset">Limpiar</button>
-      </div>
-
-      <div class="hint" style="margin-top:10px;">
-        Búsqueda inteligente: se buscan coincidencias en <b>código</b>, <b>descripción</b> y <b>rango</b>. (Ubicación se filtra por ID exacto).
       </div>
     </div>
 
     <!-- Results -->
     <div class="card resultsCard">
       <div class="resultsHeader">
-        <div class="row" style="max-width:420px;gap:10px;">
-          <select id="modo" style="padding:10px 12px;border-radius:10px;">
-            <option value="list" selected>Listado</option>
-          </select>
-        </div>
-
         <div style="flex:1;">
           <div style="font-weight:700;">Resultados</div>
-          <div class="meta" id="meta">—</div>
+          <div class="meta" id="meta">Iniciando…</div>
         </div>
-
         <div class="row" style="max-width:320px;">
           <button class="btn" id="btnCopy">Copiar lista (CSV)</button>
         </div>
@@ -324,12 +282,17 @@
   </div>
 </div>
 
-<script type="module" src="config.mjs"></script>
+<!-- IMPORTANTE: config.mjs debe definir window.supabase -->
+<script type="module" src="./config.mjs"></script>
 
 <script type="module">
+  // ============
+  // DIAGNÓSTICO + BUSCADOR
+  // ============
+
   const supabase = window.supabase;
 
-  // --- DOM ---
+  // DOM
   const el = (id) => document.getElementById(id);
   const q = el('q');
   const codigo = el('codigo');
@@ -339,33 +302,40 @@
   const estado = el('estado');
   const orden = el('orden');
   const limit = el('limit');
-  const showMore = el('showMore');
+
   const box = el('resultados');
   const meta = el('meta');
+
   const pager = el('pager');
   const prevBtn = el('prev');
   const nextBtn = el('next');
   const pageInfo = el('pageInfo');
+
   const btnBuscar = el('btnBuscar');
   const btnReset = el('btnReset');
   const btnCopy = el('btnCopy');
 
-  // --- Guardas ---
-  if(!supabase){
-    box.innerHTML = `<div class="empty">
-      ❌ No se pudo conectar con Supabase.<br>
-      Revisa <b>config.mjs</b> y la consola del navegador (F12).
-    </div>`;
-    throw new Error("Supabase no está definido. Revisar config.mjs");
-  }
-
-  // --- State ---
+  // State
   let page = 0;
   let total = 0;
   let lastData = [];
   let debounceTimer = null;
 
-  // --- Helpers ---
+  // UI helpers
+  function empty(msg){
+    box.innerHTML = '<div class="empty">' + msg + '</div>';
+  }
+  function loading(){
+    box.innerHTML = '<div class="loading"><span class="spinner"></span> Buscando…</div>';
+  }
+  function escapeHTML(str){
+    return (str ?? '').toString()
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#039;');
+  }
   function formatDate(d){
     if(!d) return '-';
     const dt = new Date(d);
@@ -373,6 +343,7 @@
     return dt.toLocaleDateString('es-ES');
   }
 
+  // Estado calibración
   function estadoKey(inst){
     if(!inst.proxima_calibracion) return 'nodata';
     const hoy = new Date();
@@ -382,30 +353,12 @@
     if(diff <= 30) return 'warn';
     return 'ok';
   }
-
   function estadoTag(inst){
     const k = estadoKey(inst);
-    if(k === 'nodata') return `<span class='tag info'>Sin datos</span>`;
-    if(k === 'bad') return `<span class='tag bad'>Fuera de calibración</span>`;
-    if(k === 'warn') return `<span class='tag warn'>Próxima calibración</span>`;
-    return `<span class='tag ok'>En regla</span>`;
-  }
-
-  function escapeHTML(str){
-    return (str ?? '').toString()
-      .replaceAll('&','&amp;')
-      .replaceAll('<','&lt;')
-      .replaceAll('>','&gt;')
-      .replaceAll('"','&quot;')
-      .replaceAll("'",'&#039;');
-  }
-
-  function loading(){
-    box.innerHTML = `<div class="loading"><span class="spinner"></span> Buscando…</div>`;
-  }
-
-  function empty(msg){
-    box.innerHTML = `<div class="empty">${msg}</div>`;
+    if(k === 'nodata') return "<span class='tag info'>Sin datos</span>";
+    if(k === 'bad') return "<span class='tag bad'>Fuera de calibración</span>";
+    if(k === 'warn') return "<span class='tag warn'>Próxima calibración</span>";
+    return "<span class='tag ok'>En regla</span>";
   }
 
   function getOrder(){
@@ -416,49 +369,6 @@
     if(v === 'prox_asc') return {col:'proxima_calibracion', asc:true};
     if(v === 'prox_desc') return {col:'proxima_calibracion', asc:false};
     return {col:'codigo', asc:true};
-  }
-
-  function render(data){
-    if(!data?.length){
-      empty('No se encontraron instrumentos con los filtros actuales');
-      return;
-    }
-
-    const detail = showMore.checked;
-
-    box.innerHTML = data.map(inst => {
-      const url = 'qr/qr.info_instrumentos.html?codigo=' + encodeURIComponent(inst.codigo);
-
-      const chips = [
-        inst.rango ? `<span class="chip">Rango: ${escapeHTML(inst.rango)}</span>` : '',
-        (inst.ubicacion_id !== null && inst.ubicacion_id !== undefined) ? `<span class="chip">Ubicación ID: ${escapeHTML(inst.ubicacion_id)}</span>` : '',
-      ].filter(Boolean).join('');
-
-      const extra = detail ? `
-        <div class="kv">
-          <div class="k">Descripción</div><div class="v">${escapeHTML(inst.descripcion || '-')}</div>
-          <div class="k">Rango</div><div class="v">${escapeHTML(inst.rango || '-')}</div>
-          <div class="k">Ubicación (ID)</div><div class="v">${escapeHTML(inst.ubicacion_id ?? '-')}</div>
-          <div class="k">Próx. calib.</div><div class="v">${formatDate(inst.proxima_calibracion)}</div>
-        </div>
-      ` : `
-        <div class="r-desc">${escapeHTML(inst.descripcion || '-')}</div>
-      `;
-
-      return `
-        <div class="result" onclick="window.location.href='${url}'">
-          <div class="topline">
-            <div>
-              <div class="r-code">${escapeHTML(inst.codigo)}</div>
-              ${detail ? '' : `<div class="r-desc">${escapeHTML(inst.rango || '-')} · Ubic ID: ${escapeHTML(inst.ubicacion_id ?? '-')}</div>`}
-            </div>
-            ${estadoTag(inst)}
-          </div>
-          ${chips ? `<div class="chips">${chips}</div>` : ''}
-          ${extra}
-        </div>
-      `;
-    }).join('');
   }
 
   function updatePager(){
@@ -472,7 +382,7 @@
 
   function updateMeta(){
     if(total === 0){
-      meta.textContent = '—';
+      meta.textContent = '0 instrumentos';
       return;
     }
     const perPage = Number(limit.value);
@@ -481,12 +391,73 @@
     meta.textContent = total + ' instrumentos · mostrando ' + start + '-' + end;
   }
 
+  function render(data){
+    if(!data || !data.length){
+      empty("No se encontraron instrumentos");
+      return;
+    }
+
+    box.innerHTML = data.map(inst => {
+      const url = 'qr/qr.info_instrumentos.html?codigo=' + encodeURIComponent(inst.codigo);
+      return `
+        <div class="result" onclick="window.location.href='${url}'">
+          <div class="topline">
+            <div>
+              <div class="r-code">${escapeHTML(inst.codigo)}</div>
+              <div class="r-desc">${escapeHTML(inst.descripcion || '-')}</div>
+            </div>
+            ${estadoTag(inst)}
+          </div>
+          <div class="chips">
+            <span class="chip">Rango: ${escapeHTML(inst.rango || '-')}</span>
+            <span class="chip">Ubicación ID: ${escapeHTML(inst.ubicacion_id ?? '-')}</span>
+            <span class="chip">Próx. calib.: ${formatDate(inst.proxima_calibracion)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   function applyEstadoFilter(data){
     const s = estado.value;
     if(!s) return data;
-    return data.filter(inst => estadoKey(inst) === s);
+    return (data || []).filter(inst => estadoKey(inst) === s);
   }
 
+  // ============
+  // TEST CONEXIÓN SUPABASE (VISUAL)
+  // ============
+  async function testSupabase(){
+    console.log("window.supabase =", window.supabase);
+
+    if(!supabase){
+      empty("❌ Supabase NO está cargado (window.supabase undefined). Revisa config.mjs y la ruta ./config.mjs");
+      meta.textContent = "❌ Supabase no cargado";
+      throw new Error("Supabase undefined");
+    }
+
+    meta.textContent = "✅ Supabase cargado. Probando lectura de instrumentos…";
+
+    const { data, error } = await supabase
+      .from("instrumentos")
+      .select("codigo, descripcion, rango, ubicacion_id, proxima_calibracion")
+      .limit(3);
+
+    if(error){
+      console.error("Error leyendo instrumentos:", error);
+      empty("❌ Error leyendo instrumentos: " + (error.message || JSON.stringify(error)));
+      meta.textContent = "❌ Error leyendo instrumentos";
+      return false;
+    }
+
+    console.log("TEST OK instrumentos:", data);
+    meta.textContent = "✅ Conexión OK. Cargando listado…";
+    return true;
+  }
+
+  // ============
+  // BUSCAR
+  // ============
   async function buscar({resetPage=false}={}){
     if(resetPage) page = 0;
 
@@ -497,63 +468,59 @@
     loading();
 
     let req = supabase
-      .from('instrumentos')
-      .select('codigo, descripcion, rango, ubicacion_id, proxima_calibracion', { count: 'exact' });
+      .from("instrumentos")
+      .select("codigo, descripcion, rango, ubicacion_id, proxima_calibracion", { count: "exact" });
 
     // Global
     const gt = q.value.trim();
     if(gt){
-      const like = '%' + gt + '%';
+      const like = "%" + gt + "%";
       req = req.or(
-        'codigo.ilike.' + like +
-        ',descripcion.ilike.' + like +
-        ',rango.ilike.' + like
+        "codigo.ilike." + like +
+        ",descripcion.ilike." + like +
+        ",rango.ilike." + like
       );
     }
 
-    // Campo a campo
+    // filtros
     const c = codigo.value.trim();
     const d = descripcion.value.trim();
     const r = rango.value.trim();
     const u = ubicacion.value.trim();
 
-    if(c) req = req.ilike('codigo', '%' + c + '%');
-    if(d) req = req.ilike('descripcion', '%' + d + '%');
-    if(r) req = req.ilike('rango', '%' + r + '%');
+    if(c) req = req.ilike("codigo", "%" + c + "%");
+    if(d) req = req.ilike("descripcion", "%" + d + "%");
+    if(r) req = req.ilike("rango", "%" + r + "%");
 
-    // ubicacion_id numérico
+    // ubicación id numérico
     if(u){
       const n = Number(u);
-      if(!Number.isNaN(n)) req = req.eq('ubicacion_id', n);
+      if(!Number.isNaN(n)) req = req.eq("ubicacion_id", n);
     }
 
     const { col, asc } = getOrder();
     req = req.order(col, { ascending: asc, nullsFirst: false });
-
-    // Paginar
     req = req.range(from, to);
 
     const { data, error, count } = await req;
 
     if(error){
-      console.error(error);
-      total = 0;
-      updateMeta();
-      empty('Error buscando datos (mira la consola F12)');
-      pager.style.display = 'none';
+      console.error("Error query buscar:", error);
+      empty("❌ Error en la búsqueda: " + (error.message || JSON.stringify(error)));
+      meta.textContent = "❌ Error en búsqueda";
+      pager.style.display = "none";
       return;
     }
 
     total = count ?? 0;
 
-    // Estado calibración (client-side)
-    let filtered = applyEstadoFilter(data || []);
+    const filtered = applyEstadoFilter(data || []);
     lastData = filtered;
 
     updateMeta();
 
     if(!filtered.length){
-      empty('No se encontraron instrumentos con los filtros actuales');
+      empty("No se encontraron instrumentos con los filtros actuales");
       updatePager();
       return;
     }
@@ -568,86 +535,77 @@
   }
 
   function reset(){
-    q.value = '';
-    codigo.value = '';
-    descripcion.value = '';
-    rango.value = '';
-    ubicacion.value = '';
-    estado.value = '';
-    orden.value = 'codigo_asc';
-    limit.value = '50';
-    showMore.checked = true;
+    q.value = "";
+    codigo.value = "";
+    descripcion.value = "";
+    rango.value = "";
+    ubicacion.value = "";
+    estado.value = "";
+    orden.value = "codigo_asc";
+    limit.value = "50";
 
     page = 0;
     total = 0;
     lastData = [];
 
-    meta.textContent = '—';
-    box.innerHTML = '';
-    pager.style.display = 'none';
-
-    // Recargar listado inicial
     buscar({resetPage:true});
   }
 
   function toCSV(data){
-    const headers = ['codigo','descripcion','rango','ubicacion_id','proxima_calibracion'];
+    const headers = ["codigo","descripcion","rango","ubicacion_id","proxima_calibracion"];
     const esc = (v) => {
-      const s = (v ?? '').toString().replaceAll('"','""');
+      const s = (v ?? "").toString().replaceAll('"','""');
       return '"' + s + '"';
     };
-    const lines = [headers.join(',')];
-    data.forEach(r => {
-      lines.push(headers.map(h => esc(r[h])).join(','));
+    const lines = [headers.join(",")];
+    (data || []).forEach(r => {
+      lines.push(headers.map(h => esc(r[h])).join(","));
     });
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   async function copyCSV(){
-    if(!lastData?.length){
-      alert('No hay resultados para copiar.');
+    if(!lastData || !lastData.length){
+      alert("No hay resultados para copiar.");
       return;
     }
     const csv = toCSV(lastData);
     await navigator.clipboard.writeText(csv);
-    alert('Copiado al portapapeles (CSV).');
+    alert("Copiado al portapapeles (CSV).");
   }
 
-  // --- Events ---
-  btnBuscar.addEventListener('click', () => buscar({resetPage:true}));
-  btnReset.addEventListener('click', reset);
-  btnCopy.addEventListener('click', copyCSV);
+  // Events
+  btnBuscar.addEventListener("click", () => buscar({resetPage:true}));
+  btnReset.addEventListener("click", reset);
+  btnCopy.addEventListener("click", copyCSV);
 
-  // Buscar al escribir (debounce)
-  [q, codigo, descripcion, rango].forEach(inp => {
-    inp.addEventListener('input', () => debouncedBuscar(true));
+  [q, codigo, descripcion, rango, ubicacion].forEach(inp => {
+    inp.addEventListener("input", () => debouncedBuscar(true));
   });
 
-  // Cambios en select
-  [estado, orden, limit, showMore].forEach(sel => {
-    sel.addEventListener('change', () => buscar({resetPage:true}));
+  [estado, orden, limit].forEach(sel => {
+    sel.addEventListener("change", () => buscar({resetPage:true}));
   });
 
-  // Ubicación por ID (input)
-  ubicacion.addEventListener('input', () => debouncedBuscar(true));
-
-  // Paginación
-  prevBtn.addEventListener('click', () => {
+  prevBtn.addEventListener("click", () => {
     page = Math.max(0, page - 1);
     buscar({resetPage:false});
   });
-  nextBtn.addEventListener('click', () => {
+
+  nextBtn.addEventListener("click", () => {
     page = page + 1;
     buscar({resetPage:false});
   });
 
-  // Enter para buscar
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') buscar({resetPage:true});
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") buscar({resetPage:true});
   });
 
-  // Init: cargar listado inicial
-  buscar({resetPage:true});
+  // INIT
+  // 1) test supabase
+  // 2) si ok => cargar listado inicial
+  const ok = await testSupabase();
+  if(ok) buscar({resetPage:true});
 </script>
 
 </body>
