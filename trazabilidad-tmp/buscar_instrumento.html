@@ -520,14 +520,17 @@
     const to = from + perPage - 1;
 
     // Validación ligera: si no hay nada, no bombardear.
-    const hasAny = [q.value, codigo.value, descripcion.value, rango.value, ubicacion.value, estado.value].some(v => (v||'').toString().trim() !== '');
-    if(!hasAny){
-      total = 0;
-      updateMeta();
-      box.innerHTML = '';
-      pager.style.display = 'none';
-      return;
-    }
+    // Permitir listado inicial sin filtros (con paginación).
+    // Si queréis obligar a escribir algo para evitar consultas grandes, volved a activar esta validación.
+    // const hasAny = [q.value, codigo.value, descripcion.value, rango.value, ubicacion.value, estado.value].some(v => (v||'').toString().trim() !== '');
+    // if(!hasAny){
+    //   total = 0;
+    //   updateMeta();
+    //   box.innerHTML = '';
+    //   pager.style.display = 'none';
+    //   return;
+    // }
+
 
     loading();
 
@@ -677,6 +680,8 @@
 
   // Init
   // (Sin carga de rangos; se filtra escribiendo)
+  // Cargar listado inicial
+  buscar({resetPage:true});
 </script>
 
 </body>
