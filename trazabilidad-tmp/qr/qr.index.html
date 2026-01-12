@@ -3,24 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TMP · QR Label Studio (Lyreco 70×36 · 3×8) · HQ QR</title>
+  <title>TMP · QR Label Studio (Lyreco 70×36 · 3×8) · QR tipo “ANTES”</title>
 
   <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     :root{
-      --bg0:#070b12; --bg1:#0b1220;
-      --panel:#0f172a; --panel2:#111c33;
+      --bg0:#070b12;
+      --bg1:#0b1220;
+      --panel:#0f172a;
+      --panel2:#111c33;
       --border:rgba(255,255,255,.10);
       --border2:rgba(88,166,255,.25);
-      --txt:#eaf2ff; --muted:#a0b3cc;
+      --txt:#eaf2ff;
+      --muted:#a0b3cc;
       --accent:#58a6ff;
-      --ok:#22c55e; --bad:#ff6b6b;
+      --ok:#22c55e;
+      --bad:#ff6b6b;
       --shadow:0 18px 42px rgba(0,0,0,.60);
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
+
     body{
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--txt);
@@ -32,49 +37,99 @@
     }
 
     .topbar{
-      position:sticky; top:0; z-index:50;
+      position:sticky;
+      top:0;
+      z-index:50;
       backdrop-filter:blur(12px);
       background:rgba(15,23,42,.70);
       border-bottom:1px solid var(--border);
       box-shadow:0 12px 30px rgba(0,0,0,.35);
     }
+
     .topbar-inner{
-      max-width:1200px; margin:0 auto;
+      max-width:1200px;
+      margin:0 auto;
       padding:14px 18px;
-      display:flex; align-items:center; gap:14px;
+      display:flex;
+      align-items:center;
+      gap:14px;
     }
-    .brand{display:flex;align-items:center;gap:12px;}
-    .brand img{height:38px;width:auto;filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));}
-    .brand h1{font-size:15px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;line-height:1;}
-    .brand .sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.2;}
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand img{
+      height:38px;
+      width:auto;
+      filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));
+    }
+
+    .brand h1{
+      font-size:15px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:900;
+      margin:0;
+      line-height:1;
+    }
+
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.2;
+    }
 
     .pill{
       margin-left:auto;
-      display:inline-flex;align-items:center;gap:8px;
-      font-size:12px;padding:8px 12px;border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      padding:8px 12px;
+      border-radius:999px;
       background:linear-gradient(135deg, rgba(88,166,255,.14), rgba(39,211,255,.08));
       border:1px solid var(--border2);
       color:#d5e9ff;
     }
-    .pill .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 18px rgba(34,197,94,.55);}
-    .pill.offline .dot{background:var(--bad);box-shadow:0 0 18px rgba(255,107,107,.55);}
+
+    .pill .dot{
+      width:9px;height:9px;border-radius:50%;
+      background:var(--ok);
+      box-shadow:0 0 18px rgba(34,197,94,.55);
+    }
+
+    .pill.offline .dot{
+      background:var(--bad);
+      box-shadow:0 0 18px rgba(255,107,107,.55);
+    }
 
     .btn-top{
-      margin-left:12px;border:none;border-radius:12px;
-      padding:10px 14px;font-weight:800;cursor:pointer;
+      margin-left:12px;
+      border:none;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:800;
+      cursor:pointer;
       background:linear-gradient(135deg, #1fae64, #22c55e);
-      color:#04120a;box-shadow:0 14px 30px rgba(0,0,0,.45);
+      color:#04120a;
+      box-shadow:0 14px 30px rgba(0,0,0,.45);
       transition:.15s transform,.15s filter;
     }
     .btn-top:hover{transform:translateY(-1px);filter:brightness(1.06)}
 
     .wrap{
-      max-width:1200px;margin:22px auto;
+      max-width:1200px;
+      margin:22px auto;
       padding:0 18px 40px;
       display:grid;
-      grid-template-columns: minmax(0,480px) minmax(0,1fr);
+      grid-template-columns:minmax(0,480px) minmax(0,1fr);
       gap:18px;
     }
+
     @media (max-width:980px){
       .wrap{grid-template-columns:1fr;}
       .pill{display:none;}
@@ -83,127 +138,282 @@
     .card{
       background:linear-gradient(180deg, rgba(17,28,51,.92), rgba(11,18,32,.88));
       border:1px solid rgba(88,166,255,.16);
-      border-radius:18px; box-shadow:var(--shadow);
+      border-radius:18px;
+      box-shadow:var(--shadow);
       padding:18px 16px 16px;
     }
-    .card h2{
-      font-size:14px;font-weight:900;letter-spacing:.08em;
-      text-transform:uppercase;margin-bottom:12px;color:#dff0ff;
-    }
-    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.04em;}
-    input,select{
-      width:100%;padding:10px 12px;border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:#070b12;color:var(--txt);outline:none;
-      font-size:14px;transition:.15s border-color;
-    }
-    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.12);}
 
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+    .card h2{
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:12px;
+      color:#dff0ff;
+    }
+
+    label{
+      font-size:12px;
+      color:var(--muted);
+      display:block;
+      margin-bottom:6px;
+      letter-spacing:.04em;
+    }
+
+    input,select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:#070b12;
+      color:var(--txt);
+      outline:none;
+      font-size:14px;
+      transition:.15s border-color;
+    }
+
+    input:focus,select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(88,166,255,.12);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:10px;
+    }
+
     .btn{
-      border:none;border-radius:999px;padding:10px 16px;
-      font-size:13px;cursor:pointer;font-weight:900;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border:none;
+      border-radius:999px;
+      padding:10px 16px;
+      font-size:13px;
+      cursor:pointer;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
       transition:.15s transform,.15s filter;
       box-shadow:0 12px 26px rgba(0,0,0,.35);
     }
     .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
-    .btn.main{background:linear-gradient(135deg, #1fae64, #22c55e);color:#04120a;}
+    .btn.main{background:linear-gradient(135deg,#1fae64,#22c55e);color:#04120a;}
     .btn.ghost{background:rgba(255,255,255,.04);color:#d7ebff;border:1px solid rgba(255,255,255,.10);box-shadow:none;}
     .btn.ghost:hover{border-color:rgba(88,166,255,.35)}
 
-    .sizes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-    .sizes button{
-      padding:8px 12px;font-size:12px;border-radius:999px;cursor:pointer;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);color:#d7ebff;font-weight:900;
+    .sizes{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
     }
+
+    .sizes button{
+      padding:8px 12px;
+      font-size:12px;
+      border-radius:999px;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#d7ebff;
+      font-weight:900;
+    }
+
     .sizes button.active{
       background:linear-gradient(135deg, rgba(88,166,255,.85), rgba(39,211,255,.55));
-      color:#041324;border-color:transparent;
+      color:#041324;
+      border-color:transparent;
     }
 
     .box{
-      margin-top:12px;padding:14px;border-radius:16px;
+      margin-top:12px;
+      padding:14px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       background:linear-gradient(135deg, rgba(7,11,18,.75), rgba(15,23,42,.45));
     }
-    .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
+
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+      line-height:1.35;
+    }
 
     /* PREVIEW */
-    .preview{margin-top:14px;display:flex;justify-content:center;align-items:center;min-height:220px;gap:10px;flex-direction:column;}
-    .label-preview{
-      background:#fff;border:1px solid #111;border-radius:12px;
-      padding:10px;box-shadow:0 18px 30px rgba(0,0,0,.25);
-      display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;
-      position:relative;padding-top:18px;
+    .preview{
+      margin-top:14px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:220px;
+      gap:10px;
+      flex-direction:column;
     }
+
+    .label-preview{
+      background:#fff;
+      border:1px solid #111;
+      border-radius:12px;
+      padding:10px;
+      box-shadow:0 18px 30px rgba(0,0,0,.25);
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      position:relative;
+      padding-top:18px; /* zona agujero */
+    }
+
     .hole{
-      position:absolute;top:6px;left:6px;width:10px;height:10px;border-radius:50%;
-      border:1px solid rgba(0,0,0,.9);background:rgba(0,0,0,.04);
-      display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;
+      position:absolute;
+      top:6px;
+      left:6px;
+      width:10px;height:10px;
+      border-radius:50%;
+      border:1px solid rgba(0,0,0,.9);
+      background:rgba(0,0,0,.04);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:5;
+      pointer-events:none;
     }
     .hole::after{content:"";width:6px;height:6px;border-radius:50%;border:1px solid rgba(0,0,0,.45);background:transparent;}
     .hole::before{content:"+";position:absolute;font-size:9px;font-weight:900;color:rgba(0,0,0,.55);line-height:1;transform:translateY(-0.2px);}
-    .label-preview .tmp{font-size:11px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:#0b1220;margin-bottom:4px;}
 
-    .qr-box{
-      display:inline-block;background:#fff;
-      padding:16px; /* QUIET ZONE EXTRA (más robusto) */
-      border-radius:10px;
+    .label-preview .tmp{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color:#0b1220;
+      margin-bottom:4px;
     }
+
+    /* QUIET ZONE GRANDE como tu etiqueta “antes” */
+    .qr-box{
+      display:inline-block;
+      background:#fff;
+      padding:10px;           /* margen blanco visible */
+      border-radius:8px;
+    }
+
     .qr-box canvas{
-      display:block;background:#fff;
-      image-rendering:pixelated;
+      display:block;
+      background:#fff;
+      image-rendering: pixelated;
     }
 
     .label-preview .code{
-      margin-top:6px;padding:4px 10px;border-radius:999px;
-      border:1px solid #111;background:#f2f2f2;
-      font-weight:900;font-size:13px;letter-spacing:.12em;color:#111;line-height:1;
+      margin-top:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #111;
+      background:#f2f2f2;
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.12em;
+      color:#111;
+      line-height:1;
     }
 
     /* LISTA */
     .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      font-size:12px;padding:8px 12px;border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      padding:8px 12px;
+      border-radius:999px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
-      color:#cfe6ff;margin-bottom:12px;
+      color:#cfe6ff;
+      margin-bottom:12px;
     }
+
     .list{
-      margin-top:12px;border-radius:16px;border:1px solid rgba(255,255,255,.10);
-      overflow:auto;background:rgba(0,0,0,.18);max-height:340px;
+      margin-top:12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      overflow:auto;
+      background:rgba(0,0,0,.18);
+      max-height:340px;
     }
+
     .inst-row{
-      display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);
-      cursor:pointer;transition:.12s background,.12s outline;align-items:flex-start;
+      display:flex;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      cursor:pointer;
+      transition:.12s background,.12s outline;
+      align-items:flex-start;
     }
+
     .inst-row:hover{background:rgba(88,166,255,.08)}
     .inst-row.selected{background:rgba(88,166,255,.14);outline:1px solid rgba(88,166,255,.40);}
+
     .inst-row input[type="checkbox"]{
-      margin-top:2px;width:18px;height:18px;
-      accent-color: var(--accent);cursor:pointer;
+      margin-top:2px;
+      width:18px;height:18px;
+      accent-color: var(--accent);
+      cursor:pointer;
     }
-    .inst-code{font-weight:900;letter-spacing:.08em;min-width:80px;}
-    .inst-desc{font-size:12px;color:var(--muted);line-height:1.25;}
+
+    .inst-code{
+      font-weight:900;
+      letter-spacing:.08em;
+      min-width:90px;
+    }
+
+    .inst-desc{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.25;
+    }
 
     .footer{
-      margin-top:12px;color:var(--muted);font-size:12px;
-      display:flex;flex-direction:column;gap:6px;
+      margin-top:12px;
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
     }
+
     .footer strong{color:#e9f4ff}
 
     .preview-grid{
-      display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;
-      background:rgba(0,0,0,.25);border:1px dashed rgba(255,255,255,.10);
-      border-radius:12px;padding:10px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:5px;
+      margin-top:10px;
+      background:rgba(0,0,0,.25);
+      border:1px dashed rgba(255,255,255,.10);
+      border-radius:12px;
+      padding:10px;
     }
+
     .preview-cell{
-      height:18px;border-radius:4px;background:#1f2937;
-      display:flex;align-items:center;justify-content:center;font-size:10px;color:#9ca3af;
+      height:18px;
+      border-radius:4px;
+      background:#1f2937;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:10px;
+      color:#9ca3af;
     }
-    .preview-cell.filled{background:#22c55e;color:#022c22;font-weight:900;}
+
+    .preview-cell.filled{
+      background:#22c55e;
+      color:#022c22;
+      font-weight:900;
+    }
 
     /* PRINT */
     #printArea{display:none;}
@@ -215,13 +425,14 @@
 </head>
 
 <body>
+  <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand">
         <img src="../img/tmp-quality.png" alt="TMP">
         <div>
           <h1>QR Label Studio</h1>
-          <div class="sub">Lyreco 70×36 (3×8) · QR NÍTIDO (ECC H + sin blur)</div>
+          <div class="sub">Lyreco 70×36 (3×8) · QR robusto (como “antes”)</div>
         </div>
       </div>
 
@@ -235,13 +446,12 @@
   </div>
 
   <div class="wrap">
-
     <!-- IZQUIERDA -->
     <div class="card">
       <h2>Etiqueta individual</h2>
 
       <label>Código del instrumento</label>
-      <input id="codigo" type="text" placeholder="Ej: METMP001">
+      <input id="codigo" type="text" placeholder="Ej: 3V070701 o 180515066018">
 
       <div class="row">
         <button class="btn main" id="btnGenerar">Generar</button>
@@ -262,25 +472,10 @@
           <option value="full">FULL (incluye microtexto)</option>
         </select>
 
-        <div class="row" style="margin-top:10px;">
-          <div style="flex:1;min-width:230px;">
-            <label>Contenido QR</label>
-            <select id="qrModo">
-              <!-- ✅ POR DEFECTO “SOLO CÓDIGO” PARA MÁXIMA ROBUSTEZ -->
-              <option value="code" selected>Solo código (recomendado 10×10)</option>
-              <option value="url">URL completa</option>
-              <option value="short">URL corta (base)</option>
-            </select>
-          </div>
-          <div style="flex:2;min-width:240px;">
-            <label>Base URL corta (si eliges “URL corta”)</label>
-            <input id="shortBase" type="text" placeholder="Ej: https://t.tmp/?c=" value="https://trazabilidad-tmp.vercel.app/i?c=">
-          </div>
-        </div>
-
         <div class="hint">
-          ✅ Para abarcar iPhone + Android + lector: <b>Solo código</b> o <b>URL corta</b>.<br>
-          ✅ En imprimir: <b>Escala 100%</b> y desactivar <b>encabezados/pies</b>.
+          ✅ Para que el QR sea como tu etiqueta “antes”: usamos una URL corta:<br>
+          <b>https://trazabilidad-tmp.vercel.app/i/CODIGO</b><br>
+          (redirige a la pantalla del instrumento).
         </div>
       </div>
 
@@ -303,7 +498,6 @@
       <div class="footer">
         <span><strong>Casilla:</strong> 70×36 mm · 3×8 (sin separación)</span>
         <span><strong>QR:</strong> <span id="lblQRSize">10</span>×<span id="lblQRSize2">10</span> mm (centrado)</span>
-        <span><strong>Contenido:</strong> <span id="lblModo">Solo código</span></span>
         <span><strong>Plantilla:</strong> <span id="lblTpl">LAB PRO</span></span>
         <span><strong>Capacidad:</strong> 24 etiquetas</span>
         <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
@@ -326,39 +520,36 @@
   <script type="module" src="../config.mjs"></script>
 
   <script type="module">
-    // ========================
-    // CONFIG
-    // ========================
-    const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
+    // ======================================================
+    // CLAVE: QR “como antes”
+    // - Evitamos URL larga (densa)
+    // - Usamos URL corta /i/CODIGO (poco densa)
+    // ======================================================
+    const SHORT_PREFIX = "https://trazabilidad-tmp.vercel.app/i/";
 
     // Hoja Lyreco:
     const COLS = 3, ROWS = 8;
     const CELL_W_MM = 70, CELL_H_MM = 36;
 
-    // Márgenes que has dado:
+    // Márgenes arriba/abajo que nos diste
     const MARGEN_SUP_MM = 4.5;
     const MARGEN_INF_MM = 4.5;
 
-    // Margen lateral (ajustable si la impresora desplaza)
+    // Laterales (si tu impresora desplaza, ajusta aquí)
     const MARGEN_IZQ_MM = 0.0;
     const MARGEN_DER_MM = 0.0;
 
-    // Sin separación entre etiquetas
     const GAP_X_MM = 0.0;
     const GAP_Y_MM = 0.0;
 
     const CAPACITY = COLS * ROWS;
 
-    // ========================
     // STATE
-    // ========================
     let etiquetaMM = 10;
     let allInstrumentos = [];
     const selectedCodigos = new Set();
 
-    // ========================
     // DOM
-    // ========================
     const codigoInput = document.getElementById("codigo");
     const qrResult = document.getElementById("qrResult");
 
@@ -372,9 +563,6 @@
     const sizeButtons = document.querySelectorAll(".size-btn");
     const tplSelect = document.getElementById("tplEtiqueta");
 
-    const qrModo = document.getElementById("qrModo");
-    const shortBase = document.getElementById("shortBase");
-
     const lblTpl = document.getElementById("lblTpl");
     const lblSeleccionados = document.getElementById("lblSeleccionados");
     const previewGrid = document.getElementById("previewGrid");
@@ -382,22 +570,13 @@
 
     const lblQRSize = document.getElementById("lblQRSize");
     const lblQRSize2 = document.getElementById("lblQRSize2");
-    const lblModo = document.getElementById("lblModo");
 
-    // ========================
     // HELPERS
-    // ========================
     function plantillaNombre(v){
       if (v==="minimal") return "MINIMAL";
       if (v==="lab") return "LAB PRO";
       if (v==="full") return "FULL";
       return "LAB PRO";
-    }
-    function modoNombre(v){
-      if(v==="url") return "URL completa";
-      if(v==="code") return "Solo código";
-      if(v==="short") return "URL corta";
-      return "Solo código";
     }
 
     function esc(text){
@@ -415,91 +594,46 @@
     }
 
     function mmToPx(mm){
-      // 96 DPI aprox. navegador
+      // 96 DPI aproximado del navegador
       return Math.round(mm * 96 / 25.4);
     }
 
-    // ========================
-    // QR NÍTIDO (clave)
-    // - genera QR grande y remuestrea SIN blur
-    // ========================
-    function renderQRSharp(container, text, visiblePx, {
-      scale = 10,
-      padPx = 16,
-      ecc = "H"
-    } = {}){
+    // Construye el texto QR: URL corta (como “antes”: poco denso)
+    function buildQRText(codigo){
+      return SHORT_PREFIX + encodeURIComponent(codigo);
+    }
+
+    // Render QR al tamaño exacto (sin reescalado) para evitar “borroso”
+    function renderQRExact(container, text, visiblePx){
       container.innerHTML = "";
-      container.style.padding = padPx + "px";
-      container.style.background = "#fff";
-      container.style.display = "inline-block";
+      // Creamos un div interno para qrcodejs
+      const d = document.createElement("div");
+      container.appendChild(d);
 
-      // 1) canvas interno grande
-      const tmp = document.createElement("div");
-      tmp.style.position = "absolute";
-      tmp.style.left = "-99999px";
-      tmp.style.top = "-99999px";
-      document.body.appendChild(tmp);
-
-      const internalPx = Math.max(visiblePx * scale, 320);
-
-      new QRCode(tmp, {
-        text,
-        width: internalPx,
-        height: internalPx,
-        correctLevel: (ecc === "H" ? QRCode.CorrectLevel.H :
-                      ecc === "Q" ? QRCode.CorrectLevel.Q :
-                      ecc === "M" ? QRCode.CorrectLevel.M :
-                                   QRCode.CorrectLevel.L)
+      // Genera canvas EXACTO al tamaño final
+      const qr = new QRCode(d, {
+        text: text,
+        width: visiblePx,
+        height: visiblePx,
+        correctLevel: QRCode.CorrectLevel.H
       });
 
-      const srcCanvas = tmp.querySelector("canvas");
-      if(!srcCanvas){
-        document.body.removeChild(tmp);
-        container.textContent = "Error QR";
-        return;
+      // Asegura que no haya escalado CSS
+      const c = d.querySelector("canvas");
+      if(c){
+        c.style.width = visiblePx + "px";
+        c.style.height = visiblePx + "px";
+        c.style.imageRendering = "pixelated";
       }
-
-      // 2) canvas final (tamaño EXACTO) sin suavizado
-      const out = document.createElement("canvas");
-      out.width = visiblePx;
-      out.height = visiblePx;
-      const ctx = out.getContext("2d", { alpha: false });
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(srcCanvas, 0, 0, visiblePx, visiblePx);
-
-      out.style.display = "block";
-      out.style.background = "#fff";
-      out.style.imageRendering = "pixelated";
-
-      container.appendChild(out);
-      document.body.removeChild(tmp);
+      return qr;
     }
 
-    function buildQRText(codigo){
-      const mode = qrModo.value;
-
-      // ✅ default: SOLO CÓDIGO (máxima robustez 10×10)
-      if(mode === "code") return codigo;
-
-      if(mode === "short"){
-        const base = (shortBase.value || "").trim();
-        if(!base) return codigo; // fallback
-        return base + encodeURIComponent(codigo);
-      }
-
-      // url completa
-      return BASE_URL + encodeURIComponent(codigo);
-    }
-
-    // ========================
     // UI
-    // ========================
     function actualizarPreview(){
       lblTpl.textContent = plantillaNombre(tplSelect.value);
       lblSeleccionados.textContent = selectedCodigos.size;
       lblQRSize.textContent = etiquetaMM;
       lblQRSize2.textContent = etiquetaMM;
-      lblModo.textContent = modoNombre(qrModo.value);
 
       previewGrid.innerHTML = "";
       for(let i=0;i<CAPACITY;i++){
@@ -525,14 +659,13 @@
           <div class="qr-box" id="qrBoxPreview"></div>
           <div class="code">${esc(codigo)}</div>
         </div>
-        <div class="hint">QR contiene: <b>${esc(qrText)}</b></div>
+        <div class="hint">QR abre: <b>${esc(qrText)}</b></div>
       `;
 
       const qrBox = document.getElementById("qrBoxPreview");
       const visiblePx = mmToPx(etiquetaMM);
 
-      // Preview: alto pero razonable
-      renderQRSharp(qrBox, qrText, visiblePx, { scale: 12, padPx: 16, ecc: "H" });
+      renderQRExact(qrBox, qrText, visiblePx);
     }
 
     function generar(){
@@ -541,7 +674,7 @@
       renderEtiquetaPreview(codigo);
     }
 
-    // Tamaños
+    // Tamaños 10/13/15
     sizeButtons.forEach(btn=>{
       btn.addEventListener("click",()=>{
         sizeButtons.forEach(b=>b.classList.remove("active"));
@@ -552,18 +685,9 @@
       });
     });
 
-    tplSelect.addEventListener("change",()=>{
+    tplSelect.addEventListener("change", ()=>{
       actualizarPreview();
       if(codigoInput.value.trim()) generar();
-    });
-
-    qrModo.addEventListener("change", ()=>{
-      actualizarPreview();
-      if(codigoInput.value.trim()) generar();
-    });
-
-    shortBase.addEventListener("input", ()=>{
-      if(qrModo.value === "short" && codigoInput.value.trim()) generar();
     });
 
     document.getElementById("btnGenerar").addEventListener("click", generar);
@@ -571,9 +695,7 @@
       if(e.key==="Enter"){ e.preventDefault(); generar(); }
     });
 
-    // ========================
     // SUPABASE
-    // ========================
     async function waitForSupabase(ms=5000){
       const start = Date.now();
       while(Date.now() - start < ms){
@@ -629,9 +751,7 @@
       renderLista();
     }
 
-    // ========================
     // LISTA + selección
-    // ========================
     function toggleSeleccion(codigo){
       if(selectedCodigos.has(codigo)){
         selectedCodigos.delete(codigo);
@@ -707,9 +827,7 @@
     document.getElementById("btnRefrescarLista").addEventListener("click", cargarInstrumentos);
     document.getElementById("btnLimpiarSeleccion").addEventListener("click", limpiarSeleccion);
 
-    // ========================
     // IMPRESIÓN (Lyreco 70×36)
-    // ========================
     function buildPrintCSS(tpl){
       const showHeader = (tpl !== "minimal");
 
@@ -775,12 +893,13 @@
           .qrwrap{
             display:inline-block;
             background:#fff;
-            padding:16px; /* QUIET ZONE EXTRA */
+            padding:10px; /* quiet zone visible (tipo “antes”) */
           }
+
           .qrwrap canvas{
             display:block;
             background:#fff;
-            image-rendering:pixelated;
+            image-rendering: pixelated;
           }
         </style>
       `;
@@ -825,22 +944,20 @@
 
       printArea.innerHTML = html;
 
-      // Tamaño del QR: exactamente etiquetaMM
       const visiblePx = mmToPx(etiquetaMM);
 
+      // Genera cada QR al tamaño exacto (sin reescalado)
       for(const c of codigos){
         const id = safeIdFromCode(c);
         const el = document.getElementById("pqr_" + id);
         const qrText = buildQRText(c);
-
-        // ✅ IMPRESIÓN: escala MUY ALTA para que salga nítido
-        renderQRSharp(el, qrText, visiblePx, { scale: 20, padPx: 16, ecc: "H" });
+        renderQRExact(el, qrText, visiblePx);
       }
 
       setTimeout(()=>{
         window.print();
         setTimeout(()=>{ printArea.innerHTML=""; }, 500);
-      }, 650);
+      }, 600);
     }
 
     function imprimirHojaA4(){
@@ -856,13 +973,29 @@
     document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHojaA4);
     document.getElementById("btnImprimirUno").addEventListener("click", imprimirEtiquetaIndividual);
 
-    // ========================
     // INIT
-    // ========================
     window.addEventListener("load", async () => {
       actualizarPreview();
       await cargarInstrumentos();
     });
   </script>
+
+  <!--
+    ✅ PARA QUE FUNCIONE LA URL CORTA /i/CODIGO:
+    En la raíz del proyecto crea vercel.json con:
+
+    {
+      "redirects": [
+        {
+          "source": "/i/:codigo",
+          "destination": "/qr/qr.info_instrumentos.html?codigo=:codigo",
+          "permanent": false
+        }
+      ]
+    }
+
+    Luego redeploy en Vercel.
+  -->
 </body>
 </html>
+
