@@ -276,12 +276,9 @@
       align-items:center;
       justify-content:flex-start;
       position:relative;
-
-      /* ✅ reserva zona superior para que el agujero NO toque el QR */
       padding-top:18px;
     }
 
-    /* ✅ agujero ARRIBA IZQUIERDA, fuera del QR */
     .hole{
       position:absolute;
       top:6px;
@@ -388,6 +385,12 @@
       color:var(--muted);
       line-height:1.25;
     }
+    .inst-range{
+      font-size:11px;
+      color:#d7ebff;
+      opacity:.9;
+      margin-top:4px;
+    }
 
     .footer{
       margin-top:12px;
@@ -432,7 +435,6 @@
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-inner">
     <div class="brand">
@@ -459,7 +461,7 @@
     <h2>Etiqueta individual</h2>
 
     <label>Código del instrumento</label>
-    <input id="codigo" type="text" placeholder="Ej: 11217">
+    <input id="codigo" type="text" placeholder="Ej: METMP001">
 
     <div class="row">
       <button class="btn main" id="btnGenerar">Generar</button>
@@ -497,7 +499,7 @@
 
     <div style="margin-top:6px">
       <label>Buscar instrumentos</label>
-      <input id="buscador" type="text" placeholder="Ej: 112, micrómetro…">
+      <input id="buscador" type="text" placeholder="Ej: MET, micrómetro, M14…">
     </div>
 
     <div class="list" id="listaInstrumentos"></div>
@@ -526,125 +528,377 @@
 <!-- SUPABASE -->
 <script type="module" src="../config.mjs"></script>
 
-<script>
-const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
-const MAX_PER_PAGE = 12;
+<script type="module">
+  const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
+  const MAX_PER_PAGE = 12;
 
-let etiquetaMM = 10;
-let allInstrumentos = [];
-const selectedCodigos = new Set();
+  let etiquetaMM = 10;
+  let allInstrumentos = [];
+  const selectedCodigos = new Set();
 
-const codigoInput = document.getElementById("codigo");
-const qrResult = document.getElementById("qrResult");
+  const codigoInput = document.getElementById("codigo");
+  const qrResult = document.getElementById("qrResult");
 
-const badgeOnline = document.getElementById("badgeOnline");
-const badgeOnlineTxt = document.getElementById("badgeOnlineTxt");
+  const badgeOnline = document.getElementById("badgeOnline");
+  const badgeOnlineTxt = document.getElementById("badgeOnlineTxt");
 
-const badgeEstado = document.getElementById("badgeEstado");
-const listaInstrumentos = document.getElementById("listaInstrumentos");
-const buscadorInput = document.getElementById("buscador");
+  const badgeEstado = document.getElementById("badgeEstado");
+  const listaInstrumentos = document.getElementById("listaInstrumentos");
+  const buscadorInput = document.getElementById("buscador");
 
-const lblTamano = document.getElementById("lblTamano");
-const lblTpl = document.getElementById("lblTpl");
-const lblSeleccionados = document.getElementById("lblSeleccionados");
-const previewGrid = document.getElementById("previewGrid");
+  const lblTamano = document.getElementById("lblTamano");
+  const lblTpl = document.getElementById("lblTpl");
+  const lblSeleccionados = document.getElementById("lblSeleccionados");
+  const previewGrid = document.getElementById("previewGrid");
 
-const sizeButtons = document.querySelectorAll(".size-btn");
-const tplSelect = document.getElementById("tplEtiqueta");
+  const sizeButtons = document.querySelectorAll(".size-btn");
+  const tplSelect = document.getElementById("tplEtiqueta");
 
-function plantillaNombre(v){
-  if (v==="minimal") return "MINIMAL";
-  if (v==="lab") return "LAB PRO";
-  if (v==="full") return "FULL";
-  return "LAB PRO";
-}
-function esc(text){
-  return String(text).replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
+  const btnGenerar = document.getElementById("btnGenerar");
+  const btnImprimirUno = document.getElementById("btnImprimirUno");
+  const btnImprimirHoja = document.getElementById("btnImprimirHoja");
+  const btnLimpiarSeleccion = document.getElementById("btnLimpiarSeleccion");
+  const btnRefrescarLista = document.getElementById("btnRefrescarLista");
 
-function actualizarPreview(){
-  lblTamano.textContent = etiquetaMM + " mm";
-  lblTpl.textContent = plantillaNombre(tplSelect.value);
-  lblSeleccionados.textContent = selectedCodigos.size;
-
-  previewGrid.innerHTML = "";
-  for(let i=0;i<MAX_PER_PAGE;i++){
-    const div=document.createElement("div");
-    div.className="preview-cell";
-    if(i<selectedCodigos.size){
-      div.classList.add("filled");
-      div.textContent=i+1;
-    }
-    previewGrid.appendChild(div);
+  function plantillaNombre(v){
+    if (v==="minimal") return "MINIMAL";
+    if (v==="lab") return "LAB PRO";
+    if (v==="full") return "FULL";
+    return "LAB PRO";
   }
-}
 
-function renderEtiquetaPreview(codigo, url, mm, tpl){
-  const showHeader = (tpl !== "minimal");
-  qrResult.innerHTML = `
-    <div class="label-preview">
-      <div class="hole"></div>
-      ${showHeader ? `<div class="tmp">TMP</div>` : ``}
-      <div class="qr-box"></div>
-      <div class="code">${esc(codigo)}</div>
-    </div>
-    <div class="hint">URL: ${esc(url)}</div>
-  `;
-  const qrBox = qrResult.querySelector(".qr-box");
-  qrBox.innerHTML = "";
-  new QRCode(qrBox, {
-    text: url,
-    width: mm * 8,
-    height: mm * 8
+  function esc(text){
+    return String(text ?? "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  function normalize(s){
+    return (s ?? "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // quita tildes
+  }
+
+  function actualizarPreview(){
+    lblTamano.textContent = etiquetaMM + " mm";
+    lblTpl.textContent = plantillaNombre(tplSelect.value);
+    lblSeleccionados.textContent = selectedCodigos.size;
+
+    previewGrid.innerHTML = "";
+    for(let i=0;i<MAX_PER_PAGE;i++){
+      const div=document.createElement("div");
+      div.className="preview-cell";
+      if(i<selectedCodigos.size){
+        div.classList.add("filled");
+        div.textContent=i+1;
+      }
+      previewGrid.appendChild(div);
+    }
+  }
+
+  function renderEtiquetaPreview(codigo, url, mm, tpl){
+    const showHeader = (tpl !== "minimal");
+    qrResult.innerHTML = `
+      <div class="label-preview">
+        <div class="hole"></div>
+        ${showHeader ? `<div class="tmp">TMP</div>` : ``}
+        <div class="qr-box"></div>
+        <div class="code">${esc(codigo)}</div>
+      </div>
+      <div class="hint">URL: ${esc(url)}</div>
+    `;
+    const qrBox = qrResult.querySelector(".qr-box");
+    qrBox.innerHTML = "";
+    new QRCode(qrBox, {
+      text: url,
+      width: etiquetaMM * 8,
+      height: etiquetaMM * 8
+    });
+  }
+
+  function generar(){
+    const codigo = codigoInput.value.trim();
+    if(!codigo){ alert("Introduce el código"); return; }
+    const url = BASE_URL + encodeURIComponent(codigo);
+    renderEtiquetaPreview(codigo, url, etiquetaMM, tplSelect.value);
+  }
+
+  sizeButtons.forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      sizeButtons.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      etiquetaMM = parseInt(btn.dataset.mm,10);
+      actualizarPreview();
+      if(codigoInput.value.trim()) generar();
+    });
   });
-}
 
-function generar(){
-  const codigo = codigoInput.value.trim();
-  if(!codigo){ alert("Introduce el código"); return; }
-  const url = BASE_URL + encodeURIComponent(codigo);
-  renderEtiquetaPreview(codigo, url, etiquetaMM, tplSelect.value);
-}
-
-sizeButtons.forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    sizeButtons.forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    etiquetaMM = parseInt(btn.dataset.mm,10);
+  tplSelect.addEventListener("change",()=>{
     actualizarPreview();
     if(codigoInput.value.trim()) generar();
   });
-});
 
-tplSelect.addEventListener("change",()=>{
-  actualizarPreview();
-  if(codigoInput.value.trim()) generar();
-});
+  btnGenerar.addEventListener("click", generar);
 
-document.getElementById("btnGenerar").addEventListener("click", generar);
+  codigoInput.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ e.preventDefault(); generar(); }
+  });
 
-codigoInput.addEventListener("keydown", e=>{
-  if(e.key==="Enter"){ e.preventDefault(); generar(); }
-});
-
-async function checkSupabase(){
-  const sb = window.supabase;
-  if(sb){
-    badgeOnline.classList.remove("offline");
-    badgeOnlineTxt.textContent="Online (Supabase conectado)";
-  } else {
-    badgeOnline.classList.add("offline");
-    badgeOnlineTxt.textContent="Offline (Supabase no disponible)";
+  // ========= SUPABASE =========
+  async function waitForSupabase(ms=2500){
+    const start = Date.now();
+    while(Date.now() - start < ms){
+      if(window.supabase) return window.supabase;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    return null;
   }
-}
 
-window.addEventListener("load", ()=>{
-  actualizarPreview();
-  checkSupabase();
-});
+  async function checkSupabase(){
+    const sb = await waitForSupabase();
+    if(sb){
+      badgeOnline.classList.remove("offline");
+      badgeOnlineTxt.textContent="Online (Supabase conectado)";
+      return sb;
+    } else {
+      badgeOnline.classList.add("offline");
+      badgeOnlineTxt.textContent="Offline (Supabase no disponible)";
+      return null;
+    }
+  }
+
+  async function cargarInstrumentos(){
+    const sb = await checkSupabase();
+    if(!sb){
+      badgeEstado.textContent = "❌ No hay conexión con Supabase";
+      listaInstrumentos.innerHTML = "";
+      return;
+    }
+
+    badgeEstado.textContent = "Cargando instrumentos desde Supabase…";
+
+    // ⚠️ Usamos SOLO columnas confirmadas
+    const { data, error } = await sb
+      .from("instrumentos")
+      .select("codigo, descripcion, rango")
+      .order("codigo", { ascending: true })
+      .limit(5000);
+
+    if(error){
+      console.error(error);
+      badgeEstado.textContent = "❌ Error cargando instrumentos: " + (error.message || "desconocido");
+      listaInstrumentos.innerHTML = "";
+      return;
+    }
+
+    allInstrumentos = (data || []).map(x => ({
+      codigo: x.codigo,
+      descripcion: x.descripcion || "",
+      rango: x.rango || ""
+    }));
+
+    badgeEstado.textContent = `✅ Instrumentos cargados: ${allInstrumentos.length}`;
+    renderLista();
+  }
+
+  function renderLista(){
+    const q = normalize(buscadorInput.value.trim());
+
+    const filtered = !q ? allInstrumentos : allInstrumentos.filter(it => {
+      const hay = normalize(it.codigo) + " " + normalize(it.descripcion) + " " + normalize(it.rango);
+      return hay.includes(q);
+    });
+
+    if(!filtered.length){
+      listaInstrumentos.innerHTML = `<div style="padding:12px;color:var(--muted);font-size:12px;">No hay resultados</div>`;
+      return;
+    }
+
+    // Limit visual: no pintamos infinito; la búsqueda va bien, pero la UI no
+    const view = filtered.slice(0, 300);
+
+    listaInstrumentos.innerHTML = view.map(it => {
+      const checked = selectedCodigos.has(it.codigo) ? "checked" : "";
+      return `
+        <div class="inst-row" data-codigo="${esc(it.codigo)}">
+          <input type="checkbox" ${checked} />
+          <div>
+            <div class="inst-code">${esc(it.codigo)}</div>
+            <div class="inst-desc">${esc(it.descripcion || "-")}</div>
+            <div class="inst-range">Rango: <b>${esc(it.rango || "-")}</b></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // eventos fila
+    listaInstrumentos.querySelectorAll(".inst-row").forEach(row => {
+      row.addEventListener("click", (e) => {
+        // si clicas en el checkbox, también vale
+        const codigo = row.getAttribute("data-codigo");
+        toggleSeleccion(codigo);
+        // refleja checkbox
+        const cb = row.querySelector('input[type="checkbox"]');
+        cb.checked = selectedCodigos.has(codigo);
+        e.preventDefault();
+      });
+    });
+  }
+
+  function toggleSeleccion(codigo){
+    if(selectedCodigos.has(codigo)){
+      selectedCodigos.delete(codigo);
+    } else {
+      if(selectedCodigos.size >= MAX_PER_PAGE){
+        alert("Máximo " + MAX_PER_PAGE + " etiquetas por hoja.");
+        return;
+      }
+      selectedCodigos.add(codigo);
+    }
+    actualizarPreview();
+  }
+
+  function limpiarSeleccion(){
+    selectedCodigos.clear();
+    actualizarPreview();
+    renderLista();
+  }
+
+  function getSelectedArray(){
+    return Array.from(selectedCodigos);
+  }
+
+  // ========= IMPRESIÓN =========
+  function openPrintWindow(codigos){
+    if(!codigos.length){
+      alert("No hay instrumentos seleccionados.");
+      return;
+    }
+
+    const tpl = tplSelect.value;
+    const mm = etiquetaMM;
+
+    // HTML impresión
+    const w = window.open("", "_blank");
+    w.document.open();
+    w.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Imprimir etiquetas</title>
+        <style>
+          @page { size: A4; margin: 10mm; }
+          body{ font-family: Arial, sans-serif; }
+          .grid{
+            display:grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6mm;
+          }
+          .label{
+            width: 60mm;
+            min-height: 35mm;
+            border: 1px solid #000;
+            border-radius: 4mm;
+            padding: 3mm;
+            position: relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+          }
+          .hole{
+            position:absolute;
+            top:2mm; left:2mm;
+            width:3.2mm; height:3.2mm;
+            border:1px solid #000;
+            border-radius:50%;
+          }
+          .tmp{
+            font-size:8pt;
+            font-weight:700;
+            letter-spacing:.25em;
+            margin-bottom:2mm;
+          }
+          .code{
+            margin-top:2mm;
+            font-weight:700;
+            border:1px solid #000;
+            border-radius: 999px;
+            padding:1mm 3mm;
+            font-size:10pt;
+          }
+          canvas{ display:block; }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+      </head>
+      <body>
+        <div class="grid" id="grid"></div>
+        <script>
+          const codigos = ${JSON.stringify(codigos)};
+          const BASE_URL = ${JSON.stringify(BASE_URL)};
+          const mm = ${JSON.stringify(mm)};
+          const tpl = ${JSON.stringify(tpl)};
+          const showHeader = (tpl !== "minimal");
+          const grid = document.getElementById("grid");
+
+          function makeLabel(codigo){
+            const url = BASE_URL + encodeURIComponent(codigo);
+            const div = document.createElement("div");
+            div.className = "label";
+            div.innerHTML = \`
+              <div class="hole"></div>
+              \${showHeader ? '<div class="tmp">TMP</div>' : ''}
+              <div class="qr" id="qr_\${codigo.replace(/[^a-zA-Z0-9]/g,'_')}"></div>
+              <div class="code">\${codigo}</div>
+            \`;
+            grid.appendChild(div);
+
+            const qrBox = div.querySelector(".qr");
+            new QRCode(qrBox, {
+              text: url,
+              width: mm * 8,
+              height: mm * 8
+            });
+          }
+
+          codigos.forEach(makeLabel);
+
+          setTimeout(() => window.print(), 450);
+        </script>
+      </body>
+      </html>
+    `);
+    w.document.close();
+  }
+
+  function imprimirEtiquetaIndividual(){
+    const codigo = codigoInput.value.trim();
+    if(!codigo){ alert("Introduce el código"); return; }
+    openPrintWindow([codigo]);
+  }
+
+  function imprimirHojaA4(){
+    openPrintWindow(getSelectedArray());
+  }
+
+  // ========= EVENTOS =========
+  buscadorInput.addEventListener("input", () => renderLista());
+
+  btnRefrescarLista.addEventListener("click", cargarInstrumentos);
+  btnLimpiarSeleccion.addEventListener("click", limpiarSeleccion);
+  btnImprimirHoja.addEventListener("click", imprimirHojaA4);
+  btnImprimirUno.addEventListener("click", imprimirEtiquetaIndividual);
+
+  // INIT
+  window.addEventListener("load", async () => {
+    actualizarPreview();
+    await cargarInstrumentos();
+  });
 </script>
 
 </body>
 </html>
+
