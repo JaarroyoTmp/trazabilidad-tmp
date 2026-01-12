@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TMP · QR Label Studio (LAB PRO)</title>
 
-  <!-- Librería QR (en esta misma página) -->
+  <!-- Librería QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -293,9 +293,13 @@
     .footer strong{color:#e9f4ff}
 
     .preview-grid{
-      display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;
-      background:rgba(0,0,0,.25);border:1px dashed rgba(255,255,255,.10);
-      border-radius:12px;padding:10px;
+      display:grid;
+      gap:5px;
+      margin-top:10px;
+      background:rgba(0,0,0,.25);
+      border:1px dashed rgba(255,255,255,.10);
+      border-radius:12px;
+      padding:10px;
     }
 
     .preview-cell{
@@ -310,25 +314,16 @@
     /* =======================
        IMPRESIÓN SIN POPUP
        ======================= */
-    #printArea{
-      display:none;
-    }
-
+    #printArea{display:none;}
     @media print{
-      /* oculta toda la UI */
-      body > *:not(#printArea){
-        display:none !important;
-      }
-      #printArea{
-        display:block !important;
-      }
+      body > *:not(#printArea){display:none !important;}
+      #printArea{display:block !important;}
     }
   </style>
 </head>
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-inner">
     <div class="brand">
@@ -387,11 +382,22 @@
 
   <!-- DERECHA -->
   <div class="card">
-    <h2>Hoja A4 (3×4 etiquetas)</h2>
+    <h2>Hoja A4</h2>
 
     <div class="badge" id="badgeEstado">Cargando instrumentos desde Supabase…</div>
 
     <div style="margin-top:6px">
+      <label>Formato hoja</label>
+      <select id="sheetPreset">
+        <option value="sticker_70x36" selected>Pegatina 70×36 mm (3×8)</option>
+        <option value="generic_3x4">Genérico (3×4)</option>
+      </select>
+      <div class="hint" style="margin-top:6px">
+        Para que cuadre perfecto: en el diálogo de imprimir usa <b>Escala 100%</b> y desmarca <b>encabezados/pies</b>.
+      </div>
+    </div>
+
+    <div style="margin-top:10px">
       <label>Buscar instrumentos</label>
       <input id="buscador" type="text" placeholder="Ej: MET, micrómetro, M14…">
     </div>
@@ -401,7 +407,7 @@
     <div class="footer">
       <span><strong>Tamaño:</strong> <span id="lblTamano">10 mm</span></span>
       <span><strong>Plantilla:</strong> <span id="lblTpl">LAB PRO</span></span>
-      <span><strong>Capacidad:</strong> 12 etiquetas</span>
+      <span><strong>Capacidad:</strong> <span id="lblCapacidad">24</span> etiquetas</span>
       <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
     </div>
 
@@ -419,7 +425,7 @@
 
 </div>
 
-<!-- Área oculta para imprimir (SIN popup) -->
+<!-- Área oculta para imprimir -->
 <div id="printArea"></div>
 
 <!-- SUPABASE -->
@@ -427,9 +433,30 @@
 
 <script type="module">
   const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
-  const MAX_PER_PAGE = 12;
 
-  let etiquetaMM = 10;
+  // ====== PRESETS DE HOJA A4 ======
+  // sticker_70x36: 3 columnas x 8 filas, etiqueta 70x36 mm (24)
+  // generic_3x4: 3x4 (12) por si lo necesitas
+  const SHEETS = {
+    sticker_70x36: {
+      name: "Pegatina 70×36",
+      cols: 3, rows: 8,
+      labelWmm: 70, labelHmm: 36,
+      gapXmm: 0, gapYmm: 0,
+      marginTopMm: 0, marginLeftMm: 0,
+      pageMarginMm: 0
+    },
+    generic_3x4: {
+      name: "Genérico 3×4",
+      cols: 3, rows: 4,
+      labelWmm: 60, labelHmm: 35,
+      gapXmm: 6, gapYmm: 6,
+      marginTopMm: 6, marginLeftMm: 6,
+      pageMarginMm: 6
+    }
+  };
+
+  let etiquetaMM = 10;              // para etiqueta individual (10/13/15)
   let allInstrumentos = [];
   const selectedCodigos = new Set();
 
@@ -446,12 +473,22 @@
   const lblTamano = document.getElementById("lblTamano");
   const lblTpl = document.getElementById("lblTpl");
   const lblSeleccionados = document.getElementById("lblSeleccionados");
+  const lblCapacidad = document.getElementById("lblCapacidad");
   const previewGrid = document.getElementById("previewGrid");
 
   const sizeButtons = document.querySelectorAll(".size-btn");
   const tplSelect = document.getElementById("tplEtiqueta");
 
+  const sheetPreset = document.getElementById("sheetPreset");
   const printArea = document.getElementById("printArea");
+
+  function getSheet(){
+    return SHEETS[sheetPreset.value] || SHEETS.sticker_70x36;
+  }
+  function getCapacity(){
+    const s = getSheet();
+    return s.cols * s.rows;
+  }
 
   function plantillaNombre(v){
     if (v==="minimal") return "MINIMAL";
@@ -479,8 +516,15 @@
     lblTpl.textContent = plantillaNombre(tplSelect.value);
     lblSeleccionados.textContent = selectedCodigos.size;
 
+    const cap = getCapacity();
+    lblCapacidad.textContent = cap;
+
+    // preview grid acorde a hoja
+    const s = getSheet();
+    previewGrid.style.gridTemplateColumns = `repeat(${s.cols}, 1fr)`;
+
     previewGrid.innerHTML = "";
-    for(let i=0;i<MAX_PER_PAGE;i++){
+    for(let i=0;i<cap;i++){
       const div=document.createElement("div");
       div.className="preview-cell";
       if(i<selectedCodigos.size){
@@ -536,7 +580,6 @@
   });
 
   document.getElementById("btnGenerar").addEventListener("click", generar);
-
   codigoInput.addEventListener("keydown", e=>{
     if(e.key==="Enter"){ e.preventDefault(); generar(); }
   });
@@ -600,7 +643,6 @@
 
   function renderLista(){
     const q = normalize(buscadorInput.value.trim());
-
     const filtered = !q ? allInstrumentos : allInstrumentos.filter(it => {
       const hay = normalize(it.codigo) + " " + normalize(it.descripcion) + " " + normalize(it.rango);
       return hay.includes(q);
@@ -611,7 +653,7 @@
       return;
     }
 
-    const view = filtered.slice(0, 350);
+    const view = filtered.slice(0, 500);
 
     let html = "";
     for(const it of view){
@@ -649,11 +691,12 @@
   }
 
   function toggleSeleccion(codigo){
+    const cap = getCapacity();
     if(selectedCodigos.has(codigo)){
       selectedCodigos.delete(codigo);
     } else {
-      if(selectedCodigos.size >= MAX_PER_PAGE){
-        alert("Máximo " + MAX_PER_PAGE + " etiquetas por hoja.");
+      if(selectedCodigos.size >= cap){
+        alert("Máximo " + cap + " etiquetas para este formato de hoja.");
         return;
       }
       selectedCodigos.add(codigo);
@@ -668,23 +711,54 @@
   }
 
   // ==========================
-  // IMPRESIÓN SIN POPUPS
+  // IMPRESIÓN SIN POPUPS (A4)
   // ==========================
-  function buildPrintCSS(){
+  function mmToPx(v){ return Math.round(v * 96 / 25.4); }
+
+  function buildPrintCSS(sheet, tpl){
+    const showHeader = (tpl !== "minimal");
+
+    // Ajustes de diseño dentro de la etiqueta (mm)
+    const padX = 2.0;
+    const padY = 2.0;
+    const holeMm = 3.2;
+    const headerMm = showHeader ? 3.2 : 0;  // altura zona TMP
+    const codeMm = 4.5;                     // altura zona código
+
     return (
       "<style>" +
-        "@page{size:A4;margin:10mm;}" +
+        "@page{size:A4;margin:"+sheet.pageMarginMm+"mm;}" +
+        "html,body{margin:0;padding:0;}" +
         "body{font-family:Arial,sans-serif;}" +
-        ".grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;}" +
-        ".label{width:60mm;min-height:35mm;border:1px solid #000;border-radius:4mm;padding:3mm;position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;}" +
-        ".hole{position:absolute;top:2mm;left:2mm;width:3.2mm;height:3.2mm;border:1px solid #000;border-radius:50%;}" +
-        ".tmp{font-size:8pt;font-weight:700;letter-spacing:.25em;margin-bottom:2mm;}" +
-        ".code{margin-top:2mm;font-weight:700;border:1px solid #000;border-radius:999px;padding:1mm 3mm;font-size:10pt;}" +
+
+        /* Contenedor con offset (por si tu hoja tiene margen físico) */
+        ".sheet{padding-top:"+sheet.marginTopMm+"mm;padding-left:"+sheet.marginLeftMm+"mm;}" +
+
+        /* Grid exacta para la hoja de pegatina */
+        ".grid{display:grid;" +
+          "grid-template-columns:repeat("+sheet.cols+","+sheet.labelWmm+"mm);" +
+          "grid-auto-rows:"+sheet.labelHmm+"mm;" +
+          "column-gap:"+sheet.gapXmm+"mm;row-gap:"+sheet.gapYmm+"mm;" +
+          "align-content:start;}" +
+
+        /* Etiqueta */
+        ".label{width:"+sheet.labelWmm+"mm;height:"+sheet.labelHmm+"mm;" +
+          "position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;" +
+          "padding:"+padY+"mm "+padX+"mm;overflow:hidden;}" +
+
+        /* Agujero (solo guía visual; si no lo quieres, puedes ocultarlo aquí) */
+        ".hole{position:absolute;top:2mm;left:2mm;width:"+holeMm+"mm;height:"+holeMm+"mm;border:0.25mm solid #000;border-radius:50%;}" +
+
+        ".tmp{margin-top:0mm;font-size:3mm;font-weight:700;letter-spacing:0.8mm;line-height:1;}" +
+        ".qr{margin-top:"+ (showHeader ? 1.2 : 0) +"mm;display:flex;align-items:center;justify-content:center;}" +
+        ".code{margin-top:1mm;font-size:3.2mm;font-weight:700;border:0.25mm solid #000;border-radius:10mm;padding:0.5mm 2mm;line-height:1;white-space:nowrap;}" +
+
       "</style>"
     );
   }
 
-  function makePrintLabelHTML(codigo, showHeader){
+  function makePrintLabelHTML(codigo, tpl){
+    const showHeader = (tpl !== "minimal");
     const safe = codigo.replace(/[^a-zA-Z0-9]/g,"_");
     return (
       "<div class='label'>" +
@@ -707,31 +781,39 @@
     }
 
     const tpl = tplSelect.value;
-    const showHeader = (tpl !== "minimal");
-    const mm = etiquetaMM;
+    const sheet = getSheet();
 
     // Monta HTML imprimible
-    let html = buildPrintCSS();
-    html += "<div class='grid' id='pgrid'>";
+    let html = buildPrintCSS(sheet, tpl);
+    html += "<div class='sheet'><div class='grid' id='pgrid'>";
     for(const c of codigos){
-      html += makePrintLabelHTML(c, showHeader);
+      html += makePrintLabelHTML(c, tpl);
     }
-    html += "</div>";
+    html += "</div></div>";
     printArea.innerHTML = html;
 
-    // Genera QRs dentro del printArea
+    // Tamaño del QR: para 70×36 conviene grande pero dejando código
+    // Aproximación buena:
+    // - lado QR = min(labelH - zona texto, labelW) * 0.70
+    const showHeader = (tpl !== "minimal");
+    const headerMm = showHeader ? 3.2 : 0;
+    const codeMm = 4.5;
+    const usableH = Math.max(10, sheet.labelHmm - headerMm - codeMm - 6); // deja aire
+    const usableW = Math.max(10, sheet.labelWmm - 8);
+    const qrSideMm = Math.max(10, Math.min(usableW, usableH) * 0.95); // casi todo el alto útil
+    const qrSidePx = mmToPx(qrSideMm);
+
     for(const c of codigos){
       const safe = c.replace(/[^a-zA-Z0-9]/g,"_");
       const el = document.getElementById("pqr_" + safe);
       const url = BASE_URL + encodeURIComponent(c);
       el.innerHTML = "";
-      new QRCode(el, { text: url, width: mm*8, height: mm*8 });
+      new QRCode(el, { text: url, width: qrSidePx, height: qrSidePx });
     }
 
-    // Espera un poco a que pinte canvas y dispara impresión
+    // Espera render canvas
     setTimeout(() => {
       window.print();
-      // Limpieza después (cuando vuelve de imprimir)
       setTimeout(() => { printArea.innerHTML = ""; }, 500);
     }, 700);
   }
@@ -752,6 +834,18 @@
   document.getElementById("btnLimpiarSeleccion").addEventListener("click", limpiarSeleccion);
   document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHojaA4);
   document.getElementById("btnImprimirUno").addEventListener("click", imprimirEtiquetaIndividual);
+
+  sheetPreset.addEventListener("change", () => {
+    // Si cambia la hoja y hay más seleccionados de los permitidos, recorta
+    const cap = getCapacity();
+    if(selectedCodigos.size > cap){
+      const keep = Array.from(selectedCodigos).slice(0, cap);
+      selectedCodigos.clear();
+      keep.forEach(x => selectedCodigos.add(x));
+    }
+    actualizarPreview();
+    renderLista();
+  });
 
   // Init
   window.addEventListener("load", async () => {
