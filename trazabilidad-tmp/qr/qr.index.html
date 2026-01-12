@@ -2,31 +2,37 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>TMP · Generador QR (LEGIBLE)</title>
+<title>TMP · QR Label Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- QR LIB -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
+/* ===== PANTALLA ===== */
 body{
   background:#0b1220;
   color:#eaf2ff;
   font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+  margin:0;
+  padding:30px;
   display:flex;
   justify-content:center;
-  padding:40px;
 }
-.card{
+
+.panel{
   background:#111c33;
   border-radius:18px;
-  padding:24px;
-  width:340px;
-  box-shadow:0 20px 40px rgba(0,0,0,.6);
+  padding:22px;
+  width:360px;
+  box-shadow:0 20px 40px rgba(0,0,0,.55);
 }
+
 label{
   font-size:13px;
   color:#a0b3cc;
 }
+
 input{
   width:100%;
   padding:10px;
@@ -37,60 +43,102 @@ input{
   color:#fff;
   font-size:15px;
 }
+
 button{
   margin-top:12px;
   padding:10px;
   border-radius:999px;
   border:none;
-  cursor:pointer;
   font-weight:800;
+  cursor:pointer;
 }
+
 .btn-main{
   background:#22c55e;
   color:#04120a;
 }
+
+.btn-print{
+  background:#58a6ff;
+  color:#041324;
+}
+
 .sizes{
   display:flex;
   gap:8px;
   margin-top:12px;
 }
+
 .sizes button{
   flex:1;
   background:#1f2937;
   color:#cfe6ff;
 }
+
 .sizes button.active{
   background:#58a6ff;
   color:#041324;
 }
+
 .preview{
   margin-top:18px;
   display:flex;
   justify-content:center;
 }
-.qr-box{
+
+.qr-wrapper{
   background:#fff;
   padding:12px;
 }
-.qr-box canvas{
+
+canvas{
   image-rendering: pixelated;
 }
-.caption{
+
+.info{
   margin-top:10px;
   font-size:12px;
   color:#a0b3cc;
-  text-align:center;
+  word-break:break-all;
+}
+
+/* ===== IMPRESIÓN ===== */
+@media print{
+  body{
+    background:#fff;
+    padding:0;
+  }
+
+  .panel{
+    box-shadow:none;
+    border-radius:0;
+    width:auto;
+    padding:0;
+  }
+
+  button, input, .sizes, .info{
+    display:none !important;
+  }
+
+  .qr-wrapper{
+    padding:0;
+  }
+
+  canvas{
+    image-rendering: pixelated;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="panel">
   <label>Código del instrumento</label>
   <input id="codigo" placeholder="Ej: 11217">
 
-  <button class="btn-main" onclick="generar()">Generar QR</button>
+  <button class="btn-main" onclick="generarQR()">Generar QR</button>
+  <button class="btn-print" onclick="window.print()">Imprimir</button>
 
   <div class="sizes">
     <button class="active" onclick="setSize(10,this)">10 mm</button>
@@ -99,15 +147,16 @@ button{
   </div>
 
   <div class="preview">
-    <div class="qr-box" id="qr"></div>
+    <div class="qr-wrapper" id="qr"></div>
   </div>
 
-  <div class="caption" id="info"></div>
+  <div class="info" id="info"></div>
 </div>
 
 <script>
+const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
+
 let sizeMM = 10;
-const BASE_URL = "https://tmp-trazabilidad.netlify.app/qr/";
 
 function mmToPx(mm){
   return Math.round(mm * 96 / 25.4);
@@ -117,43 +166,50 @@ function setSize(mm,btn){
   sizeMM = mm;
   document.querySelectorAll(".sizes button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
-  if(document.getElementById("codigo").value) generar();
+  if(document.getElementById("codigo").value) generarQR();
 }
 
-function generar(){
-  const code = document.getElementById("codigo").value.trim();
-  if(!code) return alert("Introduce un código");
+function generarQR(){
+  const codigo = document.getElementById("codigo").value.trim();
+  if(!codigo){
+    alert("Introduce un código");
+    return;
+  }
 
-  const qrText = BASE_URL + code;
-  const visiblePx = mmToPx(sizeMM);
+  const url = BASE_URL + encodeURIComponent(codigo);
+  const finalPx = mmToPx(sizeMM);
 
-  const container = document.getElementById("qr");
-  container.innerHTML = "";
+  const cont = document.getElementById("qr");
+  cont.innerHTML = "";
 
-  // 1️⃣ QR GRANDE (HQ)
-  const temp = document.createElement("div");
-  new QRCode(temp,{
-    text: qrText,
-    width:600,
-    height:600,
-    correctLevel: QRCode.CorrectLevel.H
+  /* 1️⃣ QR GRANDE (CALIDAD MÁXIMA) */
+  const tmp = document.createElement("div");
+  new QRCode(tmp,{
+    text:url,
+    width:1000,
+    height:1000,
+    correctLevel:QRCode.CorrectLevel.H
   });
-  const bigCanvas = temp.querySelector("canvas");
 
-  // 2️⃣ Canvas final EXACTO sin suavizado
-  const finalCanvas = document.createElement("canvas");
-  finalCanvas.width = visiblePx;
-  finalCanvas.height = visiblePx;
-  const ctx = finalCanvas.getContext("2d");
+  const bigCanvas = tmp.querySelector("canvas");
+
+  /* 2️⃣ REDUCCIÓN LIMPIA (SIN SUAVIZADO) */
+  const canvas = document.createElement("canvas");
+  canvas.width = finalPx;
+  canvas.height = finalPx;
+
+  const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(bigCanvas,0,0,visiblePx,visiblePx);
+  ctx.drawImage(bigCanvas,0,0,finalPx,finalPx);
 
-  container.appendChild(finalCanvas);
+  cont.appendChild(canvas);
 
   document.getElementById("info").innerText =
-    "URL en QR: " + qrText + " · Tamaño: " + sizeMM + "×" + sizeMM + " mm";
+    "QR → " + url + " | Tamaño real: " + sizeMM + "×" + sizeMM + " mm";
 }
 </script>
 
 </body>
 </html>
+
+
