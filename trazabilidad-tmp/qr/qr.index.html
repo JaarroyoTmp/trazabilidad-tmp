@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TMP · QR Label Studio (LAB PRO)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMP · QR Label Studio (Lyreco 70×36 · 3×8)</title>
 
   <!-- Librería QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -19,7 +19,6 @@
       --txt:#eaf2ff;
       --muted:#a0b3cc;
       --accent:#58a6ff;
-      --accent2:#27d3ff;
       --ok:#22c55e;
       --bad:#ff6b6b;
       --shadow:0 18px 42px rgba(0,0,0,.60);
@@ -66,12 +65,9 @@
       letter-spacing:.08em;
       text-transform:uppercase;
       font-weight:900;
-      margin:0;line-height:1;
+      line-height:1;
     }
-    .brand .sub{
-      font-size:12px;color:var(--muted);
-      margin-top:4px;line-height:1.2;
-    }
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.2;}
 
     .pill{
       margin-left:auto;
@@ -96,8 +92,12 @@
     }
 
     .btn-top{
-      margin-left:12px;border:none;border-radius:12px;
-      padding:10px 14px;font-weight:800;cursor:pointer;
+      margin-left:12px;
+      border:none;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:800;
+      cursor:pointer;
       background:linear-gradient(135deg, #1fae64, #22c55e);
       color:#04120a;
       box-shadow:0 14px 30px rgba(0,0,0,.45);
@@ -113,6 +113,7 @@
       grid-template-columns: minmax(0,480px) minmax(0,1fr);
       gap:18px;
     }
+
     @media (max-width:980px){
       .wrap{grid-template-columns:1fr;}
       .pill{display:none;}
@@ -125,6 +126,7 @@
       box-shadow:var(--shadow);
       padding:18px 16px 16px;
     }
+
     .card h2{
       font-size:14px;
       font-weight:900;
@@ -135,8 +137,11 @@
     }
 
     label{
-      font-size:12px;color:var(--muted);
-      display:block;margin-bottom:6px;letter-spacing:.04em;
+      font-size:12px;
+      color:var(--muted);
+      display:block;
+      margin-bottom:6px;
+      letter-spacing:.04em;
     }
 
     input,select{
@@ -147,8 +152,8 @@
       background:#070b12;
       color:var(--txt);
       outline:none;
-      transition:.15s border-color,.15s transform;
       font-size:14px;
+      transition:.15s border-color,.15s transform;
     }
     input:focus,select:focus{
       border-color:var(--accent);
@@ -156,23 +161,34 @@
     }
 
     .row{
-      display:flex;gap:10px;flex-wrap:wrap;
-      align-items:center;margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:10px;
     }
 
     .btn{
-      border:none;border-radius:999px;
-      padding:10px 16px;font-size:13px;
-      cursor:pointer;font-weight:900;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      transition:.15s transform,.15s filter,.15s box-shadow;
+      border:none;
+      border-radius:999px;
+      padding:10px 16px;
+      font-size:13px;
+      cursor:pointer;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:.15s transform,.15s filter;
       box-shadow:0 12px 26px rgba(0,0,0,.35);
     }
     .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+
     .btn.main{
       background:linear-gradient(135deg, #1fae64, #22c55e);
       color:#04120a;
     }
+
     .btn.ghost{
       background:rgba(255,255,255,.04);
       color:#d7ebff;
@@ -181,27 +197,46 @@
     }
     .btn.ghost:hover{border-color:rgba(88,166,255,.35)}
 
-    .sizes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-    .sizes button{
-      padding:8px 12px;font-size:12px;border-radius:999px;
-      cursor:pointer;border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      color:#d7ebff;font-weight:900;
+    .sizes{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
     }
+
+    .sizes button{
+      padding:8px 12px;
+      font-size:12px;
+      border-radius:999px;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#d7ebff;
+      font-weight:900;
+    }
+
     .sizes button.active{
       background:linear-gradient(135deg, rgba(88,166,255,.85), rgba(39,211,255,.55));
-      color:#041324;border-color:transparent;
+      color:#041324;
+      border-color:transparent;
     }
 
     .box{
-      margin-top:12px;padding:14px;border-radius:16px;
+      margin-top:12px;
+      padding:14px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       background:linear-gradient(135deg, rgba(7,11,18,.75), rgba(15,23,42,.45));
     }
 
-    .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35;}
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+      line-height:1.35;
+    }
 
-    /* ===== PREVIEW LABEL ===== */
+    /* PREVIEW */
     .preview{
       margin-top:14px;
       display:flex;
@@ -213,65 +248,110 @@
     }
 
     .label-preview{
-      background:#fff;border:1px solid #111;border-radius:12px;
-      padding:10px;box-shadow:0 18px 30px rgba(0,0,0,.25);
-      display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      background:#fff;
+      border:1px solid #111;
+      border-radius:12px;
+      padding:10px;
+      box-shadow:0 18px 30px rgba(0,0,0,.25);
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
       position:relative;
       padding-top:18px;
     }
 
     .hole{
-      position:absolute;top:6px;left:6px;
-      width:10px;height:10px;border-radius:50%;
+      position:absolute;
+      top:6px;
+      left:6px;
+      width:10px;
+      height:10px;
+      border-radius:50%;
       border:1px solid rgba(0,0,0,.9);
       background:rgba(0,0,0,.04);
-      display:flex;align-items:center;justify-content:center;
-      z-index:5;pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:5;
+      pointer-events:none;
     }
     .hole::after{
-      content:"";width:6px;height:6px;border-radius:50%;
+      content:"";
+      width:6px;height:6px;border-radius:50%;
       border:1px solid rgba(0,0,0,.45);
       background:transparent;
     }
     .hole::before{
-      content:"+";position:absolute;font-size:9px;font-weight:900;
-      color:rgba(0,0,0,.55);line-height:1;transform:translateY(-0.2px);
+      content:"+";
+      position:absolute;
+      font-size:9px;
+      font-weight:900;
+      color:rgba(0,0,0,.55);
+      line-height:1;
+      transform:translateY(-0.2px);
     }
 
     .label-preview .tmp{
-      font-size:11px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;
-      color:#0b1220;margin-bottom:4px;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color:#0b1220;
+      margin-bottom:4px;
     }
 
-    .label-preview .qr-box canvas{background:#fff;border-radius:10px;}
+    .label-preview .qr-box canvas{
+      background:#fff;
+      border-radius:10px;
+    }
 
     .label-preview .code{
-      margin-top:6px;padding:4px 10px;border-radius:999px;border:1px solid #111;
-      background:#f2f2f2;font-weight:900;font-size:13px;letter-spacing:.12em;color:#111;line-height:1;
+      margin-top:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #111;
+      background:#f2f2f2;
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.12em;
+      color:#111;
+      line-height:1;
     }
 
-    /* ===== PANEL DERECHA ===== */
+    /* LISTA */
     .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      font-size:12px;padding:8px 12px;border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      padding:8px 12px;
+      border-radius:999px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
-      color:#cfe6ff;margin-bottom:12px;
+      color:#cfe6ff;
+      margin-bottom:12px;
     }
 
     .list{
-      margin-top:12px;border-radius:16px;border:1px solid rgba(255,255,255,.10);
-      overflow:auto;background:rgba(0,0,0,.18);max-height:320px;
+      margin-top:12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      overflow:auto;
+      background:rgba(0,0,0,.18);
+      max-height:320px;
     }
 
     .inst-row{
-      display:flex;gap:10px;padding:10px 12px;
+      display:flex;
+      gap:10px;
+      padding:10px 12px;
       border-bottom:1px solid rgba(255,255,255,.06);
-      cursor:pointer;transition:.12s background,.12s outline;
+      cursor:pointer;
+      transition:.12s background,.12s outline;
       align-items:flex-start;
     }
     .inst-row:hover{background:rgba(88,166,255,.08)}
-    .inst-row:last-child{border-bottom:none;}
     .inst-row.selected{
       background:rgba(88,166,255,.14);
       outline:1px solid rgba(88,166,255,.40);
@@ -287,13 +367,18 @@
     .inst-desc{font-size:12px;color:var(--muted);line-height:1.25;}
 
     .footer{
-      margin-top:12px;color:var(--muted);font-size:12px;
-      display:flex;flex-direction:column;gap:6px;
+      margin-top:12px;
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
     }
     .footer strong{color:#e9f4ff}
 
     .preview-grid{
       display:grid;
+      grid-template-columns:repeat(3,1fr);
       gap:5px;
       margin-top:10px;
       background:rgba(0,0,0,.25);
@@ -301,19 +386,23 @@
       border-radius:12px;
       padding:10px;
     }
-
     .preview-cell{
-      height:18px;border-radius:4px;background:#1f2937;
-      display:flex;align-items:center;justify-content:center;
-      font-size:10px;color:#9ca3af;
+      height:18px;
+      border-radius:4px;
+      background:#1f2937;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:10px;
+      color:#9ca3af;
     }
     .preview-cell.filled{
-      background:#22c55e;color:#022c22;font-weight:900;
+      background:#22c55e;
+      color:#022c22;
+      font-weight:900;
     }
 
-    /* =======================
-       IMPRESIÓN SIN POPUP
-       ======================= */
+    /* PRINT */
     #printArea{display:none;}
     @media print{
       body > *:not(#printArea){display:none !important;}
@@ -330,7 +419,7 @@
       <img src="../img/tmp-quality.png" alt="TMP">
       <div>
         <h1>QR Label Studio</h1>
-        <div class="sub">Editor profesional de etiquetas · Laboratorio TMP</div>
+        <div class="sub">Lyreco 70×36 (3×8) · QR centrado a 10/13/15 mm</div>
       </div>
     </div>
 
@@ -372,8 +461,8 @@
       </select>
 
       <div class="hint">
-        ✅ Líneas de corte siempre.<br>
-        ✅ Agujero guía <b>ARRIBA IZQUIERDA</b> para anillo acero 4mm (sin tocar QR).
+        ✅ En la hoja Lyreco la casilla es 70×36 mm, pero el QR impreso será <b>10/13/15 mm</b> según selecciones.<br>
+        ✅ Imprimir: <b>Escala 100%</b> + desmarcar <b>encabezados/pies</b>.
       </div>
     </div>
 
@@ -382,22 +471,11 @@
 
   <!-- DERECHA -->
   <div class="card">
-    <h2>Hoja A4</h2>
+    <h2>Hoja A4 (Lyreco pegatina 3×8)</h2>
 
     <div class="badge" id="badgeEstado">Cargando instrumentos desde Supabase…</div>
 
     <div style="margin-top:6px">
-      <label>Formato hoja</label>
-      <select id="sheetPreset">
-        <option value="sticker_70x36" selected>Pegatina 70×36 mm (3×8)</option>
-        <option value="generic_3x4">Genérico (3×4)</option>
-      </select>
-      <div class="hint" style="margin-top:6px">
-        Para que cuadre perfecto: en el diálogo de imprimir usa <b>Escala 100%</b> y desmarca <b>encabezados/pies</b>.
-      </div>
-    </div>
-
-    <div style="margin-top:10px">
       <label>Buscar instrumentos</label>
       <input id="buscador" type="text" placeholder="Ej: MET, micrómetro, M14…">
     </div>
@@ -405,9 +483,10 @@
     <div class="list" id="listaInstrumentos"></div>
 
     <div class="footer">
-      <span><strong>Tamaño:</strong> <span id="lblTamano">10 mm</span></span>
+      <span><strong>Casilla:</strong> 70×36 mm · 3×8</span>
+      <span><strong>QR:</strong> <span id="lblQRSize">10</span>×<span id="lblQRSize2">10</span> mm (centrado)</span>
       <span><strong>Plantilla:</strong> <span id="lblTpl">LAB PRO</span></span>
-      <span><strong>Capacidad:</strong> <span id="lblCapacidad">24</span> etiquetas</span>
+      <span><strong>Capacidad:</strong> 24 etiquetas</span>
       <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
     </div>
 
@@ -417,15 +496,11 @@
       <button class="btn ghost" id="btnRefrescarLista">Recargar</button>
     </div>
 
-    <div class="hint" style="margin-top:10px">
-      Vista previa (ocupación de hoja):
-    </div>
+    <div class="hint" style="margin-top:10px">Vista previa (ocupación):</div>
     <div class="preview-grid" id="previewGrid"></div>
   </div>
-
 </div>
 
-<!-- Área oculta para imprimir -->
 <div id="printArea"></div>
 
 <!-- SUPABASE -->
@@ -434,61 +509,46 @@
 <script type="module">
   const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-  // ====== PRESETS DE HOJA A4 ======
-  // sticker_70x36: 3 columnas x 8 filas, etiqueta 70x36 mm (24)
-  // generic_3x4: 3x4 (12) por si lo necesitas
-  const SHEETS = {
-    sticker_70x36: {
-      name: "Pegatina 70×36",
-      cols: 3, rows: 8,
-      labelWmm: 70, labelHmm: 36,
-      gapXmm: 0, gapYmm: 0,
-      marginTopMm: 0, marginLeftMm: 0,
-      pageMarginMm: 0
-    },
-    generic_3x4: {
-      name: "Genérico 3×4",
-      cols: 3, rows: 4,
-      labelWmm: 60, labelHmm: 35,
-      gapXmm: 6, gapYmm: 6,
-      marginTopMm: 6, marginLeftMm: 6,
-      pageMarginMm: 6
-    }
-  };
+  // ===== HOJA LYRECO =====
+  const COLS = 3;
+  const ROWS = 8;
+  const CELL_W_MM = 70;
+  const CELL_H_MM = 36;
 
-  let etiquetaMM = 10;              // para etiqueta individual (10/13/15)
+  const MARGEN_SUP_MM = 4.5;
+  const MARGEN_INF_MM = 4.5;
+
+  // No nos diste margen lateral: lo dejo 0.
+  // Si ves que está corrido a derecha/izquierda: prueba 1.0 o 2.0
+  const MARGEN_IZQ_MM = 0.0;
+  const MARGEN_DER_MM = 0.0;
+
+  const GAP_X_MM = 0.0;
+  const GAP_Y_MM = 0.0;
+
+  const CAPACITY = COLS * ROWS;
+
+  // ===== Estado =====
+  let etiquetaMM = 10;
   let allInstrumentos = [];
   const selectedCodigos = new Set();
 
+  // DOM
   const codigoInput = document.getElementById("codigo");
   const qrResult = document.getElementById("qrResult");
-
   const badgeOnline = document.getElementById("badgeOnline");
   const badgeOnlineTxt = document.getElementById("badgeOnlineTxt");
-
   const badgeEstado = document.getElementById("badgeEstado");
   const listaInstrumentos = document.getElementById("listaInstrumentos");
   const buscadorInput = document.getElementById("buscador");
-
-  const lblTamano = document.getElementById("lblTamano");
-  const lblTpl = document.getElementById("lblTpl");
-  const lblSeleccionados = document.getElementById("lblSeleccionados");
-  const lblCapacidad = document.getElementById("lblCapacidad");
-  const previewGrid = document.getElementById("previewGrid");
-
   const sizeButtons = document.querySelectorAll(".size-btn");
   const tplSelect = document.getElementById("tplEtiqueta");
-
-  const sheetPreset = document.getElementById("sheetPreset");
+  const lblTpl = document.getElementById("lblTpl");
+  const lblSeleccionados = document.getElementById("lblSeleccionados");
+  const previewGrid = document.getElementById("previewGrid");
   const printArea = document.getElementById("printArea");
-
-  function getSheet(){
-    return SHEETS[sheetPreset.value] || SHEETS.sticker_70x36;
-  }
-  function getCapacity(){
-    const s = getSheet();
-    return s.cols * s.rows;
-  }
+  const lblQRSize = document.getElementById("lblQRSize");
+  const lblQRSize2 = document.getElementById("lblQRSize2");
 
   function plantillaNombre(v){
     if (v==="minimal") return "MINIMAL";
@@ -512,19 +572,13 @@
   }
 
   function actualizarPreview(){
-    lblTamano.textContent = etiquetaMM + " mm";
     lblTpl.textContent = plantillaNombre(tplSelect.value);
     lblSeleccionados.textContent = selectedCodigos.size;
-
-    const cap = getCapacity();
-    lblCapacidad.textContent = cap;
-
-    // preview grid acorde a hoja
-    const s = getSheet();
-    previewGrid.style.gridTemplateColumns = `repeat(${s.cols}, 1fr)`;
+    lblQRSize.textContent = etiquetaMM;
+    lblQRSize2.textContent = etiquetaMM;
 
     previewGrid.innerHTML = "";
-    for(let i=0;i<cap;i++){
+    for(let i=0;i<CAPACITY;i++){
       const div=document.createElement("div");
       div.className="preview-cell";
       if(i<selectedCodigos.size){
@@ -537,15 +591,15 @@
 
   function renderEtiquetaPreview(codigo, url, mm, tpl){
     const showHeader = (tpl !== "minimal");
-    qrResult.innerHTML =
-      "<div class='label-preview'>" +
-        "<div class='hole'></div>" +
-        (showHeader ? "<div class='tmp'>TMP</div>" : "") +
-        "<div class='qr-box'></div>" +
-        "<div class='code'>" + esc(codigo) + "</div>" +
-      "</div>" +
-      "<div class='hint'>URL: " + esc(url) + "</div>";
-
+    qrResult.innerHTML = `
+      <div class="label-preview">
+        <div class="hole"></div>
+        ${showHeader ? `<div class="tmp">TMP</div>` : ``}
+        <div class="qr-box"></div>
+        <div class="code">${esc(codigo)}</div>
+      </div>
+      <div class="hint">URL: ${esc(url)}</div>
+    `;
     const qrBox = qrResult.querySelector(".qr-box");
     qrBox.innerHTML = "";
     new QRCode(qrBox, {
@@ -562,7 +616,7 @@
     renderEtiquetaPreview(codigo, url, etiquetaMM, tplSelect.value);
   }
 
-  // Tamaños
+  // ===== Tamaños (10/13/15) =====
   sizeButtons.forEach(btn=>{
     btn.addEventListener("click",()=>{
       sizeButtons.forEach(b=>b.classList.remove("active"));
@@ -573,7 +627,6 @@
     });
   });
 
-  // Plantilla
   tplSelect.addEventListener("change",()=>{
     actualizarPreview();
     if(codigoInput.value.trim()) generar();
@@ -584,7 +637,7 @@
     if(e.key==="Enter"){ e.preventDefault(); generar(); }
   });
 
-  // Supabase wait
+  // ===== Supabase wait =====
   async function waitForSupabase(ms=3500){
     const start = Date.now();
     while(Date.now() - start < ms){
@@ -607,7 +660,6 @@
     }
   }
 
-  // Carga instrumentos
   async function cargarInstrumentos(){
     const sb = await checkSupabase();
     if(!sb){
@@ -622,7 +674,7 @@
       .from("instrumentos")
       .select("codigo, descripcion, rango")
       .order("codigo", { ascending: true })
-      .limit(5000);
+      .limit(8000);
 
     if(error){
       console.error(error);
@@ -653,7 +705,7 @@
       return;
     }
 
-    const view = filtered.slice(0, 500);
+    const view = filtered.slice(0, 700);
 
     let html = "";
     for(const it of view){
@@ -691,12 +743,11 @@
   }
 
   function toggleSeleccion(codigo){
-    const cap = getCapacity();
     if(selectedCodigos.has(codigo)){
       selectedCodigos.delete(codigo);
     } else {
-      if(selectedCodigos.size >= cap){
-        alert("Máximo " + cap + " etiquetas para este formato de hoja.");
+      if(selectedCodigos.size >= CAPACITY){
+        alert("Máximo " + CAPACITY + " etiquetas por hoja (3×8).");
         return;
       }
       selectedCodigos.add(codigo);
@@ -710,67 +761,56 @@
     renderLista();
   }
 
-  // ==========================
-  // IMPRESIÓN SIN POPUPS (A4)
-  // ==========================
+  // ===== IMPRESIÓN =====
   function mmToPx(v){ return Math.round(v * 96 / 25.4); }
 
-  function buildPrintCSS(sheet, tpl){
+  function buildPrintCSS(tpl){
     const showHeader = (tpl !== "minimal");
-
-    // Ajustes de diseño dentro de la etiqueta (mm)
-    const padX = 2.0;
-    const padY = 2.0;
-    const holeMm = 3.2;
-    const headerMm = showHeader ? 3.2 : 0;  // altura zona TMP
-    const codeMm = 4.5;                     // altura zona código
+    const showCode = true;
 
     return (
       "<style>" +
-        "@page{size:A4;margin:"+sheet.pageMarginMm+"mm;}" +
+        "@page{size:A4;margin:0mm;}" +
         "html,body{margin:0;padding:0;}" +
         "body{font-family:Arial,sans-serif;}" +
 
-        /* Contenedor con offset (por si tu hoja tiene margen físico) */
-        ".sheet{padding-top:"+sheet.marginTopMm+"mm;padding-left:"+sheet.marginLeftMm+"mm;}" +
+        // Contenedor con márgenes de hoja
+        ".sheet{padding-top:"+MARGEN_SUP_MM+"mm;padding-left:"+MARGEN_IZQ_MM+"mm;}" +
 
-        /* Grid exacta para la hoja de pegatina */
+        // Grid 3x8 con casillas 70x36
         ".grid{display:grid;" +
-          "grid-template-columns:repeat("+sheet.cols+","+sheet.labelWmm+"mm);" +
-          "grid-auto-rows:"+sheet.labelHmm+"mm;" +
-          "column-gap:"+sheet.gapXmm+"mm;row-gap:"+sheet.gapYmm+"mm;" +
+          "grid-template-columns:repeat("+COLS+","+CELL_W_MM+"mm);" +
+          "grid-auto-rows:"+CELL_H_MM+"mm;" +
+          "column-gap:"+GAP_X_MM+"mm;row-gap:"+GAP_Y_MM+"mm;" +
           "align-content:start;}" +
 
-        /* Etiqueta */
-        ".label{width:"+sheet.labelWmm+"mm;height:"+sheet.labelHmm+"mm;" +
-          "position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;" +
-          "padding:"+padY+"mm "+padX+"mm;overflow:hidden;}" +
+        // Casilla: centrado absoluto del contenido
+        ".cell{width:"+CELL_W_MM+"mm;height:"+CELL_H_MM+"mm;position:relative;}" +
+        ".center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2mm;}" +
 
-        /* Agujero (solo guía visual; si no lo quieres, puedes ocultarlo aquí) */
-        ".hole{position:absolute;top:2mm;left:2mm;width:"+holeMm+"mm;height:"+holeMm+"mm;border:0.25mm solid #000;border-radius:50%;}" +
-
-        ".tmp{margin-top:0mm;font-size:3mm;font-weight:700;letter-spacing:0.8mm;line-height:1;}" +
-        ".qr{margin-top:"+ (showHeader ? 1.2 : 0) +"mm;display:flex;align-items:center;justify-content:center;}" +
-        ".code{margin-top:1mm;font-size:3.2mm;font-weight:700;border:0.25mm solid #000;border-radius:10mm;padding:0.5mm 2mm;line-height:1;white-space:nowrap;}" +
+        // TMP opcional y código
+        ".tmp{font-size:3mm;font-weight:700;letter-spacing:0.8mm;line-height:1;color:#000;}" +
+        ".code{font-size:3.2mm;font-weight:700;border:0.25mm solid #000;border-radius:10mm;padding:0.5mm 2mm;line-height:1;white-space:nowrap;color:#000;background:#fff;}" +
 
       "</style>"
     );
   }
 
-  function makePrintLabelHTML(codigo, tpl){
+  function makePrintCellHTML(codigo, tpl){
     const showHeader = (tpl !== "minimal");
     const safe = codigo.replace(/[^a-zA-Z0-9]/g,"_");
     return (
-      "<div class='label'>" +
-        "<div class='hole'></div>" +
-        (showHeader ? "<div class='tmp'>TMP</div>" : "") +
-        "<div class='qr' id='pqr_" + safe + "'></div>" +
-        "<div class='code'>" + esc(codigo) + "</div>" +
+      "<div class='cell'>" +
+        "<div class='center'>" +
+          (showHeader ? "<div class='tmp'>TMP</div>" : "") +
+          "<div id='pqr_"+safe+"'></div>" +
+          "<div class='code'>"+esc(codigo)+"</div>" +
+        "</div>" +
       "</div>"
     );
   }
 
-  function openPrintSamePage(codigos){
+  function printCodigos(codigos){
     if(!codigos || !codigos.length){
       alert("No hay instrumentos para imprimir.");
       return;
@@ -781,73 +821,51 @@
     }
 
     const tpl = tplSelect.value;
-    const sheet = getSheet();
 
-    // Monta HTML imprimible
-    let html = buildPrintCSS(sheet, tpl);
-    html += "<div class='sheet'><div class='grid' id='pgrid'>";
+    let html = buildPrintCSS(tpl);
+    html += "<div class='sheet'><div class='grid'>";
     for(const c of codigos){
-      html += makePrintLabelHTML(c, tpl);
+      html += makePrintCellHTML(c, tpl);
     }
     html += "</div></div>";
+
+    // Margen inferior no hace falta en CSS porque ya estamos top-padding y el grid ocupará lo que ocupe,
+    // pero está definido en constantes por si más adelante quieres calcular otra cosa.
     printArea.innerHTML = html;
 
-    // Tamaño del QR: para 70×36 conviene grande pero dejando código
-    // Aproximación buena:
-    // - lado QR = min(labelH - zona texto, labelW) * 0.70
-    const showHeader = (tpl !== "minimal");
-    const headerMm = showHeader ? 3.2 : 0;
-    const codeMm = 4.5;
-    const usableH = Math.max(10, sheet.labelHmm - headerMm - codeMm - 6); // deja aire
-    const usableW = Math.max(10, sheet.labelWmm - 8);
-    const qrSideMm = Math.max(10, Math.min(usableW, usableH) * 0.95); // casi todo el alto útil
+    // ✅ QR EXACTO al tamaño seleccionado (10/13/15 mm) y centrado en casilla 70×36
+    const qrSideMm = etiquetaMM;
     const qrSidePx = mmToPx(qrSideMm);
 
     for(const c of codigos){
       const safe = c.replace(/[^a-zA-Z0-9]/g,"_");
-      const el = document.getElementById("pqr_" + safe);
+      const el = document.getElementById("pqr_"+safe);
       const url = BASE_URL + encodeURIComponent(c);
       el.innerHTML = "";
-      new QRCode(el, { text: url, width: qrSidePx, height: qrSidePx });
+      new QRCode(el, { text:url, width:qrSidePx, height:qrSidePx });
     }
 
-    // Espera render canvas
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => { printArea.innerHTML = ""; }, 500);
-    }, 700);
+    setTimeout(()=>{ window.print(); setTimeout(()=>{printArea.innerHTML="";},500); },700);
+  }
+
+  function imprimirHojaA4(){
+    printCodigos(Array.from(selectedCodigos));
   }
 
   function imprimirEtiquetaIndividual(){
     const codigo = codigoInput.value.trim();
     if(!codigo){ alert("Introduce el código"); return; }
-    openPrintSamePage([codigo]);
+    printCodigos([codigo]);
   }
 
-  function imprimirHojaA4(){
-    openPrintSamePage(Array.from(selectedCodigos));
-  }
-
-  // Eventos
-  buscadorInput.addEventListener("input", () => renderLista());
+  // Events
+  buscadorInput.addEventListener("input", renderLista);
   document.getElementById("btnRefrescarLista").addEventListener("click", cargarInstrumentos);
   document.getElementById("btnLimpiarSeleccion").addEventListener("click", limpiarSeleccion);
   document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHojaA4);
   document.getElementById("btnImprimirUno").addEventListener("click", imprimirEtiquetaIndividual);
 
-  sheetPreset.addEventListener("change", () => {
-    // Si cambia la hoja y hay más seleccionados de los permitidos, recorta
-    const cap = getCapacity();
-    if(selectedCodigos.size > cap){
-      const keep = Array.from(selectedCodigos).slice(0, cap);
-      selectedCodigos.clear();
-      keep.forEach(x => selectedCodigos.add(x));
-    }
-    actualizarPreview();
-    renderLista();
-  });
-
-  // Init
+  // INIT
   window.addEventListener("load", async () => {
     actualizarPreview();
     await cargarInstrumentos();
@@ -856,4 +874,3 @@
 
 </body>
 </html>
-
