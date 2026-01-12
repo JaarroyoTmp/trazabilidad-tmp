@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TMP · QR Label Studio (Lyreco 70×36 · 3×8)</title>
+  <title>TMP · QR Label Studio (Lyreco 70×36 · 3×8) · HQ QR</title>
 
   <!-- Librería QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -301,9 +301,15 @@
       margin-bottom:4px;
     }
 
+    .label-preview .qr-box{
+      display:inline-block;
+      background:#fff;
+      padding:8px; /* quiet zone extra */
+      border-radius:10px;
+    }
     .label-preview .qr-box canvas{
       background:#fff;
-      border-radius:10px;
+      border-radius:0px;
     }
 
     .label-preview .code{
@@ -419,7 +425,7 @@
       <img src="../img/tmp-quality.png" alt="TMP">
       <div>
         <h1>QR Label Studio</h1>
-        <div class="sub">Lyreco 70×36 (3×8) · QR centrado a 10/13/15 mm</div>
+        <div class="sub">Lyreco 70×36 (3×8) · QR HQ (ECC H + quiet zone)</div>
       </div>
     </div>
 
@@ -461,7 +467,7 @@
       </select>
 
       <div class="hint">
-        ✅ En la hoja Lyreco la casilla es 70×36 mm, pero el QR impreso será <b>10/13/15 mm</b> según selecciones.<br>
+        ✅ QR más legible: <b>ECC H</b> + render HQ + margen blanco (quiet zone).<br>
         ✅ Imprimir: <b>Escala 100%</b> + desmarcar <b>encabezados/pies</b>.
       </div>
     </div>
@@ -515,14 +521,15 @@
   const CELL_W_MM = 70;
   const CELL_H_MM = 36;
 
+  // Márgenes verticales de tu hoja
   const MARGEN_SUP_MM = 4.5;
   const MARGEN_INF_MM = 4.5;
 
-  // No nos diste margen lateral: lo dejo 0.
-  // Si ves que está corrido a derecha/izquierda: prueba 1.0 o 2.0
+  // Margen lateral (si ves que se desplaza, sube 1-4 mm)
   const MARGEN_IZQ_MM = 0.0;
   const MARGEN_DER_MM = 0.0;
 
+  // Sin separación entre casillas
   const GAP_X_MM = 0.0;
   const GAP_Y_MM = 0.0;
 
@@ -589,6 +596,34 @@
     }
   }
 
+  // ===== QR HQ helper =====
+  function renderQR_HQ(container, text, targetPx, scale=8, padPx=8){
+    // limpia y prepara contenedor
+    container.innerHTML = "";
+    container.style.padding = padPx + "px";
+    container.style.background = "#fff";
+    container.style.display = "inline-block";
+
+    const hiPx = Math.max(64, targetPx * scale);
+
+    new QRCode(container, {
+      text,
+      width: hiPx,
+      height: hiPx,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    const canvas = container.querySelector("canvas");
+    if(canvas){
+      // encoger al tamaño final sin blur
+      canvas.style.width = targetPx + "px";
+      canvas.style.height = targetPx + "px";
+      canvas.style.imageRendering = "pixelated";
+      canvas.style.display = "block";
+      canvas.style.background = "#fff";
+    }
+  }
+
   function renderEtiquetaPreview(codigo, url, mm, tpl){
     const showHeader = (tpl !== "minimal");
     qrResult.innerHTML = `
@@ -601,12 +636,10 @@
       <div class="hint">URL: ${esc(url)}</div>
     `;
     const qrBox = qrResult.querySelector(".qr-box");
-    qrBox.innerHTML = "";
-    new QRCode(qrBox, {
-      text: url,
-      width: mm * 8,
-      height: mm * 8
-    });
+
+    // Preview: usa tamaño en px estable, pero HQ
+    const targetPx = Math.round(mm * 9); // un pelín más grande visualmente
+    renderQR_HQ(qrBox, url, targetPx, 6, 8);
   }
 
   function generar(){
@@ -616,7 +649,7 @@
     renderEtiquetaPreview(codigo, url, etiquetaMM, tplSelect.value);
   }
 
-  // ===== Tamaños (10/13/15) =====
+  // ===== Tamaños =====
   sizeButtons.forEach(btn=>{
     btn.addEventListener("click",()=>{
       sizeButtons.forEach(b=>b.classList.remove("active"));
@@ -766,31 +799,33 @@
 
   function buildPrintCSS(tpl){
     const showHeader = (tpl !== "minimal");
-    const showCode = true;
 
+    // En impresión centramos TODO dentro de la casilla 70x36
     return (
       "<style>" +
         "@page{size:A4;margin:0mm;}" +
         "html,body{margin:0;padding:0;}" +
         "body{font-family:Arial,sans-serif;}" +
 
-        // Contenedor con márgenes de hoja
         ".sheet{padding-top:"+MARGEN_SUP_MM+"mm;padding-left:"+MARGEN_IZQ_MM+"mm;}" +
 
-        // Grid 3x8 con casillas 70x36
         ".grid{display:grid;" +
           "grid-template-columns:repeat("+COLS+","+CELL_W_MM+"mm);" +
           "grid-auto-rows:"+CELL_H_MM+"mm;" +
           "column-gap:"+GAP_X_MM+"mm;row-gap:"+GAP_Y_MM+"mm;" +
           "align-content:start;}" +
 
-        // Casilla: centrado absoluto del contenido
         ".cell{width:"+CELL_W_MM+"mm;height:"+CELL_H_MM+"mm;position:relative;}" +
-        ".center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2mm;}" +
+        ".center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);" +
+          "display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2mm;}" +
 
-        // TMP opcional y código
         ".tmp{font-size:3mm;font-weight:700;letter-spacing:0.8mm;line-height:1;color:#000;}" +
-        ".code{font-size:3.2mm;font-weight:700;border:0.25mm solid #000;border-radius:10mm;padding:0.5mm 2mm;line-height:1;white-space:nowrap;color:#000;background:#fff;}" +
+        ".code{font-size:3.2mm;font-weight:700;border:0.25mm solid #000;border-radius:10mm;" +
+          "padding:0.5mm 2mm;line-height:1;white-space:nowrap;color:#000;background:#fff;}" +
+
+        // contenedor QR en impresión (quiet zone)
+        ".qrwrap{display:inline-block;background:#fff;padding:8px;}" +
+        ".qrwrap canvas{background:#fff;image-rendering:pixelated;display:block;}" +
 
       "</style>"
     );
@@ -803,7 +838,7 @@
       "<div class='cell'>" +
         "<div class='center'>" +
           (showHeader ? "<div class='tmp'>TMP</div>" : "") +
-          "<div id='pqr_"+safe+"'></div>" +
+          "<div class='qrwrap' id='pqr_"+safe+"'></div>" +
           "<div class='code'>"+esc(codigo)+"</div>" +
         "</div>" +
       "</div>"
@@ -828,24 +863,25 @@
       html += makePrintCellHTML(c, tpl);
     }
     html += "</div></div>";
-
-    // Margen inferior no hace falta en CSS porque ya estamos top-padding y el grid ocupará lo que ocupe,
-    // pero está definido en constantes por si más adelante quieres calcular otra cosa.
     printArea.innerHTML = html;
 
-    // ✅ QR EXACTO al tamaño seleccionado (10/13/15 mm) y centrado en casilla 70×36
+    // QR EXACTO en mm, pero render HQ para que se lea bien
     const qrSideMm = etiquetaMM;
-    const qrSidePx = mmToPx(qrSideMm);
+    const targetPx = mmToPx(qrSideMm);
 
     for(const c of codigos){
       const safe = c.replace(/[^a-zA-Z0-9]/g,"_");
       const el = document.getElementById("pqr_"+safe);
       const url = BASE_URL + encodeURIComponent(c);
-      el.innerHTML = "";
-      new QRCode(el, { text:url, width:qrSidePx, height:qrSidePx });
+
+      // HQ en impresión: scale alto + ECC H
+      renderQR_HQ(el, url, targetPx, 10, 8);
     }
 
-    setTimeout(()=>{ window.print(); setTimeout(()=>{printArea.innerHTML="";},500); },700);
+    setTimeout(()=>{
+      window.print();
+      setTimeout(()=>{ printArea.innerHTML=""; }, 500);
+    }, 700);
   }
 
   function imprimirHojaA4(){
