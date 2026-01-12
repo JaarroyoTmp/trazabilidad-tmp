@@ -5,27 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TMP · QR Label Studio (Lyreco 70×36 · 3×8) · HQ QR</title>
 
-  <!-- Librería QR -->
+  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     :root{
-      --bg0:#070b12;
-      --bg1:#0b1220;
-      --panel:#0f172a;
-      --panel2:#111c33;
+      --bg0:#070b12; --bg1:#0b1220;
+      --panel:#0f172a; --panel2:#111c33;
       --border:rgba(255,255,255,.10);
       --border2:rgba(88,166,255,.25);
-      --txt:#eaf2ff;
-      --muted:#a0b3cc;
+      --txt:#eaf2ff; --muted:#a0b3cc;
       --accent:#58a6ff;
-      --ok:#22c55e;
-      --bad:#ff6b6b;
+      --ok:#22c55e; --bad:#ff6b6b;
       --shadow:0 18px 42px rgba(0,0,0,.60);
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-
     body{
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--txt);
@@ -37,83 +32,49 @@
     }
 
     .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
+      position:sticky; top:0; z-index:50;
       backdrop-filter:blur(12px);
       background:rgba(15,23,42,.70);
       border-bottom:1px solid var(--border);
       box-shadow:0 12px 30px rgba(0,0,0,.35);
     }
-
     .topbar-inner{
-      max-width:1200px;
-      margin:0 auto;
+      max-width:1200px; margin:0 auto;
       padding:14px 18px;
-      display:flex;
-      align-items:center;
-      gap:14px;
+      display:flex; align-items:center; gap:14px;
     }
-
     .brand{display:flex;align-items:center;gap:12px;}
-    .brand img{
-      height:38px;width:auto;
-      filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));
-    }
-    .brand h1{
-      font-size:15px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      font-weight:900;
-      line-height:1;
-    }
+    .brand img{height:38px;width:auto;filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));}
+    .brand h1{font-size:15px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;line-height:1;}
     .brand .sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.2;}
 
     .pill{
       margin-left:auto;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size:12px;
-      padding:8px 12px;
-      border-radius:999px;
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;padding:8px 12px;border-radius:999px;
       background:linear-gradient(135deg, rgba(88,166,255,.14), rgba(39,211,255,.08));
       border:1px solid var(--border2);
       color:#d5e9ff;
     }
-    .pill .dot{
-      width:9px;height:9px;border-radius:50%;
-      background:var(--ok);
-      box-shadow:0 0 18px rgba(34,197,94,.55);
-    }
-    .pill.offline .dot{
-      background:var(--bad);
-      box-shadow:0 0 18px rgba(255,107,107,.55);
-    }
+    .pill .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 18px rgba(34,197,94,.55);}
+    .pill.offline .dot{background:var(--bad);box-shadow:0 0 18px rgba(255,107,107,.55);}
 
     .btn-top{
-      margin-left:12px;
-      border:none;
-      border-radius:12px;
-      padding:10px 14px;
-      font-weight:800;
-      cursor:pointer;
+      margin-left:12px;border:none;border-radius:12px;
+      padding:10px 14px;font-weight:800;cursor:pointer;
       background:linear-gradient(135deg, #1fae64, #22c55e);
-      color:#04120a;
-      box-shadow:0 14px 30px rgba(0,0,0,.45);
+      color:#04120a;box-shadow:0 14px 30px rgba(0,0,0,.45);
       transition:.15s transform,.15s filter;
     }
     .btn-top:hover{transform:translateY(-1px);filter:brightness(1.06)}
 
     .wrap{
-      max-width:1200px;
-      margin:22px auto;
+      max-width:1200px;margin:22px auto;
       padding:0 18px 40px;
       display:grid;
       grid-template-columns: minmax(0,480px) minmax(0,1fr);
       gap:18px;
     }
-
     @media (max-width:980px){
       .wrap{grid-template-columns:1fr;}
       .pill{display:none;}
@@ -122,291 +83,127 @@
     .card{
       background:linear-gradient(180deg, rgba(17,28,51,.92), rgba(11,18,32,.88));
       border:1px solid rgba(88,166,255,.16);
-      border-radius:18px;
-      box-shadow:var(--shadow);
+      border-radius:18px; box-shadow:var(--shadow);
       padding:18px 16px 16px;
     }
-
     .card h2{
-      font-size:14px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      margin-bottom:12px;
-      color:#dff0ff;
+      font-size:14px;font-weight:900;letter-spacing:.08em;
+      text-transform:uppercase;margin-bottom:12px;color:#dff0ff;
     }
-
-    label{
-      font-size:12px;
-      color:var(--muted);
-      display:block;
-      margin-bottom:6px;
-      letter-spacing:.04em;
-    }
-
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.04em;}
     input,select{
-      width:100%;
-      padding:10px 12px;
-      border-radius:12px;
+      width:100%;padding:10px 12px;border-radius:12px;
       border:1px solid rgba(255,255,255,.10);
-      background:#070b12;
-      color:var(--txt);
-      outline:none;
-      font-size:14px;
-      transition:.15s border-color,.15s transform;
+      background:#070b12;color:var(--txt);outline:none;
+      font-size:14px;transition:.15s border-color;
     }
-    input:focus,select:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(88,166,255,.12);
-    }
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.12);}
 
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-top:10px;
-    }
-
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
     .btn{
-      border:none;
-      border-radius:999px;
-      padding:10px 16px;
-      font-size:13px;
-      cursor:pointer;
-      font-weight:900;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
+      border:none;border-radius:999px;padding:10px 16px;
+      font-size:13px;cursor:pointer;font-weight:900;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
       transition:.15s transform,.15s filter;
       box-shadow:0 12px 26px rgba(0,0,0,.35);
     }
     .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
-
-    .btn.main{
-      background:linear-gradient(135deg, #1fae64, #22c55e);
-      color:#04120a;
-    }
-
-    .btn.ghost{
-      background:rgba(255,255,255,.04);
-      color:#d7ebff;
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:none;
-    }
+    .btn.main{background:linear-gradient(135deg, #1fae64, #22c55e);color:#04120a;}
+    .btn.ghost{background:rgba(255,255,255,.04);color:#d7ebff;border:1px solid rgba(255,255,255,.10);box-shadow:none;}
     .btn.ghost:hover{border-color:rgba(88,166,255,.35)}
 
-    .sizes{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-
+    .sizes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
     .sizes button{
-      padding:8px 12px;
-      font-size:12px;
-      border-radius:999px;
-      cursor:pointer;
+      padding:8px 12px;font-size:12px;border-radius:999px;cursor:pointer;
       border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      color:#d7ebff;
-      font-weight:900;
+      background:rgba(255,255,255,.04);color:#d7ebff;font-weight:900;
     }
-
     .sizes button.active{
       background:linear-gradient(135deg, rgba(88,166,255,.85), rgba(39,211,255,.55));
-      color:#041324;
-      border-color:transparent;
+      color:#041324;border-color:transparent;
     }
 
     .box{
-      margin-top:12px;
-      padding:14px;
-      border-radius:16px;
+      margin-top:12px;padding:14px;border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       background:linear-gradient(135deg, rgba(7,11,18,.75), rgba(15,23,42,.45));
     }
-
-    .hint{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:10px;
-      line-height:1.35;
-    }
+    .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
 
     /* PREVIEW */
-    .preview{
-      margin-top:14px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:220px;
-      gap:10px;
-      flex-direction:column;
-    }
-
+    .preview{margin-top:14px;display:flex;justify-content:center;align-items:center;min-height:220px;gap:10px;flex-direction:column;}
     .label-preview{
-      background:#fff;
-      border:1px solid #111;
-      border-radius:12px;
-      padding:10px;
-      box-shadow:0 18px 30px rgba(0,0,0,.25);
-      display:inline-flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      position:relative;
-      padding-top:18px;
+      background:#fff;border:1px solid #111;border-radius:12px;
+      padding:10px;box-shadow:0 18px 30px rgba(0,0,0,.25);
+      display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      position:relative;padding-top:18px;
     }
-
     .hole{
-      position:absolute;
-      top:6px;
-      left:6px;
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      border:1px solid rgba(0,0,0,.9);
-      background:rgba(0,0,0,.04);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:5;
-      pointer-events:none;
+      position:absolute;top:6px;left:6px;width:10px;height:10px;border-radius:50%;
+      border:1px solid rgba(0,0,0,.9);background:rgba(0,0,0,.04);
+      display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;
     }
-    .hole::after{
-      content:"";
-      width:6px;height:6px;border-radius:50%;
-      border:1px solid rgba(0,0,0,.45);
-      background:transparent;
-    }
-    .hole::before{
-      content:"+";
-      position:absolute;
-      font-size:9px;
-      font-weight:900;
-      color:rgba(0,0,0,.55);
-      line-height:1;
-      transform:translateY(-0.2px);
-    }
+    .hole::after{content:"";width:6px;height:6px;border-radius:50%;border:1px solid rgba(0,0,0,.45);background:transparent;}
+    .hole::before{content:"+";position:absolute;font-size:9px;font-weight:900;color:rgba(0,0,0,.55);line-height:1;transform:translateY(-0.2px);}
+    .label-preview .tmp{font-size:11px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:#0b1220;margin-bottom:4px;}
 
-    .label-preview .tmp{
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.24em;
-      text-transform:uppercase;
-      color:#0b1220;
-      margin-bottom:4px;
-    }
-
-    .label-preview .qr-box{
-      display:inline-block;
-      background:#fff;
-      padding:8px; /* quiet zone extra */
+    .qr-box{
+      display:inline-block;background:#fff;
+      padding:16px; /* QUIET ZONE EXTRA (más robusto) */
       border-radius:10px;
     }
-    .label-preview .qr-box canvas{
-      background:#fff;
-      border-radius:0px;
+    .qr-box canvas{
+      display:block;background:#fff;
+      image-rendering:pixelated;
     }
 
     .label-preview .code{
-      margin-top:6px;
-      padding:4px 10px;
-      border-radius:999px;
-      border:1px solid #111;
-      background:#f2f2f2;
-      font-weight:900;
-      font-size:13px;
-      letter-spacing:.12em;
-      color:#111;
-      line-height:1;
+      margin-top:6px;padding:4px 10px;border-radius:999px;
+      border:1px solid #111;background:#f2f2f2;
+      font-weight:900;font-size:13px;letter-spacing:.12em;color:#111;line-height:1;
     }
 
     /* LISTA */
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size:12px;
-      padding:8px 12px;
-      border-radius:999px;
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;padding:8px 12px;border-radius:999px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
-      color:#cfe6ff;
-      margin-bottom:12px;
+      color:#cfe6ff;margin-bottom:12px;
     }
-
     .list{
-      margin-top:12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      overflow:auto;
-      background:rgba(0,0,0,.18);
-      max-height:320px;
+      margin-top:12px;border-radius:16px;border:1px solid rgba(255,255,255,.10);
+      overflow:auto;background:rgba(0,0,0,.18);max-height:340px;
     }
-
     .inst-row{
-      display:flex;
-      gap:10px;
-      padding:10px 12px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      cursor:pointer;
-      transition:.12s background,.12s outline;
-      align-items:flex-start;
+      display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);
+      cursor:pointer;transition:.12s background,.12s outline;align-items:flex-start;
     }
     .inst-row:hover{background:rgba(88,166,255,.08)}
-    .inst-row.selected{
-      background:rgba(88,166,255,.14);
-      outline:1px solid rgba(88,166,255,.40);
-    }
+    .inst-row.selected{background:rgba(88,166,255,.14);outline:1px solid rgba(88,166,255,.40);}
     .inst-row input[type="checkbox"]{
-      margin-top:2px;
-      width:18px;height:18px;
-      accent-color: var(--accent);
-      cursor:pointer;
+      margin-top:2px;width:18px;height:18px;
+      accent-color: var(--accent);cursor:pointer;
     }
-
-    .inst-code{font-weight:900;letter-spacing:.08em;min-width:70px;}
+    .inst-code{font-weight:900;letter-spacing:.08em;min-width:80px;}
     .inst-desc{font-size:12px;color:var(--muted);line-height:1.25;}
 
     .footer{
-      margin-top:12px;
-      color:var(--muted);
-      font-size:12px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
+      margin-top:12px;color:var(--muted);font-size:12px;
+      display:flex;flex-direction:column;gap:6px;
     }
     .footer strong{color:#e9f4ff}
 
     .preview-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:5px;
-      margin-top:10px;
-      background:rgba(0,0,0,.25);
-      border:1px dashed rgba(255,255,255,.10);
-      border-radius:12px;
-      padding:10px;
+      display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;
+      background:rgba(0,0,0,.25);border:1px dashed rgba(255,255,255,.10);
+      border-radius:12px;padding:10px;
     }
     .preview-cell{
-      height:18px;
-      border-radius:4px;
-      background:#1f2937;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:10px;
-      color:#9ca3af;
+      height:18px;border-radius:4px;background:#1f2937;
+      display:flex;align-items:center;justify-content:center;font-size:10px;color:#9ca3af;
     }
-    .preview-cell.filled{
-      background:#22c55e;
-      color:#022c22;
-      font-weight:900;
-    }
+    .preview-cell.filled{background:#22c55e;color:#022c22;font-weight:900;}
 
     /* PRINT */
     #printArea{display:none;}
@@ -418,495 +215,654 @@
 </head>
 
 <body>
-
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="brand">
-      <img src="../img/tmp-quality.png" alt="TMP">
-      <div>
-        <h1>QR Label Studio</h1>
-        <div class="sub">Lyreco 70×36 (3×8) · QR HQ (ECC H + quiet zone)</div>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="../img/tmp-quality.png" alt="TMP">
+        <div>
+          <h1>QR Label Studio</h1>
+          <div class="sub">Lyreco 70×36 (3×8) · QR NÍTIDO (ECC H + sin blur)</div>
+        </div>
       </div>
-    </div>
 
-    <div id="badgeOnline" class="pill offline">
-      <span class="dot"></span>
-      <span id="badgeOnlineTxt">Offline / verificando Supabase…</span>
-    </div>
-
-    <button class="btn-top" onclick="window.location.href='../home.html'">🏠 Volver</button>
-  </div>
-</div>
-
-<div class="wrap">
-
-  <!-- IZQUIERDA -->
-  <div class="card">
-    <h2>Etiqueta individual</h2>
-
-    <label>Código del instrumento</label>
-    <input id="codigo" type="text" placeholder="Ej: METMP001">
-
-    <div class="row">
-      <button class="btn main" id="btnGenerar">Generar</button>
-      <button class="btn ghost" id="btnImprimirUno">Imprimir etiqueta</button>
-    </div>
-
-    <div class="sizes">
-      <button class="size-btn active" data-mm="10">10 mm</button>
-      <button class="size-btn" data-mm="13">13 mm</button>
-      <button class="size-btn" data-mm="15">15 mm</button>
-    </div>
-
-    <div class="box">
-      <label>Plantilla</label>
-      <select id="tplEtiqueta">
-        <option value="minimal">Minimal (QR + Código)</option>
-        <option value="lab" selected>LAB PRO (TMP + QR + Código + corte + agujero)</option>
-        <option value="full">FULL (incluye microtexto)</option>
-      </select>
-
-      <div class="hint">
-        ✅ QR más legible: <b>ECC H</b> + render HQ + margen blanco (quiet zone).<br>
-        ✅ Imprimir: <b>Escala 100%</b> + desmarcar <b>encabezados/pies</b>.
+      <div id="badgeOnline" class="pill offline">
+        <span class="dot"></span>
+        <span id="badgeOnlineTxt">Offline / verificando Supabase…</span>
       </div>
-    </div>
 
-    <div class="preview" id="qrResult"></div>
+      <button class="btn-top" onclick="window.location.href='../home.html'">🏠 Volver</button>
+    </div>
   </div>
 
-  <!-- DERECHA -->
-  <div class="card">
-    <h2>Hoja A4 (Lyreco pegatina 3×8)</h2>
+  <div class="wrap">
 
-    <div class="badge" id="badgeEstado">Cargando instrumentos desde Supabase…</div>
+    <!-- IZQUIERDA -->
+    <div class="card">
+      <h2>Etiqueta individual</h2>
 
-    <div style="margin-top:6px">
-      <label>Buscar instrumentos</label>
-      <input id="buscador" type="text" placeholder="Ej: MET, micrómetro, M14…">
+      <label>Código del instrumento</label>
+      <input id="codigo" type="text" placeholder="Ej: METMP001">
+
+      <div class="row">
+        <button class="btn main" id="btnGenerar">Generar</button>
+        <button class="btn ghost" id="btnImprimirUno">Imprimir etiqueta</button>
+      </div>
+
+      <div class="sizes">
+        <button class="size-btn active" data-mm="10">10 mm</button>
+        <button class="size-btn" data-mm="13">13 mm</button>
+        <button class="size-btn" data-mm="15">15 mm</button>
+      </div>
+
+      <div class="box">
+        <label>Plantilla</label>
+        <select id="tplEtiqueta">
+          <option value="minimal">Minimal (QR + Código)</option>
+          <option value="lab" selected>LAB PRO (TMP + QR + Código + corte + agujero)</option>
+          <option value="full">FULL (incluye microtexto)</option>
+        </select>
+
+        <div class="row" style="margin-top:10px;">
+          <div style="flex:1;min-width:230px;">
+            <label>Contenido QR</label>
+            <select id="qrModo">
+              <!-- ✅ POR DEFECTO “SOLO CÓDIGO” PARA MÁXIMA ROBUSTEZ -->
+              <option value="code" selected>Solo código (recomendado 10×10)</option>
+              <option value="url">URL completa</option>
+              <option value="short">URL corta (base)</option>
+            </select>
+          </div>
+          <div style="flex:2;min-width:240px;">
+            <label>Base URL corta (si eliges “URL corta”)</label>
+            <input id="shortBase" type="text" placeholder="Ej: https://t.tmp/?c=" value="https://trazabilidad-tmp.vercel.app/i?c=">
+          </div>
+        </div>
+
+        <div class="hint">
+          ✅ Para abarcar iPhone + Android + lector: <b>Solo código</b> o <b>URL corta</b>.<br>
+          ✅ En imprimir: <b>Escala 100%</b> y desactivar <b>encabezados/pies</b>.
+        </div>
+      </div>
+
+      <div class="preview" id="qrResult"></div>
     </div>
 
-    <div class="list" id="listaInstrumentos"></div>
+    <!-- DERECHA -->
+    <div class="card">
+      <h2>Hoja A4 (Lyreco pegatina 3×8)</h2>
 
-    <div class="footer">
-      <span><strong>Casilla:</strong> 70×36 mm · 3×8</span>
-      <span><strong>QR:</strong> <span id="lblQRSize">10</span>×<span id="lblQRSize2">10</span> mm (centrado)</span>
-      <span><strong>Plantilla:</strong> <span id="lblTpl">LAB PRO</span></span>
-      <span><strong>Capacidad:</strong> 24 etiquetas</span>
-      <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
+      <div class="badge" id="badgeEstado">Cargando instrumentos desde Supabase…</div>
+
+      <div style="margin-top:6px">
+        <label>Buscar instrumentos</label>
+        <input id="buscador" type="text" placeholder="Ej: MET, micrómetro, M14…">
+      </div>
+
+      <div class="list" id="listaInstrumentos"></div>
+
+      <div class="footer">
+        <span><strong>Casilla:</strong> 70×36 mm · 3×8 (sin separación)</span>
+        <span><strong>QR:</strong> <span id="lblQRSize">10</span>×<span id="lblQRSize2">10</span> mm (centrado)</span>
+        <span><strong>Contenido:</strong> <span id="lblModo">Solo código</span></span>
+        <span><strong>Plantilla:</strong> <span id="lblTpl">LAB PRO</span></span>
+        <span><strong>Capacidad:</strong> 24 etiquetas</span>
+        <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span></span>
+      </div>
+
+      <div class="row" style="margin-top:12px;justify-content:flex-end">
+        <button class="btn main" id="btnImprimirHoja">Imprimir hoja A4</button>
+        <button class="btn ghost" id="btnLimpiarSeleccion">Limpiar</button>
+        <button class="btn ghost" id="btnRefrescarLista">Recargar</button>
+      </div>
+
+      <div class="hint" style="margin-top:10px">Vista previa (ocupación):</div>
+      <div class="preview-grid" id="previewGrid"></div>
     </div>
-
-    <div class="row" style="margin-top:12px;justify-content:flex-end">
-      <button class="btn main" id="btnImprimirHoja">Imprimir hoja A4</button>
-      <button class="btn ghost" id="btnLimpiarSeleccion">Limpiar</button>
-      <button class="btn ghost" id="btnRefrescarLista">Recargar</button>
-    </div>
-
-    <div class="hint" style="margin-top:10px">Vista previa (ocupación):</div>
-    <div class="preview-grid" id="previewGrid"></div>
   </div>
-</div>
 
-<div id="printArea"></div>
+  <div id="printArea"></div>
 
-<!-- SUPABASE -->
-<script type="module" src="../config.mjs"></script>
+  <!-- SUPABASE -->
+  <script type="module" src="../config.mjs"></script>
 
-<script type="module">
-  const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
+  <script type="module">
+    // ========================
+    // CONFIG
+    // ========================
+    const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-  // ===== HOJA LYRECO =====
-  const COLS = 3;
-  const ROWS = 8;
-  const CELL_W_MM = 70;
-  const CELL_H_MM = 36;
+    // Hoja Lyreco:
+    const COLS = 3, ROWS = 8;
+    const CELL_W_MM = 70, CELL_H_MM = 36;
 
-  // Márgenes verticales de tu hoja
-  const MARGEN_SUP_MM = 4.5;
-  const MARGEN_INF_MM = 4.5;
+    // Márgenes que has dado:
+    const MARGEN_SUP_MM = 4.5;
+    const MARGEN_INF_MM = 4.5;
 
-  // Margen lateral (si ves que se desplaza, sube 1-4 mm)
-  const MARGEN_IZQ_MM = 0.0;
-  const MARGEN_DER_MM = 0.0;
+    // Margen lateral (ajustable si la impresora desplaza)
+    const MARGEN_IZQ_MM = 0.0;
+    const MARGEN_DER_MM = 0.0;
 
-  // Sin separación entre casillas
-  const GAP_X_MM = 0.0;
-  const GAP_Y_MM = 0.0;
+    // Sin separación entre etiquetas
+    const GAP_X_MM = 0.0;
+    const GAP_Y_MM = 0.0;
 
-  const CAPACITY = COLS * ROWS;
+    const CAPACITY = COLS * ROWS;
 
-  // ===== Estado =====
-  let etiquetaMM = 10;
-  let allInstrumentos = [];
-  const selectedCodigos = new Set();
+    // ========================
+    // STATE
+    // ========================
+    let etiquetaMM = 10;
+    let allInstrumentos = [];
+    const selectedCodigos = new Set();
 
-  // DOM
-  const codigoInput = document.getElementById("codigo");
-  const qrResult = document.getElementById("qrResult");
-  const badgeOnline = document.getElementById("badgeOnline");
-  const badgeOnlineTxt = document.getElementById("badgeOnlineTxt");
-  const badgeEstado = document.getElementById("badgeEstado");
-  const listaInstrumentos = document.getElementById("listaInstrumentos");
-  const buscadorInput = document.getElementById("buscador");
-  const sizeButtons = document.querySelectorAll(".size-btn");
-  const tplSelect = document.getElementById("tplEtiqueta");
-  const lblTpl = document.getElementById("lblTpl");
-  const lblSeleccionados = document.getElementById("lblSeleccionados");
-  const previewGrid = document.getElementById("previewGrid");
-  const printArea = document.getElementById("printArea");
-  const lblQRSize = document.getElementById("lblQRSize");
-  const lblQRSize2 = document.getElementById("lblQRSize2");
+    // ========================
+    // DOM
+    // ========================
+    const codigoInput = document.getElementById("codigo");
+    const qrResult = document.getElementById("qrResult");
 
-  function plantillaNombre(v){
-    if (v==="minimal") return "MINIMAL";
-    if (v==="lab") return "LAB PRO";
-    if (v==="full") return "FULL";
-    return "LAB PRO";
-  }
+    const badgeOnline = document.getElementById("badgeOnline");
+    const badgeOnlineTxt = document.getElementById("badgeOnlineTxt");
 
-  function esc(text){
-    return String(text ?? "").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
+    const badgeEstado = document.getElementById("badgeEstado");
+    const listaInstrumentos = document.getElementById("listaInstrumentos");
+    const buscadorInput = document.getElementById("buscador");
 
-  function normalize(s){
-    return (s ?? "")
-      .toString()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  }
+    const sizeButtons = document.querySelectorAll(".size-btn");
+    const tplSelect = document.getElementById("tplEtiqueta");
 
-  function actualizarPreview(){
-    lblTpl.textContent = plantillaNombre(tplSelect.value);
-    lblSeleccionados.textContent = selectedCodigos.size;
-    lblQRSize.textContent = etiquetaMM;
-    lblQRSize2.textContent = etiquetaMM;
+    const qrModo = document.getElementById("qrModo");
+    const shortBase = document.getElementById("shortBase");
 
-    previewGrid.innerHTML = "";
-    for(let i=0;i<CAPACITY;i++){
-      const div=document.createElement("div");
-      div.className="preview-cell";
-      if(i<selectedCodigos.size){
-        div.classList.add("filled");
-        div.textContent=i+1;
-      }
-      previewGrid.appendChild(div);
+    const lblTpl = document.getElementById("lblTpl");
+    const lblSeleccionados = document.getElementById("lblSeleccionados");
+    const previewGrid = document.getElementById("previewGrid");
+    const printArea = document.getElementById("printArea");
+
+    const lblQRSize = document.getElementById("lblQRSize");
+    const lblQRSize2 = document.getElementById("lblQRSize2");
+    const lblModo = document.getElementById("lblModo");
+
+    // ========================
+    // HELPERS
+    // ========================
+    function plantillaNombre(v){
+      if (v==="minimal") return "MINIMAL";
+      if (v==="lab") return "LAB PRO";
+      if (v==="full") return "FULL";
+      return "LAB PRO";
     }
-  }
+    function modoNombre(v){
+      if(v==="url") return "URL completa";
+      if(v==="code") return "Solo código";
+      if(v==="short") return "URL corta";
+      return "Solo código";
+    }
 
-  // ===== QR HQ helper =====
-  function renderQR_HQ(container, text, targetPx, scale=8, padPx=8){
-    // limpia y prepara contenedor
-    container.innerHTML = "";
-    container.style.padding = padPx + "px";
-    container.style.background = "#fff";
-    container.style.display = "inline-block";
+    function esc(text){
+      return String(text ?? "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
 
-    const hiPx = Math.max(64, targetPx * scale);
+    function normalize(s){
+      return (s ?? "")
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
 
-    new QRCode(container, {
-      text,
-      width: hiPx,
-      height: hiPx,
-      correctLevel: QRCode.CorrectLevel.H
+    function mmToPx(mm){
+      // 96 DPI aprox. navegador
+      return Math.round(mm * 96 / 25.4);
+    }
+
+    // ========================
+    // QR NÍTIDO (clave)
+    // - genera QR grande y remuestrea SIN blur
+    // ========================
+    function renderQRSharp(container, text, visiblePx, {
+      scale = 10,
+      padPx = 16,
+      ecc = "H"
+    } = {}){
+      container.innerHTML = "";
+      container.style.padding = padPx + "px";
+      container.style.background = "#fff";
+      container.style.display = "inline-block";
+
+      // 1) canvas interno grande
+      const tmp = document.createElement("div");
+      tmp.style.position = "absolute";
+      tmp.style.left = "-99999px";
+      tmp.style.top = "-99999px";
+      document.body.appendChild(tmp);
+
+      const internalPx = Math.max(visiblePx * scale, 320);
+
+      new QRCode(tmp, {
+        text,
+        width: internalPx,
+        height: internalPx,
+        correctLevel: (ecc === "H" ? QRCode.CorrectLevel.H :
+                      ecc === "Q" ? QRCode.CorrectLevel.Q :
+                      ecc === "M" ? QRCode.CorrectLevel.M :
+                                   QRCode.CorrectLevel.L)
+      });
+
+      const srcCanvas = tmp.querySelector("canvas");
+      if(!srcCanvas){
+        document.body.removeChild(tmp);
+        container.textContent = "Error QR";
+        return;
+      }
+
+      // 2) canvas final (tamaño EXACTO) sin suavizado
+      const out = document.createElement("canvas");
+      out.width = visiblePx;
+      out.height = visiblePx;
+      const ctx = out.getContext("2d", { alpha: false });
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(srcCanvas, 0, 0, visiblePx, visiblePx);
+
+      out.style.display = "block";
+      out.style.background = "#fff";
+      out.style.imageRendering = "pixelated";
+
+      container.appendChild(out);
+      document.body.removeChild(tmp);
+    }
+
+    function buildQRText(codigo){
+      const mode = qrModo.value;
+
+      // ✅ default: SOLO CÓDIGO (máxima robustez 10×10)
+      if(mode === "code") return codigo;
+
+      if(mode === "short"){
+        const base = (shortBase.value || "").trim();
+        if(!base) return codigo; // fallback
+        return base + encodeURIComponent(codigo);
+      }
+
+      // url completa
+      return BASE_URL + encodeURIComponent(codigo);
+    }
+
+    // ========================
+    // UI
+    // ========================
+    function actualizarPreview(){
+      lblTpl.textContent = plantillaNombre(tplSelect.value);
+      lblSeleccionados.textContent = selectedCodigos.size;
+      lblQRSize.textContent = etiquetaMM;
+      lblQRSize2.textContent = etiquetaMM;
+      lblModo.textContent = modoNombre(qrModo.value);
+
+      previewGrid.innerHTML = "";
+      for(let i=0;i<CAPACITY;i++){
+        const div=document.createElement("div");
+        div.className="preview-cell";
+        if(i<selectedCodigos.size){
+          div.classList.add("filled");
+          div.textContent=i+1;
+        }
+        previewGrid.appendChild(div);
+      }
+    }
+
+    function renderEtiquetaPreview(codigo){
+      const tpl = tplSelect.value;
+      const showHeader = (tpl !== "minimal");
+      const qrText = buildQRText(codigo);
+
+      qrResult.innerHTML = `
+        <div class="label-preview">
+          <div class="hole"></div>
+          ${showHeader ? `<div class="tmp">TMP</div>` : ``}
+          <div class="qr-box" id="qrBoxPreview"></div>
+          <div class="code">${esc(codigo)}</div>
+        </div>
+        <div class="hint">QR contiene: <b>${esc(qrText)}</b></div>
+      `;
+
+      const qrBox = document.getElementById("qrBoxPreview");
+      const visiblePx = mmToPx(etiquetaMM);
+
+      // Preview: alto pero razonable
+      renderQRSharp(qrBox, qrText, visiblePx, { scale: 12, padPx: 16, ecc: "H" });
+    }
+
+    function generar(){
+      const codigo = (codigoInput.value || "").trim();
+      if(!codigo){ alert("Introduce el código"); return; }
+      renderEtiquetaPreview(codigo);
+    }
+
+    // Tamaños
+    sizeButtons.forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        sizeButtons.forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        etiquetaMM = parseInt(btn.dataset.mm,10);
+        actualizarPreview();
+        if(codigoInput.value.trim()) generar();
+      });
     });
 
-    const canvas = container.querySelector("canvas");
-    if(canvas){
-      // encoger al tamaño final sin blur
-      canvas.style.width = targetPx + "px";
-      canvas.style.height = targetPx + "px";
-      canvas.style.imageRendering = "pixelated";
-      canvas.style.display = "block";
-      canvas.style.background = "#fff";
-    }
-  }
-
-  function renderEtiquetaPreview(codigo, url, mm, tpl){
-    const showHeader = (tpl !== "minimal");
-    qrResult.innerHTML = `
-      <div class="label-preview">
-        <div class="hole"></div>
-        ${showHeader ? `<div class="tmp">TMP</div>` : ``}
-        <div class="qr-box"></div>
-        <div class="code">${esc(codigo)}</div>
-      </div>
-      <div class="hint">URL: ${esc(url)}</div>
-    `;
-    const qrBox = qrResult.querySelector(".qr-box");
-
-    // Preview: usa tamaño en px estable, pero HQ
-    const targetPx = Math.round(mm * 9); // un pelín más grande visualmente
-    renderQR_HQ(qrBox, url, targetPx, 6, 8);
-  }
-
-  function generar(){
-    const codigo = codigoInput.value.trim();
-    if(!codigo){ alert("Introduce el código"); return; }
-    const url = BASE_URL + encodeURIComponent(codigo);
-    renderEtiquetaPreview(codigo, url, etiquetaMM, tplSelect.value);
-  }
-
-  // ===== Tamaños =====
-  sizeButtons.forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      sizeButtons.forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-      etiquetaMM = parseInt(btn.dataset.mm,10);
+    tplSelect.addEventListener("change",()=>{
       actualizarPreview();
       if(codigoInput.value.trim()) generar();
     });
-  });
 
-  tplSelect.addEventListener("change",()=>{
-    actualizarPreview();
-    if(codigoInput.value.trim()) generar();
-  });
+    qrModo.addEventListener("change", ()=>{
+      actualizarPreview();
+      if(codigoInput.value.trim()) generar();
+    });
 
-  document.getElementById("btnGenerar").addEventListener("click", generar);
-  codigoInput.addEventListener("keydown", e=>{
-    if(e.key==="Enter"){ e.preventDefault(); generar(); }
-  });
+    shortBase.addEventListener("input", ()=>{
+      if(qrModo.value === "short" && codigoInput.value.trim()) generar();
+    });
 
-  // ===== Supabase wait =====
-  async function waitForSupabase(ms=3500){
-    const start = Date.now();
-    while(Date.now() - start < ms){
-      if(window.supabase) return window.supabase;
-      await new Promise(r => setTimeout(r, 50));
-    }
-    return null;
-  }
+    document.getElementById("btnGenerar").addEventListener("click", generar);
+    codigoInput.addEventListener("keydown", e=>{
+      if(e.key==="Enter"){ e.preventDefault(); generar(); }
+    });
 
-  async function checkSupabase(){
-    const sb = await waitForSupabase();
-    if(sb){
-      badgeOnline.classList.remove("offline");
-      badgeOnlineTxt.textContent="Online (Supabase conectado)";
-      return sb;
-    } else {
-      badgeOnline.classList.add("offline");
-      badgeOnlineTxt.textContent="Offline (Supabase no disponible)";
+    // ========================
+    // SUPABASE
+    // ========================
+    async function waitForSupabase(ms=5000){
+      const start = Date.now();
+      while(Date.now() - start < ms){
+        if(window.supabase) return window.supabase;
+        await new Promise(r => setTimeout(r, 50));
+      }
       return null;
     }
-  }
 
-  async function cargarInstrumentos(){
-    const sb = await checkSupabase();
-    if(!sb){
-      badgeEstado.textContent = "❌ No hay conexión con Supabase";
-      listaInstrumentos.innerHTML = "";
-      return;
+    async function checkSupabase(){
+      const sb = await waitForSupabase();
+      if(sb){
+        badgeOnline.classList.remove("offline");
+        badgeOnlineTxt.textContent="Online (Supabase conectado)";
+        return sb;
+      } else {
+        badgeOnline.classList.add("offline");
+        badgeOnlineTxt.textContent="Offline (Supabase no disponible)";
+        return null;
+      }
     }
 
-    badgeEstado.textContent = "Cargando instrumentos desde Supabase…";
-
-    const { data, error } = await sb
-      .from("instrumentos")
-      .select("codigo, descripcion, rango")
-      .order("codigo", { ascending: true })
-      .limit(8000);
-
-    if(error){
-      console.error(error);
-      badgeEstado.textContent = "❌ Error cargando instrumentos: " + (error.message || "desconocido");
-      listaInstrumentos.innerHTML = "";
-      return;
-    }
-
-    allInstrumentos = (data || []).map(x => ({
-      codigo: x.codigo,
-      descripcion: x.descripcion || "",
-      rango: x.rango || ""
-    }));
-
-    badgeEstado.textContent = "✅ Instrumentos cargados: " + allInstrumentos.length;
-    renderLista();
-  }
-
-  function renderLista(){
-    const q = normalize(buscadorInput.value.trim());
-    const filtered = !q ? allInstrumentos : allInstrumentos.filter(it => {
-      const hay = normalize(it.codigo) + " " + normalize(it.descripcion) + " " + normalize(it.rango);
-      return hay.includes(q);
-    });
-
-    if(!filtered.length){
-      listaInstrumentos.innerHTML = "<div style='padding:12px;color:var(--muted);font-size:12px;'>No hay resultados</div>";
-      return;
-    }
-
-    const view = filtered.slice(0, 700);
-
-    let html = "";
-    for(const it of view){
-      const checked = selectedCodigos.has(it.codigo);
-      html +=
-        "<div class='inst-row " + (checked ? "selected" : "") + "' data-codigo='" + esc(it.codigo) + "'>" +
-          "<input type='checkbox' " + (checked ? "checked" : "") + " />" +
-          "<div>" +
-            "<div class='inst-code'>" + esc(it.codigo) + "</div>" +
-            "<div class='inst-desc'>" + esc(it.descripcion || "-") + "</div>" +
-            "<div class='inst-desc' style='margin-top:4px;'>Rango: <b>" + esc(it.rango || "-") + "</b></div>" +
-          "</div>" +
-        "</div>";
-    }
-    listaInstrumentos.innerHTML = html;
-
-    listaInstrumentos.querySelectorAll(".inst-row").forEach(row => {
-      row.addEventListener("click", (e) => {
-        const codigo = row.getAttribute("data-codigo");
-        toggleSeleccion(codigo);
-        renderLista();
-        e.preventDefault();
-      });
-    });
-
-    listaInstrumentos.querySelectorAll(".inst-row input[type='checkbox']").forEach(cb => {
-      cb.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const row = cb.closest(".inst-row");
-        const codigo = row.getAttribute("data-codigo");
-        toggleSeleccion(codigo);
-        renderLista();
-      });
-    });
-  }
-
-  function toggleSeleccion(codigo){
-    if(selectedCodigos.has(codigo)){
-      selectedCodigos.delete(codigo);
-    } else {
-      if(selectedCodigos.size >= CAPACITY){
-        alert("Máximo " + CAPACITY + " etiquetas por hoja (3×8).");
+    async function cargarInstrumentos(){
+      const sb = await checkSupabase();
+      if(!sb){
+        badgeEstado.textContent = "❌ No hay conexión con Supabase";
+        listaInstrumentos.innerHTML = "";
         return;
       }
-      selectedCodigos.add(codigo);
-    }
-    actualizarPreview();
-  }
 
-  function limpiarSeleccion(){
-    selectedCodigos.clear();
-    actualizarPreview();
-    renderLista();
-  }
+      badgeEstado.textContent = "Cargando instrumentos desde Supabase…";
 
-  // ===== IMPRESIÓN =====
-  function mmToPx(v){ return Math.round(v * 96 / 25.4); }
+      const { data, error } = await sb
+        .from("instrumentos")
+        .select("codigo, descripcion, rango")
+        .order("codigo", { ascending: true })
+        .limit(10000);
 
-  function buildPrintCSS(tpl){
-    const showHeader = (tpl !== "minimal");
+      if(error){
+        console.error(error);
+        badgeEstado.textContent = "❌ Error cargando instrumentos: " + (error.message || "desconocido");
+        listaInstrumentos.innerHTML = "";
+        return;
+      }
 
-    // En impresión centramos TODO dentro de la casilla 70x36
-    return (
-      "<style>" +
-        "@page{size:A4;margin:0mm;}" +
-        "html,body{margin:0;padding:0;}" +
-        "body{font-family:Arial,sans-serif;}" +
+      allInstrumentos = (data || []).map(x => ({
+        codigo: x.codigo,
+        descripcion: x.descripcion || "",
+        rango: x.rango || ""
+      }));
 
-        ".sheet{padding-top:"+MARGEN_SUP_MM+"mm;padding-left:"+MARGEN_IZQ_MM+"mm;}" +
-
-        ".grid{display:grid;" +
-          "grid-template-columns:repeat("+COLS+","+CELL_W_MM+"mm);" +
-          "grid-auto-rows:"+CELL_H_MM+"mm;" +
-          "column-gap:"+GAP_X_MM+"mm;row-gap:"+GAP_Y_MM+"mm;" +
-          "align-content:start;}" +
-
-        ".cell{width:"+CELL_W_MM+"mm;height:"+CELL_H_MM+"mm;position:relative;}" +
-        ".center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);" +
-          "display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2mm;}" +
-
-        ".tmp{font-size:3mm;font-weight:700;letter-spacing:0.8mm;line-height:1;color:#000;}" +
-        ".code{font-size:3.2mm;font-weight:700;border:0.25mm solid #000;border-radius:10mm;" +
-          "padding:0.5mm 2mm;line-height:1;white-space:nowrap;color:#000;background:#fff;}" +
-
-        // contenedor QR en impresión (quiet zone)
-        ".qrwrap{display:inline-block;background:#fff;padding:8px;}" +
-        ".qrwrap canvas{background:#fff;image-rendering:pixelated;display:block;}" +
-
-      "</style>"
-    );
-  }
-
-  function makePrintCellHTML(codigo, tpl){
-    const showHeader = (tpl !== "minimal");
-    const safe = codigo.replace(/[^a-zA-Z0-9]/g,"_");
-    return (
-      "<div class='cell'>" +
-        "<div class='center'>" +
-          (showHeader ? "<div class='tmp'>TMP</div>" : "") +
-          "<div class='qrwrap' id='pqr_"+safe+"'></div>" +
-          "<div class='code'>"+esc(codigo)+"</div>" +
-        "</div>" +
-      "</div>"
-    );
-  }
-
-  function printCodigos(codigos){
-    if(!codigos || !codigos.length){
-      alert("No hay instrumentos para imprimir.");
-      return;
-    }
-    if(!window.QRCode){
-      alert("No está cargada la librería QRCode (qrcodejs).");
-      return;
+      badgeEstado.textContent = "✅ Instrumentos cargados: " + allInstrumentos.length;
+      renderLista();
     }
 
-    const tpl = tplSelect.value;
-
-    let html = buildPrintCSS(tpl);
-    html += "<div class='sheet'><div class='grid'>";
-    for(const c of codigos){
-      html += makePrintCellHTML(c, tpl);
-    }
-    html += "</div></div>";
-    printArea.innerHTML = html;
-
-    // QR EXACTO en mm, pero render HQ para que se lea bien
-    const qrSideMm = etiquetaMM;
-    const targetPx = mmToPx(qrSideMm);
-
-    for(const c of codigos){
-      const safe = c.replace(/[^a-zA-Z0-9]/g,"_");
-      const el = document.getElementById("pqr_"+safe);
-      const url = BASE_URL + encodeURIComponent(c);
-
-      // HQ en impresión: scale alto + ECC H
-      renderQR_HQ(el, url, targetPx, 10, 8);
+    // ========================
+    // LISTA + selección
+    // ========================
+    function toggleSeleccion(codigo){
+      if(selectedCodigos.has(codigo)){
+        selectedCodigos.delete(codigo);
+      } else {
+        if(selectedCodigos.size >= CAPACITY){
+          alert("Máximo " + CAPACITY + " etiquetas por hoja (3×8).");
+          return;
+        }
+        selectedCodigos.add(codigo);
+      }
+      actualizarPreview();
     }
 
-    setTimeout(()=>{
-      window.print();
-      setTimeout(()=>{ printArea.innerHTML=""; }, 500);
-    }, 700);
-  }
+    function renderLista(){
+      const q = normalize(buscadorInput.value.trim());
+      const filtered = !q ? allInstrumentos : allInstrumentos.filter(it => {
+        const hay = normalize(it.codigo) + " " + normalize(it.descripcion) + " " + normalize(it.rango);
+        return hay.includes(q);
+      });
 
-  function imprimirHojaA4(){
-    printCodigos(Array.from(selectedCodigos));
-  }
+      if(!filtered.length){
+        listaInstrumentos.innerHTML = "<div style='padding:12px;color:var(--muted);font-size:12px;'>No hay resultados</div>";
+        return;
+      }
 
-  function imprimirEtiquetaIndividual(){
-    const codigo = codigoInput.value.trim();
-    if(!codigo){ alert("Introduce el código"); return; }
-    printCodigos([codigo]);
-  }
+      const view = filtered.slice(0, 900);
 
-  // Events
-  buscadorInput.addEventListener("input", renderLista);
-  document.getElementById("btnRefrescarLista").addEventListener("click", cargarInstrumentos);
-  document.getElementById("btnLimpiarSeleccion").addEventListener("click", limpiarSeleccion);
-  document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHojaA4);
-  document.getElementById("btnImprimirUno").addEventListener("click", imprimirEtiquetaIndividual);
+      let html = "";
+      for(const it of view){
+        const checked = selectedCodigos.has(it.codigo);
+        html += `
+          <div class="inst-row ${checked ? "selected" : ""}" data-codigo="${esc(it.codigo)}">
+            <input type="checkbox" ${checked ? "checked" : ""} />
+            <div>
+              <div class="inst-code">${esc(it.codigo)}</div>
+              <div class="inst-desc">${esc(it.descripcion || "-")}</div>
+              <div class="inst-desc" style="margin-top:4px;">Rango: <b>${esc(it.rango || "-")}</b></div>
+            </div>
+          </div>
+        `;
+      }
+      listaInstrumentos.innerHTML = html;
 
-  // INIT
-  window.addEventListener("load", async () => {
-    actualizarPreview();
-    await cargarInstrumentos();
-  });
-</script>
+      // Click fila
+      listaInstrumentos.querySelectorAll(".inst-row").forEach(row => {
+        row.addEventListener("click", (e) => {
+          const codigo = row.getAttribute("data-codigo");
+          toggleSeleccion(codigo);
+          renderLista();
+          e.preventDefault();
+        });
+      });
 
+      // Click checkbox
+      listaInstrumentos.querySelectorAll(".inst-row input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const row = cb.closest(".inst-row");
+          const codigo = row.getAttribute("data-codigo");
+          toggleSeleccion(codigo);
+          renderLista();
+        });
+      });
+    }
+
+    function limpiarSeleccion(){
+      selectedCodigos.clear();
+      actualizarPreview();
+      renderLista();
+    }
+
+    buscadorInput.addEventListener("input", renderLista);
+    document.getElementById("btnRefrescarLista").addEventListener("click", cargarInstrumentos);
+    document.getElementById("btnLimpiarSeleccion").addEventListener("click", limpiarSeleccion);
+
+    // ========================
+    // IMPRESIÓN (Lyreco 70×36)
+    // ========================
+    function buildPrintCSS(tpl){
+      const showHeader = (tpl !== "minimal");
+
+      return `
+        <style>
+          @page{ size:A4; margin:0mm; }
+          html,body{ margin:0; padding:0; }
+          body{ font-family: Arial, sans-serif; }
+
+          .sheet{
+            padding-top:${MARGEN_SUP_MM}mm;
+            padding-left:${MARGEN_IZQ_MM}mm;
+            padding-right:${MARGEN_DER_MM}mm;
+          }
+
+          .grid{
+            display:grid;
+            grid-template-columns:repeat(${COLS}, ${CELL_W_MM}mm);
+            grid-auto-rows:${CELL_H_MM}mm;
+            column-gap:${GAP_X_MM}mm;
+            row-gap:${GAP_Y_MM}mm;
+            align-content:start;
+          }
+
+          .cell{
+            width:${CELL_W_MM}mm;
+            height:${CELL_H_MM}mm;
+            position:relative;
+          }
+
+          .center{
+            position:absolute;
+            left:50%;
+            top:50%;
+            transform:translate(-50%,-50%);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:1.2mm;
+          }
+
+          .tmp{
+            font-size:3mm;
+            font-weight:700;
+            letter-spacing:0.8mm;
+            line-height:1;
+            color:#000;
+          }
+
+          .code{
+            font-size:3.2mm;
+            font-weight:700;
+            border:0.25mm solid #000;
+            border-radius:10mm;
+            padding:0.5mm 2mm;
+            line-height:1;
+            white-space:nowrap;
+            color:#000;
+            background:#fff;
+          }
+
+          .qrwrap{
+            display:inline-block;
+            background:#fff;
+            padding:16px; /* QUIET ZONE EXTRA */
+          }
+          .qrwrap canvas{
+            display:block;
+            background:#fff;
+            image-rendering:pixelated;
+          }
+        </style>
+      `;
+    }
+
+    function safeIdFromCode(c){
+      return c.toString().replace(/[^a-zA-Z0-9]/g,"_");
+    }
+
+    function makePrintCellHTML(codigo, tpl){
+      const showHeader = (tpl !== "minimal");
+      const id = safeIdFromCode(codigo);
+      return `
+        <div class="cell">
+          <div class="center">
+            ${showHeader ? `<div class="tmp">TMP</div>` : ``}
+            <div class="qrwrap" id="pqr_${id}"></div>
+            <div class="code">${esc(codigo)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function printCodigos(codigos){
+      if(!codigos || !codigos.length){
+        alert("No hay instrumentos para imprimir.");
+        return;
+      }
+      if(!window.QRCode){
+        alert("No está cargada la librería QRCode (qrcodejs).");
+        return;
+      }
+
+      const tpl = tplSelect.value;
+
+      let html = buildPrintCSS(tpl);
+      html += `<div class="sheet"><div class="grid">`;
+      for(const c of codigos){
+        html += makePrintCellHTML(c, tpl);
+      }
+      html += `</div></div>`;
+
+      printArea.innerHTML = html;
+
+      // Tamaño del QR: exactamente etiquetaMM
+      const visiblePx = mmToPx(etiquetaMM);
+
+      for(const c of codigos){
+        const id = safeIdFromCode(c);
+        const el = document.getElementById("pqr_" + id);
+        const qrText = buildQRText(c);
+
+        // ✅ IMPRESIÓN: escala MUY ALTA para que salga nítido
+        renderQRSharp(el, qrText, visiblePx, { scale: 20, padPx: 16, ecc: "H" });
+      }
+
+      setTimeout(()=>{
+        window.print();
+        setTimeout(()=>{ printArea.innerHTML=""; }, 500);
+      }, 650);
+    }
+
+    function imprimirHojaA4(){
+      printCodigos(Array.from(selectedCodigos));
+    }
+
+    function imprimirEtiquetaIndividual(){
+      const codigo = (codigoInput.value || "").trim();
+      if(!codigo){ alert("Introduce el código"); return; }
+      printCodigos([codigo]);
+    }
+
+    document.getElementById("btnImprimirHoja").addEventListener("click", imprimirHojaA4);
+    document.getElementById("btnImprimirUno").addEventListener("click", imprimirEtiquetaIndividual);
+
+    // ========================
+    // INIT
+    // ========================
+    window.addEventListener("load", async () => {
+      actualizarPreview();
+      await cargarInstrumentos();
+    });
+  </script>
 </body>
 </html>
