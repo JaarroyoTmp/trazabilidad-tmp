@@ -304,7 +304,7 @@
       <img src="../img/tmp-quality.png" alt="TMP">
       <div>
         <h1>QR Label Studio</h1>
-        <div class="sub">Lyreco 70×36 (3×8) · QR nítido (SVG) · Etiqueta bonita</div>
+        <div class="sub">Lyreco 70×36 (3×8) · QR nítido (SVG) · Búsqueda real en Supabase</div>
       </div>
     </div>
 
@@ -403,7 +403,7 @@ const QUIET_MODULES = 4;
 const ERROR_CORRECTION = "M";
 
 // Etiqueta bonita: marco (opcional) en impresión para guiar corte
-const PRINT_DRAW_CELL_BORDER = false; // pon true si quieres líneas guía finas
+const PRINT_DRAW_CELL_BORDER = false; // true si quieres líneas guía finas
 
 /* =========================
    STATE
@@ -520,6 +520,7 @@ async function checkSupabase(){
   }
 }
 
+/* ✅ Carga inicial ligera (200) */
 async function loadInstrumentos(){
   const sb = window.supabase;
   if(!sb){
@@ -529,13 +530,13 @@ async function loadInstrumentos(){
     return;
   }
 
-  badgeEstado.textContent = "Cargando instrumentos desde Supabase…";
+  badgeEstado.textContent = "Cargando instrumentos (servidor)…";
 
   const { data, error } = await sb
     .from("instrumentos")
     .select("codigo, descripcion")
     .order("codigo", { ascending: true })
-    .limit(5000);
+    .limit(200);
 
   if(error){
     console.error(error);
@@ -546,12 +547,12 @@ async function loadInstrumentos(){
   }
 
   allInstrumentos = data || [];
-  badgeEstado.textContent = `Instrumentos cargados: ${allInstrumentos.length}`;
+  badgeEstado.textContent = `Instrumentos listados: ${allInstrumentos.length} (usa el buscador para traer más)`;
   renderLista(allInstrumentos);
 }
 
 /* =========================
-   List render + search + select
+   Lista + búsqueda REAL en servidor
 ========================= */
 function renderLista(data){
   const list = data || [];
@@ -572,6 +573,7 @@ function renderLista(data){
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = selectedCodigos.has(codigo);
+
     cb.addEventListener("click", (e)=> e.stopPropagation());
     cb.addEventListener("change", ()=>{
       if(cb.checked){
@@ -610,19 +612,47 @@ function renderLista(data){
   listaInstrumentos.appendChild(frag);
 }
 
+let searchTimer = null;
+
+/* ✅ Esta es la clave: buscar contra Supabase (no contra lo cargado) */
 function filterLista(){
-  const t = (buscadorInput.value || "").trim().toLowerCase();
-  if(!t){
-    renderLista(allInstrumentos);
+  const sb = window.supabase;
+  if(!sb){
+    renderLista([]);
     return;
   }
-  const parts = t.split(/\s+/).filter(Boolean);
 
-  const filtered = allInstrumentos.filter(inst=>{
-    const hay = ((inst.codigo ?? "") + " " + (inst.descripcion ?? "")).toLowerCase();
-    return parts.every(p => hay.includes(p));
-  });
-  renderLista(filtered);
+  const t = (buscadorInput.value || "").trim().toLowerCase();
+
+  // vacío => lista base 200
+  if(!t){
+    loadInstrumentos();
+    return;
+  }
+
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async ()=>{
+    badgeEstado.textContent = "Buscando en Supabase…";
+
+    const like = `%${t}%`;
+    const { data, error } = await sb
+      .from("instrumentos")
+      .select("codigo, descripcion")
+      .or(`codigo.ilike.${like},descripcion.ilike.${like}`)
+      .order("codigo", { ascending: true })
+      .limit(400);
+
+    if(error){
+      console.error(error);
+      badgeEstado.textContent = "Error en la búsqueda (mira consola).";
+      renderLista([]);
+      return;
+    }
+
+    const list = data || [];
+    badgeEstado.textContent = `Resultados: ${list.length} (limit 400)`;
+    renderLista(list);
+  }, 250);
 }
 
 /* =========================
@@ -669,14 +699,6 @@ function buildLyrecoSheetHTML(codigos){
       const url = buildUrl(codigo);
       const svg = makeQrSvg(url, etiquetaMM);
 
-      const inner = document.createElement("div");
-      inner.style.display = "flex";
-      inner.style.flexDirection = "column";
-      inner.style.alignItems = "center";
-      inner.style.justifyContent = "center";
-      inner.style.gap = "1.5mm";
-
-      // marco bonito de etiqueta (muy fino para no “ensuciar”)
       const card = document.createElement("div");
       card.style.border = "0.35mm solid #111";
       card.style.borderRadius = "3mm";
@@ -718,8 +740,7 @@ function buildLyrecoSheetHTML(codigos){
       card.appendChild(qrWrap);
       card.appendChild(pill);
 
-      inner.appendChild(card);
-      cell.appendChild(inner);
+      cell.appendChild(card);
     }
 
     grid.appendChild(cell);
@@ -785,7 +806,9 @@ document.getElementById("btnImprimirHoja").addEventListener("click", printLyreco
 document.getElementById("btnLimpiarSeleccion").addEventListener("click", ()=>{
   selectedCodigos.clear();
   actualizarPreview();
-  renderLista(allInstrumentos);
+  const t = (buscadorInput.value || "").trim();
+  if(t) filterLista();
+  else renderLista(allInstrumentos);
 });
 document.getElementById("btnRefrescarLista").addEventListener("click", loadInstrumentos);
 
@@ -810,19 +833,7 @@ sizeButtons.forEach(btn=>{
 ========================= */
 window.addEventListener("load", async ()=>{
   actualizarPreview();
-  const ok = await (async ()=>{
-    const sb = window.supabase;
-    if(sb){
-      badgeOnline.classList.remove("offline");
-      badgeOnlineTxt.textContent="Online (Supabase conectado)";
-      return true;
-    } else {
-      badgeOnline.classList.add("offline");
-      badgeOnlineTxt.textContent="Offline (Supabase no disponible)";
-      return false;
-    }
-  })();
-
+  const ok = await checkSupabase();
   if(ok) await loadInstrumentos();
   else renderLista([]);
 });
@@ -830,7 +841,5 @@ window.addEventListener("load", async ()=>{
 
 </body>
 </html>
-
-
 
 
