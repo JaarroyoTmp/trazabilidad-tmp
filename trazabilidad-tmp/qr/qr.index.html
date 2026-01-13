@@ -1,215 +1,795 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>TMP · QR Label Studio</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMP · QR Label Studio (Lyreco 70×36)</title>
 
-<!-- QR LIB -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- QR generator (SVG) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
-<style>
-/* ===== PANTALLA ===== */
-body{
-  background:#0b1220;
-  color:#eaf2ff;
-  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
-  margin:0;
-  padding:30px;
-  display:flex;
-  justify-content:center;
-}
+  <style>
+    :root{
+      --bg0:#070b12;
+      --bg1:#0b1220;
+      --panel:#0f172a;
+      --panel2:#111c33;
+      --border:rgba(255,255,255,.10);
+      --border2:rgba(88,166,255,.25);
+      --txt:#eaf2ff;
+      --muted:#a0b3cc;
+      --accent:#58a6ff;
+      --ok:#22c55e;
+      --bad:#ff6b6b;
+      --shadow:0 18px 42px rgba(0,0,0,.60);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
 
-.panel{
-  background:#111c33;
-  border-radius:18px;
-  padding:22px;
-  width:360px;
-  box-shadow:0 20px 40px rgba(0,0,0,.55);
-}
+    body{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--txt);
+      background:
+        radial-gradient(900px 700px at 10% 0%, rgba(88,166,255,.22), transparent 55%),
+        radial-gradient(900px 700px at 100% 10%, rgba(39,211,255,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      min-height:100vh;
+    }
 
-label{
-  font-size:13px;
-  color:#a0b3cc;
-}
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:blur(12px);
+      background:rgba(15,23,42,.70);
+      border-bottom:1px solid var(--border);
+      box-shadow:0 12px 30px rgba(0,0,0,.35);
+    }
+    .topbar-inner{
+      max-width:1200px; margin:0 auto;
+      padding:14px 18px;
+      display:flex; align-items:center; gap:14px;
+    }
+    .brand{display:flex; align-items:center; gap:12px;}
+    .brand img{height:38px; width:auto; filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));}
+    .brand h1{font-size:15px; letter-spacing:.08em; text-transform:uppercase; font-weight:900; line-height:1;}
+    .brand .sub{font-size:12px; color:var(--muted); margin-top:4px; line-height:1.2;}
 
-input{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border-radius:10px;
-  border:1px solid #2a3556;
-  background:#070b12;
-  color:#fff;
-  font-size:15px;
-}
+    .pill{
+      margin-left:auto;
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:linear-gradient(135deg, rgba(88,166,255,.14), rgba(39,211,255,.08));
+      border:1px solid var(--border2);
+      color:#d5e9ff;
+    }
+    .pill .dot{width:9px;height:9px;border-radius:50%; background:var(--ok); box-shadow:0 0 18px rgba(34,197,94,.55);}
+    .pill.offline .dot{background:var(--bad); box-shadow:0 0 18px rgba(255,107,107,.55);}
 
-button{
-  margin-top:12px;
-  padding:10px;
-  border-radius:999px;
-  border:none;
-  font-weight:800;
-  cursor:pointer;
-}
+    .btn-top{
+      margin-left:12px;
+      border:none; border-radius:12px;
+      padding:10px 14px; font-weight:900;
+      cursor:pointer;
+      background:linear-gradient(135deg, #1fae64, #22c55e);
+      color:#04120a;
+      box-shadow:0 14px 30px rgba(0,0,0,.45);
+      transition:.15s transform,.15s filter;
+    }
+    .btn-top:hover{transform:translateY(-1px);filter:brightness(1.06)}
 
-.btn-main{
-  background:#22c55e;
-  color:#04120a;
-}
+    .wrap{
+      max-width:1200px;
+      margin:22px auto;
+      padding:0 18px 40px;
+      display:grid;
+      grid-template-columns: minmax(0,480px) minmax(0,1fr);
+      gap:18px;
+    }
+    @media (max-width:980px){
+      .wrap{grid-template-columns:1fr;}
+      .pill{display:none;}
+    }
 
-.btn-print{
-  background:#58a6ff;
-  color:#041324;
-}
+    .card{
+      background:linear-gradient(180deg, rgba(17,28,51,.92), rgba(11,18,32,.88));
+      border:1px solid rgba(88,166,255,.16);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px 16px 16px;
+    }
+    .card h2{
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:12px;
+      color:#dff0ff;
+    }
 
-.sizes{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
-}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.04em;}
+    input,select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:#070b12;
+      color:var(--txt);
+      outline:none;
+      transition:.15s border-color,.15s transform;
+      font-size:14px;
+    }
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.12);}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
 
-.sizes button{
-  flex:1;
-  background:#1f2937;
-  color:#cfe6ff;
-}
+    .btn{
+      border:none; border-radius:999px;
+      padding:10px 16px;
+      font-size:13px;
+      cursor:pointer;
+      font-weight:900;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      transition:.15s transform,.15s filter,.15s box-shadow;
+      box-shadow:0 12px 26px rgba(0,0,0,.35);
+    }
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+    .btn.main{background:linear-gradient(135deg, #1fae64, #22c55e);color:#04120a;}
+    .btn.ghost{background:rgba(255,255,255,.04);color:#d7ebff;border:1px solid rgba(255,255,255,.10);box-shadow:none;}
+    .btn.ghost:hover{border-color:rgba(88,166,255,.35)}
 
-.sizes button.active{
-  background:#58a6ff;
-  color:#041324;
-}
+    .sizes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .sizes button{
+      padding:8px 12px; font-size:12px;
+      border-radius:999px; cursor:pointer;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#d7ebff; font-weight:900;
+    }
+    .sizes button.active{
+      background:linear-gradient(135deg, rgba(88,166,255,.85), rgba(39,211,255,.55));
+      color:#041324;
+      border-color:transparent;
+    }
 
-.preview{
-  margin-top:18px;
-  display:flex;
-  justify-content:center;
-}
+    .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
 
-.qr-wrapper{
-  background:#fff;
-  padding:12px;
-}
+    /* Preview individual */
+    .preview{
+      margin-top:14px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:220px;
+      gap:10px;
+      flex-direction:column;
+    }
+    .label-preview{
+      background:#fff;
+      border:1px solid #111;
+      border-radius:12px;
+      padding:10px;
+      box-shadow:0 18px 30px rgba(0,0,0,.25);
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      position:relative;
+    }
+    .label-preview .tmp{
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      color:#0b1220;
+      margin-bottom:4px;
+    }
+    .label-preview .code{
+      margin-top:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #111;
+      background:#f2f2f2;
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.12em;
+      color:#111;
+      line-height:1;
+      white-space:nowrap;
+    }
 
-canvas{
-  image-rendering: pixelated;
-}
+    /* Lista instrumentos */
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#cfe6ff;
+      margin-bottom:12px;
+    }
+    .list{
+      margin-top:12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      overflow:auto;
+      background:rgba(0,0,0,.18);
+      max-height:360px;
+    }
+    .inst-row{
+      display:flex;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      cursor:pointer;
+      transition:.12s background;
+      align-items:flex-start;
+    }
+    .inst-row:hover{background:rgba(88,166,255,.08)}
+    .inst-row:last-child{border-bottom:none;}
 
-.info{
-  margin-top:10px;
-  font-size:12px;
-  color:#a0b3cc;
-  word-break:break-all;
-}
+    .inst-row input[type="checkbox"]{
+      margin-top:2px;
+      accent-color: var(--accent); /* ✅ tick azul */
+      transform: scale(1.05);
+    }
+    .inst-code{font-weight:900; letter-spacing:.08em; min-width:84px;}
+    .inst-desc{font-size:12px; color:var(--muted); line-height:1.25;}
 
-/* ===== IMPRESIÓN ===== */
-@media print{
-  body{
-    background:#fff;
-    padding:0;
-  }
+    .footer{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .footer strong{color:#e9f4ff}
 
-  .panel{
-    box-shadow:none;
-    border-radius:0;
-    width:auto;
-    padding:0;
-  }
+    .preview-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:5px;
+      margin-top:10px;
+      background:rgba(0,0,0,.25);
+      border:1px dashed rgba(255,255,255,.10);
+      border-radius:12px;
+      padding:10px;
+    }
+    .preview-cell{
+      height:18px;
+      border-radius:4px;
+      background:#1f2937;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:10px;
+      color:#9ca3af;
+    }
+    .preview-cell.filled{
+      background:#22c55e;
+      color:#022c22;
+      font-weight:900;
+    }
 
-  button, input, .sizes, .info{
-    display:none !important;
-  }
-
-  .qr-wrapper{
-    padding:0;
-  }
-
-  canvas{
-    image-rendering: pixelated;
-  }
-}
-</style>
+    /* ==== PRINT AREA (Lyreco 70×36, 3×8) ==== */
+    #printArea{display:none;}
+    @media print{
+      body > *:not(#printArea){display:none !important;}
+      #printArea{display:block !important;}
+      @page{
+        size: A4;
+        margin: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="panel">
-  <label>Código del instrumento</label>
-  <input id="codigo" placeholder="Ej: 11217">
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <img src="../img/tmp-quality.png" alt="TMP">
+      <div>
+        <h1>QR Label Studio</h1>
+        <div class="sub">Lyreco 70×36 (3×8) · QR nítido (SVG)</div>
+      </div>
+    </div>
 
-  <button class="btn-main" onclick="generarQR()">Generar QR</button>
-  <button class="btn-print" onclick="window.print()">Imprimir</button>
+    <div id="badgeOnline" class="pill offline">
+      <span class="dot"></span>
+      <span id="badgeOnlineTxt">Offline / verificando Supabase…</span>
+    </div>
 
-  <div class="sizes">
-    <button class="active" onclick="setSize(10,this)">10 mm</button>
-    <button onclick="setSize(13,this)">13 mm</button>
-    <button onclick="setSize(15,this)">15 mm</button>
+    <button class="btn-top" onclick="window.location.href='../home.html'">🏠 Volver</button>
   </div>
-
-  <div class="preview">
-    <div class="qr-wrapper" id="qr"></div>
-  </div>
-
-  <div class="info" id="info"></div>
 </div>
 
+<div class="wrap">
+
+  <!-- IZQUIERDA -->
+  <div class="card">
+    <h2>Etiqueta individual</h2>
+
+    <label>Código del instrumento</label>
+    <input id="codigo" type="text" placeholder="Ej: 30187">
+
+    <div class="row">
+      <button class="btn main" id="btnGenerar">Generar</button>
+      <button class="btn ghost" id="btnImprimirUno">Imprimir etiqueta</button>
+    </div>
+
+    <div class="sizes">
+      <button class="size-btn active" data-mm="10">10 mm</button>
+      <button class="size-btn" data-mm="13">13 mm</button>
+      <button class="size-btn" data-mm="15">15 mm</button>
+    </div>
+
+    <div class="hint">
+      QR codifica: <b>https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=XXXX</b><br>
+      Render: <b>SVG crispEdges</b> (igual que los “buenos” de tu foto, sin borrosidad al imprimir).
+    </div>
+
+    <div class="preview" id="qrResult"></div>
+  </div>
+
+  <!-- DERECHA -->
+  <div class="card">
+    <h2>Hoja Lyreco A4 (3×8 etiquetas)</h2>
+
+    <div class="badge" id="badgeEstado">Cargando instrumentos desde Supabase…</div>
+
+    <div style="margin-top:6px">
+      <label>Buscar instrumentos</label>
+      <input id="buscador" type="text" placeholder="Ej: 301, micrómetro…">
+    </div>
+
+    <div class="list" id="listaInstrumentos"></div>
+
+    <div class="footer">
+      <span><strong>QR:</strong> <span id="lblTamano">10 mm</span> (centrado en casilla 70×36)</span>
+      <span><strong>Casilla Lyreco:</strong> 70×36 mm · 3 columnas × 8 filas</span>
+      <span><strong>Márgenes hoja:</strong> 4,5 mm arriba/abajo · 0 mm entre casillas</span>
+      <span><strong>Seleccionados:</strong> <span id="lblSeleccionados">0</span> / 24</span>
+    </div>
+
+    <div class="row" style="margin-top:12px;justify-content:flex-end">
+      <button class="btn main" id="btnImprimirHoja">Imprimir hoja Lyreco</button>
+      <button class="btn ghost" id="btnLimpiarSeleccion">Limpiar</button>
+      <button class="btn ghost" id="btnRefrescarLista">Recargar</button>
+    </div>
+
+    <div class="hint" style="margin-top:10px">Vista previa (ocupación de hoja):</div>
+    <div class="preview-grid" id="previewGrid"></div>
+  </div>
+
+</div>
+
+<!-- PRINT AREA -->
+<div id="printArea"></div>
+
+<!-- SUPABASE (tu config existente) -->
+<script type="module" src="../config.mjs"></script>
+
 <script>
+/* =========================
+   CONFIG
+========================= */
+
+// ✅ EXACTAMENTE lo que tú quieres codificar
 const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
-let sizeMM = 10;
+// Lyreco sheet
+const COLS = 3;
+const ROWS = 8;
+const MAX_PER_SHEET = COLS * ROWS; // 24
+const CELL_W_MM = 70;
+const CELL_H_MM = 36;
+const TOP_MARGIN_MM = 4.5;
+const BOTTOM_MARGIN_MM = 4.5;
 
-function mmToPx(mm){
-  return Math.round(mm * 96 / 25.4);
+// QR settings (para que se parezca a tus buenos)
+const QUIET_MODULES = 4;          // margen blanco real
+const ERROR_CORRECTION = "M";     // M suele ser el mejor en 10×10 con URL (menos denso que H)
+
+/* =========================
+   STATE
+========================= */
+let etiquetaMM = 10;
+let allInstrumentos = [];
+const selectedCodigos = new Set();
+
+const badgeOnline = document.getElementById("badgeOnline");
+const badgeOnlineTxt = document.getElementById("badgeOnlineTxt");
+
+const codigoInput = document.getElementById("codigo");
+const qrResult = document.getElementById("qrResult");
+
+const badgeEstado = document.getElementById("badgeEstado");
+const listaInstrumentos = document.getElementById("listaInstrumentos");
+const buscadorInput = document.getElementById("buscador");
+
+const lblTamano = document.getElementById("lblTamano");
+const lblSeleccionados = document.getElementById("lblSeleccionados");
+const previewGrid = document.getElementById("previewGrid");
+
+const sizeButtons = document.querySelectorAll(".size-btn");
+
+function esc(text){
+  return String(text ?? "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
 }
 
-function setSize(mm,btn){
-  sizeMM = mm;
-  document.querySelectorAll(".sizes button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  if(document.getElementById("codigo").value) generarQR();
+/* =========================
+   QR SVG (crispEdges)
+   - Vectorial, no borroso al imprimir
+   - Tamaño exacto en mm
+========================= */
+function makeQrSvg(text, mm){
+  const qr = qrcode(0, ERROR_CORRECTION);
+  qr.addData(text);
+  qr.make();
+
+  const n = qr.getModuleCount();
+  const quiet = QUIET_MODULES;
+  const total = n + quiet*2;
+
+  let svg = '';
+  svg += `<svg xmlns="http://www.w3.org/2000/svg" width="${mm}mm" height="${mm}mm" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges">`;
+  svg += `<rect x="0" y="0" width="${total}" height="${total}" fill="#fff"/>`;
+
+  for(let r=0; r<n; r++){
+    for(let c=0; c<n; c++){
+      if(qr.isDark(r,c)){
+        svg += `<rect x="${c+quiet}" y="${r+quiet}" width="1" height="1" fill="#000"/>`;
+      }
+    }
+  }
+  svg += `</svg>`;
+  return svg;
 }
 
-function generarQR(){
-  const codigo = document.getElementById("codigo").value.trim();
-  if(!codigo){
-    alert("Introduce un código");
+function buildUrl(codigo){
+  return BASE_URL + encodeURIComponent(codigo);
+}
+
+/* =========================
+   UI: preview grid
+========================= */
+function actualizarPreview(){
+  lblTamano.textContent = etiquetaMM + " mm";
+  lblSeleccionados.textContent = selectedCodigos.size;
+
+  previewGrid.innerHTML = "";
+  for(let i=0;i<MAX_PER_SHEET;i++){
+    const div=document.createElement("div");
+    div.className="preview-cell";
+    if(i<selectedCodigos.size){
+      div.classList.add("filled");
+      div.textContent=i+1;
+    }
+    previewGrid.appendChild(div);
+  }
+}
+
+/* =========================
+   Individual
+========================= */
+function renderEtiquetaPreview(codigo){
+  const url = buildUrl(codigo);
+  const svg = makeQrSvg(url, etiquetaMM);
+
+  qrResult.innerHTML = `
+    <div class="label-preview">
+      <div class="tmp">TMP</div>
+      <div class="qr-box">${svg}</div>
+      <div class="code">${esc(codigo)}</div>
+    </div>
+    <div class="hint">URL: ${esc(url)}</div>
+  `;
+}
+
+function generar(){
+  const codigo = codigoInput.value.trim();
+  if(!codigo){ alert("Introduce el código"); return; }
+  renderEtiquetaPreview(codigo);
+}
+
+/* =========================
+   Supabase load + list
+========================= */
+async function checkSupabase(){
+  const sb = window.supabase;
+  if(sb){
+    badgeOnline.classList.remove("offline");
+    badgeOnlineTxt.textContent="Online (Supabase conectado)";
+    return true;
+  } else {
+    badgeOnline.classList.add("offline");
+    badgeOnlineTxt.textContent="Offline (Supabase no disponible)";
+    return false;
+  }
+}
+
+async function loadInstrumentos(){
+  const sb = window.supabase;
+  if(!sb){
+    badgeEstado.textContent = "Supabase no disponible (config.mjs). Puedes usar etiqueta individual.";
+    allInstrumentos = [];
+    renderLista([]);
     return;
   }
 
-  const url = BASE_URL + encodeURIComponent(codigo);
-  const finalPx = mmToPx(sizeMM);
+  badgeEstado.textContent = "Cargando instrumentos desde Supabase…";
 
-  const cont = document.getElementById("qr");
-  cont.innerHTML = "";
+  // Ajusta columnas si quieres más info, pero mínimo codigo/descripcion
+  const { data, error } = await sb
+    .from("instrumentos")
+    .select("codigo, descripcion")
+    .order("codigo", { ascending: true })
+    .limit(5000);
 
-  /* 1️⃣ QR GRANDE (CALIDAD MÁXIMA) */
-  const tmp = document.createElement("div");
-  new QRCode(tmp,{
-    text:url,
-    width:1000,
-    height:1000,
-    correctLevel:QRCode.CorrectLevel.H
+  if(error){
+    console.error(error);
+    badgeEstado.textContent = "Error cargando instrumentos (mira consola).";
+    allInstrumentos = [];
+    renderLista([]);
+    return;
+  }
+
+  allInstrumentos = data || [];
+  badgeEstado.textContent = `Instrumentos cargados: ${allInstrumentos.length}`;
+  renderLista(allInstrumentos);
+}
+
+/* =========================
+   List render + search + select
+========================= */
+function renderLista(data){
+  const list = data || [];
+  if(!list.length){
+    listaInstrumentos.innerHTML = `<div style="padding:12px;color:var(--muted);">Sin resultados</div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+
+  list.forEach(inst=>{
+    const codigo = (inst.codigo ?? "").toString();
+    const desc = (inst.descripcion ?? "").toString();
+
+    const row = document.createElement("div");
+    row.className = "inst-row";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = selectedCodigos.has(codigo);
+    cb.addEventListener("click", (e)=> e.stopPropagation());
+    cb.addEventListener("change", ()=>{
+      if(cb.checked){
+        if(selectedCodigos.size >= MAX_PER_SHEET){
+          cb.checked = false;
+          alert(`Máximo ${MAX_PER_SHEET} por hoja (3×8).`);
+          return;
+        }
+        selectedCodigos.add(codigo);
+      } else {
+        selectedCodigos.delete(codigo);
+      }
+      actualizarPreview();
+    });
+
+    row.addEventListener("click", ()=>{
+      cb.checked = !cb.checked;
+      cb.dispatchEvent(new Event("change"));
+    });
+
+    const codeDiv = document.createElement("div");
+    codeDiv.className = "inst-code";
+    codeDiv.textContent = codigo;
+
+    const descDiv = document.createElement("div");
+    descDiv.className = "inst-desc";
+    descDiv.textContent = desc || "-";
+
+    row.appendChild(cb);
+    row.appendChild(codeDiv);
+    row.appendChild(descDiv);
+    frag.appendChild(row);
   });
 
-  const bigCanvas = tmp.querySelector("canvas");
-
-  /* 2️⃣ REDUCCIÓN LIMPIA (SIN SUAVIZADO) */
-  const canvas = document.createElement("canvas");
-  canvas.width = finalPx;
-  canvas.height = finalPx;
-
-  const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(bigCanvas,0,0,finalPx,finalPx);
-
-  cont.appendChild(canvas);
-
-  document.getElementById("info").innerText =
-    "QR → " + url + " | Tamaño real: " + sizeMM + "×" + sizeMM + " mm";
+  listaInstrumentos.innerHTML = "";
+  listaInstrumentos.appendChild(frag);
 }
+
+function filterLista(){
+  const t = (buscadorInput.value || "").trim().toLowerCase();
+  if(!t){
+    renderLista(allInstrumentos);
+    return;
+  }
+  const parts = t.split(/\s+/).filter(Boolean);
+
+  const filtered = allInstrumentos.filter(inst=>{
+    const hay = ((inst.codigo ?? "") + " " + (inst.descripcion ?? "")).toLowerCase();
+    return parts.every(p => hay.includes(p));
+  });
+  renderLista(filtered);
+}
+
+/* =========================
+   Printing (Lyreco grid)
+   - 3 cols x 8 rows
+   - cell 70x36mm
+   - top/bottom margin 4.5mm
+   - no gaps between cells
+   - QR centered; QR size is etiquetaMM
+========================= */
+function buildLyrecoSheetHTML(codigos){
+  // Construye una hoja completa 3x8 aunque haya menos codigos
+  const items = Array.from(codigos).slice(0, MAX_PER_SHEET);
+
+  // Estilo de impresión: todo en mm, sin escalado interno
+  // IMPORTANTE: al imprimir, elegir 100% / tamaño real (NO "ajustar a página").
+  const page = document.createElement("div");
+  page.style.width = "210mm";
+  page.style.height = "297mm";
+  page.style.position = "relative";
+  page.style.background = "#fff";
+
+  // Contenedor de etiquetas con márgenes arriba/abajo
+  const grid = document.createElement("div");
+  grid.style.position = "absolute";
+  grid.style.left = "0";
+  grid.style.right = "0";
+  grid.style.top = TOP_MARGIN_MM + "mm";
+  grid.style.bottom = BOTTOM_MARGIN_MM + "mm";
+
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = `repeat(${COLS}, ${CELL_W_MM}mm)`;
+  grid.style.gridTemplateRows = `repeat(${ROWS}, ${CELL_H_MM}mm)`;
+  grid.style.gap = "0mm"; // sin separación
+  grid.style.justifyContent = "center"; // centra el bloque en la hoja si sobra ancho
+  grid.style.alignContent = "start";
+
+  for(let i=0; i<MAX_PER_SHEET; i++){
+    const cell = document.createElement("div");
+    cell.style.width = CELL_W_MM + "mm";
+    cell.style.height = CELL_H_MM + "mm";
+    cell.style.display = "flex";
+    cell.style.alignItems = "center";
+    cell.style.justifyContent = "center";
+    cell.style.overflow = "hidden";
+
+    // Contenido centrado
+    if(i < items.length){
+      const codigo = items[i];
+      const url = buildUrl(codigo);
+      const svg = makeQrSvg(url, etiquetaMM);
+
+      const inner = document.createElement("div");
+      inner.style.display = "flex";
+      inner.style.flexDirection = "column";
+      inner.style.alignItems = "center";
+      inner.style.justifyContent = "center";
+      inner.style.gap = "2mm";
+
+      // QR
+      const qr = document.createElement("div");
+      qr.innerHTML = svg;
+
+      // Código (opcional) pequeño
+      const code = document.createElement("div");
+      code.textContent = codigo;
+      code.style.fontFamily = "system-ui,Segoe UI,sans-serif";
+      code.style.fontSize = "10pt";
+      code.style.fontWeight = "800";
+      code.style.color = "#111";
+
+      inner.appendChild(qr);
+      inner.appendChild(code);
+      cell.appendChild(inner);
+    }
+
+    grid.appendChild(cell);
+  }
+
+  page.appendChild(grid);
+  return page.outerHTML;
+}
+
+function printLyrecoSheet(){
+  if(selectedCodigos.size === 0){
+    alert("Selecciona al menos 1 instrumento.");
+    return;
+  }
+  const printArea = document.getElementById("printArea");
+  printArea.innerHTML = "";
+
+  const css = document.createElement("style");
+  css.textContent = `
+    /* Asegura bordes duros en SVG al imprimir */
+    svg { shape-rendering: crispEdges; }
+  `;
+  printArea.appendChild(css);
+
+  const pageHTML = buildLyrecoSheetHTML(selectedCodigos);
+  printArea.insertAdjacentHTML("beforeend", pageHTML);
+
+  // Imprimir
+  setTimeout(()=> window.print(), 50);
+}
+
+function printOne(){
+  const codigo = codigoInput.value.trim();
+  if(!codigo){ alert("Introduce un código"); return; }
+
+  const printArea = document.getElementById("printArea");
+  printArea.innerHTML = "";
+
+  const url = buildUrl(codigo);
+  const svg = makeQrSvg(url, etiquetaMM);
+
+  // Imprime solo una etiqueta centrada
+  printArea.innerHTML = `
+    <div style="width:210mm;height:297mm;background:#fff;display:flex;align-items:center;justify-content:center;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+        ${svg}
+        <div style="font-family:system-ui,Segoe UI,sans-serif;font-size:12pt;font-weight:900;color:#111;">${esc(codigo)}</div>
+      </div>
+    </div>
+    <style>svg{shape-rendering:crispEdges}</style>
+  `;
+
+  setTimeout(()=> window.print(), 50);
+}
+
+/* =========================
+   Events
+========================= */
+document.getElementById("btnGenerar").addEventListener("click", generar);
+document.getElementById("btnImprimirUno").addEventListener("click", printOne);
+
+document.getElementById("btnImprimirHoja").addEventListener("click", printLyrecoSheet);
+document.getElementById("btnLimpiarSeleccion").addEventListener("click", ()=>{
+  selectedCodigos.clear();
+  actualizarPreview();
+  renderLista(allInstrumentos);
+});
+document.getElementById("btnRefrescarLista").addEventListener("click", loadInstrumentos);
+
+buscadorInput.addEventListener("input", filterLista);
+
+codigoInput.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){ e.preventDefault(); generar(); }
+});
+
+sizeButtons.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    sizeButtons.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    etiquetaMM = parseInt(btn.dataset.mm,10);
+    actualizarPreview();
+    if(codigoInput.value.trim()) generar();
+  });
+});
+
+/* =========================
+   Init
+========================= */
+window.addEventListener("load", async ()=>{
+  actualizarPreview();
+  const ok = await checkSupabase();
+  if(ok) await loadInstrumentos();
+  else renderLista([]);
+});
 </script>
 
 </body>
 </html>
+
 
 
