@@ -107,7 +107,7 @@
     }
 
     label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.04em;}
-    input,select{
+    input{
       width:100%;
       padding:10px 12px;
       border-radius:12px;
@@ -118,7 +118,7 @@
       transition:.15s border-color,.15s transform;
       font-size:14px;
     }
-    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.12);}
+    input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.12);}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
 
     .btn{
@@ -162,32 +162,45 @@
       gap:10px;
       flex-direction:column;
     }
-    .label-preview{
+
+    /* ✅ ETIQUETA BONITA (preview) */
+    .label-card{
       background:#fff;
-      border:1px solid #111;
-      border-radius:12px;
-      padding:10px;
+      border:2px solid #111;
+      border-radius:14px;
+      padding:10px 10px 8px;
+      width:200px;
       box-shadow:0 18px 30px rgba(0,0,0,.25);
-      display:inline-flex;
+      display:flex;
       flex-direction:column;
       align-items:center;
-      justify-content:flex-start;
-      position:relative;
+      gap:6px;
     }
-    .label-preview .tmp{
-      font-size:11px;
+    .label-head{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       font-weight:900;
-      letter-spacing:.24em;
-      text-transform:uppercase;
+      letter-spacing:.22em;
+      font-size:11px;
       color:#0b1220;
-      margin-bottom:4px;
     }
-    .label-preview .code{
-      margin-top:6px;
+    .label-qr{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px;
+      border:1px solid rgba(0,0,0,.25);
+      border-radius:10px;
+      background:#fff;
+    }
+    .code-pill{
+      margin-top:2px;
       padding:4px 10px;
       border-radius:999px;
-      border:1px solid #111;
-      background:#f2f2f2;
+      border:2px solid #111;
+      background:#f5f5f5;
       font-weight:900;
       font-size:13px;
       letter-spacing:.12em;
@@ -231,7 +244,7 @@
 
     .inst-row input[type="checkbox"]{
       margin-top:2px;
-      accent-color: var(--accent); /* ✅ tick azul */
+      accent-color: var(--accent);
       transform: scale(1.05);
     }
     .inst-code{font-weight:900; letter-spacing:.08em; min-width:84px;}
@@ -278,10 +291,7 @@
     @media print{
       body > *:not(#printArea){display:none !important;}
       #printArea{display:block !important;}
-      @page{
-        size: A4;
-        margin: 0;
-      }
+      @page{ size:A4; margin:0; }
     }
   </style>
 </head>
@@ -294,7 +304,7 @@
       <img src="../img/tmp-quality.png" alt="TMP">
       <div>
         <h1>QR Label Studio</h1>
-        <div class="sub">Lyreco 70×36 (3×8) · QR nítido (SVG)</div>
+        <div class="sub">Lyreco 70×36 (3×8) · QR nítido (SVG) · Etiqueta bonita</div>
       </div>
     </div>
 
@@ -329,7 +339,7 @@
 
     <div class="hint">
       QR codifica: <b>https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=XXXX</b><br>
-      Render: <b>SVG crispEdges</b> (igual que los “buenos” de tu foto, sin borrosidad al imprimir).
+      Render: <b>SVG crispEdges</b> (no borroso).
     </div>
 
     <div class="preview" id="qrResult"></div>
@@ -370,15 +380,13 @@
 <!-- PRINT AREA -->
 <div id="printArea"></div>
 
-<!-- SUPABASE (tu config existente) -->
+<!-- SUPABASE -->
 <script type="module" src="../config.mjs"></script>
 
 <script>
 /* =========================
    CONFIG
 ========================= */
-
-// ✅ EXACTAMENTE lo que tú quieres codificar
 const BASE_URL = "https://trazabilidad-tmp.vercel.app/qr/qr.info_instrumentos.html?codigo=";
 
 // Lyreco sheet
@@ -390,9 +398,12 @@ const CELL_H_MM = 36;
 const TOP_MARGIN_MM = 4.5;
 const BOTTOM_MARGIN_MM = 4.5;
 
-// QR settings (para que se parezca a tus buenos)
-const QUIET_MODULES = 4;          // margen blanco real
-const ERROR_CORRECTION = "M";     // M suele ser el mejor en 10×10 con URL (menos denso que H)
+// QR settings
+const QUIET_MODULES = 4;
+const ERROR_CORRECTION = "M";
+
+// Etiqueta bonita: marco (opcional) en impresión para guiar corte
+const PRINT_DRAW_CELL_BORDER = false; // pon true si quieres líneas guía finas
 
 /* =========================
    STATE
@@ -423,11 +434,6 @@ function esc(text){
   }[m]));
 }
 
-/* =========================
-   QR SVG (crispEdges)
-   - Vectorial, no borroso al imprimir
-   - Tamaño exacto en mm
-========================= */
 function makeQrSvg(text, mm){
   const qr = qrcode(0, ERROR_CORRECTION);
   qr.addData(text);
@@ -457,7 +463,7 @@ function buildUrl(codigo){
 }
 
 /* =========================
-   UI: preview grid
+   UI
 ========================= */
 function actualizarPreview(){
   lblTamano.textContent = etiquetaMM + " mm";
@@ -476,17 +482,17 @@ function actualizarPreview(){
 }
 
 /* =========================
-   Individual
+   Individual preview
 ========================= */
 function renderEtiquetaPreview(codigo){
   const url = buildUrl(codigo);
   const svg = makeQrSvg(url, etiquetaMM);
 
   qrResult.innerHTML = `
-    <div class="label-preview">
-      <div class="tmp">TMP</div>
-      <div class="qr-box">${svg}</div>
-      <div class="code">${esc(codigo)}</div>
+    <div class="label-card">
+      <div class="label-head">TMP</div>
+      <div class="label-qr">${svg}</div>
+      <div class="code-pill">${esc(codigo)}</div>
     </div>
     <div class="hint">URL: ${esc(url)}</div>
   `;
@@ -499,7 +505,7 @@ function generar(){
 }
 
 /* =========================
-   Supabase load + list
+   Supabase
 ========================= */
 async function checkSupabase(){
   const sb = window.supabase;
@@ -525,7 +531,6 @@ async function loadInstrumentos(){
 
   badgeEstado.textContent = "Cargando instrumentos desde Supabase…";
 
-  // Ajusta columnas si quieres más info, pero mínimo codigo/descripcion
   const { data, error } = await sb
     .from("instrumentos")
     .select("codigo, descripcion")
@@ -622,25 +627,16 @@ function filterLista(){
 
 /* =========================
    Printing (Lyreco grid)
-   - 3 cols x 8 rows
-   - cell 70x36mm
-   - top/bottom margin 4.5mm
-   - no gaps between cells
-   - QR centered; QR size is etiquetaMM
 ========================= */
 function buildLyrecoSheetHTML(codigos){
-  // Construye una hoja completa 3x8 aunque haya menos codigos
   const items = Array.from(codigos).slice(0, MAX_PER_SHEET);
 
-  // Estilo de impresión: todo en mm, sin escalado interno
-  // IMPORTANTE: al imprimir, elegir 100% / tamaño real (NO "ajustar a página").
   const page = document.createElement("div");
   page.style.width = "210mm";
   page.style.height = "297mm";
   page.style.position = "relative";
   page.style.background = "#fff";
 
-  // Contenedor de etiquetas con márgenes arriba/abajo
   const grid = document.createElement("div");
   grid.style.position = "absolute";
   grid.style.left = "0";
@@ -651,8 +647,8 @@ function buildLyrecoSheetHTML(codigos){
   grid.style.display = "grid";
   grid.style.gridTemplateColumns = `repeat(${COLS}, ${CELL_W_MM}mm)`;
   grid.style.gridTemplateRows = `repeat(${ROWS}, ${CELL_H_MM}mm)`;
-  grid.style.gap = "0mm"; // sin separación
-  grid.style.justifyContent = "center"; // centra el bloque en la hoja si sobra ancho
+  grid.style.gap = "0mm";
+  grid.style.justifyContent = "center";
   grid.style.alignContent = "start";
 
   for(let i=0; i<MAX_PER_SHEET; i++){
@@ -664,7 +660,10 @@ function buildLyrecoSheetHTML(codigos){
     cell.style.justifyContent = "center";
     cell.style.overflow = "hidden";
 
-    // Contenido centrado
+    if(PRINT_DRAW_CELL_BORDER){
+      cell.style.border = "0.2mm solid rgba(0,0,0,.18)";
+    }
+
     if(i < items.length){
       const codigo = items[i];
       const url = buildUrl(codigo);
@@ -675,22 +674,51 @@ function buildLyrecoSheetHTML(codigos){
       inner.style.flexDirection = "column";
       inner.style.alignItems = "center";
       inner.style.justifyContent = "center";
-      inner.style.gap = "2mm";
+      inner.style.gap = "1.5mm";
 
-      // QR
-      const qr = document.createElement("div");
-      qr.innerHTML = svg;
+      // marco bonito de etiqueta (muy fino para no “ensuciar”)
+      const card = document.createElement("div");
+      card.style.border = "0.35mm solid #111";
+      card.style.borderRadius = "3mm";
+      card.style.padding = "2mm 2mm 1.6mm";
+      card.style.display = "flex";
+      card.style.flexDirection = "column";
+      card.style.alignItems = "center";
+      card.style.gap = "1mm";
+      card.style.background = "#fff";
 
-      // Código (opcional) pequeño
-      const code = document.createElement("div");
-      code.textContent = codigo;
-      code.style.fontFamily = "system-ui,Segoe UI,sans-serif";
-      code.style.fontSize = "10pt";
-      code.style.fontWeight = "800";
-      code.style.color = "#111";
+      const head = document.createElement("div");
+      head.textContent = "TMP";
+      head.style.fontFamily = "system-ui,Segoe UI,sans-serif";
+      head.style.fontSize = "8pt";
+      head.style.fontWeight = "900";
+      head.style.letterSpacing = "0.18em";
+      head.style.color = "#111";
 
-      inner.appendChild(qr);
-      inner.appendChild(code);
+      const qrWrap = document.createElement("div");
+      qrWrap.style.border = "0.2mm solid rgba(0,0,0,.25)";
+      qrWrap.style.borderRadius = "2.2mm";
+      qrWrap.style.padding = "1mm";
+      qrWrap.innerHTML = svg;
+
+      const pill = document.createElement("div");
+      pill.textContent = codigo;
+      pill.style.fontFamily = "system-ui,Segoe UI,sans-serif";
+      pill.style.fontSize = "9pt";
+      pill.style.fontWeight = "900";
+      pill.style.border = "0.35mm solid #111";
+      pill.style.borderRadius = "99mm";
+      pill.style.padding = "0.8mm 3mm";
+      pill.style.background = "#f5f5f5";
+      pill.style.letterSpacing = "0.10em";
+      pill.style.color = "#111";
+      pill.style.lineHeight = "1";
+
+      card.appendChild(head);
+      card.appendChild(qrWrap);
+      card.appendChild(pill);
+
+      inner.appendChild(card);
       cell.appendChild(inner);
     }
 
@@ -710,16 +738,12 @@ function printLyrecoSheet(){
   printArea.innerHTML = "";
 
   const css = document.createElement("style");
-  css.textContent = `
-    /* Asegura bordes duros en SVG al imprimir */
-    svg { shape-rendering: crispEdges; }
-  `;
+  css.textContent = `svg{shape-rendering:crispEdges}`;
   printArea.appendChild(css);
 
   const pageHTML = buildLyrecoSheetHTML(selectedCodigos);
   printArea.insertAdjacentHTML("beforeend", pageHTML);
 
-  // Imprimir
   setTimeout(()=> window.print(), 50);
 }
 
@@ -733,12 +757,16 @@ function printOne(){
   const url = buildUrl(codigo);
   const svg = makeQrSvg(url, etiquetaMM);
 
-  // Imprime solo una etiqueta centrada
   printArea.innerHTML = `
     <div style="width:210mm;height:297mm;background:#fff;display:flex;align-items:center;justify-content:center;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
-        ${svg}
-        <div style="font-family:system-ui,Segoe UI,sans-serif;font-size:12pt;font-weight:900;color:#111;">${esc(codigo)}</div>
+      <div style="border:0.6mm solid #111;border-radius:5mm;padding:4mm 4mm 3mm;background:#fff;display:flex;flex-direction:column;align-items:center;gap:2mm;">
+        <div style="font-family:system-ui,Segoe UI,sans-serif;font-size:10pt;font-weight:900;letter-spacing:.22em;color:#111;">TMP</div>
+        <div style="border:0.25mm solid rgba(0,0,0,.25);border-radius:3mm;padding:2mm;background:#fff;">
+          ${svg}
+        </div>
+        <div style="font-family:system-ui,Segoe UI,sans-serif;font-size:12pt;font-weight:900;border:0.6mm solid #111;border-radius:999mm;padding:1.5mm 6mm;background:#f5f5f5;letter-spacing:.12em;color:#111;line-height:1;">
+          ${esc(codigo)}
+        </div>
       </div>
     </div>
     <style>svg{shape-rendering:crispEdges}</style>
@@ -782,7 +810,19 @@ sizeButtons.forEach(btn=>{
 ========================= */
 window.addEventListener("load", async ()=>{
   actualizarPreview();
-  const ok = await checkSupabase();
+  const ok = await (async ()=>{
+    const sb = window.supabase;
+    if(sb){
+      badgeOnline.classList.remove("offline");
+      badgeOnlineTxt.textContent="Online (Supabase conectado)";
+      return true;
+    } else {
+      badgeOnline.classList.add("offline");
+      badgeOnlineTxt.textContent="Offline (Supabase no disponible)";
+      return false;
+    }
+  })();
+
   if(ok) await loadInstrumentos();
   else renderLista([]);
 });
@@ -790,6 +830,7 @@ window.addEventListener("load", async ()=>{
 
 </body>
 </html>
+
 
 
 
