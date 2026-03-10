@@ -527,8 +527,6 @@ async function actualizarFechasEnSupabase(instrumentoId, fechaCal, proxCal) {
   return true;
 }
 
-
-
 /* ========= CARGA INSTRUMENTO ========= */
 async function cargarInstrumento(){
   const codigo = $("#insCodigo").value.trim();
@@ -565,18 +563,18 @@ async function cargarInstrumento(){
     return;
   }
 
- state.instrumento = {
-  ...inst,
-  id: inst.id ?? inst.instrumento_id ?? inst.uuid ?? null
-};
+  state.instrumento = {
+    ...inst,
+    id: inst.id ?? inst.instrumento_id ?? inst.uuid ?? null
+  };
 
-if (!state.instrumento.id) {
-  alert("Instrumento cargado sin ID válido. Revisa Supabase.");
-  return;
-}
+  if (!state.instrumento.id) {
+    alert("Instrumento cargado sin ID válido. Revisa Supabase.");
+    return;
+  }
 
-pintarInstrumento();
-  
+  pintarInstrumento();
+
   await cargarPatrones();
 
   state.plan=[]; state.mediciones={}; state.resultados={};
@@ -1188,18 +1186,170 @@ function dibujarGraficaErrores(){
   });
 }
 
+/* ========= FUNCIONES AUXILIARES PARA JSON COMPLETO ========= */
+function calcularDecisionILAC(errorUm, uUm, tUm) {
+  const absE = Math.abs(parseNum(errorUm));
+  const U = parseNum(uUm);
+  const T = parseNum(tUm);
+
+  if (absE + U <= T) return "APTO";
+  if (absE - U > T) return "NO APTO";
+  return "INDETERMINADO";
+}
+
+function obtenerContextoCalibracion() {
+  return {
+    ladoGlobal: $("#ladoMed").value,
+    nominalGO: parseNum($("#nominalGO").value),
+    nominalNOGO: parseNum($("#nominalNOGO").value),
+    refError: $("#refError").value,
+    tolGlobalMm: parseNum($("#tolGlobal").value),
+    uBaseMm: parseNum($("#uBase").value)
+  };
+}
+
+function construirPuntoResultado(bloque, punto, ctxCal) {
+  const key = `${bloque.id}|${punto.id}`;
+  const med = state.mediciones[key] || {};
+
+  const media = med.media !== undefined && med.media !== null && med.media !== ""
+    ? Number(med.media)
+    : null;
+
+  const sigma = med.s !== undefined && med.s !== null && med.s !== ""
+    ? Number(med.s)
+    : null;
+
+  const ladoBloque = bloque.lado || ctxCal.ladoGlobal;
+  const nominalBloque = (ladoBloque === "GO") ? ctxCal.nominalGO : ctxCal.nominalNOGO;
+  const refVal = (ctxCal.refError === "patron") ? punto.valor_nominal : nominalBloque;
+
+  let error = null;
+  let U = null;
+  let T = null;
+  let decision = null;
+
+  if (media !== null) {
+    error = (media - refVal) * 1000;            // µm
+    U = ctxCal.uBaseMm * 1000;                  // µm
+    T = ctxCal.tolGlobalMm * 1000;              // µm
+    decision = calcularDecisionILAC(error, U, T);
+  }
+
+  return {
+    id: punto.id,
+    nominal: punto.valor_nominal,
+    referencia_utilizada: refVal,
+    correccion_patron: punto.correccion_patron,
+    caracteristica: punto.caracteristica || "",
+    repeticiones: Array.isArray(med.r) ? med.r.filter(v => v !== null && v !== "" && Number.isFinite(Number(v))) : [],
+    media,
+    sigma,
+    error,
+    U,
+    T,
+    decision
+  };
+}
+
+function resumirBloqueResultado(bloque, puntosResultado) {
+  const errores = puntosResultado
+    .map(pt => typeof pt.error === "number" ? Math.abs(pt.error) : null)
+    .filter(v => v !== null);
+
+  const erroresMasU = puntosResultado
+    .map(pt => (typeof pt.error === "number" && typeof pt.U === "number")
+      ? Math.abs(pt.error) + pt.U
+      : null)
+    .filter(v => v !== null);
+
+  const tolerancias = puntosResultado
+    .map(pt => typeof pt.T === "number" ? pt.T : null)
+    .filter(v => v !== null);
+
+  const decisiones = puntosResultado
+    .map(pt => pt.decision)
+    .filter(Boolean);
+
+  let decisionBloque = null;
+  if (decisiones.includes("NO APTO")) decisionBloque = "NO APTO";
+  else if (decisiones.includes("INDETERMINADO")) decisionBloque = "INDETERMINADO";
+  else if (decisiones.includes("APTO")) decisionBloque = "APTO";
+
+  return {
+    id: bloque.id,
+    tipo: bloque.tipo,
+    nombre: bloque.tipo,
+    lado: bloque.lado,
+    patron: {
+      id: bloque.patron.id,
+      codigo: bloque.patron.codigo,
+      descripcion: bloque.patron.descripcion,
+      u_k2: bloque.patron.u_k2
+    },
+    max_abs_error_um: errores.length ? Math.max(...errores) : null,
+    max_abs_error_plus_u_um: erroresMasU.length ? Math.max(...erroresMasU) : null,
+    tolerancia_um: tolerancias.length ? Math.max(...tolerancias) : null,
+    decision: decisionBloque,
+    puntos: puntosResultado
+  };
+}
+
+function construirResumenGlobalJSON(bloquesResultado, ctxCal) {
+  const maxErrores = [];
+  const maxErroresMasU = [];
+  const decisiones = [];
+  let totalPuntos = 0;
+
+  bloquesResultado.forEach(b => {
+    if (typeof b.max_abs_error_um === "number") maxErrores.push(b.max_abs_error_um);
+    if (typeof b.max_abs_error_plus_u_um === "number") maxErroresMasU.push(b.max_abs_error_plus_u_um);
+    if (b.decision) decisiones.push(b.decision);
+    totalPuntos += Array.isArray(b.puntos) ? b.puntos.length : 0;
+  });
+
+  let decisionGlobal = "APTO";
+  if (decisiones.includes("NO APTO")) decisionGlobal = "NO APTO";
+  else if (decisiones.includes("INDETERMINADO")) decisionGlobal = "INDETERMINADO";
+
+  return {
+    numero_bloques: bloquesResultado.length,
+    total_puntos: totalPuntos,
+    max_abs_error_um: maxErrores.length ? Math.max(...maxErrores) : null,
+    max_abs_error_plus_u_um: maxErroresMasU.length ? Math.max(...maxErroresMasU) : null,
+    tolerancia_um: ctxCal.tolGlobalMm * 1000,
+    decision: decisionGlobal,
+    bloques: bloquesResultado.map(b => ({
+      nombre: b.nombre,
+      lado: b.lado,
+      patron_codigo: b.patron?.codigo || null,
+      puntos: Array.isArray(b.puntos) ? b.puntos.length : 0,
+      max_abs_error_um: b.max_abs_error_um,
+      max_abs_error_plus_u_um: b.max_abs_error_plus_u_um,
+      tolerancia_um: b.tolerancia_um,
+      decision: b.decision
+    }))
+  };
+}
+
 /* ========= FUNCIÓN buildCertJSON() ========= */
 function buildCertJSON() {
   // Firma manuscrita en base64
   const sigCanvas = document.getElementById("sigPad");
   const firmaBase64 = sigCanvas.toDataURL("image/png");
 
+  // Contexto de calibración
+  const ctxCal = obtenerContextoCalibracion();
+
   // Condiciones ambientales
   const condiciones = {
     temperatura: $("#condTemp").value || null,
     humedad: $("#condHum").value || null,
     fecha_calibracion: $("#condFechaCal").value || null,
-    observaciones: $("#condObs").value || ""
+    observaciones: $("#condObs").value || "",
+    procedimiento: "Calibración por comparación con patrón materializado",
+    regla_decision: "ILAC-G8",
+    operario: $("#firmanteNombre").value || ""
   };
 
   // Patrones
@@ -1211,48 +1361,46 @@ function buildCertJSON() {
     nota: p.nota || ""
   }));
 
-  // Bloques y puntos con mediciones
-  const bloques = state.plan.map(b => ({
-    id: b.id,
-    tipo: b.tipo,
-    lado: b.lado,
-    patron: {
-      id: b.patron.id,
-      codigo: b.patron.codigo,
-      descripcion: b.patron.descripcion,
-      u_k2: b.patron.u_k2
-    },
-    puntos: b.puntos.map(p => {
-      const key = `${b.id}|${p.id}`;
-      const med = state.mediciones[key] || {};
-      return {
-        id: p.id,
-        nominal: p.valor_nominal,
-        correccion_patron: p.correccion_patron,
-        caracteristica: p.caracteristica || "",
-        repeticiones: med.r || [],
-        media: med.media ? Number(med.media) : null,
-        sigma: med.s ? Number(med.s) : null
-      };
-    })
-  }));
+  // Bloques y puntos con resultados completos
+  const bloques = state.plan.map(b => {
+    const puntosResultado = b.puntos.map(p => construirPuntoResultado(b, p, ctxCal));
+    return resumirBloqueResultado(b, puntosResultado);
+  });
 
-  // Resumen global en texto
-  const resumenGlobal = $("#resumenGlobalBox").innerText || "";
+  // Resumen global estructurado
+  const resumenGlobal = construirResumenGlobalJSON(bloques, ctxCal);
 
   // Instrumento
   const instrumento = state.instrumento || {};
 
+  // Texto de trazabilidad
+  const trazabilidad = (state.patronesSeleccionados || [])
+    .map(p => `${p.codigo || p.id} · ${p.descripcion || ""}`)
+    .join("; ");
+
   return {
     certificado: {
       fecha_generacion: new Date().toISOString(),
-      norma: "ISO/IEC 17025 · ILAC-G8"
+      norma: "ISO/IEC 17025 · ILAC-G8",
+      tipo_documento: "Certificado de calibración"
     },
-    instrumento,
+    instrumento: {
+      ...instrumento,
+      codigo: instrumento.codigo || "",
+      descripcion: instrumento.descripcion || "",
+      fabricante_tipo: instrumento.fabricante_tipo || "",
+      rango: instrumento.rango || "",
+      unidad_base: instrumento.unidad_base || $("#unidadBase").value || "mm",
+      fecha_calibracion: instrumento.fecha_calibracion || instrumento.fecha_ultima_cal || null,
+      fecha_proxima_calibracion: instrumento.fecha_proxima_calibracion || $("#firmanteProxima").value || null
+    },
     condiciones,
     patrones,
     bloques,
     resumen_global: resumenGlobal,
+    trazabilidad: trazabilidad
+      ? `Patrones empleados: ${trazabilidad}. La trazabilidad metrológica se garantiza mediante patrones materializados controlados por el sistema TMP.`
+      : "La trazabilidad metrológica se declara mediante patrones controlados por el sistema TMP.",
     firma: {
       nombre: $("#firmanteNombre").value || "",
       proxima_calibracion: $("#firmanteProxima").value || "",
@@ -1260,7 +1408,9 @@ function buildCertJSON() {
     },
     qr: {
       url_verificacion: null
-    }
+    },
+    regla_decision: "ILAC-G8",
+    decision_global: resumenGlobal.decision
   };
 }
 
@@ -1313,10 +1463,8 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
   alert("✔ Fechas del instrumento actualizadas correctamente.");
 });
 
-
-
 /* ========= EMITIR CERTIFICADO OFICIAL (backend real) ========= */
-  function limpiarParaBackend(certJSON) {
+function limpiarParaBackend(certJSON) {
   // Copia profunda para no modificar el original
   const copia = JSON.parse(JSON.stringify(certJSON));
 
@@ -1330,7 +1478,6 @@ $("#btnGuardarTodo").addEventListener("click", async () => {
 }
 
 $("#btnEmitirOficial").addEventListener("click", async () => {
-
   console.log("🟢 CLICK en Emitir certificado");
 
   try {
@@ -1390,7 +1537,6 @@ $("#btnEmitirOficial").addEventListener("click", async () => {
   }
 });
 
-
 /* ========= TABS ========= */
 function switchTab(name){
   $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
@@ -1440,7 +1586,6 @@ $("#btnLimpiar").addEventListener("click", ()=>location.reload());
 setBadge(false);
 switchTab('plan');
 
-
 /* ===========================================================
    ✅✅✅ AUTOLOAD DESDE QR.INFO / URL PARAM (AÑADIDO)
    NO TOCA TU FLUJO: SOLO RELLENA #insCodigo Y DISPARA CARGA
@@ -1483,6 +1628,4 @@ autoloadCodigoDesdeURL();
 </script>
 </body>
 </html>
-
-
 
