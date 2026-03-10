@@ -575,7 +575,8 @@ if (!state.instrumento.id) {
   return;
 }
 
-
+pintarInstrumento();
+  
   await cargarPatrones();
 
   state.plan=[]; state.mediciones={}; state.resultados={};
@@ -1482,5 +1483,6 @@ autoloadCodigoDesdeURL();
 </script>
 </body>
 </html>
+
 
 
