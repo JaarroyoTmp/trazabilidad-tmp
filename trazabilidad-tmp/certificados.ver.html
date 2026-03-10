@@ -5,419 +5,620 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TMP · Certificado de Calibración</title>
 
-  <!-- Fuente -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg0:#020617;
-      --bg1:#020c1a;
-      --panel:#020617;
-      --card:#0b1220;
-      --border:#1e293b;
-      --border-soft:#1f2937;
-      --txt:#e5f0ff;
-      --muted:#94a3b8;
+      --bg:#06101d;
+      --bg2:#081424;
+      --panel:#0f1b2e;
+      --panel2:#12213a;
+      --card:#111d31;
+      --border:#233754;
+      --border-soft:#1c2d47;
+      --txt:#eef5ff;
+      --muted:#9cb0cb;
+      --muted2:#7e93b2;
       --accent:#22c55e;
-      --accent-soft:#4ade80;
-      --danger:#ef4444;
+      --accent2:#4ade80;
+      --blue:#60a5fa;
+      --blue2:#93c5fd;
       --warn:#f59e0b;
+      --danger:#ef4444;
       --ok:#22c55e;
+      --shadow:0 20px 60px rgba(0,0,0,.40);
+      --shadow-soft:0 10px 30px rgba(0,0,0,.28);
     }
 
-    *{box-sizing:border-box;}
+    *{box-sizing:border-box}
+    html,body{min-height:100%}
 
     body{
       margin:0;
       font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:
-        radial-gradient(circle at 0 0,#0f172a 0,transparent 55%),
-        radial-gradient(circle at 100% 0,#020617 0,transparent 45%),
-        #020617;
       color:var(--txt);
+      background:
+        radial-gradient(900px 500px at 0% 0%, rgba(96,165,250,.12), transparent 60%),
+        radial-gradient(800px 400px at 100% 0%, rgba(34,197,94,.10), transparent 60%),
+        linear-gradient(180deg, #08111f 0%, #050c17 52%, #040914 100%);
+      background-color:var(--bg);
     }
 
     .shell{
-      max-width:1040px;
-      margin:20px auto 32px;
-      padding:0 16px 24px;
+      max-width:1440px;
+      margin:0 auto;
+      padding:20px 16px 32px;
     }
 
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:10px 16px 14px;
-      border-radius:18px;
-      background:radial-gradient(circle at 0 0,#0b1120 0,transparent 55%),
-                 linear-gradient(135deg,#020617,#020617 55%,#02141f);
-      border:1px solid #1f2937;
-      box-shadow:0 14px 40px rgba(0,0,0,.7);
+    .hero{
       position:relative;
       overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:30px;
+      background:
+        linear-gradient(135deg, rgba(16,26,45,.96), rgba(9,16,29,.94)),
+        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 35%);
+      box-shadow:var(--shadow);
+      padding:20px;
     }
 
-    header::before{
+    .hero::before{
       content:"";
       position:absolute;
-      inset:-1px;
-      border-radius:inherit;
-      background:conic-gradient(
-        from 180deg,
-        rgba(34,197,94,.75),
-        transparent 35%,
-        transparent 65%,
-        rgba(56,189,248,.7),
-        rgba(34,197,94,.75)
-      );
-      opacity:0.18;
-      mix-blend-mode:screen;
+      top:-80px;
+      right:-80px;
+      width:260px;
+      height:260px;
+      background:radial-gradient(circle, rgba(34,197,94,.10), transparent 70%);
       pointer-events:none;
     }
 
-    header > *{
-      position:relative;
-      z-index:1;
+    .hero-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
     }
 
     .brand{
       display:flex;
       align-items:center;
       gap:14px;
+      min-width:0;
     }
 
     .brand-logo{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      background:
-        radial-gradient(circle at 30% 20%,#f9fafb,transparent 55%),
-        linear-gradient(135deg,#22c55e,#16a34a);
-      box-shadow:
-        0 0 0 2px rgba(15,23,42,1),
-        0 10px 24px rgba(0,0,0,0.6);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:800;
-      color:#022c22;
+      width:58px;
+      height:58px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
       font-size:20px;
+      font-weight:900;
+      color:#042517;
+      background:linear-gradient(135deg,var(--accent2),var(--accent));
+      box-shadow:0 14px 30px rgba(34,197,94,.24);
+      flex:0 0 auto;
     }
 
-    .brand-text h1{
+    .brand-copy h1{
       margin:0;
-      font-size:18px;
-      font-weight:600;
-      letter-spacing:.03em;
+      font-size:28px;
+      line-height:1.05;
+      font-weight:900;
+      letter-spacing:.1px;
+      color:#f5f9ff;
     }
 
-    .brand-text p{
-      margin:2px 0 0;
-      font-size:12px;
+    .brand-copy p{
+      margin:5px 0 0;
+      font-size:14px;
+      line-height:1.55;
       color:var(--muted);
     }
 
-    .header-right{
+    .hero-badges{
       display:flex;
+      gap:10px;
       flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-      justify-content:flex-end;
+      align-items:flex-start;
     }
 
     .badge{
-      font-size:11px;
-      padding:4px 10px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:34px;
+      padding:8px 12px;
       border-radius:999px;
-      border:1px solid var(--border-soft);
-      background:#020617;
-      color:var(--muted);
+      border:1px solid #29415f;
+      background:#0b1628;
+      color:#d8e7fb;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.25px;
       white-space:nowrap;
     }
 
-    .badge-ok{
-      border-color:var(--ok);
-      color:var(--ok);
-    }
-    .badge-bad{
-      border-color:var(--danger);
-      color:var(--danger);
-    }
-    .badge-warn{
-      border-color:var(--warn);
-      color:var(--warn);
+    .badge-ok{ border-color:#1f7448; color:#baf2cf; background:#0d2318; }
+    .badge-bad{ border-color:#8d1f1f; color:#ffcbcb; background:#251010; }
+    .badge-warn{ border-color:#8a5b12; color:#ffe1a6; background:#241b0a; }
+
+    .hero-actions{
+      margin-top:18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
 
     .btn{
-      border-radius:999px;
-      border:1px solid var(--border-soft);
-      background:#020617;
-      color:var(--txt);
-      font-size:12px;
-      padding:6px 12px;
-      text-decoration:none;
       display:inline-flex;
       align-items:center;
-      gap:6px;
+      justify-content:center;
+      gap:8px;
+      min-height:46px;
+      padding:12px 16px;
+      border-radius:14px;
+      border:1px solid #344b6a;
+      background:#0b1628;
+      color:#edf5ff;
+      text-decoration:none;
+      font-weight:800;
       cursor:pointer;
-      transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
+      transition:.2s ease;
+      box-shadow:none;
     }
+
     .btn:hover{
-      background:#0b1220;
       transform:translateY(-1px);
-      box-shadow:0 10px 24px rgba(0,0,0,.7);
+      border-color:#5679a5;
+      background:#101c31;
     }
+
     .btn-primary{
-      border-color:var(--accent);
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-      color:#ecfeff;
+      border:none;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#032516;
+      box-shadow:0 14px 30px rgba(34,197,94,.22);
     }
+
     .btn-primary:hover{
       filter:brightness(1.04);
     }
 
-    main{
+    .btn-soft{
+      background:#0d192c;
+    }
+
+    .hero-grid{
       margin-top:18px;
       display:grid;
-      grid-template-columns:2.2fr 1.6fr;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .metric{
+      border:1px solid var(--border-soft);
+      border-radius:20px;
+      padding:16px;
+      background:linear-gradient(180deg, rgba(13,23,40,.94), rgba(9,16,29,.94));
+      box-shadow:var(--shadow-soft);
+    }
+
+    .metric .k{
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      color:#a9c8ea;
+      margin-bottom:8px;
+    }
+
+    .metric .v{
+      display:block;
+      font-size:18px;
+      font-weight:800;
+      line-height:1.25;
+      color:#f3f8ff;
+      margin-bottom:5px;
+    }
+
+    .metric .d{
+      display:block;
+      font-size:13px;
+      line-height:1.55;
+      color:var(--muted);
+    }
+
+    .layout{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:16px;
+    }
+
+    .stack{
+      display:grid;
       gap:16px;
     }
 
     .panel{
-      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
-                 linear-gradient(145deg,#020617,#020617 55%,#020c1a);
-      border-radius:18px;
       border:1px solid var(--border);
-      box-shadow:0 18px 40px rgba(0,0,0,.75);
-      padding:16px 16px 14px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(15,26,45,.96), rgba(9,16,28,.96));
+      box-shadow:var(--shadow);
+      padding:18px;
     }
 
     .panel h2{
       margin:0 0 8px;
-      font-size:16px;
-      font-weight:600;
-      color:#e5f3ff;
+      font-size:20px;
+      font-weight:900;
+      color:#eef5ff;
+      letter-spacing:.1px;
     }
 
-    .panel h3{
-      margin:0 0 6px;
+    .panel-intro{
+      margin:0 0 14px;
       font-size:14px;
-      font-weight:600;
-      color:#cbdff9;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .card{
+      border:1px solid var(--border-soft);
+      border-radius:18px;
+      background:#0b1525;
+      padding:14px;
+    }
+
+    .card h3{
+      margin:0 0 8px;
+      font-size:15px;
+      font-weight:800;
+      color:#eaf3ff;
     }
 
     .muted{
-      font-size:12px;
-      color:var(--muted);
       margin:0 0 10px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
     }
 
     .kline{
       display:flex;
-      flex-wrap:wrap;
       gap:8px;
+      align-items:flex-start;
+      margin-bottom:7px;
       font-size:13px;
-      margin-bottom:4px;
+      line-height:1.5;
     }
 
     .klabel{
-      min-width:120px;
-      color:var(--muted);
+      min-width:150px;
+      color:#9fb4d1;
+      font-weight:600;
     }
 
     .kvalue{
-      font-weight:500;
+      color:#f2f7ff;
+      font-weight:600;
+      word-break:break-word;
+    }
+
+    .taglist{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+      margin-top:10px;
+    }
+
+    .tag{
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      border:1px solid #29415f;
+      background:#0a1322;
+      color:#c7dcfb;
     }
 
     .pill{
       display:inline-flex;
       align-items:center;
       gap:6px;
-      padding:4px 9px;
+      padding:6px 10px;
       border-radius:999px;
-      font-size:11px;
-      border:1px solid var(--border-soft);
-      background:#020617;
-      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      border:1px solid #334760;
+      background:#0a1322;
+      color:#d7e6fb;
       white-space:nowrap;
     }
 
-    .pill-ok{
-      border-color:var(--ok);
-      color:var(--ok);
-    }
-    .pill-bad{
-      border-color:var(--danger);
-      color:var(--danger);
-    }
-    .pill-warn{
-      border-color:var(--warn);
-      color:var(--warn);
-    }
+    .pill-ok{ border-color:#1f7448; color:#baf2cf; background:#0d2318; }
+    .pill-bad{ border-color:#8d1f1f; color:#ffcbcb; background:#251010; }
+    .pill-warn{ border-color:#8a5b12; color:#ffe1a6; background:#241b0a; }
 
-    .grid-2{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-    }
-
-    .box{
-      background:#020617;
-      border-radius:12px;
-      border:1px solid var(--border-soft);
-      padding:10px 12px;
-      font-size:12px;
-    }
-
-    .box ul{
-      padding-left:18px;
-      margin:4px 0 0;
-      color:var(--muted);
-    }
-    .box li{margin-bottom:2px;}
+    .section-gap{ margin-top:12px; }
 
     table{
       width:100%;
       border-collapse:collapse;
-      font-size:12px;
-      margin-top:6px;
-    }
-
-    th,td{
-      padding:6px 6px;
-      border-bottom:1px solid #1e293b;
-      text-align:left;
+      margin-top:8px;
+      font-size:13px;
+      overflow:hidden;
     }
 
     thead th{
-      background:#020617;
-      color:#cbd5f5;
-      font-weight:600;
+      background:#0a1322;
+      color:#d4e6ff;
+      font-weight:800;
+      border-bottom:1px solid #243650;
+      padding:10px 8px;
+      text-align:left;
+      vertical-align:bottom;
+    }
+
+    tbody td{
+      padding:10px 8px;
+      border-bottom:1px solid #1c2e47;
+      color:#eaf2ff;
+      vertical-align:top;
     }
 
     tbody tr:nth-child(odd){
-      background:#020617;
+      background:#0c1729;
     }
 
+    .text-right{text-align:right}
+    .text-center{text-align:center}
+
     .badge-small{
-      padding:2px 6px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:26px;
+      padding:4px 8px;
       border-radius:999px;
-      font-size:10px;
-      border:1px solid var(--border-soft);
-      display:inline-block;
+      font-size:11px;
+      font-weight:800;
+      border:1px solid #334760;
+      background:#0a1322;
+      color:#d7e6fb;
       white-space:nowrap;
     }
 
-    .text-center{text-align:center;}
-    .text-right{text-align:right;}
+    .badge-small.badge-ok{ border-color:#1f7448; color:#baf2cf; background:#0d2318; }
+    .badge-small.badge-bad{ border-color:#8d1f1f; color:#ffcbcb; background:#251010; }
+    .badge-small.badge-warn{ border-color:#8a5b12; color:#ffe1a6; background:#241b0a; }
 
-    .mt-8{margin-top:8px;}
-    .mt-4{margin-top:4px;}
-
-    footer{
-      margin-top:18px;
-      font-size:11px;
-      color:var(--muted);
-      text-align:center;
-    }
-
-    .taglist{
+    .preview-wrap{
       display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-top:4px;
+      flex-direction:column;
+      gap:12px;
     }
 
-    .tag{
-      font-size:10px;
-      padding:2px 6px;
-      border-radius:999px;
+    .pdf-frame{
+      width:100%;
+      min-height:860px;
       border:1px solid var(--border-soft);
-      background:#020617;
+      border-radius:20px;
+      overflow:hidden;
+      background:#0b1320;
+      box-shadow:var(--shadow-soft);
+    }
+
+    .pdf-frame iframe{
+      width:100%;
+      height:860px;
+      border:none;
+      background:#ffffff;
+    }
+
+    .empty-preview{
+      min-height:260px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:26px;
+      border:1px dashed #34506f;
+      border-radius:18px;
+      background:#0a1322;
       color:var(--muted);
+      line-height:1.7;
     }
 
-    .alert{
-      font-size:12px;
-      color:var(--danger);
-      margin-top:4px;
-    }
-
-    /* Loader / estado */
     .state-msg{
-      font-size:13px;
+      margin-top:12px;
+      font-size:14px;
       color:var(--muted);
-      margin-top:10px;
+      line-height:1.6;
     }
 
     .state-msg strong{
-      color:#e5f0ff;
+      color:#eef5ff;
     }
 
-    /* ================== MODO IMPRESIÓN ================== */
+    .alert{
+      margin-top:10px;
+      font-size:13px;
+      color:#ffb8b8;
+      line-height:1.6;
+    }
+
+    .explain{
+      white-space:pre-line;
+      line-height:1.7;
+    }
+
+    .good{
+      color:#baf2cf;
+      font-weight:700;
+    }
+
+    .bad{
+      color:#ffcbcb;
+      font-weight:700;
+    }
+
+    .warn{
+      color:#ffe1a6;
+      font-weight:700;
+    }
+
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+
+    footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+
+    code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      background:#0a1322;
+      border:1px solid #1e3350;
+      border-radius:8px;
+      padding:2px 6px;
+      color:#dce9ff;
+      font-size:.95em;
+    }
+
     @media print{
       body{
         background:#ffffff;
         color:#000000;
       }
+
       .shell{
-        margin:0;
         max-width:none;
-        padding:0 18mm 10mm;
+        margin:0;
+        padding:0 14mm 10mm;
       }
-      header{
-        box-shadow:none;
-        border-radius:0;
-        margin:0 -18mm 8mm;
-        border-bottom:1px solid #cbd5e1;
+
+      .hero{
         background:#ffffff;
+        box-shadow:none;
+        border:1px solid #cbd5e1;
+        border-radius:0;
+        padding:10px 0 10px;
       }
-      header::before{display:none;}
+
+      .hero::before{
+        display:none;
+      }
+
       .brand-logo{
         background:#ffffff;
-        border-radius:0;
+        color:#000;
         box-shadow:none;
         border:1px solid #0f172a;
+        border-radius:0;
       }
-      .brand-text h1{
-        color:#000000;
+
+      .brand-copy h1,
+      .metric .v,
+      .panel h2,
+      .card h3,
+      .kvalue{
+        color:#000000 !important;
       }
-      .brand-text p{
-        color:#1e293b;
+
+      .brand-copy p,
+      .metric .d,
+      .metric .k,
+      .panel-intro,
+      .muted,
+      footer{
+        color:#1f2937 !important;
       }
-      .header-right .btn,
-      .header-right .badge{
+
+      .badge,
+      .hero-actions,
+      #btnPrint,
+      #btnPdf,
+      .pdf-frame,
+      .empty-preview{
         display:none !important;
       }
-      main{
+
+      .hero-grid{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+      }
+
+      .layout{
         display:block;
       }
-      .panel{
+
+      .panel,
+      .card,
+      .metric{
         background:#ffffff;
-        border:1px solid #cbd5e1;
         box-shadow:none;
-        border-radius:0;
-        padding:10px 12px;
-        margin-bottom:6mm;
+        border:1px solid #cbd5e1;
+        break-inside:avoid;
       }
-      .box{
-        background:#ffffff;
-        border-color:#cbd5e1;
+
+      .grid-2{
+        grid-template-columns:1fr 1fr;
       }
-      footer{
-        margin-top:6mm;
-        color:#0f172a;
-        font-size:10px;
+
+      table thead th,
+      tbody tr:nth-child(odd){
+        background:#ffffff !important;
+        color:#000000 !important;
       }
-      a[href]:after{content:"";}
+
+      tbody td{
+        color:#000000 !important;
+        border-bottom:1px solid #cbd5e1;
+      }
     }
 
-    @media (max-width:820px){
-      main{
+    @media (max-width: 1240px){
+      .layout{
         grid-template-columns:1fr;
+      }
+      .hero-grid{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 900px){
+      .hero-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 780px){
+      .grid-2,
+      .hero-grid{
+        grid-template-columns:1fr;
+      }
+      .brand-copy h1{
+        font-size:22px;
+      }
+      .pdf-frame,
+      .pdf-frame iframe{
+        min-height:540px;
+        height:540px;
       }
     }
   </style>
@@ -425,167 +626,236 @@
 <body>
 <div class="shell">
 
-  <header>
-    <div class="brand">
-      <div class="brand-logo">T</div>
-      <div class="brand-text">
-        <h1>Certificado de calibración TMP</h1>
-        <p>ID: <span id="certIdHeader">—</span> · Trazabilidad metrológica profesional</p>
+  <section class="hero">
+    <div class="hero-top">
+      <div class="brand">
+        <div class="brand-logo">TMP</div>
+        <div class="brand-copy">
+          <h1>Certificado de calibración</h1>
+          <p>
+            Visualización documental del certificado emitido por el laboratorio TMP.
+            ID consultado: <strong id="certIdHeader">—</strong>
+          </p>
+        </div>
+      </div>
+
+      <div class="hero-badges">
+        <span id="decisionBadge" class="badge">Decisión global: —</span>
+        <span class="badge">ISO/IEC 17025</span>
+        <span class="badge">ILAC-G8</span>
       </div>
     </div>
 
-    <div class="header-right">
-      <span id="decisionBadge" class="badge">Decisión global: —</span>
-      <a href="certificados.html" class="btn">⟵ Volver a certificados</a>
-      <button id="btnPrint" class="btn">🖨 Imprimir</button>
-      <a id="btnPdf" href="#" target="_blank" class="btn btn-primary" style="display:none;">
-        📄 Abrir PDF oficial
-      </a>
+    <div class="hero-actions">
+      <a href="certificados.html" class="btn btn-soft">⟵ Volver a certificados</a>
+      <button id="btnPrint" class="btn">🖨 Imprimir vista</button>
+      <a id="btnPdf" href="#" target="_blank" class="btn btn-primary" style="display:none;">📄 Abrir PDF oficial</a>
     </div>
-  </header>
 
-  <main>
-    <!-- PANEL IZQUIERDO: Datos e informe -->
-    <section class="panel" id="panelDatos">
-      <h2>1. Datos del certificado e instrumento</h2>
-      <p class="muted">
-        Informe generado por el laboratorio TMP a partir de la calibración registrada en el sistema
-        de trazabilidad. La información numérica procede de Supabase (tablas <code>certificados</code> y
-        <code>calibraciones_log</code>).
-      </p>
+    <div class="hero-grid">
+      <div class="metric">
+        <span class="k">Certificado</span>
+        <span class="v" id="certNumeroTop">—</span>
+        <span class="d">Identificador documental del certificado emitido.</span>
+      </div>
+      <div class="metric">
+        <span class="k">Estado</span>
+        <span class="v" id="estadoTop">Pendiente</span>
+        <span class="d">Resultado de la consulta y disponibilidad documental.</span>
+      </div>
+      <div class="metric">
+        <span class="k">Decisión global</span>
+        <span class="v" id="decisionTop">—</span>
+        <span class="d">Resultado informado en <code>certificados</code>.</span>
+      </div>
+      <div class="metric">
+        <span class="k">Documento oficial</span>
+        <span class="v" id="pdfTop">Pendiente</span>
+        <span class="d">Disponibilidad de PDF oficial archivado en el sistema.</span>
+      </div>
+      <div class="metric">
+        <span class="k">Regla aplicada</span>
+        <span class="v" id="ruleTop">—</span>
+        <span class="d">Regla de decisión y marco documental mostrado al usuario.</span>
+      </div>
+    </div>
+  </section>
 
-      <div class="grid-2">
-        <div class="box">
-          <h3>Identificación</h3>
-          <div class="kline"><span class="klabel">Certificado nº</span><span class="kvalue" id="certNumero">—</span></div>
-          <div class="kline"><span class="klabel">Decisión global</span>
-            <span class="kvalue" id="certDecisionGlobal">—</span>
+  <div class="layout">
+
+    <div class="stack">
+      <section class="panel">
+        <h2>Resumen documental y técnico</h2>
+        <p class="panel-intro">
+          Informe generado a partir de la información registrada en el sistema de trazabilidad TMP.
+          Los datos se obtienen desde Supabase, principalmente de las tablas <code>certificados</code>
+          y <code>calibraciones_log</code>.
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>1. Identificación del certificado</h3>
+            <div class="kline"><span class="klabel">Certificado nº</span><span class="kvalue" id="certNumero">—</span></div>
+            <div class="kline"><span class="klabel">UID calibración</span><span class="kvalue mono" id="certUid">—</span></div>
+            <div class="kline"><span class="klabel">Regla de decisión</span><span class="kvalue" id="certReglaDecision">—</span></div>
+            <div class="kline"><span class="klabel">Decisión global</span><span class="kvalue" id="certDecisionGlobal">—</span></div>
+            <div class="section-gap">
+              <span class="pill" id="pillEstado">Estado: desconocido</span>
+            </div>
+            <div class="taglist">
+              <span class="tag">TMP · ISO/IEC 17025</span>
+              <span class="tag">ILAC-G8</span>
+              <span class="tag">Trazabilidad metrológica</span>
+            </div>
           </div>
-          <div class="kline"><span class="klabel">Regla de decisión</span><span class="kvalue" id="certReglaDecision">—</span></div>
-          <div class="kline"><span class="klabel">UID calibración</span><span class="kvalue" id="certUid">—</span></div>
 
-          <div class="mt-4">
-            <span class="pill" id="pillEstado">Estado: desconocido</span>
+          <div class="card">
+            <h3>2. Instrumento y cliente</h3>
+            <div class="kline"><span class="klabel">Código instrumento</span><span class="kvalue" id="insCodigo">—</span></div>
+            <div class="kline"><span class="klabel">Descripción</span><span class="kvalue" id="insDescripcion">—</span></div>
+            <div class="kline"><span class="klabel">Cliente</span><span class="kvalue" id="clienteNombre">—</span></div>
+            <div class="kline"><span class="klabel">Fecha calibración</span><span class="kvalue" id="fechaCalibracion">—</span></div>
+            <div class="kline"><span class="klabel">Próxima calibración</span><span class="kvalue" id="fechaProxima">—</span></div>
           </div>
+        </div>
 
+        <div class="card section-gap">
+          <h3>3. Resumen metrológico por bloques</h3>
+          <p class="muted" id="resumenMetrologico">
+            Pendiente de recibir detalles numéricos de la calibración. Cuando la tabla
+            <code>calibraciones_log</code> incluya el resumen estructurado, se mostrará aquí
+            la síntesis de errores máximos, incertidumbre, tolerancias y decisión asociada.
+          </p>
+
+          <table id="tablaResumen" style="display:none;">
+            <thead>
+              <tr>
+                <th>Magnitud / bloque</th>
+                <th class="text-right">Máx |E| (µm)</th>
+                <th class="text-right">Máx (|E| + U) (µm)</th>
+                <th class="text-right">Tolerancia (µm)</th>
+                <th class="text-center">Decisión</th>
+                <th>Interpretación</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyResumen"></tbody>
+          </table>
+        </div>
+
+        <div class="card section-gap">
+          <h3>4. Explicación técnica del resultado</h3>
+          <p class="muted explain" id="explicacionResultado">
+            Aún no hay suficiente información estructurada para explicar la decisión con detalle.
+            En cuanto el sistema encuentre los valores de error, incertidumbre, tolerancia y decisión,
+            este apartado justificará si el resultado es favorable, desfavorable o indeterminado.
+          </p>
+        </div>
+
+        <div class="card section-gap">
+          <h3>5. Trazabilidad e información metrológica</h3>
+          <p class="muted explain" id="textoTrazabilidad">
+            La calibración se realiza conforme a los procedimientos internos TMP basados en ISO/IEC 17025
+            e ILAC-G8, utilizando patrones trazables a patrones nacionales e internacionales. Los patrones
+            empleados y su situación de calibración se gestionan dentro del sistema de trazabilidad TMP.
+          </p>
           <div class="taglist">
-            <span class="tag">TMP · ISO/IEC 17025</span>
-            <span class="tag">ILAC-G8 · toma de decisiones</span>
-            <span class="tag">Firma digital visible en PDF</span>
+            <span class="tag">Comparación con patrón materializado</span>
+            <span class="tag">E = I − R</span>
+            <span class="tag">U(k=2)</span>
+            <span class="tag">Conformidad ILAC-G8</span>
           </div>
         </div>
 
-        <div class="box">
-          <h3>Instrumento y cliente</h3>
-          <div class="kline"><span class="klabel">Código instrumento</span><span class="kvalue" id="insCodigo">—</span></div>
-          <div class="kline"><span class="klabel">Descripción</span><span class="kvalue" id="insDescripcion">—</span></div>
-          <div class="kline"><span class="klabel">Cliente</span><span class="kvalue" id="clienteNombre">—</span></div>
-          <div class="kline"><span class="klabel">Fecha calibración</span><span class="kvalue" id="fechaCalibracion">—</span></div>
-          <div class="kline"><span class="klabel">Próxima calibración</span><span class="kvalue" id="fechaProxima">—</span></div>
+        <div class="card section-gap">
+          <h3>6. Método, firmas y validez documental</h3>
+          <p class="muted">
+            Este visor resume la información disponible en el sistema. El documento oficial de referencia sigue siendo
+            el PDF archivado y asociado al certificado. La presentación del resultado y la explicación técnica ayudan
+            a comprender la decisión, pero no sustituyen los procedimientos internos, la revisión técnica ni el control documental.
+          </p>
+          <div class="kline"><span class="klabel">Técnico</span><span class="kvalue" id="firmanteTecnico">—</span></div>
+          <div class="kline"><span class="klabel">Revisión / aprobación</span><span class="kvalue" id="firmanteRevision">—</span></div>
+          <p class="alert" id="alertSinPdf" style="display:none;">
+            No se ha encontrado aún una URL de PDF asociada al certificado en la tabla <code>certificados</code>.
+          </p>
         </div>
-      </div>
 
-      <div class="box mt-8">
-        <h3>2. Resumen metrológico</h3>
-        <p class="muted" id="resumenMetrologico">
-          Pendiente de recibir detalles numéricos de la calibración. Cuando la tabla
-          <code>calibraciones_log</code> incluya el resumen (errores máximos, U, tolerancias),
-          se mostrará aquí la síntesis apto/no apto siguiendo ILAC-G8.
+        <p class="state-msg" id="stateMsg">Cargando certificado desde Supabase…</p>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="panel">
+        <h2>Vista previa del documento oficial</h2>
+        <p class="panel-intro">
+          Cuando exista PDF archivado en el sistema, se mostrará una previsualización integrada
+          para facilitar la consulta por clientes, personal técnico y auditorías.
         </p>
 
-        <table id="tablaResumen" style="display:none;">
-          <thead>
-            <tr>
-              <th>Magnitud / bloque</th>
-              <th>Máx |E| (µm)</th>
-              <th>Máx (|E| + U) (µm)</th>
-              <th>Tolerancia (µm)</th>
-              <th>Decisión</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyResumen"></tbody>
-        </table>
-      </div>
+        <div class="preview-wrap">
+          <div id="pdfEmpty" class="empty-preview">
+            <div>
+              <strong style="display:block;color:#eef5ff;font-size:16px;margin-bottom:6px;">PDF oficial no disponible todavía</strong>
+              <span>
+                Cuando la tabla <code>certificados</code> incluya una URL válida en
+                <code>certificado_pdf_url</code>, la previsualización aparecerá aquí.
+              </span>
+            </div>
+          </div>
 
-      <div class="box mt-8">
-        <h3>3. Trazabilidad e información metrológica</h3>
-        <p class="muted" id="textoTrazabilidad">
-          La calibración se realiza conforme a los procedimientos internos TMP basados en ISO/IEC 17025 e ILAC-G8,
-          utilizando patrones trazables a patrones nacionales e internacionales. Los patrones empleados y su
-          situación de calibración se gestionan en el módulo de patrones del sistema de trazabilidad TMP.
-        </p>
-        <ul>
-          <li>Modelo general: calibración por comparación con patrón materializado.</li>
-          <li>Cálculo de error <code>E = I − R</code>, incertidumbre combinada y expandida <code>U(k=2)</code>.</li>
-          <li>Regla de decisión: ILAC-G8 (zona apto / no apto / indeterminado).</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- PANEL DERECHO: Método, firmas y PDF -->
-    <section class="panel" id="panelFirmas">
-      <h2>4. Método, firmas y documento PDF</h2>
-
-      <div class="box">
-        <h3>Método aplicado</h3>
-        <p class="muted">
-          El método de calibración utilizado para este certificado es el definido en el procedimiento interno
-          correspondiente (dimensional, par, balanza, dureza, etc.), incluyendo:
-        </p>
-        <ul>
-          <li>Verificación de condiciones ambientales antes y durante la calibración.</li>
-          <li>Lecturas repetidas para estimar repetibilidad y estabilidad del instrumento.</li>
-          <li>Cálculo de los errores de indicación por punto de medida.</li>
-          <li>Estimación de incertidumbre considerando patrón, repetibilidad y resolución.</li>
-        </ul>
-      </div>
-
-      <div class="box mt-8">
-        <h3>Firmas y validación</h3>
-        <p class="muted">
-          La copia oficial de este certificado incluye la firma digital visible del técnico y, en su caso,
-          del responsable del laboratorio, integrada en el PDF guardado en el sistema TMP.
-        </p>
-        <div class="kline">
-          <span class="klabel">Técnico</span><span class="kvalue" id="firmanteTecnico">—</span>
+          <div id="pdfFrame" class="pdf-frame" style="display:none;">
+            <iframe id="pdfPreview" title="Vista previa del PDF oficial"></iframe>
+          </div>
         </div>
-        <div class="kline">
-          <span class="klabel">Revisión / aprobación</span><span class="kvalue" id="firmanteRevision">—</span>
+      </section>
+
+      <section class="panel">
+        <h2>Interpretación normativa y de decisión</h2>
+        <p class="panel-intro">
+          Este bloque explica de forma legible por qué el resultado mostrado puede considerarse favorable o no,
+          teniendo en cuenta la información disponible en el sistema y la regla de decisión declarada.
+        </p>
+
+        <div class="card">
+          <h3>Lectura de la decisión global</h3>
+          <p class="muted explain" id="explicacionDecisionGlobal">
+            Sin datos todavía.
+          </p>
         </div>
-        <p class="muted mt-4">
-          El presente visor muestra un resumen profesional. Para la copia con validez legal y la firma digital
-          debe utilizarse el PDF asociado.
-        </p>
-        <p class="alert" id="alertSinPdf" style="display:none;">
-          No se ha encontrado aún una URL de PDF asociada al certificado en la tabla <code>certificados</code>.
-        </p>
-      </div>
 
-      <div class="box mt-8">
-        <h3>Acceso al documento PDF</h3>
-        <p class="muted">
-          Utiliza el botón <strong>“Abrir PDF oficial”</strong> de la parte superior para descargar o visualizar el
-          certificado completo. Si el enlace está vacío, significa que todavía no se ha archivado el PDF en el sistema.
-        </p>
-        <p class="muted">
-          Número de certificado actual: <strong id="certNumeroMini">—</strong>
-        </p>
-      </div>
+        <div class="card section-gap">
+          <h3>Qué está bien y qué está mal según los resultados</h3>
+          <p class="muted explain" id="explicacionBienMal">
+            Sin datos todavía.
+          </p>
+        </div>
 
-      <p class="state-msg" id="stateMsg">
-        Cargando certificado desde Supabase…
-      </p>
-    </section>
-  </main>
+        <div class="card section-gap">
+          <h3>Alcance de esta interpretación</h3>
+          <p class="muted explain" id="explicacionAlcance">
+            La explicación se basa en los resultados disponibles en el sistema y en la regla de decisión indicada.
+            No sustituye la revisión técnica interna, la aprobación del laboratorio ni el contenido del certificado oficial.
+          </p>
+        </div>
+
+        <div class="card section-gap">
+          <h3>Información de uso</h3>
+          <div class="kline"><span class="klabel">Certificado actual</span><span class="kvalue" id="certNumeroMini">—</span></div>
+          <div class="kline"><span class="klabel">PDF archivado</span><span class="kvalue" id="pdfDisponibilidad">—</span></div>
+          <div class="kline"><span class="klabel">Regla aplicada</span><span class="kvalue" id="reglaMini">—</span></div>
+        </div>
+      </section>
+    </div>
+
+  </div>
 
   <footer>
     Talleres Mecánicos Paramio · Sistema profesional de trazabilidad metrológica ·
-    Documento generado automáticamente desde el sistema TMP.
+    Visualizador documental integrado del certificado de calibración TMP.
   </footer>
 </div>
 
 <script type="module">
-  // ========= CONFIG SUPABASE (misma que en el resto del sistema) =========
   const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
 
@@ -596,8 +866,10 @@
 
   const elCertIdHeader    = $("#certIdHeader");
   const elNumero          = $("#certNumero");
+  const elNumeroTop       = $("#certNumeroTop");
   const elNumeroMini      = $("#certNumeroMini");
   const elDecisionGlobal  = $("#certDecisionGlobal");
+  const elDecisionTop     = $("#decisionTop");
   const elReglaDecision   = $("#certReglaDecision");
   const elUid             = $("#certUid");
   const elPillEstado      = $("#pillEstado");
@@ -614,6 +886,21 @@
   const elFirmanteTec     = $("#firmanteTecnico");
   const elFirmanteRev     = $("#firmanteRevision");
 
+  const elEstadoTop       = $("#estadoTop");
+  const elPdfTop          = $("#pdfTop");
+  const elRuleTop         = $("#ruleTop");
+  const elPdfDisp         = $("#pdfDisponibilidad");
+  const elPdfPreview      = $("#pdfPreview");
+  const elPdfFrame        = $("#pdfFrame");
+  const elPdfEmpty        = $("#pdfEmpty");
+
+  const elExpResultado    = $("#explicacionResultado");
+  const elExpDecision     = $("#explicacionDecisionGlobal");
+  const elExpBienMal      = $("#explicacionBienMal");
+  const elExpAlcance      = $("#explicacionAlcance");
+  const elReglaMini       = $("#reglaMini");
+  const elTextoTraz       = $("#textoTrazabilidad");
+
   if (CERT_ID) {
     elCertIdHeader.textContent = CERT_ID;
   } else {
@@ -622,42 +909,251 @@
 
   $("#btnPrint").addEventListener("click", () => window.print());
 
-  function setDecision(decision){
-    const d = (decision || "").toUpperCase().trim();
-    let txt = "Decisión global: " + (decision || "—");
-    let cls = "badge";
+  function safeText(v, fallback = "—"){
+    if (v === null || v === undefined) return fallback;
+    const s = String(v).trim();
+    return s ? s : fallback;
+  }
 
-    let pillTxt = "Estado: " + (decision || "desconocido");
-    let pillCls = "pill";
+  function toNum(v){
+    if (v === null || v === undefined || v === "") return null;
+    if (typeof v === "number") return Number.isFinite(v) ? v : null;
+    const n = Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
 
-    if (d === "APTO") {
-      cls += " badge-ok";
-      pillCls += " pill-ok";
-    } else if (d === "NO APTO") {
-      cls += " badge-bad";
-      pillCls += " pill-bad";
-    } else if (d === "INDETERMINADO" || d === "INDETERMINADO ") {
-      cls += " badge-warn";
-      pillCls += " pill-warn";
-    }
-
-    elDecisionBadge.className = cls;
-    elDecisionBadge.textContent = txt;
-
-    elPillEstado.className = pillCls;
-    elPillEstado.textContent = pillTxt;
+  function fmtNum(v, dec = 1){
+    const n = toNum(v);
+    return n === null ? "—" : n.toFixed(dec);
   }
 
   function fmtDate(iso){
     if (!iso) return "—";
     const d = new Date(iso);
-    if (isNaN(+d)) return iso;
+    if (isNaN(+d)) return safeText(iso);
     return d.toLocaleDateString("es-ES");
+  }
+
+  function upper(v){
+    return safeText(v, "").toUpperCase().trim();
+  }
+
+  function setDecision(decision){
+    const d = upper(decision);
+
+    let badgeClass = "badge";
+    let pillClass = "pill";
+
+    if (d === "APTO") {
+      badgeClass += " badge-ok";
+      pillClass += " pill-ok";
+    } else if (d === "NO APTO") {
+      badgeClass += " badge-bad";
+      pillClass += " pill-bad";
+    } else if (d === "INDETERMINADO") {
+      badgeClass += " badge-warn";
+      pillClass += " pill-warn";
+    }
+
+    elDecisionBadge.className = badgeClass;
+    elDecisionBadge.textContent = "Decisión global: " + safeText(decision);
+
+    elPillEstado.className = pillClass;
+    elPillEstado.textContent = "Estado: " + safeText(decision, "desconocido");
+
+    elDecisionGlobal.textContent = safeText(decision);
+    elDecisionTop.textContent = safeText(decision);
+  }
+
+  function setTopStatus(text){
+    elEstadoTop.textContent = text;
+  }
+
+  function setPdfAvailability(hasPdf){
+    if (hasPdf) {
+      elPdfTop.textContent = "Disponible";
+      elPdfDisp.textContent = "Sí";
+    } else {
+      elPdfTop.textContent = "No disponible";
+      elPdfDisp.textContent = "No";
+    }
+  }
+
+  function showPdf(url){
+    if (!url) return;
+    elPdfPreview.src = url;
+    elPdfFrame.style.display = "block";
+    elPdfEmpty.style.display = "none";
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function interpretarBloque(f){
+    const dec = upper(f.decision);
+    const epu = toNum(f.maxAbsEplusU);
+    const tol = toNum(f.tol);
+    const e = toNum(f.maxAbsE);
+
+    if (dec === "APTO") {
+      if (epu !== null && tol !== null) {
+        return `Bloque conforme: el valor máximo |E| + U (${fmtNum(epu,1)} µm) no supera la tolerancia declarada (${fmtNum(tol,1)} µm).`;
+      }
+      return "Bloque conforme: la decisión registrada indica APTO.";
+    }
+
+    if (dec === "NO APTO") {
+      if (epu !== null && tol !== null) {
+        return `Bloque no conforme: los resultados disponibles indican superación del criterio de aceptación respecto a la tolerancia (${fmtNum(tol,1)} µm).`;
+      }
+      if (e !== null && tol !== null) {
+        return `Bloque no conforme: el error observado es incompatible con la tolerancia declarada.`;
+      }
+      return "Bloque no conforme: la decisión registrada indica NO APTO.";
+    }
+
+    if (dec === "INDETERMINADO") {
+      return "Bloque en zona de decisión no concluyente: el resultado queda demasiado próximo al límite de aceptación y requiere interpretar la incertidumbre declarada según la regla aplicada.";
+    }
+
+    return "Bloque sin interpretación cerrada: faltan datos estructurados suficientes para justificar la decisión.";
+  }
+
+  function construirExplicacionGlobal(decision, regla, bloques, resumenOrigen){
+    const d = upper(decision);
+    const r = safeText(regla, "No indicada");
+
+    let txt = "";
+
+    txt += `La decisión global informada por el sistema es ${safeText(decision)}.\n\n`;
+    txt += `La regla de decisión declarada es ${r}. En este visor, la interpretación se muestra con enfoque documental y metrológico, ayudando a entender el resultado final a partir de los datos disponibles.\n\n`;
+
+    if (d === "APTO") {
+      txt += "Esto significa que, con la información registrada, el instrumento o magnitud evaluada cumple el criterio de aceptación declarado por el laboratorio.\n";
+      txt += "Desde un punto de vista técnico, el resultado es favorable cuando los errores observados y la incertidumbre asociada permanecen dentro del límite de tolerancia definido para la calibración.";
+    } else if (d === "NO APTO") {
+      txt += "Esto significa que, con la información registrada, existe al menos una condición de resultado incompatible con el criterio de aceptación declarado por el laboratorio.\n";
+      txt += "Desde un punto de vista técnico, el resultado es desfavorable cuando los errores observados, considerando la incertidumbre y la regla de decisión aplicada, exceden el margen permitido por la tolerancia.";
+    } else if (d === "INDETERMINADO") {
+      txt += "Esto significa que el resultado se encuentra en una zona donde la decisión no es plenamente concluyente con la información disponible.\n";
+      txt += "En este tipo de casos, la proximidad al límite de tolerancia y el efecto de la incertidumbre hacen que no pueda declararse conformidad ni no conformidad de forma tajante.";
+    } else {
+      txt += "No hay una decisión global estructurada o legible en los datos consultados.";
+    }
+
+    if (Array.isArray(bloques) && bloques.length) {
+      txt += `\n\nEl sistema ha encontrado ${bloques.length} bloque(s) o magnitud(es) resumidos para apoyar la interpretación técnica.`;
+    } else if (resumenOrigen) {
+      txt += "\n\nSe ha localizado un resumen global, pero no contiene un desglose por bloques suficientemente claro para mostrar una justificación detallada por magnitud.";
+    } else {
+      txt += "\n\nNo se ha encontrado todavía un resumen estructurado suficiente para justificar la decisión con detalle numérico.";
+    }
+
+    return txt;
+  }
+
+  function construirExplicacionBienMal(decision, bloques){
+    const d = upper(decision);
+    let txt = "";
+
+    txt += "Qué se considera bien o mal en función de los resultados disponibles:\n\n";
+
+    if (d === "APTO") {
+      txt += "• Está bien cuando los resultados muestran que el comportamiento del instrumento es compatible con la tolerancia declarada.\n";
+      txt += "• Está bien cuando la incertidumbre no cambia la conclusión de conformidad.\n";
+      txt += "• Está bien cuando no aparecen bloques con decisión NO APTO.\n\n";
+      txt += "• Estaría mal si existiera un bloque con superación clara del criterio de aceptación, aunque la decisión global no lo reflejara correctamente.\n";
+      txt += "• Estaría mal si faltaran registros esenciales que impidan justificar la conformidad declarada.";
+    } else if (d === "NO APTO") {
+      txt += "• Está mal cuando al menos un resultado relevante excede el criterio de aceptación declarado.\n";
+      txt += "• Está mal cuando el error observado, junto con la incertidumbre y la regla de decisión aplicada, no permite sostener conformidad.\n\n";
+      txt += "• Estaría bien únicamente si hubiera evidencia numérica o documental suficiente para demostrar que el límite no se ha excedido y la decisión registrada fuera incorrecta.\n";
+      txt += "• Mientras no exista esa evidencia, lo correcto es mantener la no conformidad declarada.";
+    } else if (d === "INDETERMINADO") {
+      txt += "• No está bien declarar conformidad plena si el resultado cae en zona no concluyente.\n";
+      txt += "• Tampoco está bien declarar no conformidad tajante si la propia regla de decisión deja el resultado en zona intermedia.\n\n";
+      txt += "• Lo correcto en este caso es reconocer explícitamente la incertidumbre de la decisión y documentarla de forma transparente.";
+    } else {
+      txt += "• No es posible decir con rigor qué está bien o mal sin una decisión clara y sin resumen numérico estructurado.\n";
+      txt += "• El sistema necesita datos mejor definidos para justificar la evaluación.";
+    }
+
+    if (Array.isArray(bloques) && bloques.length) {
+      txt += "\n\nInterpretación por bloque:\n";
+      bloques.forEach((b, i) => {
+        txt += `• ${safeText(b.nombre, "Bloque " + (i+1))}: ${interpretarBloque(b)}\n`;
+      });
+    }
+
+    return txt;
+  }
+
+  function construirExplicacionResultado(decision, regla, bloques){
+    const d = upper(decision);
+    const r = safeText(regla, "No indicada");
+    let txt = "";
+
+    txt += `Resultado interpretado: ${safeText(decision)}.\n`;
+    txt += `Regla de decisión declarada: ${r}.\n\n`;
+
+    if (Array.isArray(bloques) && bloques.length) {
+      const aptos = bloques.filter(b => upper(b.decision) === "APTO").length;
+      const noAptos = bloques.filter(b => upper(b.decision) === "NO APTO").length;
+      const indets = bloques.filter(b => upper(b.decision) === "INDETERMINADO").length;
+
+      txt += `Bloques analizados: ${bloques.length}. `;
+      txt += `APTO: ${aptos}. NO APTO: ${noAptos}. INDETERMINADO: ${indets}.\n\n`;
+    }
+
+    if (d === "APTO") {
+      txt += "Interpretación: el certificado indica conformidad global. Esto es coherente cuando los errores y la incertidumbre se mantienen en una relación compatible con la tolerancia declarada.";
+    } else if (d === "NO APTO") {
+      txt += "Interpretación: el certificado indica no conformidad global. Esto es coherente cuando algún resultado relevante supera el criterio de aceptación y no puede sostenerse conformidad con la regla aplicada.";
+    } else if (d === "INDETERMINADO") {
+      txt += "Interpretación: el certificado indica una situación no concluyente. Esto es coherente cuando el resultado queda cerca del límite y la incertidumbre influye de forma crítica en la decisión.";
+    } else {
+      txt += "Interpretación: no hay suficiente información estructurada para justificar la conclusión.";
+    }
+
+    return txt;
+  }
+
+  function normalizarBloquesDesdeResumen(resumen){
+    if (!resumen || typeof resumen !== "object") return [];
+
+    const candidatos = [];
+
+    if (Array.isArray(resumen.bloques)) {
+      resumen.bloques.forEach(b => candidatos.push(b));
+    }
+
+    if (Array.isArray(resumen.resultados)) {
+      resumen.resultados.forEach(b => candidatos.push(b));
+    }
+
+    if (Array.isArray(resumen.detalle)) {
+      resumen.detalle.forEach(b => candidatos.push(b));
+    }
+
+    return candidatos.map((b, idx) => ({
+      nombre: b.nombre || b.tipo || b.bloque || b.magnitud || `Bloque ${idx + 1}`,
+      maxAbsE: b.max_abs_error_um ?? b.maxAbsError ?? b.max_error_um ?? b.error_max_um ?? null,
+      maxAbsEplusU: b.max_abs_error_plus_u_um ?? b.maxAbsErrorPlusU ?? b.max_error_plus_u_um ?? b.error_u_max_um ?? null,
+      tol: b.tolerancia_um ?? b.tolerancia ?? b.tol_um ?? b.T ?? null,
+      decision: b.decision || b.resultado || b.estado || "-"
+    }));
   }
 
   async function main(){
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       elStateMsg.innerHTML = "<strong>Modo local:</strong> configuración de Supabase no disponible.";
+      setTopStatus("Sin configuración");
       return;
     }
 
@@ -667,17 +1163,19 @@
       supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (e) {
       console.error(e);
-      elStateMsg.innerHTML = "No se ha podido inicializar Supabase (modo local).";
+      elStateMsg.innerHTML = "No se ha podido inicializar Supabase.";
+      setTopStatus("Error de inicialización");
       return;
     }
 
     if (!CERT_ID) {
-      elStateMsg.innerHTML = "No se ha indicado ningún ID de certificado en la URL (ej.: <code>?id=CC-2025-0001</code>).";
+      elStateMsg.innerHTML = 'No se ha indicado ningún ID de certificado en la URL (ej.: <code>?id=CC-2025-0001</code>).';
+      setTopStatus("Sin ID en URL");
       return;
     }
 
-    // 1) Buscar el certificado por número
     elStateMsg.textContent = "Buscando certificado en Supabase…";
+    setTopStatus("Consultando");
 
     const { data: cert, error } = await supabase
       .from("certificados")
@@ -687,94 +1185,111 @@
 
     if (error) {
       console.error(error);
-      elStateMsg.innerHTML = "Error al consultar la tabla <code>certificados</code> en Supabase.";
+      elStateMsg.innerHTML = 'Error al consultar la tabla <code>certificados</code> en Supabase.';
+      setTopStatus("Error de consulta");
       return;
     }
 
     if (!cert) {
       elStateMsg.innerHTML = "No se ha encontrado ningún certificado con número <strong>" + CERT_ID + "</strong>.";
+      setTopStatus("No encontrado");
       return;
     }
 
-    // Rellenar datos básicos del certificado
-    elNumero.textContent     = cert.numero || "—";
-    elNumeroMini.textContent = cert.numero || "—";
-    elUid.textContent        = cert.calibracion_uid || "—";
-    elReglaDecision.textContent  = cert.regla_decision || "ILAC-G8 (por defecto)";
-    elDecisionGlobal.textContent = cert.decision_global || "—";
+    const decisionGlobal = safeText(cert.decision_global);
+    const reglaDecision = safeText(cert.regla_decision, "ILAC-G8");
+    const uid = safeText(cert.calibracion_uid);
 
-    setDecision(cert.decision_global || "");
+    elNumero.textContent = safeText(cert.numero);
+    elNumeroTop.textContent = safeText(cert.numero);
+    elNumeroMini.textContent = safeText(cert.numero);
+    elUid.textContent = uid;
+    elReglaDecision.textContent = reglaDecision;
+    elRuleTop.textContent = reglaDecision;
+    elReglaMini.textContent = reglaDecision;
 
-    // PDF
+    setDecision(decisionGlobal);
+    setTopStatus("Cargado");
+
     if (cert.certificado_pdf_url) {
       elBtnPdf.href = cert.certificado_pdf_url;
       elBtnPdf.style.display = "inline-flex";
       elAlertSinPdf.style.display = "none";
+      setPdfAvailability(true);
+      showPdf(cert.certificado_pdf_url);
     } else {
       elBtnPdf.style.display = "none";
       elAlertSinPdf.style.display = "block";
+      setPdfAvailability(false);
     }
 
-    // 2) Intentar completar datos desde calibraciones_log (si existe uid)
+    let cal = null;
     if (cert.calibracion_uid) {
-      const { data: cal, error: errCal } = await supabase
+      const { data: calData, error: errCal } = await supabase
         .from("calibraciones_log")
         .select("*")
         .eq("uid", cert.calibracion_uid)
         .maybeSingle();
 
-      if (!errCal && cal) {
-        elInsCodigo.textContent      = cal.codigo_instrumento || cal.instrumento_codigo || "—";
-        elInsDescripcion.textContent = cal.instrumento_descripcion || cal.instrumento || "—";
-        elClienteNombre.textContent  = cal.cliente_nombre || cal.cliente || "—";
-        elFechaCal.textContent       = fmtDate(cal.fecha_calibracion || cal.fecha || null);
-        elFechaProx.textContent      = fmtDate(cal.fecha_proxima || cal.proxima_calibracion || null);
-
-        elFirmanteTec.textContent    = cal.firmante_tecnico || cal.operario || "—";
-        elFirmanteRev.textContent    = cal.firmante_revision || cal.responsable || "—";
-
-        // Si en el futuro guardas un resumen JSON con resultados, aquí lo interpretamos
-        if (cal.resumen_global && typeof cal.resumen_global === "object") {
-          const resumen = cal.resumen_global;
-          const filas = [];
-
-          if (Array.isArray(resumen.bloques)) {
-            resumen.bloques.forEach(b => {
-              filas.push({
-                nombre: b.nombre || b.tipo || "Bloque",
-                maxAbsE: b.max_abs_error_um,
-                maxAbsEplusU: b.max_abs_error_plus_u_um,
-                tol: b.tolerancia_um,
-                decision: b.decision || "-"
-              });
-            });
-          }
-
-          if (filas.length > 0) {
-            const tbody = document.getElementById("tbodyResumen");
-            tbody.innerHTML = filas.map(f => `
-              <tr>
-                <td>${f.nombre}</td>
-                <td class="text-right">${f.maxAbsE ?? "—"}</td>
-                <td class="text-right">${f.maxAbsEplusU ?? "—"}</td>
-                <td class="text-right">${f.tol ?? "—"}</td>
-                <td>
-                  <span class="badge-small ${
-                    f.decision === "APTO" ? "badge-ok" :
-                    f.decision === "NO APTO" ? "badge-bad" :
-                    f.decision === "INDETERMINADO" ? "badge-warn" : ""
-                  }">${f.decision}</span>
-                </td>
-              </tr>
-            `).join("");
-
-            document.getElementById("tablaResumen").style.display = "table";
-            document.getElementById("resumenMetrologico").textContent =
-              "Resumen numérico obtenido del registro de calibración en Supabase. Se muestran los valores máximos de error e incertidumbre por bloque/magnitud, así como la decisión ILAC-G8 asociada.";
-          }
-        }
+      if (!errCal && calData) {
+        cal = calData;
       }
     }
+
+    if (cal) {
+      elInsCodigo.textContent = safeText(cal.codigo_instrumento || cal.instrumento_codigo);
+      elInsDescripcion.textContent = safeText(cal.instrumento_descripcion || cal.instrumento);
+      elClienteNombre.textContent = safeText(cal.cliente_nombre || cal.cliente);
+      elFechaCal.textContent = fmtDate(cal.fecha_calibracion || cal.fecha);
+      elFechaProx.textContent = fmtDate(cal.fecha_proxima || cal.proxima_calibracion);
+      elFirmanteTec.textContent = safeText(cal.firmante_tecnico || cal.operario);
+      elFirmanteRev.textContent = safeText(cal.firmante_revision || cal.responsable);
+
+      if (cal.trazabilidad_texto) {
+        elTextoTraz.textContent = safeText(cal.trazabilidad_texto);
+      }
+    }
+
+    let bloques = [];
+    let resumenOrigen = null;
+
+    if (cal && cal.resumen_global && typeof cal.resumen_global === "object") {
+      resumenOrigen = cal.resumen_global;
+      bloques = normalizarBloquesDesdeResumen(cal.resumen_global);
+    }
+
+    if (bloques.length > 0) {
+      const tbody = document.getElementById("tbodyResumen");
+      tbody.innerHTML = bloques.map(f => `
+        <tr>
+          <td>${escapeHtml(safeText(f.nombre))}</td>
+          <td class="text-right">${escapeHtml(fmtNum(f.maxAbsE, 1))}</td>
+          <td class="text-right">${escapeHtml(fmtNum(f.maxAbsEplusU, 1))}</td>
+          <td class="text-right">${escapeHtml(fmtNum(f.tol, 1))}</td>
+          <td class="text-center">
+            <span class="badge-small ${
+              upper(f.decision) === "APTO" ? "badge-ok" :
+              upper(f.decision) === "NO APTO" ? "badge-bad" :
+              upper(f.decision) === "INDETERMINADO" ? "badge-warn" : ""
+            }">${escapeHtml(safeText(f.decision))}</span>
+          </td>
+          <td>${escapeHtml(interpretarBloque(f))}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("tablaResumen").style.display = "table";
+      document.getElementById("resumenMetrologico").textContent =
+        "Resumen numérico obtenido del registro de calibración en Supabase. Se muestran los valores máximos de error e incertidumbre por bloque o magnitud, junto con la decisión asociada y una interpretación técnica legible.";
+    }
+
+    elExpResultado.textContent = construirExplicacionResultado(decisionGlobal, reglaDecision, bloques);
+    elExpDecision.textContent = construirExplicacionGlobal(decisionGlobal, reglaDecision, bloques, resumenOrigen);
+    elExpBienMal.textContent = construirExplicacionBienMal(decisionGlobal, bloques);
+
+    elExpAlcance.textContent =
+      "Esta interpretación está bien planteada cuando existe coherencia entre la decisión global, la regla de decisión declarada, el resumen numérico y el contenido del PDF oficial. " +
+      "Está mal asumir conformidad solo por apariencia visual o solo por disponer de un PDF: la justificación debe apoyarse en resultados, incertidumbre, tolerancias, trazabilidad y control documental. " +
+      "La norma ISO/IEC 17025 exige competencia técnica y control de resultados; este visor ayuda a explicarlos, pero la evidencia formal sigue descansando en el sistema de calidad, los registros y el certificado oficial emitido.";
 
     elStateMsg.innerHTML = "Certificado cargado correctamente desde Supabase.";
   }
