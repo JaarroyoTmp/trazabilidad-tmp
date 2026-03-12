@@ -4,7 +4,7 @@
   <script type="module" src="config.mjs"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TMP · Calibración de anillos patrón</title>
+  <title>TMP · Calibración de anillos patrón · v2</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
       color:var(--txt);
       background: radial-gradient(1200px 800px at 10% 0%, var(--bg2) 0%, var(--bg1) 50%, var(--bg0) 100%);
     }
-    .wrap{max-width:1180px;margin:24px auto;padding:0 16px}
+    .wrap{max-width:1220px;margin:24px auto;padding:0 16px}
     header{display:flex;align-items:center;gap:16px;padding:12px 0 18px;border-bottom:1px solid #21436040}
     header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.3px}
     .badge{font-size:12px;background:var(--chip);padding:6px 10px;border-radius:999px;color:#b9d3ea}
@@ -61,12 +61,18 @@
     tbody tr:nth-child(odd){background:#11263f80}
     .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700}
     .logo{height:22px;width:22px;border-radius:4px;background:linear-gradient(135deg,#3dd2ff,#1bb3ff);display:inline-block}
-    .section-title{
-      display:flex;align-items:center;gap:10px;margin-bottom:10px
+    .section-title{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .section-title .code{font-size:12px;padding:5px 8px;border-radius:999px;background:#203a57;color:#b9d3ea}
+    .scope-card{
+      border:1px solid #2a537a;
+      border-radius:12px;
+      padding:12px;
+      background:#10243a;
+      cursor:pointer;
     }
-    .section-title .code{
-      font-size:12px;padding:5px 8px;border-radius:999px;background:#203a57;color:#b9d3ea
-    }
+    .scope-card.active{outline:2px solid #47a3ff}
+    .scope-card h4{margin:0 0 8px;font-size:13px}
+    .scope-card p{margin:0;color:#b6d1e6;font-size:12px;line-height:1.55}
     pre{
       white-space:pre-wrap;
       background:#0d2033;
@@ -78,6 +84,12 @@
       line-height:1.5;
       overflow:auto;
     }
+    .status-line{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center
+    }
+    .status-chip{
+      padding:6px 10px;border-radius:999px;font-size:12px;background:#16324f;color:#d5ebff;border:1px solid #2a537a
+    }
     @media (max-width: 900px){
       .g-4,.g-3,.g-2{grid-template-columns:1fr}
     }
@@ -88,18 +100,23 @@
   <header>
     <div class="badge">TMP · Módulo específico</div>
     <h1>Calibración de anillos patrón</h1>
-    <div class="stamp right"><span class="logo"></span> Tridimensional · ISO/IEC 17025 · Procedimiento específico</div>
+    <div class="stamp right"><span class="logo"></span> CMM · DI-016 · ISO/IEC 17025</div>
   </header>
 
   <div class="card">
     <div class="section-title">
-      <h3 style="margin:0">1. Identificación del patrón</h3>
-      <span class="code">ANILLOS / CMM</span>
+      <h3 style="margin:0">1. Identificación del anillo patrón</h3>
+      <span class="code">Desde TMP / Supabase</span>
     </div>
+
+    <p class="note">
+      Este módulo está pensado para enlazarse después con <strong>TMP_Calibraciones_Lab.html</strong>, de modo que el código,
+      descripción y especificaciones del anillo se rellenen automáticamente desde Supabase. De momento puedes introducirlos manualmente.
+    </p>
 
     <div class="grid g-4">
       <div>
-        <label>Código interno</label>
+        <label>Código interno TMP</label>
         <input id="codigo" type="text" placeholder="Ej. AP-00124">
       </div>
       <div>
@@ -116,6 +133,13 @@
       </div>
 
       <div>
+        <label>Tipo de patrón</label>
+        <select id="tipoPatron">
+          <option value="interior">Patrón cilíndrico interior</option>
+          <option value="exterior">Patrón cilíndrico exterior</option>
+        </select>
+      </div>
+      <div>
         <label>Diámetro nominal (mm)</label>
         <input id="diametroNominal" type="text" value="20.000">
       </div>
@@ -124,51 +148,126 @@
         <input id="altura" type="text" value="20.000">
       </div>
       <div>
-        <label>Clase / tolerancia</label>
-        <input id="clase" type="text" placeholder="Ej. Clase 1 / según plano">
+        <label>Clase / tolerancia / especificación</label>
+        <input id="clase" type="text" placeholder="Ej. Clase 1 / según plano / tolerancia específica">
       </div>
+
       <div>
         <label>Material</label>
         <input id="material" type="text" placeholder="Ej. acero templado">
       </div>
+      <div>
+        <label>Uso previsto</label>
+        <input id="usoPrevisto" type="text" placeholder="Ej. verificación de interiores / ajuste / referencia maestra">
+      </div>
     </div>
   </div>
 
   <div class="card" style="margin-top:12px">
     <div class="section-title">
-      <h3 style="margin:0">2. Alcance de la calibración</h3>
-      <span class="code">Método</span>
+      <h3 style="margin:0">2. Equipo patrón / equipo de medida utilizado</h3>
+      <span class="code">Superimportante</span>
     </div>
+
+    <p class="note">
+      La norma exige identificar el equipo de medida utilizado y que su capacidad sea adecuada para la calidad del patrón.
+      En este caso se declara la <strong>medidora tridimensional (CMM)</strong> como equipo empleado. :contentReference[oaicite:3]{index=3}
+    </p>
+
+    <div class="grid g-4">
+      <div>
+        <label>Tipo de equipo</label>
+        <input id="equipoTipo" type="text" value="Medidora tridimensional CMM">
+      </div>
+      <div>
+        <label>Código equipo TMP</label>
+        <input id="equipoCodigo" type="text" placeholder="Ej. CMM-001">
+      </div>
+      <div>
+        <label>Marca / modelo</label>
+        <input id="equipoModelo" type="text" placeholder="Ej. ZEISS CONTURA">
+      </div>
+      <div>
+        <label>Nº serie</label>
+        <input id="equipoSerie" type="text" placeholder="Ej. ZC-2020-45">
+      </div>
+
+      <div>
+        <label>Incertidumbre / capacidad declarada</label>
+        <input id="equipoCapacidad" type="text" placeholder="Ej. MPEE 1.8 + L/300 µm">
+      </div>
+      <div>
+        <label>Última calibración</label>
+        <input id="equipoUltimaCal" type="date">
+      </div>
+      <div>
+        <label>Próxima calibración</label>
+        <input id="equipoProxCal" type="date">
+      </div>
+      <div>
+        <label>Observaciones equipo</label>
+        <input id="equipoObs" type="text" placeholder="Palpador, configuración, software, etc.">
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="section-title">
+      <h3 style="margin:0">3. Alcance de la calibración</h3>
+      <span class="code">Elegir con certeza</span>
+    </div>
+
+    <p class="note">
+      Según el procedimiento, el alcance depende del uso del patrón: puede calibrarse solo el diámetro, el diámetro y la redondez,
+      o además la cilindricidad. Esta elección debe hacerla el operario en función del uso previsto y la exigencia geométrica del patrón. 
+    </p>
+
+    <input type="hidden" id="tipoCalibracion" value="diametro">
 
     <div class="grid g-3">
-      <div>
-        <label>Tipo de calibración</label>
-        <select id="tipoCalibracion">
-          <option value="diametro">Diámetro</option>
-          <option value="diametro_redondez">Diámetro + redondez</option>
-          <option value="diametro_redondez_cilindricidad">Diámetro + redondez + cilindricidad</option>
-        </select>
+      <div class="scope-card active" data-scope="diametro">
+        <h4>Diámetro</h4>
+        <p>
+          Para patrones utilizados en la calibración de instrumentos que determinan el diámetro a partir de dos puntos diametralmente opuestos.
+          La característica principal es el diámetro efectivo del patrón. 
+        </p>
       </div>
-      <div>
-        <label>Equipo utilizado</label>
-        <input id="equipoMedida" type="text" value="Medidora tridimensional">
+
+      <div class="scope-card" data-scope="diametro_redondez">
+        <h4>Diámetro + redondez</h4>
+        <p>
+          Para patrones empleados en la calibración de instrumentos de dos o tres puntos y en aplicaciones donde la forma de la sección es
+          relevante, como ciertos calibres de límites y patrones cilíndricos de control. 
+        </p>
       </div>
-      <div>
-        <label>Procedimiento interno</label>
-        <input id="procedimiento" type="text" value="DI-016">
+
+      <div class="scope-card" data-scope="diametro_redondez_cilindricidad">
+        <h4>Diámetro + redondez + cilindricidad</h4>
+        <p>
+          Para patrones de mayor exigencia geométrica, cuando además de la sección debe evaluarse el comportamiento del cilindro completo.
+          Suele aplicarse a patrones de alta precisión. 
+        </p>
       </div>
     </div>
 
-    <p class="note" id="metodoInfo" style="margin-top:10px">
-      La calibración se realiza mediante medidora tridimensional. Se determina el diámetro del anillo a partir de secciones de medida y, cuando aplica, se evalúan redondez y cilindricidad según el uso previsto del patrón.
-    </p>
+    <div style="margin-top:12px">
+      <label>Procedimiento interno aplicado</label>
+      <input id="procedimiento" type="text" value="DI-016">
+    </div>
+
+    <p class="note" id="metodoInfo" style="margin-top:10px"></p>
   </div>
 
   <div class="card" style="margin-top:12px">
     <div class="section-title">
-      <h3 style="margin:0">3. Condiciones ambientales y estabilización</h3>
-      <span class="code">20 °C</span>
+      <h3 style="margin:0">4. Condiciones previas y ambientales</h3>
+      <span class="code">20 °C ± 1 °C</span>
     </div>
+
+    <p class="note">
+      Antes de calibrar, el procedimiento exige limpieza e inspección visual, estabilización junto a la medidora al menos 3 horas,
+      temperatura ambiente de 20 °C ± 1 °C y variación durante la calibración no superior a 0,2 °C. :contentReference[oaicite:8]{index=8}
+    </p>
 
     <div class="grid g-4">
       <div>
@@ -197,31 +296,50 @@
         <input id="tempPatronFin" type="text" value="20.0">
       </div>
       <div>
-        <label>Tª máquina inicio (°C)</label>
+        <label>Tª CMM inicio (°C)</label>
         <input id="tempMaquinaIni" type="text" value="20.0">
       </div>
       <div>
-        <label>Tª máquina fin (°C)</label>
+        <label>Tª CMM fin (°C)</label>
         <input id="tempMaquinaFin" type="text" value="20.0">
       </div>
     </div>
 
+    <div class="grid g-2" style="margin-top:10px">
+      <div>
+        <label>Limpieza e inspección visual previa</label>
+        <select id="inspeccionPrevia">
+          <option value="ok">Correcta</option>
+          <option value="incidencia">Con incidencias</option>
+        </select>
+      </div>
+      <div>
+        <label>Variación térmica observada (°C)</label>
+        <input id="variacionTermica" type="text" value="0.0">
+      </div>
+    </div>
+
     <div style="margin-top:10px">
-      <label>Observaciones ambientales / previas</label>
-      <textarea id="obsAmb" placeholder="Limpieza, inspección visual, estabilización térmica, incidencias, etc."></textarea>
+      <label>Observaciones previas / ambientales</label>
+      <textarea id="obsAmb" placeholder="Limpieza, inspección visual, estado superficial, estabilización, incidencias, etc."></textarea>
     </div>
   </div>
 
   <div class="card" style="margin-top:12px">
     <div class="section-title">
-      <h3 style="margin:0">4. Secciones de medida</h3>
-      <span class="code">1/4 · 1/2 · 3/4</span>
+      <h3 style="margin:0">5. Secciones y datos medidos</h3>
+      <span class="code">Di · D · ΔD · ΔF</span>
     </div>
+
+    <p class="note">
+      Para diámetro, la norma contempla medición en el centro y, si el uso lo requiere, en 1/4 y 3/4 de la altura. Para redondez y cilindricidad,
+      la CMM puede trabajar por exploración y ajuste por mínimos cuadrados. La cilindricidad requiere relacionar varias secciones. 
+    </p>
 
     <div class="row">
       <button id="btnAddSeccion" class="btn">Añadir sección</button>
-      <button id="btnSeccionesStd" class="btn secondary">Cargar secciones estándar</button>
-      <span class="note">Puedes usar centro, 1/4 y 3/4 de altura o las que defina el procedimiento.</span>
+      <button id="btnSeccionesStd" class="btn secondary">Cargar 1/4 · 1/2 · 3/4</button>
+      <span class="mini">Puedes adaptar las secciones según el uso del patrón.</span>
     </div>
 
     <div class="table-box" style="margin-top:10px">
@@ -230,7 +348,7 @@
           <tr>
             <th>Sección</th>
             <th>Posición Z (mm)</th>
-            <th>Diámetro medido (mm)</th>
+            <th>Diámetro Di (mm)</th>
             <th>Redondez (µm)</th>
             <th>Cilindricidad parcial (µm)</th>
             <th>Observaciones</th>
@@ -244,9 +362,14 @@
 
   <div class="card" style="margin-top:12px">
     <div class="section-title">
-      <h3 style="margin:0">5. Cálculo y resultados</h3>
-      <span class="code">D · ΔD · ΔF</span>
+      <h3 style="margin:0">6. Cálculo, incertidumbre y criterio</h3>
+      <span class="code">Resultado + U(k=2)</span>
     </div>
+
+    <p class="note">
+      El procedimiento exige informar las desviaciones obtenidas y la incertidumbre expandida con <strong>k = 2</strong>, para una probabilidad
+      aproximada del 95 %, y considerar la incertidumbre al evaluar cumplimiento con tolerancias o clases de precisión. 
+    </p>
 
     <div class="grid g-4">
       <div>
@@ -254,16 +377,27 @@
         <input id="uExpandida" type="text" value="1.5">
       </div>
       <div>
-        <label>Tolerancia de diámetro (µm)</label>
+        <label>Factor k</label>
+        <input id="factorK" type="text" value="2">
+      </div>
+      <div>
+        <label>Tolerancia diámetro (µm)</label>
         <input id="tolDiametro" type="text" value="5.0">
       </div>
       <div>
-        <label>Tolerancia de redondez (µm)</label>
+        <label>Tolerancia redondez (µm)</label>
         <input id="tolRedondez" type="text" value="3.0">
       </div>
+    </div>
+
+    <div class="grid g-2" style="margin-top:10px">
       <div>
-        <label>Tolerancia de cilindricidad (µm)</label>
+        <label>Tolerancia cilindricidad (µm)</label>
         <input id="tolCil" type="text" value="4.0">
+      </div>
+      <div>
+        <label>Criterio de conformidad</label>
+        <input id="criterioTexto" type="text" value="Evaluación considerando desviación e incertidumbre asociada">
       </div>
     </div>
 
@@ -277,8 +411,8 @@
 
   <div class="card" style="margin-top:12px">
     <div class="section-title">
-      <h3 style="margin:0">6. Firma y validación</h3>
-      <span class="code">Informe</span>
+      <h3 style="margin:0">7. Validación e integración</h3>
+      <span class="code">Preparado para TMP</span>
     </div>
 
     <div class="grid g-3">
@@ -295,22 +429,26 @@
         <input id="proxCal" type="date">
       </div>
     </div>
+
+    <div class="status-line" style="margin-top:10px">
+      <span class="status-chip">Enlazable con TMP_Calibraciones_Lab.html</span>
+      <span class="status-chip">JSON compatible con backend</span>
+      <span class="status-chip">Listo para iterar</span>
+    </div>
   </div>
 
   <div class="card" style="margin-top:12px">
     <div class="section-title">
-      <h3 style="margin:0">7. JSON de salida</h3>
-      <span class="code">Enlace con backend / TMP</span>
+      <h3 style="margin:0">8. JSON de salida</h3>
+      <span class="code">Depuración</span>
     </div>
-    <p class="note">
-      Este bloque sirve para validar la estructura antes de integrarlo con <strong>TMP_Calibraciones_Lab.html</strong>.
-    </p>
     <pre id="jsonOut">{}</pre>
   </div>
 </div>
 
 <script type="module">
 const $ = q => document.querySelector(q);
+const $$ = q => Array.from(document.querySelectorAll(q));
 const parseNum = (v) => {
   if (typeof v === "number") return v;
   if (v === null || v === undefined) return 0;
@@ -329,17 +467,25 @@ function renderMetodoInfo() {
   let txt = "";
 
   if (tipo === "diametro") {
-    txt = "La calibración se realiza mediante medidora tridimensional determinando el diámetro del anillo a partir de secciones de medida representativas del uso previsto del patrón.";
+    txt = "Alcance seleccionado: diámetro. Aplicable cuando el patrón se utiliza para instrumentos que determinan diámetro por dos puntos opuestos. El resultado principal será el diámetro medio y su desviación al nominal.";
   } else if (tipo === "diametro_redondez") {
-    txt = "La calibración se realiza mediante medidora tridimensional determinando el diámetro del anillo y evaluando la redondez de las secciones medidas mediante ajuste por mínimos cuadrados.";
+    txt = "Alcance seleccionado: diámetro y redondez. Aplicable cuando además de la dimensión interesa la forma de la sección, como en instrumentos de dos o tres puntos o calibres de límites.";
   } else {
-    txt = "La calibración se realiza mediante medidora tridimensional determinando diámetro, redondez y cilindricidad. Se consideran varias secciones del anillo para representar el comportamiento geométrico del patrón.";
+    txt = "Alcance seleccionado: diámetro, redondez y cilindricidad. Aplicable cuando el comportamiento geométrico del cilindro completo es relevante, especialmente en patrones de alta precisión.";
   }
 
   $("#metodoInfo").textContent = txt;
 }
 
-$("#tipoCalibracion").addEventListener("change", renderMetodoInfo);
+$$(".scope-card").forEach(card => {
+  card.addEventListener("click", () => {
+    $$(".scope-card").forEach(c => c.classList.remove("active"));
+    card.classList.add("active");
+    $("#tipoCalibracion").value = card.dataset.scope;
+    renderMetodoInfo();
+  });
+});
+
 renderMetodoInfo();
 
 function addSeccion(data = {}) {
@@ -395,9 +541,18 @@ function renderSecciones() {
 $("#btnAddSeccion").addEventListener("click", () => addSeccion());
 $("#btnSeccionesStd").addEventListener("click", cargarSeccionesStd);
 
+function decisionConU(valor, U, T) {
+  if (valor === null) return "—";
+  const absE = Math.abs(valor);
+  if (absE + U <= T) return "APTO";
+  if (absE - U > T) return "NO APTO";
+  return "INDETERMINADO";
+}
+
 function calcularResultados() {
   const nominal = parseNum($("#diametroNominal").value);
   const u = parseNum($("#uExpandida").value);
+  const k = parseNum($("#factorK").value);
   const tolD = parseNum($("#tolDiametro").value);
   const tolR = parseNum($("#tolRedondez").value);
   const tolC = parseNum($("#tolCil").value);
@@ -426,21 +581,9 @@ function calcularResultados() {
   const maxRed = redsValidos.length ? Math.max(...redsValidos) : null;
   const maxCil = cilValidos.length ? Math.max(...cilValidos) : null;
 
-  let decisionDiametro = "—";
-  if (deltaD !== null) {
-    const absE = Math.abs(deltaD);
-    decisionDiametro = (absE + u <= tolD) ? "APTO" : ((absE - u > tolD) ? "NO APTO" : "INDETERMINADO");
-  }
-
-  let decisionRed = "—";
-  if (tipo !== "diametro" && maxRed !== null) {
-    decisionRed = (maxRed + u <= tolR) ? "APTO" : ((maxRed - u > tolR) ? "NO APTO" : "INDETERMINADO");
-  }
-
-  let decisionCil = "—";
-  if (tipo === "diametro_redondez_cilindricidad" && maxCil !== null) {
-    decisionCil = (maxCil + u <= tolC) ? "APTO" : ((maxCil - u > tolC) ? "NO APTO" : "INDETERMINADO");
-  }
+  const decisionDiametro = decisionConU(deltaD, u, tolD);
+  const decisionRed = (tipo !== "diametro" && maxRed !== null) ? decisionConU(maxRed, u, tolR) : "—";
+  const decisionCil = (tipo === "diametro_redondez_cilindricidad" && maxCil !== null) ? decisionConU(maxCil, u, tolC) : "—";
 
   const decisiones = [decisionDiametro];
   if (decisionRed !== "—") decisiones.push(decisionRed);
@@ -457,7 +600,7 @@ function calcularResultados() {
           <tr>
             <th>Magnitud</th>
             <th>Resultado</th>
-            <th>U(k=2)</th>
+            <th>U(k=${fmt(k,0)})</th>
             <th>Tolerancia</th>
             <th>Decisión</th>
           </tr>
@@ -513,6 +656,7 @@ function calcularResultados() {
     tipo,
     nominal,
     u_expandida_um: u,
+    factor_k: k,
     tolerancia_diametro_um: tolD,
     tolerancia_redondez_um: tolR,
     tolerancia_cilindricidad_um: tolC,
@@ -537,23 +681,36 @@ function buildCertJSON() {
       fecha_generacion: new Date().toISOString(),
       tipo_documento: "Certificado de calibración",
       modulo: "anillos_patron",
-      norma: "Procedimiento específico / ISO/IEC 17025"
+      norma: "DI-016 / ISO/IEC 17025"
     },
     procedimiento: {
       codigo: $("#procedimiento").value || "DI-016",
       familia: "anillo_patron",
-      equipo_utilizado: $("#equipoMedida").value || "Medidora tridimensional",
-      tipo_calibracion: $("#tipoCalibracion").value
+      tipo_calibracion: $("#tipoCalibracion").value,
+      explicacion_alcance: $("#metodoInfo").textContent || "",
+      criterio_conformidad: $("#criterioTexto").value || ""
     },
     instrumento: {
       codigo: $("#codigo").value || "",
       numero_serie: $("#serie").value || "",
       descripcion: $("#descripcion").value || "",
       fabricante: $("#fabricante").value || "",
+      tipo_patron: $("#tipoPatron").value || "",
       diametro_nominal_mm: parseNum($("#diametroNominal").value),
       altura_mm: parseNum($("#altura").value),
       clase_tolerancia: $("#clase").value || "",
-      material: $("#material").value || ""
+      material: $("#material").value || "",
+      uso_previsto: $("#usoPrevisto").value || ""
+    },
+    equipo_medida: {
+      tipo: $("#equipoTipo").value || "",
+      codigo: $("#equipoCodigo").value || "",
+      modelo: $("#equipoModelo").value || "",
+      numero_serie: $("#equipoSerie").value || "",
+      capacidad_declarada: $("#equipoCapacidad").value || "",
+      fecha_ultima_calibracion: $("#equipoUltimaCal").value || null,
+      fecha_proxima_calibracion: $("#equipoProxCal").value || null,
+      observaciones: $("#equipoObs").value || ""
     },
     condiciones: {
       fecha_calibracion: $("#fechaCal").value || null,
@@ -562,8 +719,10 @@ function buildCertJSON() {
       estabilizacion_horas: parseNum($("#estabilizacion").value),
       temperatura_patron_inicio_c: parseNum($("#tempPatronIni").value),
       temperatura_patron_fin_c: parseNum($("#tempPatronFin").value),
-      temperatura_maquina_inicio_c: parseNum($("#tempMaquinaIni").value),
-      temperatura_maquina_fin_c: parseNum($("#tempMaquinaFin").value),
+      temperatura_cmm_inicio_c: parseNum($("#tempMaquinaIni").value),
+      temperatura_cmm_fin_c: parseNum($("#tempMaquinaFin").value),
+      inspeccion_previa: $("#inspeccionPrevia").value || "",
+      variacion_termica_c: parseNum($("#variacionTermica").value),
       observaciones: $("#obsAmb").value || ""
     },
     resultados,
