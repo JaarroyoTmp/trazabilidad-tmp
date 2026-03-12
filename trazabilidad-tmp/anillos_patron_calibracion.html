@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script type="module" src="config.mjs"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TMP · Calibración de anillos patrón</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#0e2235; --bg1:#122b43; --bg2:#1a3b57; --card:#183049;
+      --muted:#8ea6bb; --txt:#e7f2fb; --accent:#47a3ff; --accent-2:#1f8fff;
+      --ok:#2bd47c; --warn:#ffd15c; --bad:#ff6b6b; --chip:#203a57;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--txt);
+      background: radial-gradient(1200px 800px at 10% 0%, var(--bg2) 0%, var(--bg1) 50%, var(--bg0) 100%);
+    }
+    .wrap{max-width:1180px;margin:24px auto;padding:0 16px}
+    header{display:flex;align-items:center;gap:16px;padding:12px 0 18px;border-bottom:1px solid #21436040}
+    header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.3px}
+    .badge{font-size:12px;background:var(--chip);padding:6px 10px;border-radius:999px;color:#b9d3ea}
+    .grid{display:grid;gap:12px}
+    .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .g-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:linear-gradient(180deg,#1a3551aa,#163049aa);border:1px solid #20466866;border-radius:14px;padding:16px}
+    .card h3{margin:0 0 10px;font-size:14px;font-weight:700;color:#d8e9f8}
+    label{display:block;font-size:12px;color:#a7c0d6;margin-bottom:6px}
+    input,select,textarea,button{font-family:inherit;color:inherit}
+    input[type="text"],input[type="number"],input[type="date"],select,textarea{
+      width:100%;background:#102030;border:1px solid #2a537a;border-radius:10px;padding:10px 12px;color:#e9f4ff;outline:none
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{background:var(--accent-2);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-weight:600;cursor:pointer;transition:.15s transform}
+    .btn:hover{transform:translateY(-1px)}
+    .btn.secondary{background:#214360}
+    .btn.ghost{background:transparent;border:1px solid #2a537a}
+    .note{font-size:12px;color:#a7c0d6;line-height:1.6}
+    .mini{font-size:11px;color:#9eb9cf}
+    .pill{padding:4px 8px;border-radius:999px;background:#104071;color:#bfe0ff;font-weight:600}
+    .success{background:#1c4c2b;color:#bff5d6}
+    .danger{background:#5b3a1d;color:#ffe2c0}
+    .warn{background:#4a3a16;color:#ffe6ad}
+    .right{margin-left:auto}
+    .hidden{display:none}
+    .table-box{max-height:420px;overflow:auto;border:1px solid #2a537a;border-radius:12px}
+    table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
+    th,td{border-bottom:1px solid #244b6a66;padding:10px 8px;text-align:center;font-size:13px}
+    thead th{background:#112338;color:#cfe6fa;position:sticky;top:0}
+    tbody tr:nth-child(odd){background:#11263f80}
+    .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700}
+    .logo{height:22px;width:22px;border-radius:4px;background:linear-gradient(135deg,#3dd2ff,#1bb3ff);display:inline-block}
+    .section-title{
+      display:flex;align-items:center;gap:10px;margin-bottom:10px
+    }
+    .section-title .code{
+      font-size:12px;padding:5px 8px;border-radius:999px;background:#203a57;color:#b9d3ea
+    }
+    pre{
+      white-space:pre-wrap;
+      background:#0d2033;
+      border:1px solid #2a537a;
+      border-radius:12px;
+      padding:12px;
+      color:#d8ecff;
+      font-size:12px;
+      line-height:1.5;
+      overflow:auto;
+    }
+    @media (max-width: 900px){
+      .g-4,.g-3,.g-2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">TMP · Módulo específico</div>
+    <h1>Calibración de anillos patrón</h1>
+    <div class="stamp right"><span class="logo"></span> Tridimensional · ISO/IEC 17025 · Procedimiento específico</div>
+  </header>
+
+  <div class="card">
+    <div class="section-title">
+      <h3 style="margin:0">1. Identificación del patrón</h3>
+      <span class="code">ANILLOS / CMM</span>
+    </div>
+
+    <div class="grid g-4">
+      <div>
+        <label>Código interno</label>
+        <input id="codigo" type="text" placeholder="Ej. AP-00124">
+      </div>
+      <div>
+        <label>Nº serie</label>
+        <input id="serie" type="text" placeholder="Ej. S-2024-15">
+      </div>
+      <div>
+        <label>Descripción</label>
+        <input id="descripcion" type="text" placeholder="Ej. Anillo patrón Ø20">
+      </div>
+      <div>
+        <label>Fabricante</label>
+        <input id="fabricante" type="text" placeholder="Ej. Mahr">
+      </div>
+
+      <div>
+        <label>Diámetro nominal (mm)</label>
+        <input id="diametroNominal" type="text" value="20.000">
+      </div>
+      <div>
+        <label>Altura (mm)</label>
+        <input id="altura" type="text" value="20.000">
+      </div>
+      <div>
+        <label>Clase / tolerancia</label>
+        <input id="clase" type="text" placeholder="Ej. Clase 1 / según plano">
+      </div>
+      <div>
+        <label>Material</label>
+        <input id="material" type="text" placeholder="Ej. acero templado">
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="section-title">
+      <h3 style="margin:0">2. Alcance de la calibración</h3>
+      <span class="code">Método</span>
+    </div>
+
+    <div class="grid g-3">
+      <div>
+        <label>Tipo de calibración</label>
+        <select id="tipoCalibracion">
+          <option value="diametro">Diámetro</option>
+          <option value="diametro_redondez">Diámetro + redondez</option>
+          <option value="diametro_redondez_cilindricidad">Diámetro + redondez + cilindricidad</option>
+        </select>
+      </div>
+      <div>
+        <label>Equipo utilizado</label>
+        <input id="equipoMedida" type="text" value="Medidora tridimensional">
+      </div>
+      <div>
+        <label>Procedimiento interno</label>
+        <input id="procedimiento" type="text" value="DI-016">
+      </div>
+    </div>
+
+    <p class="note" id="metodoInfo" style="margin-top:10px">
+      La calibración se realiza mediante medidora tridimensional. Se determina el diámetro del anillo a partir de secciones de medida y, cuando aplica, se evalúan redondez y cilindricidad según el uso previsto del patrón.
+    </p>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="section-title">
+      <h3 style="margin:0">3. Condiciones ambientales y estabilización</h3>
+      <span class="code">20 °C</span>
+    </div>
+
+    <div class="grid g-4">
+      <div>
+        <label>Fecha de calibración</label>
+        <input id="fechaCal" type="date">
+      </div>
+      <div>
+        <label>Temperatura sala (°C)</label>
+        <input id="tempSala" type="text" value="20.0">
+      </div>
+      <div>
+        <label>Humedad (%)</label>
+        <input id="humedad" type="text" value="50">
+      </div>
+      <div>
+        <label>Tiempo de estabilización (h)</label>
+        <input id="estabilizacion" type="text" value="3">
+      </div>
+
+      <div>
+        <label>Tª patrón inicio (°C)</label>
+        <input id="tempPatronIni" type="text" value="20.0">
+      </div>
+      <div>
+        <label>Tª patrón fin (°C)</label>
+        <input id="tempPatronFin" type="text" value="20.0">
+      </div>
+      <div>
+        <label>Tª máquina inicio (°C)</label>
+        <input id="tempMaquinaIni" type="text" value="20.0">
+      </div>
+      <div>
+        <label>Tª máquina fin (°C)</label>
+        <input id="tempMaquinaFin" type="text" value="20.0">
+      </div>
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Observaciones ambientales / previas</label>
+      <textarea id="obsAmb" placeholder="Limpieza, inspección visual, estabilización térmica, incidencias, etc."></textarea>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="section-title">
+      <h3 style="margin:0">4. Secciones de medida</h3>
+      <span class="code">1/4 · 1/2 · 3/4</span>
+    </div>
+
+    <div class="row">
+      <button id="btnAddSeccion" class="btn">Añadir sección</button>
+      <button id="btnSeccionesStd" class="btn secondary">Cargar secciones estándar</button>
+      <span class="note">Puedes usar centro, 1/4 y 3/4 de altura o las que defina el procedimiento.</span>
+    </div>
+
+    <div class="table-box" style="margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th>Sección</th>
+            <th>Posición Z (mm)</th>
+            <th>Diámetro medido (mm)</th>
+            <th>Redondez (µm)</th>
+            <th>Cilindricidad parcial (µm)</th>
+            <th>Observaciones</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tbodySecciones"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="section-title">
+      <h3 style="margin:0">5. Cálculo y resultados</h3>
+      <span class="code">D · ΔD · ΔF</span>
+    </div>
+
+    <div class="grid g-4">
+      <div>
+        <label>U expandida k=2 (µm)</label>
+        <input id="uExpandida" type="text" value="1.5">
+      </div>
+      <div>
+        <label>Tolerancia de diámetro (µm)</label>
+        <input id="tolDiametro" type="text" value="5.0">
+      </div>
+      <div>
+        <label>Tolerancia de redondez (µm)</label>
+        <input id="tolRedondez" type="text" value="3.0">
+      </div>
+      <div>
+        <label>Tolerancia de cilindricidad (µm)</label>
+        <input id="tolCil" type="text" value="4.0">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <button id="btnCalcular" class="btn">Calcular resultados</button>
+      <button id="btnConstruirJSON" class="btn secondary">Ver JSON</button>
+    </div>
+
+    <div id="resultadosBox" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="section-title">
+      <h3 style="margin:0">6. Firma y validación</h3>
+      <span class="code">Informe</span>
+    </div>
+
+    <div class="grid g-3">
+      <div>
+        <label>Operario</label>
+        <input id="operario" type="text" placeholder="Nombre y apellidos">
+      </div>
+      <div>
+        <label>Revisor</label>
+        <input id="revisor" type="text" placeholder="Nombre y apellidos">
+      </div>
+      <div>
+        <label>Próxima calibración</label>
+        <input id="proxCal" type="date">
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="section-title">
+      <h3 style="margin:0">7. JSON de salida</h3>
+      <span class="code">Enlace con backend / TMP</span>
+    </div>
+    <p class="note">
+      Este bloque sirve para validar la estructura antes de integrarlo con <strong>TMP_Calibraciones_Lab.html</strong>.
+    </p>
+    <pre id="jsonOut">{}</pre>
+  </div>
+</div>
+
+<script type="module">
+const $ = q => document.querySelector(q);
+const parseNum = (v) => {
+  if (typeof v === "number") return v;
+  if (v === null || v === undefined) return 0;
+  const n = Number(String(v).trim().replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+};
+const fmt = (n, d = 3) => Number(n).toFixed(d);
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+const state = {
+  secciones: []
+};
+
+function renderMetodoInfo() {
+  const tipo = $("#tipoCalibracion").value;
+  let txt = "";
+
+  if (tipo === "diametro") {
+    txt = "La calibración se realiza mediante medidora tridimensional determinando el diámetro del anillo a partir de secciones de medida representativas del uso previsto del patrón.";
+  } else if (tipo === "diametro_redondez") {
+    txt = "La calibración se realiza mediante medidora tridimensional determinando el diámetro del anillo y evaluando la redondez de las secciones medidas mediante ajuste por mínimos cuadrados.";
+  } else {
+    txt = "La calibración se realiza mediante medidora tridimensional determinando diámetro, redondez y cilindricidad. Se consideran varias secciones del anillo para representar el comportamiento geométrico del patrón.";
+  }
+
+  $("#metodoInfo").textContent = txt;
+}
+
+$("#tipoCalibracion").addEventListener("change", renderMetodoInfo);
+renderMetodoInfo();
+
+function addSeccion(data = {}) {
+  state.secciones.push({
+    id: uid(),
+    nombre: data.nombre || `Sección ${state.secciones.length + 1}`,
+    z: data.z ?? "",
+    diametro: data.diametro ?? "",
+    redondez: data.redondez ?? "",
+    cilindricidad: data.cilindricidad ?? "",
+    obs: data.obs || ""
+  });
+  renderSecciones();
+}
+
+function cargarSeccionesStd() {
+  state.secciones = [];
+  const h = parseNum($("#altura").value);
+  addSeccion({ nombre: "1/4 altura", z: h ? (h * 0.25).toFixed(3) : "5.000" });
+  addSeccion({ nombre: "1/2 altura", z: h ? (h * 0.50).toFixed(3) : "10.000" });
+  addSeccion({ nombre: "3/4 altura", z: h ? (h * 0.75).toFixed(3) : "15.000" });
+}
+
+function renderSecciones() {
+  const tb = $("#tbodySecciones");
+  tb.innerHTML = state.secciones.map(s => `
+    <tr>
+      <td><input data-id="${s.id}" data-k="nombre" type="text" value="${s.nombre}" /></td>
+      <td><input data-id="${s.id}" data-k="z" type="text" value="${s.z}" /></td>
+      <td><input data-id="${s.id}" data-k="diametro" type="text" value="${s.diametro}" /></td>
+      <td><input data-id="${s.id}" data-k="redondez" type="text" value="${s.redondez}" /></td>
+      <td><input data-id="${s.id}" data-k="cilindricidad" type="text" value="${s.cilindricidad}" /></td>
+      <td><input data-id="${s.id}" data-k="obs" type="text" value="${s.obs}" /></td>
+      <td><button class="btn ghost btn-del" data-id="${s.id}">Eliminar</button></td>
+    </tr>
+  `).join("");
+
+  tb.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const it = state.secciones.find(x => x.id === inp.dataset.id);
+      if (it) it[inp.dataset.k] = inp.value;
+    });
+  });
+
+  tb.querySelectorAll(".btn-del").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.secciones = state.secciones.filter(x => x.id !== btn.dataset.id);
+      renderSecciones();
+    });
+  });
+}
+
+$("#btnAddSeccion").addEventListener("click", () => addSeccion());
+$("#btnSeccionesStd").addEventListener("click", cargarSeccionesStd);
+
+function calcularResultados() {
+  const nominal = parseNum($("#diametroNominal").value);
+  const u = parseNum($("#uExpandida").value);
+  const tolD = parseNum($("#tolDiametro").value);
+  const tolR = parseNum($("#tolRedondez").value);
+  const tolC = parseNum($("#tolCil").value);
+  const tipo = $("#tipoCalibracion").value;
+
+  const secs = state.secciones.map(s => ({
+    ...s,
+    zNum: parseNum(s.z),
+    diametroNum: parseNum(s.diametro),
+    redondezNum: parseNum(s.redondez),
+    cilindricidadNum: parseNum(s.cilindricidad)
+  })).filter(s => s.nombre);
+
+  if (!secs.length) {
+    $("#resultadosBox").innerHTML = `<p class="note">No hay secciones de medida.</p>`;
+    return null;
+  }
+
+  const diasValidos = secs.map(s => s.diametroNum).filter(v => Number.isFinite(v) && v !== 0);
+  const redsValidos = secs.map(s => s.redondezNum).filter(v => Number.isFinite(v) && v !== 0);
+  const cilValidos = secs.map(s => s.cilindricidadNum).filter(v => Number.isFinite(v) && v !== 0);
+
+  const D = diasValidos.length ? diasValidos.reduce((a,b)=>a+b,0) / diasValidos.length : null;
+  const deltaD = D !== null ? (D - nominal) * 1000 : null;
+  const deltaF = diasValidos.length ? (Math.max(...diasValidos) - Math.min(...diasValidos)) * 1000 : null;
+  const maxRed = redsValidos.length ? Math.max(...redsValidos) : null;
+  const maxCil = cilValidos.length ? Math.max(...cilValidos) : null;
+
+  let decisionDiametro = "—";
+  if (deltaD !== null) {
+    const absE = Math.abs(deltaD);
+    decisionDiametro = (absE + u <= tolD) ? "APTO" : ((absE - u > tolD) ? "NO APTO" : "INDETERMINADO");
+  }
+
+  let decisionRed = "—";
+  if (tipo !== "diametro" && maxRed !== null) {
+    decisionRed = (maxRed + u <= tolR) ? "APTO" : ((maxRed - u > tolR) ? "NO APTO" : "INDETERMINADO");
+  }
+
+  let decisionCil = "—";
+  if (tipo === "diametro_redondez_cilindricidad" && maxCil !== null) {
+    decisionCil = (maxCil + u <= tolC) ? "APTO" : ((maxCil - u > tolC) ? "NO APTO" : "INDETERMINADO");
+  }
+
+  const decisiones = [decisionDiametro];
+  if (decisionRed !== "—") decisiones.push(decisionRed);
+  if (decisionCil !== "—") decisiones.push(decisionCil);
+
+  let decisionGlobal = "APTO";
+  if (decisiones.includes("NO APTO")) decisionGlobal = "NO APTO";
+  else if (decisiones.includes("INDETERMINADO")) decisionGlobal = "INDETERMINADO";
+
+  $("#resultadosBox").innerHTML = `
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Magnitud</th>
+            <th>Resultado</th>
+            <th>U(k=2)</th>
+            <th>Tolerancia</th>
+            <th>Decisión</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Diámetro medio D (mm)</td>
+            <td>${D !== null ? fmt(D, 4) : "—"}</td>
+            <td>${fmt(u, 1)} µm</td>
+            <td>${fmt(tolD, 1)} µm</td>
+            <td><span class="pill">${decisionDiametro}</span></td>
+          </tr>
+          <tr>
+            <td>Desviación al nominal ΔD (µm)</td>
+            <td>${deltaD !== null ? fmt(deltaD, 1) : "—"}</td>
+            <td>${fmt(u, 1)} µm</td>
+            <td>${fmt(tolD, 1)} µm</td>
+            <td><span class="pill">${decisionDiametro}</span></td>
+          </tr>
+          <tr>
+            <td>Variación de diámetros ΔF (µm)</td>
+            <td>${deltaF !== null ? fmt(deltaF, 1) : "—"}</td>
+            <td>—</td>
+            <td>—</td>
+            <td><span class="pill">INFORMATIVO</span></td>
+          </tr>
+          ${tipo !== "diametro" ? `
+          <tr>
+            <td>Redondez máxima (µm)</td>
+            <td>${maxRed !== null ? fmt(maxRed, 1) : "—"}</td>
+            <td>${fmt(u, 1)} µm</td>
+            <td>${fmt(tolR, 1)} µm</td>
+            <td><span class="pill">${decisionRed}</span></td>
+          </tr>` : ""}
+          ${tipo === "diametro_redondez_cilindricidad" ? `
+          <tr>
+            <td>Cilindricidad máxima (µm)</td>
+            <td>${maxCil !== null ? fmt(maxCil, 1) : "—"}</td>
+            <td>${fmt(u, 1)} µm</td>
+            <td>${fmt(tolC, 1)} µm</td>
+            <td><span class="pill">${decisionCil}</span></td>
+          </tr>` : ""}
+          <tr>
+            <td colspan="4"><strong>Decisión global</strong></td>
+            <td><span class="pill ${decisionGlobal==="APTO"?"success":(decisionGlobal==="NO APTO"?"danger":"warn")}">${decisionGlobal}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  return {
+    tipo,
+    nominal,
+    u_expandida_um: u,
+    tolerancia_diametro_um: tolD,
+    tolerancia_redondez_um: tolR,
+    tolerancia_cilindricidad_um: tolC,
+    diametro_medio_mm: D,
+    desviacion_nominal_um: deltaD,
+    variacion_diametros_um: deltaF,
+    redondez_max_um: maxRed,
+    cilindricidad_max_um: maxCil,
+    decision_diametro: decisionDiametro,
+    decision_redondez: decisionRed,
+    decision_cilindricidad: decisionCil,
+    decision_global: decisionGlobal,
+    secciones: secs
+  };
+}
+
+function buildCertJSON() {
+  const resultados = calcularResultados();
+
+  return {
+    certificado: {
+      fecha_generacion: new Date().toISOString(),
+      tipo_documento: "Certificado de calibración",
+      modulo: "anillos_patron",
+      norma: "Procedimiento específico / ISO/IEC 17025"
+    },
+    procedimiento: {
+      codigo: $("#procedimiento").value || "DI-016",
+      familia: "anillo_patron",
+      equipo_utilizado: $("#equipoMedida").value || "Medidora tridimensional",
+      tipo_calibracion: $("#tipoCalibracion").value
+    },
+    instrumento: {
+      codigo: $("#codigo").value || "",
+      numero_serie: $("#serie").value || "",
+      descripcion: $("#descripcion").value || "",
+      fabricante: $("#fabricante").value || "",
+      diametro_nominal_mm: parseNum($("#diametroNominal").value),
+      altura_mm: parseNum($("#altura").value),
+      clase_tolerancia: $("#clase").value || "",
+      material: $("#material").value || ""
+    },
+    condiciones: {
+      fecha_calibracion: $("#fechaCal").value || null,
+      temperatura_sala_c: parseNum($("#tempSala").value),
+      humedad_relativa_pct: parseNum($("#humedad").value),
+      estabilizacion_horas: parseNum($("#estabilizacion").value),
+      temperatura_patron_inicio_c: parseNum($("#tempPatronIni").value),
+      temperatura_patron_fin_c: parseNum($("#tempPatronFin").value),
+      temperatura_maquina_inicio_c: parseNum($("#tempMaquinaIni").value),
+      temperatura_maquina_fin_c: parseNum($("#tempMaquinaFin").value),
+      observaciones: $("#obsAmb").value || ""
+    },
+    resultados,
+    validacion: {
+      operario: $("#operario").value || "",
+      revisor: $("#revisor").value || "",
+      proxima_calibracion: $("#proxCal").value || null
+    }
+  };
+}
+
+$("#btnCalcular").addEventListener("click", calcularResultados);
+$("#btnConstruirJSON").addEventListener("click", () => {
+  const cert = buildCertJSON();
+  $("#jsonOut").textContent = JSON.stringify(cert, null, 2);
+});
+
+cargarSeccionesStd();
+</script>
+</body>
+</html>
