@@ -2,41 +2,42 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>TMP · Alcance, KPIs y Objetivos del Laboratorio</title>
+  <title>TMP · Dashboard Metrológico V3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="img/tmp-quality.png" />
-
-  <!-- Chart.js para los gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
       --bg:#020617;
-      --bg-gradient:radial-gradient(circle at 0% 0%, #1d3557 0, transparent 55%),
-                    radial-gradient(circle at 100% 0%, #0f172a 0, transparent 55%),
-                    linear-gradient(180deg,#020617,#020617);
-      --panel:#020617;
-      --panel-soft:#030b19;
-      --card:#020617;
-      --border:#1e293b;
+      --bg2:#07111f;
+      --panel:#071426;
+      --panel2:#0b1c33;
+      --card:#0a1728;
+      --border:rgba(148,163,184,.20);
+      --border2:rgba(56,189,248,.32);
       --txt:#e5f0ff;
-      --muted:#94a3b8;
-      --accent:#0ea5e9;
-      --accent-soft:#1d4ed8;
-      --accent-strong:#38bdf8;
-      --danger:#ef4444;
-      --warning:#f59e0b;
-      --success:#22c55e;
+      --muted:#93a4b8;
+      --blue:#38bdf8;
+      --blue2:#0ea5e9;
+      --green:#22c55e;
+      --yellow:#f59e0b;
+      --red:#ef4444;
+      --violet:#8b5cf6;
+      --shadow:0 24px 80px rgba(0,0,0,.55);
     }
 
-    *{box-sizing:border-box;}
+    *{box-sizing:border-box}
 
     body{
       margin:0;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto;
-      background:var(--bg);
-      background-image:var(--bg-gradient);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       color:var(--txt);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(14,165,233,.24), transparent 38%),
+        radial-gradient(circle at 100% 0%, rgba(139,92,246,.18), transparent 36%),
+        radial-gradient(circle at 50% 120%, rgba(34,197,94,.10), transparent 45%),
+        linear-gradient(180deg,#020617,#020617 55%,#000);
       -webkit-font-smoothing:antialiased;
     }
 
@@ -44,13 +45,20 @@
       position:sticky;
       top:0;
       z-index:20;
-      backdrop-filter:blur(18px);
-      background:linear-gradient(90deg,rgba(15,23,42,.92),rgba(15,23,42,.85));
-      border-bottom:1px solid rgba(148,163,184,.2);
-      padding:14px 20px;
+      backdrop-filter:blur(20px);
+      background:linear-gradient(90deg,rgba(2,6,23,.96),rgba(7,20,38,.88));
+      border-bottom:1px solid rgba(148,163,184,.18);
+      box-shadow:0 18px 50px rgba(0,0,0,.45);
+    }
+
+    .topbar{
+      max-width:1360px;
+      margin:0 auto;
+      padding:14px 18px;
       display:flex;
       align-items:center;
       justify-content:space-between;
+      gap:18px;
     }
 
     .brand{
@@ -60,892 +68,1002 @@
     }
 
     .brand-logo{
-      height:42px;
-      width:42px;
-      border-radius:999px;
-      background:radial-gradient(circle at 30% 0%,#38bdf8,transparent 55%),
-                 radial-gradient(circle at 70% 80%,#0ea5e9,transparent 55%);
+      width:46px;
+      height:46px;
+      border-radius:16px;
       display:flex;
       align-items:center;
       justify-content:center;
+      background:
+        radial-gradient(circle at 30% 10%,rgba(56,189,248,.95),transparent 55%),
+        radial-gradient(circle at 70% 90%,rgba(14,165,233,.75),transparent 55%),
+        #020617;
+      border:1px solid rgba(56,189,248,.38);
+      box-shadow:0 0 35px rgba(56,189,248,.26);
       overflow:hidden;
     }
+
     .brand-logo img{
-      height:34px;
-      width:auto;
+      width:36px;
+      height:auto;
     }
 
-    .brand-text-title{
-      font-size:18px;
-      font-weight:600;
-      letter-spacing:.04em;
+    .brand-title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
     }
-    .brand-text-sub{
+
+    .brand-title b{
+      font-size:17px;
+      letter-spacing:.03em;
+    }
+
+    .brand-title span{
       font-size:12px;
       color:var(--muted);
     }
 
-    .header-right{
+    .header-actions{
       display:flex;
       align-items:center;
       gap:10px;
       flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
-    .chip{
-      border-radius:999px;
-      border:1px solid rgba(148,163,184,.4);
-      padding:4px 10px;
-      font-size:11px;
+    .status-pill{
       display:inline-flex;
       align-items:center;
-      gap:6px;
-      color:var(--muted);
-      background:rgba(15,23,42,.8);
-    }
-    .chip-dot{
-      width:7px;
-      height:7px;
+      gap:8px;
       border-radius:999px;
-      background:#22c55e;
-      box-shadow:0 0 0 4px rgba(34,197,94,.25);
+      padding:7px 11px;
+      border:1px solid rgba(148,163,184,.22);
+      color:#cbd5e1;
+      background:rgba(15,23,42,.72);
+      font-size:12px;
+    }
+
+    .status-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 0 5px rgba(34,197,94,.16);
     }
 
     .btn{
+      border:none;
       border-radius:999px;
-      border:1px solid rgba(148,163,184,.4);
-      padding:7px 13px;
-      font-size:12px;
-      background:rgba(15,23,42,.9);
+      padding:9px 14px;
+      cursor:pointer;
+      background:rgba(15,23,42,.75);
       color:var(--txt);
+      border:1px solid rgba(148,163,184,.25);
+      font-size:12px;
+      font-weight:700;
+      text-decoration:none;
       display:inline-flex;
       align-items:center;
-      gap:6px;
-      cursor:pointer;
-      text-decoration:none;
-      box-shadow:0 10px 30px rgba(0,0,0,.65);
-      transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
-    }
-    .btn:hover{
-      transform:translateY(-1px);
-      box-shadow:0 16px 40px rgba(15,23,42,.85);
-      background:#020617;
+      gap:7px;
+      transition:.14s ease;
     }
 
-    .btn-primary{
-      border-color:var(--accent-strong);
-      background:linear-gradient(135deg,var(--accent-strong),var(--accent-soft));
-      color:#e0f2fe;
+    .btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(56,189,248,.55);
+      background:rgba(15,23,42,.95);
     }
-    .btn-primary:hover{
-      filter:brightness(1.06);
+
+    .btn.primary{
+      background:linear-gradient(135deg,var(--blue2),var(--blue));
+      color:#02111f;
+      border-color:transparent;
+      box-shadow:0 16px 36px rgba(14,165,233,.25);
     }
 
     main{
-      max-width:1180px;
-      margin:20px auto 40px;
-      padding:0 18px 30px;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
+      max-width:1360px;
+      margin:20px auto 44px;
+      padding:0 18px;
     }
 
-    /* Layout principal: 2 columnas */
-    .layout-top{
+    .hero{
       display:grid;
-      grid-template-columns:1.3fr 1.1fr;
+      grid-template-columns:1.15fr .85fr;
       gap:18px;
+      align-items:stretch;
+      margin-bottom:18px;
     }
 
-    @media (max-width:960px){
-      .layout-top{
-        grid-template-columns:1fr;
-      }
+    @media(max-width:1050px){
+      .hero{grid-template-columns:1fr}
     }
 
-    .card{
-      background:radial-gradient(circle at 0 0,rgba(56,189,248,.18),transparent 55%),
-                 radial-gradient(circle at 100% 100%,rgba(59,130,246,.18),transparent 55%),
-                 linear-gradient(145deg,#020617,#020617);
-      border-radius:18px;
-      border:1px solid rgba(148,163,184,.24);
-      padding:16px 16px 14px;
+    .hero-card{
+      border-radius:28px;
+      padding:24px;
+      border:1px solid rgba(56,189,248,.22);
+      background:
+        linear-gradient(135deg,rgba(15,23,42,.92),rgba(7,20,38,.88)),
+        radial-gradient(circle at 0 0,rgba(56,189,248,.30),transparent 50%);
+      box-shadow:var(--shadow);
       position:relative;
       overflow:hidden;
     }
 
-    .card::before{
+    .hero-card::after{
       content:"";
       position:absolute;
-      inset:-2px;
-      border-radius:inherit;
-      background:conic-gradient(from 210deg,rgba(56,189,248,.4),transparent,transparent);
-      opacity:0;
+      inset:auto -20% -45% auto;
+      width:420px;
+      height:420px;
+      background:radial-gradient(circle,rgba(56,189,248,.16),transparent 65%);
       pointer-events:none;
-      transition:opacity .3s ease;
-      z-index:-1;
     }
 
-    .card:hover::before{
-      opacity:1;
-    }
-
-    .card-header-row{
-      display:flex;
+    .eyebrow{
+      display:inline-flex;
       align-items:center;
+      gap:8px;
+      font-size:11px;
+      color:#bae6fd;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+      border:1px solid rgba(56,189,248,.30);
+      background:rgba(2,132,199,.10);
+      padding:5px 9px;
+      border-radius:999px;
+    }
+
+    .hero h1{
+      margin:14px 0 8px;
+      font-size:34px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      max-width:780px;
+      line-height:1.55;
+    }
+
+    .health-panel{
+      border-radius:28px;
+      padding:20px;
+      border:1px solid rgba(148,163,184,.20);
+      background:linear-gradient(145deg,rgba(7,20,38,.92),rgba(2,6,23,.90));
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
       justify-content:space-between;
-      gap:8px;
-      margin-bottom:6px;
+      gap:14px;
     }
 
-    .card-title{
-      font-size:16px;
-      font-weight:600;
-      color:#e0f2fe;
+    .health-title{
       display:flex;
-      align-items:center;
-      gap:8px;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
     }
 
-    .card-sub{
+    .health-title b{
+      font-size:15px;
+    }
+
+    .health-title span{
       font-size:12px;
       color:var(--muted);
-      margin-bottom:8px;
+      display:block;
+      margin-top:4px;
+    }
+
+    .health-score{
+      font-size:44px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+
+    .health-score.ok{color:#86efac}
+    .health-score.warn{color:#fde68a}
+    .health-score.bad{color:#fecaca}
+
+    .bar{
+      height:9px;
+      border-radius:999px;
+      background:rgba(148,163,184,.15);
+      overflow:hidden;
+      margin-top:10px;
+    }
+
+    .bar-fill{
+      height:100%;
+      border-radius:999px;
+      width:0%;
+      background:linear-gradient(90deg,var(--green),var(--blue));
+      transition:width .5s ease;
+    }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    @media(max-width:1180px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:720px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+
+    .kpi{
+      border-radius:20px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(circle at 0 0,rgba(56,189,248,.12),transparent 52%),
+        linear-gradient(145deg,rgba(7,20,38,.88),rgba(2,6,23,.88));
+      padding:15px;
+      min-height:128px;
+      box-shadow:0 18px 44px rgba(0,0,0,.34);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .kpi::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      width:100%;
+      height:3px;
+      background:linear-gradient(90deg,var(--blue),transparent);
+      opacity:.78;
+    }
+
+    .kpi .label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      font-weight:800;
+    }
+
+    .kpi .value{
+      margin-top:8px;
+      font-size:31px;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .kpi .note{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+      line-height:1.35;
+    }
+
+    .kpi.critical::before{background:linear-gradient(90deg,var(--red),transparent)}
+    .kpi.warning::before{background:linear-gradient(90deg,var(--yellow),transparent)}
+    .kpi.good::before{background:linear-gradient(90deg,var(--green),transparent)}
+    .kpi.violet::before{background:linear-gradient(90deg,var(--violet),transparent)}
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.25fr .75fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    @media(max-width:1050px){.layout{grid-template-columns:1fr}}
+
+    .panel{
+      border-radius:24px;
+      border:1px solid var(--border);
+      background:linear-gradient(145deg,rgba(7,20,38,.88),rgba(2,6,23,.90));
+      padding:18px;
+      box-shadow:0 18px 48px rgba(0,0,0,.32);
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:12px;
+    }
+
+    .panel-title{
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .panel-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.45;
+    }
+
+    .chart-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    @media(max-width:820px){.chart-grid{grid-template-columns:1fr}}
+
+    .chart-box{
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.16);
+      background:rgba(2,6,23,.45);
+      padding:14px;
+      min-height:320px;
+    }
+
+    .chart-title{
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:10px;
+      color:#e0f2fe;
+    }
+
+    canvas{max-height:265px}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+
+    th,td{
+      padding:10px 8px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      text-align:left;
+      vertical-align:top;
+    }
+
+    th{
+      color:#bae6fd;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      background:rgba(2,6,23,.35);
+      position:sticky;
+      top:0;
+    }
+
+    td{
+      color:#dbeafe;
+    }
+
+    .table-wrap{
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.16);
+      overflow:auto;
+      max-height:360px;
+      background:rgba(2,6,23,.38);
     }
 
     .pill{
       display:inline-flex;
       align-items:center;
-      gap:5px;
-      font-size:11px;
-      border-radius:999px;
-      padding:3px 9px;
-      border:1px solid rgba(148,163,184,.45);
-      background:rgba(15,23,42,.9);
-      color:var(--muted);
-    }
-
-    .tag{
-      font-size:11px;
-      padding:2px 8px;
-      border-radius:999px;
-      border:1px solid rgba(148,163,184,.35);
-      color:var(--muted);
-      white-space:nowrap;
-    }
-
-    .tag-accent{
-      border-color:var(--accent-strong);
-      color:var(--accent-strong);
-    }
-
-    .badge-kpi{
-      font-size:11px;
-      padding:2px 8px;
-      border-radius:999px;
-      border:1px solid rgba(56,189,248,.45);
-      background:rgba(15,23,42,.9);
-      color:#bae6fd;
-      white-space:nowrap;
-    }
-
-    .badge-ok{
-      border-color:var(--success);
-      color:#bbf7d0;
-    }
-
-    .badge-warn{
-      border-color:var(--warning);
-      color:#fed7aa;
-    }
-
-    /* Lista de magnitudes */
-    .mag-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
-      gap:10px;
-      margin-top:6px;
-    }
-
-    .mag-card{
-      background:rgba(15,23,42,.9);
-      border-radius:12px;
-      border:1px solid rgba(30,64,175,.7);
-      padding:9px 10px 8px;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-    }
-
-    .mag-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
       gap:6px;
-    }
-
-    .mag-title{
-      font-size:13px;
-      font-weight:600;
-    }
-
-    .mag-icon{
-      width:24px;
-      height:24px;
       border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:14px;
-      background:radial-gradient(circle at 30% 0%,rgba(56,189,248,.8),transparent 55%),
-                 radial-gradient(circle at 70% 90%,rgba(29,78,216,.9),transparent 55%);
-      box-shadow:0 0 0 3px rgba(37,99,235,.35);
-    }
-
-    .mag-meta{
+      padding:4px 8px;
       font-size:11px;
-      color:var(--muted);
+      font-weight:800;
+      border:1px solid rgba(148,163,184,.20);
+      white-space:nowrap;
     }
 
-    .mag-range{
-      font-size:11px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:4px;
-      margin-top:2px;
-    }
+    .pill.ok{color:#bbf7d0;background:rgba(22,101,52,.25);border-color:rgba(34,197,94,.35)}
+    .pill.warn{color:#fef3c7;background:rgba(113,63,18,.30);border-color:rgba(245,158,11,.35)}
+    .pill.bad{color:#fee2e2;background:rgba(127,29,29,.30);border-color:rgba(239,68,68,.40)}
+    .pill.info{color:#dbeafe;background:rgba(30,64,175,.26);border-color:rgba(96,165,250,.35)}
 
-    /* KPIs Alcance */
-    .kpi-alcance-grid{
+    .two-col{
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-      gap:8px;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-bottom:18px;
     }
 
-    .kpi-alcance-card{
-      background:#020617;
-      border-radius:12px;
-      border:1px solid rgba(51,65,85,.9);
-      padding:9px 10px 8px;
-      display:flex;
-      flex-direction:column;
-      gap:3px;
-    }
+    @media(max-width:1050px){.two-col{grid-template-columns:1fr}}
 
-    .kpi-alc-label{
-      font-size:11px;
-      color:var(--muted);
-    }
-
-    .kpi-alc-value{
-      font-size:18px;
-      font-weight:600;
-    }
-
-    .kpi-alk-note{
-      font-size:11px;
-      color:var(--muted);
-    }
-
-    /* Gráficos */
-    .charts-grid{
+    .audit-grid{
       display:grid;
-      grid-template-columns:1fr;
+      grid-template-columns:repeat(2,minmax(0,1fr));
       gap:12px;
     }
 
-    .chart-box{
-      background:rgba(15,23,42,.95);
-      border-radius:14px;
-      border:1px solid rgba(30,64,175,.7);
-      padding:10px 12px 10px;
+    @media(max-width:650px){.audit-grid{grid-template-columns:1fr}}
+
+    .audit-card{
+      border-radius:18px;
+      padding:14px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.42);
     }
 
-    .chart-title{
+    .audit-card b{
+      display:block;
       font-size:13px;
       margin-bottom:6px;
-      color:#e0f2fe;
     }
 
-    canvas{
-      max-height:260px;
-    }
-
-    /* Sección inferior */
-    .layout-bottom{
-      display:grid;
-      grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
-      gap:18px;
-    }
-
-    @media (max-width:960px){
-      .layout-bottom{
-        grid-template-columns:1fr;
-      }
-    }
-
-    .list{
-      font-size:13px;
+    .audit-card span{
+      display:block;
       color:var(--muted);
-      margin:4px 0 0;
-      padding-left:18px;
-    }
-    .list li{
-      margin-bottom:3px;
-    }
-
-    .callout{
-      margin-top:6px;
       font-size:12px;
-      color:var(--muted);
-      border-radius:10px;
-      border:1px dashed rgba(148,163,184,.4);
-      padding:7px 9px;
-      background:rgba(15,23,42,.75);
-    }
-
-    .callout strong{
-      color:#e0f2fe;
-    }
-
-    .legend-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-      gap:8px;
-      margin-top:6px;
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .legend-item{
-      display:flex;
-      align-items:flex-start;
-      gap:6px;
-    }
-
-    .legend-dot{
-      width:9px;
-      height:9px;
-      border-radius:3px;
-      flex-shrink:0;
-    }
-
-    .legend-dot.estado{
-      background:linear-gradient(135deg,#60a5fa,#38bdf8);
-    }
-
-    .legend-dot.ubic{
-      background:linear-gradient(135deg,#22c55e,#4ade80);
-    }
-
-    .legend-dot.venc{
-      background:linear-gradient(135deg,#f97316,#ef4444);
+      line-height:1.45;
     }
 
     footer{
-      max-width:1180px;
-      margin:10px auto 16px;
+      max-width:1360px;
+      margin:8px auto 26px;
       padding:0 18px;
-      font-size:12px;
-      color:var(--muted);
       text-align:center;
+      color:var(--muted);
+      font-size:12px;
     }
   </style>
 </head>
+
 <body>
-
 <header>
-  <div class="brand">
-    <div class="brand-logo">
-      <img src="img/tmp-quality.png" alt="TMP">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">
+        <img src="img/tmp-quality.png" alt="TMP">
+      </div>
+      <div class="brand-title">
+        <b>Dashboard Metrológico TMP · V3</b>
+        <span>Control ejecutivo de calibración, ubicación, propiedad y trazabilidad</span>
+      </div>
     </div>
-    <div>
-      <div class="brand-text-title">Laboratorio TMP · Alcance, KPIs y Objetivos</div>
-      <div class="brand-text-sub">Magnitudes cubiertas, rangos de trabajo y salud metrológica en tiempo real</div>
-    </div>
-  </div>
 
-  <div class="header-right">
-    <div class="chip">
-      <span class="chip-dot"></span>
-      <span id="chip-online-text">Conectado a Supabase</span>
+    <div class="header-actions">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span id="onlineText">Conectando con Supabase...</span>
+      </div>
+      <button class="btn" id="btnRefresh" type="button">⟳ Actualizar</button>
+      <a class="btn primary" href="home.html">← Panel principal</a>
     </div>
-    <a href="home.html" class="btn">
-      ← Volver al panel principal
-    </a>
   </div>
 </header>
 
 <main>
 
-  <!-- BLOQUE SUPERIOR: ALCANCE + KPIs -->
-  <section class="layout-top">
-
-    <!-- Alcance descriptivo -->
-    <article class="card">
-      <div class="card-header-row">
-        <div class="card-title">
-          📐 Alcance del laboratorio interno TMP
-          <span class="badge-kpi" id="badge-ins-total">Instrumentos: –</span>
-        </div>
-        <span class="tag tag-accent">Documento de referencia para auditoría</span>
-      </div>
-
-      <p class="card-sub">
-        El laboratorio interno TMP da soporte directo al taller de mecanizado, garantizando la trazabilidad
-        metrológica de los equipos utilizados en producción, verificación y calibración de patrones.
+  <section class="hero">
+    <article class="hero-card">
+      <div class="eyebrow">Sistema metrológico · Auditoría · Producción</div>
+      <h1>Estado real de la flota de control TMP</h1>
+      <p>
+        Vista ejecutiva para saber, de un vistazo, qué instrumentos están en regla, cuáles vencen pronto,
+        dónde están físicamente, si pertenecen a TMP o a cliente y si existe riesgo de uso de equipos vencidos
+        en producción.
       </p>
-
-      <div class="mag-grid">
-
-        <div class="mag-card">
-          <div class="mag-head">
-            <div class="mag-title">Dimensional</div>
-            <div class="mag-icon">📏</div>
-          </div>
-          <div class="mag-meta">
-            Pie de rey, micrómetros, altímetros, relojes comparadores, reglas, escuadras, mármoles,
-            tampones y anillos roscados P/NP, calas patrón...
-          </div>
-          <div class="mag-range">
-            <span class="tag">Rango típico: 0 – 1000 mm</span>
-            <span class="tag">Resolución: 0,001 / 0,01 mm</span>
-          </div>
-        </div>
-
-        <div class="mag-card">
-          <div class="mag-head">
-            <div class="mag-title">Par / Mecánica</div>
-            <div class="mag-icon">🔧</div>
-          </div>
-          <div class="mag-meta">
-            Llaves dinamométricas y equipos asociados para control de par en montaje y aprietes críticos.
-          </div>
-          <div class="mag-range">
-            <span class="tag">Rango orientativo: 0 – 2000 N·m</span>
-            <span class="tag">Resolución según modelo</span>
-          </div>
-        </div>
-
-        <div class="mag-card">
-          <div class="mag-head">
-            <div class="mag-title">Dureza</div>
-            <div class="mag-icon">🧱</div>
-          </div>
-          <div class="mag-meta">
-            Equipos de durometría (Shore / Rockwell / Brinell, según equipo instalado) para validación
-            de tratamientos térmicos y materiales.
-          </div>
-          <div class="mag-range">
-            <span class="tag">Escalas habituales: HRC / HRB / HB / Shore</span>
-            <span class="tag">Resolución conforme a equipo</span>
-          </div>
-        </div>
-
-        <div class="mag-card">
-          <div class="mag-head">
-            <div class="mag-title">Masa / Pesaje</div>
-            <div class="mag-icon">⚖️</div>
-          </div>
-          <div class="mag-meta">
-            Balanzas y básculas empleadas en procesos internos (control de piezas, consumibles, etc.),
-            trazadas a patrones externos.
-          </div>
-          <div class="mag-range">
-            <span class="tag">Rangos típicos: g – decenas de kg</span>
-            <span class="tag">Resolución: 0,1 g – 10 g</span>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="callout">
-        <strong>Nota:</strong> los rangos y resoluciones indicados representan el alcance interno habitual del laboratorio TMP.
-        Los patrones de referencia se calibran en laboratorios externos acreditados, manteniendo la trazabilidad al SI.
-      </div>
     </article>
 
-    <!-- KPIs específicos de alcance -->
-    <article class="card">
-      <div class="card-header-row">
-        <div class="card-title">
-          📊 KPIs técnicos del laboratorio
+    <aside class="health-panel">
+      <div class="health-title">
+        <div>
+          <b>Salud global del sistema</b>
+          <span id="healthText">Calculando indicadores...</span>
         </div>
-        <span class="badge-kpi" id="badge-salud-global">Salud del sistema: –</span>
+        <span class="pill info" id="healthPill">—</span>
       </div>
-
-      <p class="card-sub">
-        Indicadores directos sobre la situación metrológica global, calculados a partir de la tabla
-        <code>instrumentos</code> en Supabase.
-      </p>
-
-      <div class="kpi-alcance-grid">
-        <div class="kpi-alcance-card">
-          <div class="kpi-alc-label">Instrumentos activos</div>
-          <div class="kpi-alc-value" id="kpi-activos">–</div>
-          <div class="kpi-alk-note" id="kpi-activos-note"></div>
-        </div>
-
-        <div class="kpi-alcance-card">
-          <div class="kpi-alc-label">En laboratorio</div>
-          <div class="kpi-alc-value" id="kpi-lab">–</div>
-          <div class="kpi-alk-note" id="kpi-lab-note"></div>
-        </div>
-
-        <div class="kpi-alcance-card">
-          <div class="kpi-alc-label">En uso (fuera)</div>
-          <div class="kpi-alc-value" id="kpi-uso">–</div>
-          <div class="kpi-alk-note" id="kpi-uso-note"></div>
-        </div>
-
-        <div class="kpi-alcance-card">
-          <div class="kpi-alc-label">Calibrados</div>
-          <div class="kpi-alc-value" id="kpi-calibrados">–</div>
-          <div class="kpi-alk-note" id="kpi-calibrados-note"></div>
-        </div>
-
-        <div class="kpi-alcance-card">
-          <div class="kpi-alc-label">Próximos (&lt; 30 días)</div>
-          <div class="kpi-alc-value" id="kpi-prox">–</div>
-          <div class="kpi-alk-note" id="kpi-prox-note"></div>
-        </div>
-
-        <div class="kpi-alcance-card">
-          <div class="kpi-alc-label">Fuera de calibración</div>
-          <div class="kpi-alc-value" id="kpi-fuera">–</div>
-          <div class="kpi-alk-note" id="kpi-fuera-note"></div>
-        </div>
+      <div>
+        <div class="health-score ok" id="healthScore">—%</div>
+        <div class="bar"><div class="bar-fill" id="healthBar"></div></div>
       </div>
-
-      <div class="legend-grid">
-        <div class="legend-item">
-          <span class="legend-dot estado"></span>
-          <span>Distribución de estados (calibrado, fuera, pendiente) mostrada en el gráfico inferior.</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot ubic"></span>
-          <span>Balance entre equipos en laboratorio y equipos trabajando en taller.</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot venc"></span>
-          <span>Control de vencimientos: próximos (&lt;30 días) y fuera de plazo.</span>
-        </div>
-      </div>
-    </article>
-
+    </aside>
   </section>
 
-  <!-- BLOQUE GRÁFICOS -->
-  <section class="card">
-    <div class="card-header-row">
-      <div class="card-title">
-        📈 Visualización de la salud metrológica
-        <span class="pill">Datos en tiempo real desde <code>instrumentos</code></span>
-      </div>
+  <section class="kpi-grid">
+    <div class="kpi good">
+      <div class="label">Total instrumentos</div>
+      <div class="value" id="kpiTotal">—</div>
+      <div class="note">Flota registrada en Supabase</div>
     </div>
-    <p class="card-sub">
-      Estos gráficos ayudan a tener, de un vistazo, la fotografía global del sistema metrológico:
-      estado de calibración de la flota de equipos y reparto de instrumentos entre laboratorio y producción.
-    </p>
 
-    <div class="charts-grid">
-      <div class="chart-box">
-        <div class="chart-title">Distribución por estado de calibración</div>
-        <canvas id="chartEstados"></canvas>
-      </div>
-      <div class="chart-box">
-        <div class="chart-title">Reparto por ubicación (Laboratorio vs resto)</div>
-        <canvas id="chartUbicacion"></canvas>
-      </div>
+    <div class="kpi good">
+      <div class="label">En regla</div>
+      <div class="value" id="kpiOk">—</div>
+      <div class="note" id="kpiOkNote">Calibración vigente</div>
+    </div>
+
+    <div class="kpi warning">
+      <div class="label">Próximos 30 días</div>
+      <div class="value" id="kpiSoon">—</div>
+      <div class="note">Requieren planificación</div>
+    </div>
+
+    <div class="kpi critical">
+      <div class="label">Fuera calibración</div>
+      <div class="value" id="kpiExpired">—</div>
+      <div class="note">Riesgo metrológico</div>
+    </div>
+
+    <div class="kpi critical">
+      <div class="label">Vencidos en producción</div>
+      <div class="value" id="kpiExpiredProd">—</div>
+      <div class="note">KPI crítico de auditoría</div>
+    </div>
+
+    <div class="kpi violet">
+      <div class="label">Ubicación conocida</div>
+      <div class="value" id="kpiLocated">—%</div>
+      <div class="note">Trazabilidad física</div>
     </div>
   </section>
 
-  <!-- BLOQUE INFERIOR: TRAZABILIDAD + OBJETIVOS -->
-  <section class="layout-bottom">
-
-    <article class="card">
-      <div class="card-header-row">
-        <div class="card-title">
-          🔗 Trazabilidad metrológica y patrones
+  <section class="layout">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">📊 Panel gráfico OEM</div>
+          <div class="panel-sub">Distribución por calibración, ubicación, propiedad y familia metrológica.</div>
         </div>
       </div>
-      <p class="card-sub">
-        La trazabilidad metrológica se apoya en patrones internos y externos, controlados mediante el
-        módulo de patrones de TMP y las calibraciones realizadas en laboratorios externos acreditados.
-      </p>
 
-      <ul class="list">
-        <li><strong>Patrones internos:</strong> bloques patrón, tampones y anillos roscados, patrones de longitud
-          y dispositivos de referencia asociados a cada familia de instrumentos.</li>
-        <li><strong>Patrones externos:</strong> equipos calibrados en laboratorios acreditados, siguiendo ISO/IEC 17025
-          y guías como ILAC-G8 para evaluación de conformidad.</li>
-        <li><strong>Registro digital:</strong> toda la información de calibraciones, movimientos y estados se registra
-          en Supabase, permitiendo trazabilidad electrónica y consultas en tiempo real.</li>
-        <li><strong>Integración con producción:</strong> los equipos “en uso” están controlados para asegurar que ningún
-          instrumento crítico permanezca fuera de calibración.</li>
-      </ul>
+      <div class="chart-grid">
+        <div class="chart-box">
+          <div class="chart-title">Estado de calibración</div>
+          <canvas id="chartCal"></canvas>
+        </div>
 
-      <div class="callout">
-        <strong>Uso en auditoría:</strong> esta pantalla, junto con el panel principal, permite explicar de forma clara
-        el alcance interno del laboratorio, el control de vencimientos y el encadenamiento de trazabilidad desde los
-        instrumentos de taller hasta los patrones externos acreditados.
+        <div class="chart-box">
+          <div class="chart-title">Ubicación física</div>
+          <canvas id="chartUbic"></canvas>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-title">Propiedad</div>
+          <canvas id="chartProp"></canvas>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-title">Familias de calibración</div>
+          <canvas id="chartFam"></canvas>
+        </div>
       </div>
     </article>
 
-    <article class="card">
-      <div class="card-header-row">
-        <div class="card-title">
-          🎯 Objetivos del laboratorio TMP
+    <aside class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">🚨 Top próximos vencimientos</div>
+          <div class="panel-sub">Instrumentos más urgentes por fecha de próxima calibración.</div>
         </div>
       </div>
-      <p class="card-sub">
-        Estos objetivos se apoyan directamente en los KPIs y gráficos de esta pantalla. Pueden utilizarse
-        como referencia en auditoría y para el seguimiento interno del sistema metrológico.
-      </p>
 
-      <ul class="list">
-        <li>
-          <strong>Equipos fuera de calibración:</strong> objetivo estructural de
-          <strong>0 equipos críticos vencidos</strong> y, en global, mantener
-          <strong>&lt; 2&nbsp;%</strong> del total de instrumentos fuera de plazo.
-        </li>
-        <li>
-          <strong>Equipos próximos (&lt; 30 días):</strong> mantener el porcentaje de equipos “próximos”
-          por debajo de <strong>15&nbsp;%</strong> del total, planificando las calibraciones para evitar picos.
-        </li>
-        <li>
-          <strong>Instrumentos calibrados (en vigor):</strong> mantener al menos un
-          <strong>90&nbsp;%</strong> de los equipos en estado metrológico “en regla” (no vencidos).
-        </li>
-        <li>
-          <strong>Ubicación controlada:</strong> asegurar que el <strong>100&nbsp;%</strong> de los
-          instrumentos tienen ubicación conocida y actualizada (laboratorio / en uso / externo).
-        </li>
-        <li>
-          <strong>Rotación del laboratorio:</strong> evitar acumulaciones prolongadas de equipos en laboratorio
-          por motivos de calibración, equilibrando el número de equipos en uso y en laboratorio según la carga real.
-        </li>
-        <li>
-          <strong>Trazabilidad de patrones:</strong> mantener el <strong>100&nbsp;%</strong> de los patrones
-          internos con calibración vigente y certificados externos disponibles para consulta durante auditorías.
-        </li>
-      </ul>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Ubicación</th>
+              <th>Próx.</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaVencimientos">
+            <tr><td colspan="5">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </aside>
+  </section>
 
-      <div class="callout">
-        <strong>Cómo utilizar estos objetivos:</strong> en una auditoría, se puede mostrar esta pantalla y explicar
-        que los objetivos del laboratorio se revisan con los KPIs de Supabase. Si algún indicador se sale de rango
-        (por ejemplo, aumenta el número de equipos vencidos), se genera un plan de acción sobre los equipos
-        afectados hasta volver a la “zona verde”.
+  <section class="two-col">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">📍 Trazabilidad por ubicación</div>
+          <div class="panel-sub">Resumen de equipos por máquina, laboratorio, calidad o área asignada.</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ubicación</th>
+              <th>Total</th>
+              <th>En regla</th>
+              <th>Próximos</th>
+              <th>Vencidos</th>
+            </tr>
+          </thead>
+          <tbody id="tablaUbicaciones">
+            <tr><td colspan="5">Cargando...</td></tr>
+          </tbody>
+        </table>
       </div>
     </article>
 
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">🏢 Propiedad y clientes</div>
+          <div class="panel-sub">Equipos TMP por defecto y equipos de cliente cuando estén asignados.</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Propietario</th>
+              <th>Total</th>
+              <th>Vencidos</th>
+              <th>Próx. 30 días</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPropiedad">
+            <tr><td colspan="4">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <div class="panel-title">✅ Panel auditoría ISO / IATF</div>
+        <div class="panel-sub">Indicadores preparados para explicar control, trazabilidad, planificación y reacción ante desviaciones.</div>
+      </div>
+      <span class="pill info" id="auditPill">Evaluando...</span>
+    </div>
+
+    <div class="audit-grid">
+      <div class="audit-card">
+        <b>Objetivo 1 · 0 equipos vencidos en producción</b>
+        <span id="auditProd">Calculando...</span>
+      </div>
+      <div class="audit-card">
+        <b>Objetivo 2 · Trazabilidad de ubicación 100%</b>
+        <span id="auditUbic">Calculando...</span>
+      </div>
+      <div class="audit-card">
+        <b>Objetivo 3 · Calibraciones planificadas</b>
+        <span id="auditPlan">Calculando...</span>
+      </div>
+      <div class="audit-card">
+        <b>Objetivo 4 · Propiedad identificada</b>
+        <span id="auditProp">Por defecto, todo equipo sin propietario asignado se considera propiedad de PARAMIO.</span>
+      </div>
+    </div>
   </section>
 
 </main>
 
 <footer>
-  Talleres Mecánicos Paramio · Laboratorio TMP · Alcance, KPIs y Objetivos · 2025
+  Talleres Mecánicos Paramio · Dashboard Metrológico TMP V3 · Datos vivos desde Supabase
 </footer>
 
-<!-- Cliente Supabase (mismo que usas en home) -->
 <script type="module" src="config.mjs"></script>
 
 <script type="module">
   const supabase = window.supabase;
-  const chipText = document.getElementById("chip-online-text");
 
-  // KPIs DOM
-  const badgeInsTotal  = document.getElementById("badge-ins-total");
-  const badgeHealth    = document.getElementById("badge-salud-global");
+  const $ = id => document.getElementById(id);
 
-  const kActivos       = document.getElementById("kpi-activos");
-  const kLab           = document.getElementById("kpi-lab");
-  const kUso           = document.getElementById("kpi-uso");
-  const kCal           = document.getElementById("kpi-calibrados");
-  const kProx          = document.getElementById("kpi-prox");
-  const kFuera         = document.getElementById("kpi-fuera");
+  let charts = {};
 
-  const kActivosNote   = document.getElementById("kpi-activos-note");
-  const kLabNote       = document.getElementById("kpi-lab-note");
-  const kUsoNote       = document.getElementById("kpi-uso-note");
-  const kCalNote       = document.getElementById("kpi-calibrados-note");
-  const kProxNote      = document.getElementById("kpi-prox-note");
-  const kFueraNote     = document.getElementById("kpi-fuera-note");
-
-  let chartEstados = null;
-  let chartUbic    = null;
-
-  // Igual que en home: admite YYYY_MM_DD
-  function parseDate(str){
-    if (!str) return null;
-    const norm = String(str).replace(/_/g,"-");
-    const d = new Date(norm);
-    return isNaN(d) ? null : d;
+  function setText(id, value){
+    const el = $(id);
+    if (el) el.textContent = value;
   }
 
-  function pct(p, t){
-    if (!t) return "0%";
-    return `${Math.round((p/t)*100)}%`;
+  function fmtDate(v){
+    if (!v) return "—";
+    const d = new Date(String(v).replace(/_/g,"-"));
+    if (isNaN(d)) return "—";
+    return d.toLocaleDateString("es-ES");
   }
 
-  async function cargarAlcanceKPIs(){
-    if (!supabase){
-      chipText.textContent = "Modo offline: Supabase no disponible";
+  function daysTo(v){
+    if (!v) return null;
+    const d = new Date(String(v).replace(/_/g,"-"));
+    if (isNaN(d)) return null;
+    const now = new Date();
+    return Math.ceil((d - now) / 86400000);
+  }
+
+  function estadoCal(inst){
+    const dias = daysTo(inst.fecha_proxima_calibracion);
+    if (dias === null) return "Sin fecha";
+    if (dias < 0) return "Fuera";
+    if (dias <= 30) return "Próximo";
+    return "En regla";
+  }
+
+  function clsEstado(e){
+    if (e === "En regla") return "ok";
+    if (e === "Próximo") return "warn";
+    if (e === "Fuera") return "bad";
+    return "info";
+  }
+
+  function isLaboratorio(ubic){
+    return String(ubic || "").trim().toLowerCase() === "laboratorio";
+  }
+
+  function isProduccion(ubic){
+    const u = String(ubic || "").trim().toLowerCase();
+    return u && u !== "laboratorio" && u !== "baja técnica" && u !== "baja tecnica";
+  }
+
+  function propNombre(inst, propietarios){
+    if (!inst.propietario_id) return "PARAMIO";
+    const p = propietarios.find(x => String(x.id) === String(inst.propietario_id));
+    return p?.nombre || "PARAMIO";
+  }
+
+  function famNombre(inst, familias){
+    if (!inst.familia_calibracion_id) return "Sin familia";
+    const f = familias.find(x => String(x.id) === String(inst.familia_calibracion_id));
+    return f?.nombre || "Sin familia";
+  }
+
+  function inc(map, key, n=1){
+    const k = key || "Sin dato";
+    map[k] = (map[k] || 0) + n;
+  }
+
+  function pct(n,total){
+    if (!total) return 0;
+    return Math.round((n / total) * 100);
+  }
+
+  function renderChart(id, type, labels, data, label){
+    const ctx = $(id).getContext("2d");
+    if (charts[id]) charts[id].destroy();
+
+    charts[id] = new Chart(ctx, {
+      type,
+      data:{
+        labels,
+        datasets:[{
+          label: label || "Instrumentos",
+          data
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{
+            position:"bottom",
+            labels:{color:"#e5e7eb", boxWidth:12}
+          }
+        },
+        scales: type === "bar" ? {
+          x:{ticks:{color:"#cbd5e1"}, grid:{color:"rgba(148,163,184,.08)"}},
+          y:{ticks:{color:"#cbd5e1", precision:0}, grid:{color:"rgba(148,163,184,.08)"}, beginAtZero:true}
+        } : undefined
+      }
+    });
+  }
+
+  function rowStatus(e){
+    return `<span class="pill ${clsEstado(e)}">${e}</span>`;
+  }
+
+  function renderTopVencimientos(items){
+    const tbody = $("tablaVencimientos");
+    const urgentes = items
+      .filter(x => x.fecha_proxima_calibracion)
+      .map(x => ({...x, dias: daysTo(x.fecha_proxima_calibracion), estadoCal: estadoCal(x)}))
+      .sort((a,b) => a.dias - b.dias)
+      .slice(0,10);
+
+    if (!urgentes.length){
+      tbody.innerHTML = `<tr><td colspan="5">No hay fechas de próxima calibración registradas.</td></tr>`;
       return;
     }
 
+    tbody.innerHTML = urgentes.map(x => `
+      <tr onclick="window.location.href='qr/qr_info_instrumentos.html?codigo=${encodeURIComponent(x.codigo)}'" style="cursor:pointer">
+        <td><b>${x.codigo || "—"}</b></td>
+        <td>${x.descripcion || "—"}</td>
+        <td>${x.ubicacion_actual || "—"}</td>
+        <td>${fmtDate(x.fecha_proxima_calibracion)}</td>
+        <td>${rowStatus(x.estadoCal)}</td>
+      </tr>
+    `).join("");
+  }
+
+  function renderTablaUbicaciones(items){
+    const groups = {};
+
+    items.forEach(x => {
+      const key = x.ubicacion_actual || "Sin ubicación";
+      if (!groups[key]) groups[key] = {total:0, ok:0, soon:0, expired:0};
+      groups[key].total++;
+      const e = estadoCal(x);
+      if (e === "En regla") groups[key].ok++;
+      if (e === "Próximo") groups[key].soon++;
+      if (e === "Fuera") groups[key].expired++;
+    });
+
+    const rows = Object.entries(groups)
+      .sort((a,b) => b[1].total - a[1].total)
+      .slice(0,14);
+
+    $("tablaUbicaciones").innerHTML = rows.map(([k,v]) => `
+      <tr>
+        <td><b>${k}</b></td>
+        <td>${v.total}</td>
+        <td>${v.ok}</td>
+        <td>${v.soon}</td>
+        <td>${v.expired}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="5">Sin datos.</td></tr>`;
+  }
+
+  function renderTablaPropiedad(items, propietarios){
+    const groups = {};
+
+    items.forEach(x => {
+      const key = propNombre(x, propietarios);
+      if (!groups[key]) groups[key] = {total:0, expired:0, soon:0};
+      groups[key].total++;
+      const e = estadoCal(x);
+      if (e === "Fuera") groups[key].expired++;
+      if (e === "Próximo") groups[key].soon++;
+    });
+
+    const rows = Object.entries(groups).sort((a,b)=>b[1].total-a[1].total);
+
+    $("tablaPropiedad").innerHTML = rows.map(([k,v]) => `
+      <tr>
+        <td><b>${k}</b></td>
+        <td>${v.total}</td>
+        <td>${v.expired}</td>
+        <td>${v.soon}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="4">Sin datos.</td></tr>`;
+  }
+
+  async function loadDashboard(){
+    if (!supabase){
+      setText("onlineText", "Supabase no disponible");
+      return;
+    }
+
+    setText("onlineText", "Conectando...");
+
     try{
-      const { data: instrumentos, error } = await supabase
-        .from("instrumentos")
-        // usamos ambas columnas de fecha por compatibilidad
-        .select("codigo, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
+      const [insRes, propRes, famRes] = await Promise.all([
+        supabase.from("instrumentos").select(`
+          codigo,
+          descripcion,
+          rango,
+          estado,
+          ubicacion_actual,
+          ubicacion_id,
+          propietario_id,
+          familia_calibracion_id,
+          tipo_calibracion,
+          fecha_proxima_calibracion
+        `),
+        supabase.from("propietarios_equipos").select("id,nombre,tipo,activo"),
+        supabase.from("familias_calibracion").select("id,nombre,codigo,activo")
+      ]);
 
-      if (error){
-        console.error("Error cargando instrumentos para alcance_kpi:", error);
-        chipText.textContent = "Error al conectar con Supabase";
-        return;
-      }
+      if (insRes.error) throw insRes.error;
 
-      chipText.textContent = "Conectado a Supabase · " + instrumentos.length + " registros";
+      const items = insRes.data || [];
+      const propietarios = propRes.data || [];
+      const familias = famRes.data || [];
 
-      const total = instrumentos.length;
-      badgeInsTotal.textContent = `Instrumentos: ${total || 0}`;
+      setText("onlineText", `Online · ${items.length} instrumentos`);
 
-      const hoy = new Date();
-      const mas30 = new Date(hoy.getTime() + 30*86400000);
+      const total = items.length;
+      let ok = 0, soon = 0, expired = 0, noDate = 0, located = 0, lab = 0, prod = 0, expiredProd = 0;
 
-      let enLab = 0;
-      let enUso = 0;
-      let calibrados = 0; // EN VIGOR (no vencidos)
-      let fuera = 0;
-      let prox  = 0;
+      const calMap = {};
+      const ubicMap = {};
+      const propMap = {};
+      const famMap = {};
 
-      const estadosMap = {}; // estado -> count (para el gráfico)
+      items.forEach(inst => {
+        const e = estadoCal(inst);
+        inc(calMap, e);
 
-      instrumentos.forEach(inst => {
-        const estado = (inst.estado || "Sin estado").trim();
-        estadosMap[estado] = (estadosMap[estado] || 0) + 1;
+        if (e === "En regla") ok++;
+        else if (e === "Próximo") soon++;
+        else if (e === "Fuera") expired++;
+        else noDate++;
 
-        const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
-        if (ubic === "laboratorio") enLab++;
-        else enUso++;
+        const ubic = inst.ubicacion_actual || "Sin ubicación";
+        inc(ubicMap, ubic);
 
-        // Fecha próxima: nueva + antigua
-        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-        if (dProx){
-          if (dProx < hoy){
-            // fuera de calibración
-            fuera++;
-          } else {
-            // en vigor (calibrado)
-            calibrados++;
-            // y además próximos si están dentro de 30 días
-            if (dProx <= mas30){
-              prox++;
-            }
-          }
-        }
+        if (inst.ubicacion_actual) located++;
+        if (isLaboratorio(inst.ubicacion_actual)) lab++;
+        if (isProduccion(inst.ubicacion_actual)) prod++;
+        if (e === "Fuera" && isProduccion(inst.ubicacion_actual)) expiredProd++;
+
+        inc(propMap, propNombre(inst, propietarios));
+        inc(famMap, famNombre(inst, familias));
       });
 
-      // KPIs numéricos
-      kActivos.textContent = total;
-      kLab.textContent     = enLab;
-      kUso.textContent     = enUso;
-      kCal.textContent     = calibrados;
-      kProx.textContent    = prox;
-      kFuera.textContent   = fuera;
+      const health = Math.max(0, Math.min(100, Math.round(
+        (pct(ok,total) * .55) +
+        (pct(located,total) * .25) +
+        ((expiredProd === 0 ? 100 : 0) * .20)
+      )));
 
-      kActivosNote.textContent = total ? "100% de la flota controlada en Supabase" : "";
-      kLabNote.textContent     = total ? `${pct(enLab,total)} en laboratorio` : "";
-      kUsoNote.textContent     = total ? `${pct(enUso,total)} en uso (taller / otras áreas)` : "";
-      kCalNote.textContent     = total ? `${pct(calibrados,total)} en vigor (no vencidos)` : "";
+      setText("kpiTotal", total);
+      setText("kpiOk", ok);
+      setText("kpiOkNote", `${pct(ok,total)}% vigentes`);
+      setText("kpiSoon", soon);
+      setText("kpiExpired", expired);
+      setText("kpiExpiredProd", expiredProd);
+      setText("kpiLocated", `${pct(located,total)}%`);
 
-      if (total){
-        kProxNote.textContent  = prox ? `${pct(prox,total)} vencen en menos de 30 días` : "Sin vencimientos en 30 días";
-        kFueraNote.textContent = fuera ? `${pct(fuera,total)} ya fuera de plazo` : "Objetivo: 0 equipos vencidos (actualmente alcanzado)";
-      } else {
-        kProxNote.textContent  = "";
-        kFueraNote.textContent = "";
-      }
+      setText("healthScore", `${health}%`);
+      $("healthBar").style.width = `${health}%`;
 
-      // Salud global del sistema (badge)
-      if (!total){
-        badgeHealth.textContent = "Salud global: sin datos";
-        badgeHealth.classList.remove("badge-ok","badge-warn");
-      } else if (fuera === 0 && prox <= total*0.15){
-        badgeHealth.textContent = "Salud global: ÓPTIMA";
-        badgeHealth.classList.add("badge-ok");
-        badgeHealth.classList.remove("badge-warn");
-      } else if (fuera <= total*0.05 && prox <= total*0.3){
-        badgeHealth.textContent = "Salud global: ACEPTABLE";
-        badgeHealth.classList.remove("badge-ok");
-        badgeHealth.classList.add("badge-warn");
-      } else {
-        badgeHealth.textContent = "Salud global: CRÍTICA";
-        badgeHealth.classList.remove("badge-ok");
-        badgeHealth.classList.add("badge-warn");
-      }
+      const healthScore = $("healthScore");
+      const healthPill = $("healthPill");
+      healthScore.className = "health-score " + (health >= 90 ? "ok" : health >= 75 ? "warn" : "bad");
+      healthPill.className = "pill " + (health >= 90 ? "ok" : health >= 75 ? "warn" : "bad");
+      healthPill.textContent = health >= 90 ? "ÓPTIMA" : health >= 75 ? "ACEPTABLE" : "CRÍTICA";
 
-      // -------- Gráfico estados --------
-      const estados = Object.keys(estadosMap);
-      const valores = estados.map(e => estadosMap[e]);
+      setText(
+        "healthText",
+        expiredProd === 0
+          ? "Sin equipos vencidos detectados en producción."
+          : `${expiredProd} equipos vencidos ubicados fuera de laboratorio.`
+      );
 
-      const ctxEstados = document.getElementById("chartEstados").getContext("2d");
-      if (chartEstados) chartEstados.destroy();
-      chartEstados = new Chart(ctxEstados, {
-        type:"doughnut",
-        data:{
-          labels:estados,
-          datasets:[{
-            data:valores
-          }]
-        },
-        options:{
-          responsive:true,
-          plugins:{
-            legend:{
-              position:"bottom",
-              labels:{ color:"#e5e7eb" }
-            }
-          }
-        }
-      });
+      setText("auditProd", expiredProd === 0
+        ? "Cumplido: no hay equipos vencidos en producción."
+        : `Atención: ${expiredProd} equipo(s) vencidos están en producción o fuera del laboratorio.`);
 
-      // -------- Gráfico ubicación --------
-      const ctxUbic = document.getElementById("chartUbicacion").getContext("2d");
-      if (chartUbic) chartUbic.destroy();
-      chartUbic = new Chart(ctxUbic, {
-        type:"bar",
-        data:{
-          labels:["En laboratorio","En uso / resto"],
-          datasets:[{
-            label:"Instrumentos",
-            data:[enLab, enUso]
-          }]
-        },
-        options:{
-          responsive:true,
-          plugins:{
-            legend:{ display:false }
-          },
-          scales:{
-            x:{ ticks:{ color:"#e5e7eb" } },
-            y:{ ticks:{ color:"#e5e7eb" }, beginAtZero:true, precision:0 }
-          }
-        }
-      });
+      setText("auditUbic", pct(located,total) === 100
+        ? "Cumplido: todos los equipos tienen ubicación actual registrada."
+        : `Pendiente: ${total-located} equipo(s) sin ubicación actual.`);
+
+      setText("auditPlan", soon === 0
+        ? "Sin vencimientos en los próximos 30 días."
+        : `${soon} equipo(s) vencen en los próximos 30 días y requieren planificación.`);
+
+      const auditOk = expiredProd === 0 && pct(located,total) >= 98;
+      $("auditPill").className = "pill " + (auditOk ? "ok" : "warn");
+      $("auditPill").textContent = auditOk ? "CONTROLADO" : "REVISAR";
+
+      renderChart("chartCal", "doughnut", Object.keys(calMap), Object.values(calMap), "Estado");
+      renderChart("chartUbic", "bar", Object.keys(ubicMap).slice(0,12), Object.values(ubicMap).slice(0,12), "Ubicación");
+      renderChart("chartProp", "doughnut", Object.keys(propMap), Object.values(propMap), "Propiedad");
+      renderChart("chartFam", "bar", Object.keys(famMap).slice(0,12), Object.values(famMap).slice(0,12), "Familias");
+
+      renderTopVencimientos(items);
+      renderTablaUbicaciones(items);
+      renderTablaPropiedad(items, propietarios);
 
     } catch(e){
-      console.error("Error inesperado en alcance_kpi:", e);
-      chipText.textContent = "Error inesperado al cargar datos";
+      console.error(e);
+      setText("onlineText", "Error cargando dashboard");
+      setText("healthText", e.message || "Error inesperado");
     }
   }
 
-  cargarAlcanceKPIs();
-  // refresco opcional cada 60 s
-  setInterval(cargarAlcanceKPIs, 60000);
+  $("btnRefresh").onclick = loadDashboard;
+
+  loadDashboard();
+  setInterval(loadDashboard, 60000);
 </script>
 
 </body>
 </html>
-

@@ -1,0 +1,24 @@
+(function(global){
+  const U = {};
+  U.VERSION = 'TMP_CERTIFICATE_ENGINE_CORE_1_0';
+  U.esc = function(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); };
+  U.finite = function(v){ return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)); };
+  U.num = function(v, digits=6){ if(!U.finite(v)) return '-'; const s = Number(v).toFixed(digits); return s.replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1'); };
+  U.mm = function(v, d=6){ return U.finite(v) ? `${U.num(v,d)} mm` : '-'; };
+  U.signedMm = function(v, d=6){ if(!U.finite(v)) return '-'; const n=Number(v); return `${n>=0?'+':''}${U.num(n,d)} mm`; };
+  U.mean = function(a){ const n=(a||[]).map(Number).filter(Number.isFinite); return n.length ? n.reduce((x,y)=>x+y,0)/n.length : null; };
+  U.std = function(a){ const n=(a||[]).map(Number).filter(Number.isFinite); if(n.length<2) return null; const m=U.mean(n); return Math.sqrt(n.reduce((s,x)=>s+(x-m)**2,0)/(n.length-1)); };
+  U.dateES = function(d=new Date()){ try{return d.toLocaleDateString('es-ES');}catch{return '-';} };
+  U.timeES = function(d=new Date()){ try{return d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});}catch{return '-';} };
+  U.addMonths = function(date, months){ const d=new Date(date.getTime()); d.setMonth(d.getMonth()+months); return d; };
+  U.pick = function(...vals){ for(const v of vals){ if(v!==null && v!==undefined && v!=='' && v!==false) return v; } return '-'; };
+  U.readArr = function(v){ return (v||[]).map(Number).filter(Number.isFinite); };
+  U.row = function(label,value){ return `<tr><th>${U.esc(label)}</th><td>${U.esc(value)}</td></tr>`; };
+  U.traceScoreText = function(score){ if(!score) return '-'; return `${score.total ?? 0}/${score.max ?? 400} (${score.percent ?? 0}%)`; };
+  U.certNo = function(input={}){ const code=(input.equipment?.codigo||input.core?.equipment?.codigo||'SN'); const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); const rnd=Math.random().toString(36).slice(2,6).toUpperCase(); return `TMP-MT16-${y}${m}${day}-${String(code).replace(/[^A-Z0-9]/gi,'').slice(0,8)}-${rnd}`; };
+  U.hash = function(text){ let h=2166136261; const s=String(text||''); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return ('00000000'+(h>>>0).toString(16).toUpperCase()).slice(-8); };
+  U.qrBox = function(text){ const hash=U.hash(text); const cells=Array.from({length:49},(_,i)=>`<span class="${(hash.charCodeAt(i%hash.length)+i)%3===0?'on':''}"></span>`).join(''); return `<div class="qr"><div class="qr-grid">${cells}</div><div><b>Verificación</b><br><small>${U.esc(hash)}</small></div></div>`; };
+  U.statusClass = function(decision){ return decision === 'APTO' || decision === 'OK' ? 'ok' : (decision === 'NO APTO' || decision === 'NOK' ? 'bad' : 'warn'); };
+  U.warnList = function(list){ return (list||[]).filter(Boolean).map(x=>`<li>${U.esc(x)}</li>`).join(''); };
+  global.TMPCertUtils = U;
+})(window);

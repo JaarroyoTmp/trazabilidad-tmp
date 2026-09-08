@@ -1,0 +1,22 @@
+MT16 V75 - Lecturas en casillas
+
+Instalacion:
+Copiar el contenido de este ZIP sobre la raiz del proyecto:
+calibraciones_mt15 copy/
+
+Sustituye principalmente:
+core/metrology_core/thread/thread_mt16_workflow_test.html
+core/metrology_core/thread/thread_mt16_workflow.html
+
+Cambio principal:
+Las lecturas PASA y NO PASA ya no se introducen en una unica caja con boton de guardado una a una.
+Ahora se rellenan directamente en las casillas L1, L2, L3, L4 y L5.
+
+Uso:
+1. En PASA, rellenar L1 a L5.
+2. Pulsar Confirmar PASA.
+3. En NO PASA, rellenar L1 a L5.
+4. Pulsar Confirmar NO PASA.
+5. Calcular resultado.
+
+Mantiene el motor V74/V75, procedimiento, auditor y trazabilidad.

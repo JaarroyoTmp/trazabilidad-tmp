@@ -1,0 +1,25 @@
+MT16 V43 - Multirosca normativa segura
+
+Sustituir estos archivos dentro de:
+core/metrology_core/thread/
+
+- thread_mt16_workflow_test.html
+- core/thread_parser.js
+- core/mt16_master_engine.js
+- core/iso965_engine.js
+- core/iso1502_engine.js
+- data/thread_iso965_database.js
+- data/thread_iso1502_tables.js
+
+Novedades V43:
+- Mantiene metrica ISO M con ISO724/ISO965/ISO1502 y objetivos Trimos.
+- Activa G/BSPP ISO228-1/ISO228-2 con tabla dimensional, D2 PASA/NO PASA y objetivo Trimos.
+- Detecta R/Rc/Rp ISO7-1/ISO7-2 y entra en modo seguro de calibre conico por escalon: no inventa objetivo Trimos lineal.
+- Mantiene UN/UNC/UNF/NPT/TR detectados pero bloqueados para certificado hasta cargar su motor normativo completo.
+
+Pruebas recomendadas:
+- M16x2-6H -> debe salir Core READY.
+- G 7/8 - 14 -> debe salir Core READY con rodillo y objetivos Trimos.
+- R 1/2 -> debe salir ISO7 STEP GAUGE MODE sin objetivo Trimos.
+
+Recargar navegador con Ctrl + F5.

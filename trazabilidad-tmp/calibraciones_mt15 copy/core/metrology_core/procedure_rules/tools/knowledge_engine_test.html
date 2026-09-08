@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP · Knowledge Engine Test</title>
+<style>
+:root{--bg:#07111f;--panel:#10243a;--panel2:#071426;--line:#24425f;--txt:#e7f2fb;--muted:#91a7bd;--blue:#3d9cff;--green:#2bd47c;--red:#ff6b6b;--yellow:#ffd15c}
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:18px}.version{background:#06101d;border:1px solid var(--blue);border-radius:12px;padding:12px;margin-bottom:14px;color:var(--yellow);font-weight:bold}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}input{background:var(--panel2);color:white;border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;font-weight:bold}button{background:var(--blue);color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer;margin-top:10px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;font-size:13px;vertical-align:top;white-space:pre-wrap}th{background:#183b60;width:280px}.ok{color:var(--green);font-weight:bold}.warn{color:var(--yellow);font-weight:bold}.bad{color:var(--red);font-weight:bold}pre{background:#050b14;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap;max-height:620px}.muted{color:var(--muted)}.step{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;background:#071426}
+</style>
+</head>
+<body>
+<div class="version">TMP KNOWLEDGE ENGINE TEST V1 · 20260630</div>
+<h1>TMP · Knowledge Engine</h1>
+<p class="muted">Prueba visual: convierte el procedimiento de tampón roscado en instrucciones guiadas para operario.</p>
+
+<div class="card">
+  <h3>Equipo de prueba</h3>
+  <div class="grid">
+    <div><label>Código</label><input id="codigo" value="75148"></div>
+    <div><label>Descripción</label><input id="descripcion" value="Tampón de Rosca P/NP"></div>
+    <div><label>Rango</label><input id="rango" value="M12 x 1.25 - 6H"></div>
+  </div>
+  <button id="btn">Generar conocimiento guiado</button>
+</div>
+
+<div class="card"><h3>Resumen para operario</h3><table><tbody id="summary"></tbody></table></div>
+<div class="card"><h3>Pasos guiados</h3><div id="steps"></div></div>
+<div class="card"><h3>Riesgos / controles</h3><table><tbody id="risks"></tbody></table></div>
+<div class="card"><h3>JSON técnico</h3><pre id="json">{}</pre></div>
+
+<script type="module">
+import { buildTamponRoscadoProcedure } from "../tampon_roscado.js";
+import { buildOperatorKnowledgePack } from "../knowledge_engine.js";
+
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+
+function render() {
+  const equipment = {
+    codigo: $("#codigo").value,
+    descripcion: $("#descripcion").value,
+    rango: $("#rango").value
+  };
+
+  const procedure = buildTamponRoscadoProcedure({ instrumento: equipment, repeticiones: 5 });
+  const pack = buildOperatorKnowledgePack({ procedure, equipment });
+
+  const rows = [
+    ["Procedimiento", pack.procedure.description, "ok"],
+    ["Familia", pack.procedure.family, "ok"],
+    ["Normas", pack.norms.map(n => n.code).join(", "), "ok"],
+    ["Patrón principal", pack.traceability.main_pattern || "-", "ok"],
+    ["Rodillo recomendado", pack.expected_values.rodillo_recomendado ? "Ø " + pack.expected_values.rodillo_recomendado + " mm" : "-", pack.expected_values.rodillo_recomendado ? "ok" : "warn"],
+    ["Decide operario", pack.decision_policy.operator_can_decide ? "SÍ" : "NO", pack.decision_policy.operator_can_decide ? "bad" : "ok"],
+    ["Regla decisión", pack.decision_policy.rule, "ok"],
+    ["Resumen", pack.operator_summary.join("\\n"), ""],
+    ["Avisos", pack.warnings.join("\\n") || "Sin avisos", pack.warnings.length ? "warn" : "ok"]
+  ];
+
+  $("#summary").innerHTML = rows.map(r => `<tr><th>${esc(r[0])}</th><td class="${r[2]}">${esc(r[1])}</td></tr>`).join("");
+
+  $("#steps").innerHTML = pack.guided_steps.map(s => `
+    <div class="step">
+      <b>${esc(s.step_no + ". " + s.title)}</b><br>
+      <span class="muted">${esc(s.type)}</span><br><br>
+      ${esc(s.text)}
+      ${s.readings ? `<br><br><b>Lecturas requeridas:</b> ${esc(s.readings)}` : ""}
+    </div>
+  `).join("");
+
+  $("#risks").innerHTML = pack.risks.map(r => `
+    <tr>
+      <th>${esc(r.id)}<br><span class="${r.severity === "CRITICA" ? "bad" : r.severity === "ALTA" ? "warn" : ""}">${esc(r.severity)}</span></th>
+      <td>${esc(r.message)}\nAcción: ${esc(r.action)}</td>
+    </tr>
+  `).join("");
+
+  $("#json").textContent = JSON.stringify(pack, null, 2);
+}
+
+$("#btn").addEventListener("click", render);
+render();
+</script>
+</body>
+</html>

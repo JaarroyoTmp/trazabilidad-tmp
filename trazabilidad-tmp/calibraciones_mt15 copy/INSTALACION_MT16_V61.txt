@@ -1,0 +1,18 @@
+MT16 V61 - Expert Core Operador
+
+COPIAR ESTOS ARCHIVOS SOBRE EL PROYECTO REAL:
+
+1) core/metrology_core/thread/thread_mt16_workflow_test.html
+2) core/metrology_core/thread/thread_mt16_workflow.html
+3) core/metrology_core/thread/core/mt16_master_engine.js
+4) core/metrology_core/thread/core/thread_parser.js
+
+No copies una carpeta v61 dentro del proyecto.
+Copia el contenido respetando las rutas.
+
+Pruebas recomendadas:
+- 03-03 / M16x2-6H: debe seguir calculando objetivos Trimos.
+- 01186311 / G 7/8 - 14: debe seguir en ISO 228.
+- R 1 1/4 -11: debe entrar en modo ISO 7 calibre conico, sin error UNKNOWN.
+- 5/16-18 UNC: debe parsear UN y mostrar geometria/rodillo en modo seguro.
+- 1/4-18 NPT: debe parsear NPT y mostrar geometria/rodillo en modo seguro.

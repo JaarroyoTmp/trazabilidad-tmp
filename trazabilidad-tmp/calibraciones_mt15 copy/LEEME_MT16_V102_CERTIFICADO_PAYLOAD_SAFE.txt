@@ -1,0 +1,18 @@
+MT16 V102 - Certificado payload seguro
+
+Instalacion:
+1) Copiar el contenido de este ZIP sobre la carpeta raiz: calibraciones_mt15 copy/
+2) Sustituir archivos.
+3) Recargar navegador con Ctrl + F5.
+
+Correccion principal:
+- El boton Generar certificado PDF vuelve a funcionar.
+- certificate_engine.js ya no rompe si falta p.versions.
+- Se corrige buildPayload: ahora construye payload, anade hash, verification_url, document_status y versions antes de devolverlo.
+- Se crea alias window.TMPCertificatePayloadBuilder para desacoplar el certificado del flujo MT16.
+
+Error corregido:
+TypeError: can't access property "motor_mt", p.versions is undefined
+
+Archivos clave:
+core/metrology_core/certificates/certificate_engine.js

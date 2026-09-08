@@ -1,0 +1,17 @@
+MT16 V101 - Certificado documental TMP
+
+Instalacion:
+1. Copiar el contenido del ZIP sobre calibraciones_mt15 copy/
+2. Sustituir archivos.
+3. Refrescar navegador con Ctrl + F5.
+
+Cambios principales:
+- Anade certificate_numbering.js.
+- Numeracion automatica local tipo TMP-MT16-AAAAMMDD-000001-CODIGO.
+- Hash tecnico de certificado.
+- URL/QR de verificacion preparado para futura pagina de certificado vivo.
+- Matriz de versiones en el anexo tecnico.
+- Estado documental: CERTIFICADO TECNICO VERIFICABLE / BORRADOR TECNICO NO CERTIFICABLE.
+
+Nota:
+La numeracion queda preparada para cambiar de contador local a correlativo Supabase cuando se cree la tabla de certificados.

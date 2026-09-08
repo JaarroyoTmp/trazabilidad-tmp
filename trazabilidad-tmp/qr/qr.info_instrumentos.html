@@ -366,6 +366,71 @@
       to{ opacity:1; transform: translateY(0); }
     }
 
+
+    /* =========================================================
+       RESUMEN ACTUAL / TRAZABILIDAD DIRECTA
+    ========================================================= */
+    .summary-grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:12px;
+    }
+    @media(max-width:900px){ .summary-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media(max-width:560px){ .summary-grid{ grid-template-columns: 1fr; } }
+
+    .summary-card{
+      border-radius:16px;
+      padding:13px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,.12) 0, transparent 55%),
+        linear-gradient(135deg, rgba(2,6,23,.82), rgba(7,16,34,.90));
+      border:1px solid rgba(148,163,184,.22);
+      box-shadow: 0 14px 34px rgba(0,0,0,.45);
+      min-height:92px;
+    }
+    .summary-card .k{
+      font-size:10px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.11em;
+      margin-bottom:7px;
+      font-weight:800;
+    }
+    .summary-card .v{
+      font-size:15px;
+      font-weight:900;
+      color:#e0f2fe;
+      line-height:1.25;
+    }
+    .summary-card .s{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:5px;
+      line-height:1.35;
+    }
+
+    .cal-box{
+      margin-top:14px;
+      border-radius:16px;
+      padding:14px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(2,6,23,.72);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .cal-box strong{
+      font-size:14px;
+      letter-spacing:.03em;
+    }
+    .cal-box.ok{ border-color:rgba(74,222,128,.45); background:rgba(20,83,45,.25); }
+    .cal-box.warn{ border-color:rgba(250,204,21,.50); background:rgba(113,63,18,.28); }
+    .cal-box.bad{ border-color:rgba(251,113,133,.55); background:rgba(127,29,29,.30); }
+    .cal-box.info{ border-color:rgba(56,189,248,.45); background:rgba(12,74,110,.22); }
+
     /* =========================================================
        MODAL MOVIMIENTOS (ESPECTACULAR)
     ========================================================= */
@@ -509,6 +574,8 @@
       <div class="code" id="heroCode">CÓDIGO · —</div>
       <div class="name" id="heroTitle">Cargando instrumento…</div>
       <div class="loc"><span class="pin">📍</span><span id="heroLoc">—</span></div>
+      <div class="loc"><span class="pin">🏢</span><span id="heroOwner">PARAMIO</span></div>
+      <div class="loc"><span class="pin">🔧</span><span id="heroOperativo">—</span></div>
     </div>
 
     <div class="status-wrap">
@@ -566,6 +633,75 @@
 
     <div class="btn-row">
       <button class="btn secondary" onclick="window.location.href='../home.html'">🏠 Volver al panel</button>
+    </div>
+  </section>
+
+  <!-- RESUMEN ACTUAL DIRECTO -->
+  <section id="stepResumen" class="card fade-in" style="display:none">
+    <h2 class="title">Situación actual del instrumento</h2>
+    <div class="sub">
+      Vista rápida para taller, calidad y auditoría: ubicación oficial, propiedad, calibración vigente y último movimiento.
+    </div>
+
+    <div id="calBox" class="cal-box info">
+      <strong id="calBoxTitle">Estado de calibración</strong>
+      <span id="calBoxText">—</span>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="k">Ubicación actual</div>
+        <div class="v" id="sumUbicacion">—</div>
+        <div class="s">Dato oficial de la ficha del instrumento.</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Propiedad</div>
+        <div class="v" id="sumPropietario">—</div>
+        <div class="s">Paramio, cliente o tercero.</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Estado operativo</div>
+        <div class="v" id="sumEstadoOperativo">—</div>
+        <div class="s">Estado funcional o situación del equipo.</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Último movimiento</div>
+        <div class="v" id="sumMovimiento">—</div>
+        <div class="s" id="sumMovimientoFecha">—</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Responsable calidad</div>
+        <div class="v" id="sumResponsable">—</div>
+        <div class="s">Entrega, recoge, monta o autoriza.</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Operario 1</div>
+        <div class="v" id="sumOperario1">—</div>
+        <div class="s">Usuario principal del equipo.</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Operario 2</div>
+        <div class="v" id="sumOperario2">—</div>
+        <div class="s">Segundo usuario si aplica.</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Próxima calibración</div>
+        <div class="v" id="sumProxima">—</div>
+        <div class="s" id="sumDias">—</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="k">Tipo calibración</div>
+        <div class="v" id="sumTipoCal">—</div>
+        <div class="s">Interna, externa o no aplica.</div>
+      </div>
     </div>
   </section>
 
@@ -699,9 +835,15 @@
   }
 
   function showStep(stepId){
-    ["stepActions","stepFicha","stepTraza"].forEach(id=>{
+    ["stepActions","stepResumen","stepFicha","stepTraza"].forEach(id=>{
       const el = document.getElementById(id);
-      if (el) el.style.display = (id===stepId ? "block" : "none");
+      if (!el) return;
+
+      if (stepId === "stepActions") {
+        el.style.display = (id === "stepActions" || id === "stepResumen") ? "block" : "none";
+      } else {
+        el.style.display = (id === stepId) ? "block" : "none";
+      }
     });
   }
 
@@ -711,6 +853,29 @@
 
   function closeMovModal(){
     document.getElementById("movModal").classList.remove("show");
+  }
+
+
+  async function getPropietarioNombre(propietarioId){
+    if (!propietarioId) return "PARAMIO";
+
+    const { data, error } = await supa
+      .from("propietarios_equipos")
+      .select("nombre,tipo")
+      .eq("id", propietarioId)
+      .maybeSingle();
+
+    if (error || !data) return "PARAMIO";
+    return data.nombre || "PARAMIO";
+  }
+
+  function setText(id, value){
+    const el = document.getElementById(id);
+    if (el) el.textContent = value || "—";
+  }
+
+  function estadoOperativo(inst){
+    return inst.estado || inst.estado_actual || "Sin estado operativo";
   }
 
   async function main(){
@@ -725,7 +890,7 @@
     if (error) return showError("Error consultando DB.");
     if (!inst) return showError(`No existe el código ${codigo}`);
 
-    // movimientos para ubicación
+    // Último movimiento para responsable, operarios y trazabilidad
     const { data: movs } = await supa
       .from("movimientos")
       .select("*")
@@ -733,15 +898,19 @@
       .order("fecha", { ascending:false })
       .limit(1);
 
-    let ubic = "Sin movimientos registrados";
-    if (movs && movs.length>0){
-      ubic = movs[0].destino || ubic;
-    }
+    const ultimoMov = (movs && movs.length > 0) ? movs[0] : null;
+
+    // Ubicación oficial: siempre desde instrumentos.ubicacion_actual
+    const ubic = inst.ubicacion_actual || "Sin ubicación asignada";
+    const propietarioNombre = await getPropietarioNombre(inst.propietario_id);
+    const operativo = estadoOperativo(inst);
 
     // topbar
     document.getElementById("heroCode").textContent = `CÓDIGO · ${codigo}`;
     document.getElementById("heroTitle").textContent = inst.descripcion || "Instrumento";
     document.getElementById("heroLoc").textContent = ubic;
+    setText("heroOwner", propietarioNombre || "PARAMIO");
+    setText("heroOperativo", operativo);
 
     // estado
     const prox = inst.fecha_proxima_calibracion || null;
@@ -752,6 +921,34 @@
     document.getElementById("heroStatusCaption").textContent =
       est.detalle +
       (est.dias!==null ? (est.dias<0 ? ` · hace ${Math.abs(est.dias)} días` : ` · en ${est.dias} días`) : "");
+
+    // resumen actual directo
+    const calBox = document.getElementById("calBox");
+    calBox.className = "cal-box " + est.clase;
+
+    setText("calBoxTitle", `${est.icono} ${est.texto}`);
+    setText(
+      "calBoxText",
+      est.dias === null
+        ? "No hay fecha de próxima calibración registrada."
+        : (est.dias < 0
+            ? `Calibración vencida hace ${Math.abs(est.dias)} días.`
+            : `Calibración vigente. Próxima calibración en ${est.dias} días.`)
+    );
+
+    setText("sumUbicacion", ubic);
+    setText("sumPropietario", propietarioNombre || "PARAMIO");
+    setText("sumEstadoOperativo", operativo);
+    setText("sumMovimiento", ultimoMov ? (ultimoMov.tipo_movimiento || "Movimiento") : "Sin movimientos");
+    setText("sumMovimientoFecha", ultimoMov ? fDateTime(ultimoMov.fecha) : "No hay histórico");
+    setText("sumResponsable", ultimoMov?.responsable || "—");
+    setText("sumOperario1", ultimoMov?.operario1 || "—");
+    setText("sumOperario2", ultimoMov?.operario2 || "—");
+    setText("sumProxima", inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "—");
+    setText("sumDias", est.dias === null ? "Sin planificación" : (est.dias < 0 ? `Vencida hace ${Math.abs(est.dias)} días` : `Faltan ${est.dias} días`));
+    setText("sumTipoCal", inst.tipo_calibracion || "—");
+
+    document.getElementById("stepResumen").style.display="block";
 
     // mostrar step 1
     document.getElementById("stepActions").style.display="block";
@@ -764,6 +961,10 @@
       <div class="item"><span class="label">Rango / Especificación</span><span class="value">${inst.rango || "-"}</span></div>
       <div class="item"><span class="label">Precisión</span><span class="value">${inst.precision || "-"}</span></div>
       <div class="item"><span class="label">Tipo calibración</span><span class="value">${inst.tipo_calibracion || "-"}</span></div>
+      <div class="item"><span class="label">Ubicación actual</span><span class="value">${ubic || "-"}</span></div>
+      <div class="item"><span class="label">Propiedad</span><span class="value">${propietarioNombre || "PARAMIO"}</span></div>
+      <div class="item"><span class="label">Estado operativo</span><span class="value">${operativo || "-"}</span></div>
+      <div class="item"><span class="label">Estado calibración</span><span class="value">${est.texto} · ${est.detalle}</span></div>
       <div class="item"><span class="label">Última calibración</span><span class="value">${inst.fecha_ultima_calibracion ? fDateShort(inst.fecha_ultima_calibracion) : "-"}</span></div>
       <div class="item"><span class="label">Próxima calibración</span><span class="value">${inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "-"}</span></div>
       <div class="item"><span class="label">Observaciones</span><span class="value">${(inst.observaciones && inst.observaciones.trim()) ? inst.observaciones : "Propiedad de Talleres Mecánicos Paramio"}</span></div>
@@ -856,4 +1057,3 @@
 
 </body>
 </html>
-

@@ -1,0 +1,29 @@
+MT16 V73 - Procedure Model
+
+Instalacion:
+1. Copia el contenido de este ZIP sobre la carpeta raiz:
+   calibraciones_mt15 copy/
+2. Acepta sustituir archivos.
+3. Recarga navegador con Ctrl + F5.
+
+Archivos modificados:
+- core/metrology_core/thread/thread_mt16_workflow_test.html
+- core/metrology_core/thread/thread_mt16_workflow.html
+- core/metrology_core/thread/core/mt16_master_engine.js
+- core/metrology_core/thread/core/thread_parser.js
+- core/metrology_core/thread/procedure_rules/*.js
+
+Objetivo V73:
+- El procedimiento ya no devuelve solo familia/estado.
+- Devuelve modelo completo: medicion, entorno, trazabilidad, incertidumbre, decision y certificado.
+- No cambia los calculos que ya funcionan en M, G y UN.
+- Prepara la base para el flujo guiado de operario y certificado comun.
+
+Pruebas recomendadas:
+03-03
+01186311
+7/16-14 UNF - 2B
+5/16-18 UNC - 2B
+1/4-18 NPT
+1/4-20 BSW
+R 1/2

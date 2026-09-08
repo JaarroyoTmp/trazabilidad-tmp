@@ -1,0 +1,87 @@
+{
+  "source": "ISO 1502:1996",
+  "extraction_status": "phase_1_from_available_12_page_preview",
+  "authority": "normative",
+  "language_runtime": "es",
+  "important_warning": "El PDF disponible no contiene las tablas 4 a 9 ni las formulas completas de la clausula 13. No usar valores historicos como sustituto.",
+  "rules": {
+    "scope": {
+      "applies_to": "ISO general-purpose metric screw threads gauges and gauging",
+      "profile_reference": "ISO 68",
+      "tmp_module": "MT16_TAMPON_ROSCADO_PNP"
+    },
+    "reference_temperature": {
+      "value_c": 20,
+      "source_clause": "6",
+      "engine_use": "ambient_conditions_and_uncertainty"
+    },
+    "internal_thread_gauges": {
+      "go_screw_plug": true,
+      "not_go_screw_plug": true,
+      "plain_go_plug_minor_diameter": true,
+      "plain_not_go_plug_minor_diameter": true,
+      "source_clause": "4.2 / 5.2"
+    },
+    "go_screw_plug_internal_thread": {
+      "must_enter_full_length": true,
+      "no_excessive_force": true,
+      "checks": [
+        "virtual_pitch_diameter",
+        "minimum_limit_pitch_diameter_effect",
+        "minimum_limit_major_diameter_effect",
+        "straight_flank_length"
+      ],
+      "does_not_check": [
+        "minor_diameter"
+      ],
+      "source_clause": "7.2.1"
+    },
+    "not_go_screw_plug_internal_thread": {
+      "max_turns": 2,
+      "may_enter_both_ends": true,
+      "must_not_pass_completely_if_thread_length_leq_3_threads": true,
+      "no_excessive_force": true,
+      "source_clause": "7.2.2"
+    },
+    "minor_diameter_internal_thread": {
+      "gauge_type": "plain cylindrical GO and NOT GO plug gauges",
+      "spherical_or_rod_gauges_permitted": false,
+      "not_go_entry_zone_max_pitch_lengths": 1,
+      "source_clause": "7.2.3"
+    }
+  },
+  "symbols": {
+    "D_d": "basic major diameter",
+    "D2": "basic pitch diameter",
+    "P": "pitch",
+    "EI": "fundamental deviation of internal thread",
+    "es": "fundamental deviation of external thread",
+    "TD1": "tolerance minor diameter internal thread",
+    "TD2": "tolerance pitch diameter internal thread",
+    "Td": "tolerance major diameter external thread",
+    "Td2": "tolerance pitch diameter external thread",
+    "TPL": "tolerance pitch diameter GO/NOT GO screw plug gauges",
+    "TR": "tolerance pitch diameter GO/NOT GO screw ring gauges",
+    "WGO": "permissible wear amount GO screw gauges",
+    "WNG": "permissible wear amount NOT GO screw gauges",
+    "ZPL": "distance/tolerance-zone offset for GO screw plug gauge",
+    "ZR": "distance/tolerance-zone offset for GO screw ring gauge"
+  },
+  "numeric_tables": {
+    "tables_4_to_9": {
+      "status": "missing_in_available_pdf",
+      "required_for": [
+        "thread_gauge_limits_engine.js",
+        "thread_decision_engine.js"
+      ],
+      "engine_policy": "return TABLA_ISO1502_NO_CARGADA"
+    },
+    "clause_13_formulae": {
+      "status": "missing_in_available_pdf",
+      "required_for": [
+        "calculation_of_gauge_limits"
+      ],
+      "engine_policy": "return FORMULAS_ISO1502_NO_CARGADAS"
+    }
+  }
+}

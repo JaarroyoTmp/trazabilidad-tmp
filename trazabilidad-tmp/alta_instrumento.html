@@ -4,220 +4,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TMP · Alta / Edición / Baja de Instrumentos</title>
-
-  <!-- Lector QR con cámara -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
-
   <style>
-    :root{
-      --bg:#0f1b2d;
-      --panel:#12233b;
-      --muted:#a9b4c3;
-      --txt:#e8f0ff;
-      --primary:#1e88e5;
-      --primary-600:#1565c0;
-      --accent:#ff8f00;
-      --danger:#e53935;
-      --ok:#2e7d32;
-      --chip:#20324b;
-      --input:#0b1627;
-      --border:#1c2a44;
-    }
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu;
-      background:var(--bg);
-      color:var(--txt);
-    }
-    header{
-      padding:14px 18px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      background:linear-gradient(180deg,#0f1b2d 0,#0f1b2df0 100%);
-      position:sticky;
-      top:0;
-      z-index:10;
-    }
-    .brand-wrap{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .brand-logo{
-      height:42px;
-      width:auto;
-    }
-    .brand-titles{
-      display:flex;
-      flex-direction:column;
-    }
-    .brand-titles h1{
-      margin:0;
-      font-size:1.15rem;
-    }
-    .brand-titles span{
-      font-size:.8rem;
-      color:var(--muted);
-    }
-    .chip{
-      background:var(--chip);
-      color:#cfe1ff;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.8rem;
-      border:1px solid var(--border);
-    }
-    .btn-header{
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:transparent;
-      color:#cfe1ff;
-      padding:8px 14px;
-      font-size:.85rem;
-      cursor:pointer;
-    }
-    .btn-header:hover{
-      background:#14233a;
-    }
-    main{
-      max-width:1000px;
-      margin:20px auto 40px;
-      padding:0 16px;
-    }
-
-    .tabs{
-      display:flex;
-      gap:8px;
-      margin:10px 0 18px;
-      flex-wrap:wrap;
-    }
-    .tab{
-      background:var(--chip);
-      border:1px solid var(--border);
-      color:#cfe1ff;
-      padding:8px 14px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:600;
-      font-size:.9rem;
-    }
-    .tab.active{
-      background:var(--primary);
-      border-color:transparent;
-      color:#fff;
-    }
-
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:18px;
-      display:none;
-    }
-    .panel.active{display:block;}
-
-    h2{
-      margin:0 0 12px;
-      font-size:1.1rem;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-    }
-    @media(max-width:900px){
-      .grid{grid-template-columns:1fr;}
-    }
-
-    .row{display:flex; gap:10px; flex-wrap:wrap;}
-    label{
-      display:block;
-      font-size:.85rem;
-      color:#cfe1ff;
-      margin-bottom:4px;
-    }
-    input,select,textarea{
-      width:100%;
-      background:var(--input);
-      color:var(--txt);
-      border-radius:10px;
-      border:1px solid var(--border);
-      padding:9px 11px;
-      font-size:.95rem;
-    }
-    textarea{min-height:80px;resize:vertical;}
-
-    .actions{
-      display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;
-    }
-    .btn{
-      border-radius:10px;
-      padding:9px 13px;
-      font-size:.9rem;
-      font-weight:600;
-      cursor:pointer;
-      display:inline-flex; align-items:center; gap:6px;
-    }
-    .btn-primary{background:var(--primary); color:#fff;}
-    .btn-primary:hover{background:var(--primary-600);}
-    .btn-accent{background:var(--accent); color:#132235;}
-    .btn-warn{background:var(--danger); color:#fff;}
-    .btn-ghost{background:transparent; border:1px solid var(--border); color:#cfe1ff;}
-    .btn-ghost:hover{background:#14233a;}
-
-    .alert{margin-top:14px; padding:10px 12px; border-radius:10px; border:1px solid transparent;}
-    .alert.ok{background:#17351d; color:#baf3c1; border-color:#214d28;}
-    .alert.err{background:#3a1414; color:#ffb3b2; border-color:#572222;}
-    .alert.info{background:#102941; color:#b3d6ff; border-color:#1d3b60;}
-    .hidden{display:none;}
-
-    .qr-box{
-      background:#0c1a2c;
-      border:1px dashed var(--border);
-      border-radius:12px;
-      height:320px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:.9rem;
-      text-align:center;
-      color:var(--muted);
-    }
-
-    .btn-float{
-      position:fixed;
-      right:20px;
-      bottom:20px;
-      background:#1e88e5;
-      color:#fff;
-      border:none;
-      border-radius:999px;
-      padding:9px 18px;
-      cursor:pointer;
-      font-size:.9rem;
-      box-shadow:0 0 10px rgba(0,0,0,.4);
-      z-index:20;
-    }
-    .btn-float:hover{background:#1565c0;}
+    :root{--bg:#0f1b2d;--panel:#12233b;--muted:#a9b4c3;--txt:#e8f0ff;--primary:#1e88e5;--primary-600:#1565c0;--accent:#ff8f00;--danger:#e53935;--chip:#20324b;--input:#0b1627;--border:#1c2a44}
+    *{box-sizing:border-box}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu;background:var(--bg);color:var(--txt)}
+    header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;background:linear-gradient(180deg,#0f1b2d 0,#0f1b2df0 100%);position:sticky;top:0;z-index:10}
+    .brand-wrap{display:flex;align-items:center;gap:10px}.brand-logo{height:42px;width:auto}.brand-titles{display:flex;flex-direction:column}.brand-titles h1{margin:0;font-size:1.15rem}.brand-titles span{font-size:.8rem;color:var(--muted)}
+    .btn-header{border-radius:999px;border:1px solid var(--border);background:transparent;color:#cfe1ff;padding:8px 14px;font-size:.85rem;cursor:pointer}.btn-header:hover{background:#14233a}
+    main{max-width:1000px;margin:20px auto 40px;padding:0 16px}.tabs{display:flex;gap:8px;margin:10px 0 18px;flex-wrap:wrap}
+    .tab{background:var(--chip);border:1px solid var(--border);color:#cfe1ff;padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600;font-size:.9rem}.tab.active{background:var(--primary);border-color:transparent;color:#fff}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;display:none}.panel.active{display:block}h2{margin:0 0 12px;font-size:1.1rem}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .row{display:flex;gap:10px;flex-wrap:wrap}label{display:block;font-size:.85rem;color:#cfe1ff;margin-bottom:4px}
+    input,select,textarea{width:100%;background:var(--input);color:var(--txt);border-radius:10px;border:1px solid var(--border);padding:9px 11px;font-size:.95rem}textarea{min-height:80px;resize:vertical}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.btn{border-radius:10px;padding:9px 13px;font-size:.9rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:none}
+    .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-600)}.btn-accent{background:var(--accent);color:#132235}.btn-warn{background:var(--danger);color:#fff}.btn-ghost{background:transparent;border:1px solid var(--border);color:#cfe1ff}.btn-ghost:hover{background:#14233a}
+    .alert{margin-top:14px;padding:10px 12px;border-radius:10px;border:1px solid transparent}.alert.ok{background:#17351d;color:#baf3c1;border-color:#214d28}.alert.err{background:#3a1414;color:#ffb3b2;border-color:#572222}.alert.info{background:#102941;color:#b3d6ff;border-color:#1d3b60}.hidden{display:none}
+    .qr-box{background:#0c1a2c;border:1px dashed var(--border);border-radius:12px;height:320px;display:flex;align-items:center;justify-content:center;font-size:.9rem;text-align:center;color:var(--muted)}
+    .btn-float{position:fixed;right:20px;bottom:20px;background:#1e88e5;color:#fff;border:none;border-radius:999px;padding:9px 18px;cursor:pointer;font-size:.9rem;box-shadow:0 0 10px rgba(0,0,0,.4);z-index:20}.btn-float:hover{background:#1565c0}
+    .hint{font-size:.75rem;color:var(--muted);margin-top:4px}
   </style>
 </head>
-
 <body>
-
 <header>
   <div class="brand-wrap">
     <img src="img/tmp-quality.png" alt="TMP" class="brand-logo">
-    <div class="brand-titles">
-      <h1>TMP · Control Metrológico</h1>
-      <span>Alta, edición y baja de instrumentos</span>
-    </div>
+    <div class="brand-titles"><h1>TMP · Control Metrológico</h1><span>Alta, edición y baja de instrumentos</span></div>
   </div>
-
   <button class="btn-header" onclick="window.location.href='home.html'">🏠 Volver al panel</button>
 </header>
 
@@ -227,126 +40,62 @@
     <button id="tabBaja" class="tab">Baja por QR / Código</button>
   </div>
 
-  <!-- PANEL ALTA -->
   <section id="panelAlta" class="panel active">
     <h2>Ficha del instrumento</h2>
     <div id="msgAlta" class="alert info hidden"></div>
-
     <div class="grid">
-
-      <!-- CÓDIGO -->
-      <div>
-        <label>Código (único) *</label>
-        <div class="row">
-          <input id="codigo" placeholder="Ej. 400600">
-          <button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button>
-        </div>
-      </div>
-
-      <div>
-        <label>Descripción *</label>
-        <input id="descripcion" placeholder="Ej. Tampón liso P/NP">
-      </div>
-
-      <div>
-        <label>Fabricante *</label>
-        <input id="fabricante" placeholder="Ej. Mitutoyo">
-      </div>
-
-      <div>
-        <label>Rango / Especificación</label>
-        <input id="rango" placeholder="Ej. Ø8 H7">
-      </div>
-
-      <div>
-        <label>Precisión</label>
-        <input id="precision" placeholder="Ej. 0.01 mm / Atributo">
-      </div>
-
-      <div>
-        <label>Tipo de calibración</label>
-        <input id="tipo_calibracion" placeholder="Interna / Externa">
-      </div>
-
-      <!-- ✔ ÚNICO CAMPO DE UBICACIÓN REAL -->
-      <div>
-        <label>Ubicación actual / Destino</label>
-        <input id="ubicacion_actual" placeholder="Laboratorio, Producción, Mantenimiento, Cliente...">
-      </div>
-
-      <div>
-        <label>Última calibración</label>
-        <input id="fecha_calibracion" type="date">
-      </div>
-
-      <div>
-        <label>Próxima calibración</label>
-        <input id="fecha_proxima_calibracion" type="date">
-      </div>
-
-      <div style="grid-column:1/-1">
-        <label>Observaciones</label>
-        <textarea id="observaciones" placeholder="Notas internas, incidencia, cliente, etc."></textarea>
-      </div>
-
+      <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
+      <div><label>Descripción *</label><input id="descripcion" placeholder="Ej. Tampón liso P/NP"></div>
+      <div><label>Familia de calibración *</label><select id="familia_calibracion_id"><option value="">Cargando familias...</option></select><div class="hint">Define cómo se calibrará el equipo.</div></div>
+      <div><label>Propietario / Cliente *</label><select id="propietario_id"><option value="">Cargando propietarios...</option></select><div class="hint">Diferencia equipos Paramio de equipos de cliente.</div></div>
+      <div><label>Fabricante *</label><input id="fabricante" placeholder="Ej. Mitutoyo"></div>
+      <div><label>Rango / Especificación</label><input id="rango" placeholder="Ej. Ø8 H7"></div>
+      <div><label>Precisión</label><input id="precision" placeholder="Ej. 0.01 mm / Atributo"></div>
+      <div><label>Tipo de calibración</label><select id="tipo_calibracion"><option value="Interna">Interna</option><option value="Externa">Externa</option><option value="No aplica">No aplica</option></select></div>
+      <div><label>Ubicación actual / Destino *</label><select id="ubicacion_id"><option value="">Cargando ubicaciones...</option></select><div class="hint">Se guarda también como texto en ubicación actual.</div></div>
+      <div><label>Última calibración</label><input id="fecha_calibracion" type="date"></div>
+      <div><label>Próxima calibración</label><input id="fecha_proxima_calibracion" type="date"></div>
+      <div style="grid-column:1/-1"><label>Observaciones</label><textarea id="observaciones" placeholder="Notas internas, incidencia, cliente, etc."></textarea></div>
     </div>
-
-    <div class="actions">
-      <button class="btn btn-primary" id="btnGuardar">💾 Guardar / Actualizar</button>
-      <button class="btn btn-accent" id="btnLimpiar">🧽 Limpiar</button>
-    </div>
-
+    <div class="actions"><button class="btn btn-primary" id="btnGuardar">💾 Guardar / Actualizar</button><button class="btn btn-accent" id="btnLimpiar">🧽 Limpiar</button></div>
   </section>
 
-  <!-- PANEL BAJA -->
   <section id="panelBaja" class="panel">
-    <h2>Dar de baja por QR / código</h2>
+    <h2>Dar de baja técnica por QR / código</h2>
     <div id="msgBaja" class="alert info hidden"></div>
-
     <div class="grid">
       <div>
-        <div id="qrReader" class="qr-box">
-          Enfoca el código QR del instrumento.
-        </div>
-
-        <div class="actions" style="margin-top:10px">
-          <button class="btn btn-primary" id="btnIniciarEscaneo">📷 Iniciar escaneo</button>
-          <button class="btn btn-ghost" id="btnDetenerEscaneo">✋ Detener</button>
-        </div>
+        <div id="qrReader" class="qr-box">Enfoca el código QR del instrumento.</div>
+        <div class="actions" style="margin-top:10px"><button class="btn btn-primary" id="btnIniciarEscaneo">📷 Iniciar escaneo</button><button class="btn btn-ghost" id="btnDetenerEscaneo">✋ Detener</button></div>
       </div>
-
       <div>
         <label>Dar de baja manualmente</label>
-        <div class="row">
-          <input id="codigoBaja" placeholder="Código del instrumento">
-          <button class="btn btn-warn" id="btnBajaManual">🗑 Dar de baja</button>
-        </div>
+        <div class="row"><input id="codigoBaja" placeholder="Código del instrumento"><button class="btn btn-warn" id="btnBajaManual">🗑 Baja técnica</button></div>
+        <div class="hint">No borra el instrumento: lo marca como BAJA TÉCNICA para mantener trazabilidad.</div>
       </div>
     </div>
   </section>
 </main>
 
 <button class="btn-float" onclick="window.location.href='home.html'">🏠 Inicio</button>
-<!-- Configuración Supabase -->
 <script type="module" src="config.mjs"></script>
 
-<!-- Lógica principal -->
 <script type="module">
-
   const supabase = window.supabase;
   const $ = id => document.getElementById(id);
-
   const msgAlta = $("msgAlta");
   const msgBaja = $("msgBaja");
 
   const f = {
     codigo: $("codigo"),
     descripcion: $("descripcion"),
+    familia_calibracion_id: $("familia_calibracion_id"),
+    propietario_id: $("propietario_id"),
     fabricante: $("fabricante"),
     rango: $("rango"),
     precision: $("precision"),
     tipo_calibracion: $("tipo_calibracion"),
-    ubicacion_actual: $("ubicacion_actual"),
+    ubicacion_id: $("ubicacion_id"),
     fecha_calibracion: $("fecha_calibracion"),
     fecha_proxima_calibracion: $("fecha_proxima_calibracion"),
     observaciones: $("observaciones"),
@@ -357,13 +106,51 @@
     el.textContent = text;
     el.classList.remove("hidden");
   }
-  function hideMsg(el){
-    el.classList.add("hidden");
+  function hideMsg(el){ el.classList.add("hidden"); }
+
+  function optionHTML(value, label, selectedValue="") {
+    const selected = String(value || "") === String(selectedValue || "") ? "selected" : "";
+    return `<option value="${value}" ${selected}>${label}</option>`;
   }
 
-  /* ============================
-     TABS
-  ============================ */
+  function getSelectedText(selectEl) {
+    const opt = selectEl.options[selectEl.selectedIndex];
+    return opt ? opt.textContent.trim() : "";
+  }
+
+  async function cargarCatalogos() {
+    if (!supabase) {
+      showMsg(msgAlta, "Supabase no está disponible. Revisa config.mjs.", "err");
+      return;
+    }
+
+    const [familiasRes, propietariosRes, ubicacionesRes] = await Promise.all([
+      supabase.from("familias_calibracion").select("id,nombre,codigo,activo").eq("activo", true).order("nombre"),
+      supabase.from("propietarios_equipos").select("id,nombre,tipo,activo").eq("activo", true).order("nombre"),
+      supabase.from("ubicaciones").select("id,nombre,activo").eq("activo", true).order("nombre")
+    ]);
+
+    if (familiasRes.error) console.error("Error familias_calibracion:", familiasRes.error);
+    if (propietariosRes.error) console.error("Error propietarios_equipos:", propietariosRes.error);
+    if (ubicacionesRes.error) console.error("Error ubicaciones:", ubicacionesRes.error);
+
+    f.familia_calibracion_id.innerHTML =
+      `<option value="">Selecciona familia...</option>` +
+      (familiasRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
+
+    f.propietario_id.innerHTML =
+      `<option value="">Selecciona propietario...</option>` +
+      (propietariosRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
+
+    f.ubicacion_id.innerHTML =
+      `<option value="">Selecciona ubicación...</option>` +
+      (ubicacionesRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
+  }
+
+  function seleccionarValor(selectEl, valor) {
+    selectEl.value = valor || "";
+  }
+
   const tabAlta = $("tabAlta");
   const tabBaja = $("tabBaja");
   const panelAlta = $("panelAlta");
@@ -383,19 +170,14 @@
     panelAlta.classList.remove("active");
   };
 
-  /* ============================
-     LIMPIAR FORMULARIO
-  ============================ */
   function limpiarFormulario(){
     for(const key in f){ f[key].value = ""; }
+    f.tipo_calibracion.value = "Interna";
     hideMsg(msgAlta);
   }
 
   $("btnLimpiar").onclick = limpiarFormulario;
 
-  /* ============================
-     BUSCAR POR CÓDIGO
-  ============================ */
   async function buscarPorCodigo(){
     hideMsg(msgAlta);
 
@@ -424,13 +206,14 @@
       return;
     }
 
-    // Cargar datos
     f.descripcion.value = data.descripcion ?? "";
+    seleccionarValor(f.familia_calibracion_id, data.familia_calibracion_id);
+    seleccionarValor(f.propietario_id, data.propietario_id);
     f.fabricante.value = data.fabricante ?? "";
     f.rango.value = data.rango ?? "";
     f.precision.value = data.precision ?? "";
-    f.tipo_calibracion.value = data.tipo_calibracion ?? "";
-    f.ubicacion_actual.value = data.ubicacion_actual ?? "";
+    f.tipo_calibracion.value = data.tipo_calibracion ?? "Interna";
+    seleccionarValor(f.ubicacion_id, data.ubicacion_id);
     f.fecha_calibracion.value = (data.fecha_calibracion ?? "").substring(0,10);
     f.fecha_proxima_calibracion.value = (data.fecha_proxima_calibracion ?? "").substring(0,10);
     f.observaciones.value = data.observaciones ?? "";
@@ -447,22 +230,34 @@
     }
   });
 
-  /* ============================
-     GUARDAR / UPSERT
-  ============================ */
   async function guardarInstrumento(){
     hideMsg(msgAlta);
 
     const codigo = f.codigo.value.trim();
     const descripcion = f.descripcion.value.trim();
     const fabricante = f.fabricante.value.trim();
+    const familiaId = f.familia_calibracion_id.value || null;
+    const propietarioId = f.propietario_id.value || null;
+    const ubicacionId = f.ubicacion_id.value || null;
+    const ubicacionActual = ubicacionId ? getSelectedText(f.ubicacion_id) : null;
 
     if(!codigo || !descripcion || !fabricante){
       showMsg(msgAlta,"Código, descripción y fabricante son obligatorios.","err");
       return;
     }
+    if(!familiaId){
+      showMsg(msgAlta,"Selecciona la familia de calibración.","err");
+      return;
+    }
+    if(!propietarioId){
+      showMsg(msgAlta,"Selecciona el propietario / cliente.","err");
+      return;
+    }
+    if(!ubicacionId){
+      showMsg(msgAlta,"Selecciona la ubicación actual.","err");
+      return;
+    }
 
-    // Generación del QR
     const baseUrl =
       window.location.origin && window.location.origin !== "null"
         ? window.location.origin + "/qr/"
@@ -479,8 +274,11 @@
       fabricante,
       rango: f.rango.value || null,
       precision: f.precision.value || null,
-      tipo_calibracion: f.tipo_calibracion.value || null,
-      ubicacion_actual: f.ubicacion_actual.value || null,
+      tipo_calibracion: f.tipo_calibracion.value || "Interna",
+      familia_calibracion_id: familiaId,
+      propietario_id: propietarioId,
+      ubicacion_id: ubicacionId,
+      ubicacion_actual: ubicacionActual,
       fecha_calibracion: f.fecha_calibracion.value || null,
       fecha_proxima_calibracion: f.fecha_proxima_calibracion.value || null,
       observaciones: f.observaciones.value || null,
@@ -503,9 +301,6 @@
 
   $("btnGuardar").onclick = guardarInstrumento;
 
-  /* ============================
-     BAJA TÉCNICA POR QR / CÓDIGO
-  ============================ */
   let html5Qr = null;
 
   async function iniciarEscaneo(){
@@ -516,20 +311,13 @@
         html5Qr = new Html5Qrcode("qrReader");
       }
 
-      const config = {
-        fps: 10,
-        qrbox: { width: 220, height: 220 }
-      };
-
       await html5Qr.start(
         { facingMode: "environment" },
-        config,
+        { fps: 10, qrbox: { width: 220, height: 220 } },
         async decodedText => {
           await detenerEscaneo();
 
           let code = decodedText;
-
-          // Si el QR contiene /qr/CODIGO
           if(decodedText.startsWith("http")){
             const parts = decodedText.split("/");
             code = decodeURIComponent(parts.filter(Boolean).pop());
@@ -561,16 +349,19 @@
 
     const { error } = await supabase
       .from("instrumentos")
-      .delete()
+      .update({
+        estado: "BAJA TÉCNICA",
+        ubicacion_actual: "Baja técnica"
+      })
       .eq("codigo", codigo);
 
     if(error){
       console.error(error);
-      showMsg(msgBaja,"Error al eliminar: " + error.message,"err");
+      showMsg(msgBaja,"Error al dar de baja: " + error.message,"err");
       return;
     }
 
-    showMsg(msgBaja,`Instrumento ${codigo} eliminado.`,"ok");
+    showMsg(msgBaja,`Instrumento ${codigo} marcado como BAJA TÉCNICA.`,"ok");
   }
 
   $("btnIniciarEscaneo").onclick = iniciarEscaneo;
@@ -585,6 +376,7 @@
     confirmarBaja(code);
   };
 
+  cargarCatalogos();
 </script>
 
 </body>

@@ -1,0 +1,24 @@
+{
+  "id": "cert_m33x2_h6",
+  "designation": "M33 x 2 H6",
+  "source": "Certificado historico TMP 166",
+  "nominal_mm": 33,
+  "pitch_mm": 2,
+  "class": "H6",
+  "expected": {
+    "tmp_historical_pass_D2_nominal_mm": 31.918,
+    "wire_mm": 1.35,
+    "correction_mm": 2.317949266,
+    "pass": {
+      "min_mm": 31.911,
+      "max_mm": 31.925,
+      "wear_max_mm": 31.89
+    },
+    "no_pass": {
+      "min_mm": 31.678,
+      "max_mm": 31.692,
+      "wear_max_mm": 31.663
+    }
+  },
+  "note": "Caso historico para validar ISO 1502/gauge engine."
+}

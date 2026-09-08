@@ -1,0 +1,29 @@
+{
+  "id": "iso724_phase1_validation",
+  "source": "ISO 724:1993",
+  "cases": [
+    {
+      "designation": "M14x2",
+      "D": 14,
+      "P": 2,
+      "expected_D2": 12.701,
+      "expected_D1": 11.835
+    },
+    {
+      "designation": "M16x1.5",
+      "D": 16,
+      "P": 1.5,
+      "expected_D2": 15.026,
+      "expected_D1": 14.376
+    },
+    {
+      "designation": "M33x2",
+      "D": 33,
+      "P": 2,
+      "expected_D2": 31.701,
+      "expected_D1": 30.835
+    }
+  ],
+  "tolerance_mm": 0.001,
+  "note": "Validación de fórmulas ISO724 contra valores redondeados a tabla."
+}

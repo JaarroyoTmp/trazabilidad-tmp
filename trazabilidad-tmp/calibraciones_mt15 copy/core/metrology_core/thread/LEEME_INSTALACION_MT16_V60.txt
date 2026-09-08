@@ -1,0 +1,21 @@
+MT16 Expert Core V60 - Router normativo estable
+
+Instalacion:
+1. Copiar TODO el contenido de esta carpeta dentro de:
+   calibraciones_mt15 copy/core/metrology_core/thread/
+
+2. Sustituir archivos existentes.
+
+3. Recargar navegador con Ctrl + F5.
+
+Pruebas recomendadas:
+- M16x2-6H  -> flujo metrico ISO 724/965/1502 con objetivos Trimos.
+- G 7/8 - 14 -> flujo BSPP ISO 228-1/228-2 con etiquetas normativas correctas y objetivos Trimos.
+- R 1/2 -> flujo ISO 7-1/7-2 en modo calibre conico seguro, sin inventar objetivo Trimos.
+
+Cambios V60:
+- Router normativo estable por familia de rosca.
+- Etiquetas de pantalla y auditoria corregidas: no aparece ISO 724/1502 para roscas G.
+- Lecturas habilitadas para metrica ISO y G/BSPP cuando existen objetivos Trimos.
+- R/Rc/Rp quedan bloqueadas para lectura sobre rodillos porque ISO 7-2 exige calibre conico de escalon.
+- Modo auditor muestra pasos normativos semanticos: ISO228-1_GEOMETRIA, ISO228-2_VERIFICACION, ISO7-2_VERIFICACION, etc.

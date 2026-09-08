@@ -1,0 +1,19 @@
+MT16 - CAMBIO DE MODELO METROLOGICO
+
+Criterio corregido:
+- En MT16 el patron trazable es el banco Trimos certificado.
+- El banco Trimos aporta correccion, incertidumbre, vigencia y trazabilidad.
+- Los rodillos/hilos son accesorios o utiles de medicion. Se registran para reproducibilidad del montaje, pero no se tratan como patrones.
+- No aplica patron de rosca en el procedimiento TMP MT16 actual.
+
+Archivos modificados:
+- core/metrology_core/thread/thread_mt16_workflow.html
+- core/metrology_core/thread/thread_mt16_workflow_test.html
+- core/metrology_core/certificates/certificate_traceability.js
+- core/metrology_core/certificates/certificate_results.js
+- core/metrology_core/certificates/certificate_engine.js
+- core/metrology_core/certificates/blocks/thread_gauge_block.js
+
+Instalacion:
+Copiar el contenido del ZIP sobre calibraciones_mt15 copy/ y sustituir.
+Despues Ctrl + F5.

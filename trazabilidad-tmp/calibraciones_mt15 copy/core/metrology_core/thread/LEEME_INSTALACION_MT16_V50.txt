@@ -1,0 +1,16 @@
+MT16 V50 - Router normativo multirosca
+
+Sustituir el contenido en:
+calibraciones_mt15 copy/core/metrology_core/thread/
+
+Cambios V50:
+- No muestra ISO724/ISO1502 para roscas G cuando aplica ISO228.
+- Modo auditor muestra router normativo como OK si la familia se reconoce.
+- Etiquetas dinamicas segun familia: metrica ISO, G/BSPP ISO228, R/Rc/Rp ISO7.
+- G/BSPP mantiene objetivos Trimos calculados con limites ISO228.
+- R/Rc/Rp se mantiene en modo seguro por calibre conico ISO7-2, sin inventar objetivo sobre rodillos.
+
+Probar:
+M16x2-6H
+G 7/8 - 14
+R 1/2

@@ -1,0 +1,21 @@
+{
+  "id": "thread_wire_validation_v1",
+  "source": "TMP historical documentation",
+  "cases": [
+    {
+      "designation": "M33 x 2 H6",
+      "pitch_mm": 2,
+      "expected_wire_mm": 1.35,
+      "expected_correction_mm": 2.317949266,
+      "source": "Certificado TMP 166"
+    },
+    {
+      "designation": "M85 x 1.5 H6",
+      "pitch_mm": 1.5,
+      "expected_wire_mm": 0.895,
+      "expected_correction_mm": 1.385961905,
+      "source": "Certificado TMP 594"
+    }
+  ],
+  "note": "M85x1.5 usa override historico por discrepancia con tabla general vista en capturas. No cerrar tabla final hasta validar más certificados XLSM."
+}

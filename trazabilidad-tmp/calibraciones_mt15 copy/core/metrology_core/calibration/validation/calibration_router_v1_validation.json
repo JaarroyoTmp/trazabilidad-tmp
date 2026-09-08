@@ -1,0 +1,23 @@
+{
+  "id": "calibration_router_v1_validation",
+  "cases": [
+    {
+      "descripcion": "Tampón liso P/NP",
+      "rango": "Ø8.5 H8",
+      "expected_family": "TAMPON_LISO_PNP",
+      "expected_procedure": "MT15"
+    },
+    {
+      "descripcion": "Tampón de Rosca P/NP",
+      "rango": "M18 x 1.5 - 6H",
+      "expected_family": "TAMPON_ROSCADO_PNP",
+      "expected_procedure": "MT16"
+    },
+    {
+      "descripcion": "Reloj Comparador Milesimal",
+      "rango": "0-10mm",
+      "expected_family": "RELOJ_COMPARADOR",
+      "expected_procedure": "MT17"
+    }
+  ]
+}

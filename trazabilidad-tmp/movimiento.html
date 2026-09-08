@@ -511,24 +511,37 @@
         </div>
 
         <div>
-          <label>Responsable</label>
-          <input id="responsable" placeholder="Nombre del responsable del movimiento">
+          <label>Máquina / destino</label>
+          <select id="maquinaDestino">
+            <option value="">Cargando máquinas / destinos...</option>
+          </select>
+          <p class="helper-text">
+            En salidas será el destino real del equipo. En entradas se asignará Laboratorio automáticamente.
+          </p>
         </div>
 
-        <!-- NUEVOS CAMPOS -->
+        <div>
+          <label>Responsable calidad</label>
+          <select id="responsable">
+            <option value="">Cargando responsables...</option>
+          </select>
+          <p class="helper-text">
+            Persona de calidad que entrega, recoge, monta o autoriza el equipo.
+          </p>
+        </div>
+
         <div>
           <label>Operario 1</label>
-          <input id="operario1" placeholder="Nombre del operario principal (solo en salidas)">
+          <select id="operario1">
+            <option value="">Cargando usuarios...</option>
+          </select>
         </div>
 
         <div>
           <label>Operario 2</label>
-          <input id="operario2" placeholder="Segundo operario (si existe)">
-        </div>
-
-        <div>
-          <label>Destino</label>
-          <input id="destino" placeholder="Ej: Laboratorio, línea 2...">
+          <select id="operario2">
+            <option value="">Cargando usuarios...</option>
+          </select>
         </div>
 
         <div style="grid-column:1/-1">
@@ -679,6 +692,81 @@ function computeEstado(prox) {
 }
 
 /* ===========================================================
+   CATÁLOGOS CONTROLADOS
+=========================================================== */
+function getNombre(item) {
+  return item?.nombre || item?.descripcion || item?.codigo || item?.email || item?.id || "";
+}
+
+function optionHTML(value, label) {
+  return `<option value="${value || ""}">${label || "—"}</option>`;
+}
+
+function pintarSelect(selectId, items, placeholder) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+
+  sel.innerHTML =
+    `<option value="">${placeholder}</option>` +
+    (items || [])
+      .filter(x => x && (x.activo === undefined || x.activo === true))
+      .map(x => optionHTML(x.id, getNombre(x)))
+      .join("");
+}
+
+function getSelectedText(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return "";
+  const opt = sel.options[sel.selectedIndex];
+  return opt ? opt.textContent.trim() : "";
+}
+
+async function leerTabla(nombreTabla) {
+  try {
+    const { data, error } = await sb
+      .from(nombreTabla)
+      .select("*");
+
+    if (error) {
+      console.warn(`No se pudo cargar ${nombreTabla}:`, error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (e) {
+    console.warn(`Error cargando ${nombreTabla}:`, e);
+    return [];
+  }
+}
+
+async function cargarCatalogosMovimiento() {
+  if (!sb) return;
+
+  catalogos.ubicaciones = await leerTabla("ubicaciones");
+
+  // Máquina / destino se carga desde ubicaciones.
+  catalogos.maquinas = catalogos.ubicaciones;
+
+  catalogos.responsables = await leerTabla("responsables");
+  catalogos.usuarios = await leerTabla("usuarios");
+
+  const responsables = catalogos.responsables.length ? catalogos.responsables : catalogos.usuarios;
+
+  pintarSelect("maquinaDestino", catalogos.maquinas, "Selecciona máquina / destino...");
+  pintarSelect("responsable", responsables, "Selecciona responsable calidad...");
+  pintarSelect("operario1", catalogos.usuarios, "Selecciona operario 1...");
+  pintarSelect("operario2", catalogos.usuarios, "Selecciona operario 2...");
+}
+
+function construirDestinoTexto() {
+  const maquina = getSelectedText("maquinaDestino");
+
+  return [maquina]
+    .filter(x => x && !x.startsWith("Selecciona") && !x.startsWith("Cargando"))
+    .join(" · ");
+}
+
+/* ===========================================================
    ESTADO GLOBAL
 =========================================================== */
 let instrumentoActual = null;
@@ -686,6 +774,13 @@ let movimientosCount = 0;
 let estadoActualInstrumento = null;
 let usoBajoResponsabilidad = false;
 let responsableAutorizado = "";
+
+let catalogos = {
+  ubicaciones: [],
+  maquinas: [],
+  responsables: [],
+  usuarios: []
+};
 
 // QR
 let html5QrCodeInstance = null;
@@ -958,10 +1053,19 @@ async function registrarMovimiento() {
   }
 
   const tipo = $("#tipoMovimiento").value;
-  const responsable = $("#responsable").value.trim();
-  const operario1 = $("#operario1").value.trim();
-  const operario2 = $("#operario2").value.trim();
-  const destino = $("#destino").value.trim();
+
+  const responsableId = $("#responsable").value;
+  const responsable = getSelectedText("responsable");
+
+  const operario1Id = $("#operario1").value;
+  const operario1 = getSelectedText("operario1");
+
+  const operario2Id = $("#operario2").value;
+  const operario2 = getSelectedText("operario2");
+
+  const maquinaId = $("#maquinaDestino").value;
+  const destino = construirDestinoTexto();
+
   const obsUser = $("#observaciones").value.trim();
 
   if (!tipo) {
@@ -969,8 +1073,15 @@ async function registrarMovimiento() {
     alertBox.classList.remove("hidden");
     return;
   }
-  if (!responsable) {
-    alertBox.textContent = "Introduce un responsable del movimiento";
+
+  if (!responsableId) {
+    alertBox.textContent = "Selecciona un responsable de calidad";
+    alertBox.classList.remove("hidden");
+    return;
+  }
+
+  if (tipo !== "Entrada" && !maquinaId) {
+    alertBox.textContent = "Selecciona una máquina / destino";
     alertBox.classList.remove("hidden");
     return;
   }
@@ -991,12 +1102,25 @@ async function registrarMovimiento() {
 
   obsFinal += `Estado calibración: ${estado.estado}`;
 
+  if (maquinaId) {
+    obsFinal += `\nMáquina / destino asignado: ${getSelectedText("maquinaDestino")}`;
+  }
+
   let nuevaUbicacion = instrumentoActual.ubicacion_actual || "";
+  let nuevaUbicacionId = instrumentoActual.ubicacion_id || null;
+  let destinoMovimiento = destino;
 
   if (tipo === "Entrada") {
     nuevaUbicacion = "Laboratorio";
+    destinoMovimiento = "Laboratorio";
+
+    const lab = (catalogos.ubicaciones || [])
+      .find(u => String(getNombre(u)).toLowerCase() === "laboratorio");
+
+    nuevaUbicacionId = lab?.id || null;
   } else if (destino) {
     nuevaUbicacion = destino;
+    nuevaUbicacionId = maquinaId || null;
   }
 
   const esSalida = (tipo === "Salida");
@@ -1006,15 +1130,15 @@ async function registrarMovimiento() {
     fecha: new Date().toISOString(),
     tipo_movimiento: tipo,
     responsable,
-    destino,
+    destino: destinoMovimiento,
     observaciones: obsFinal,
     operario1: null,
     operario2: null
   };
 
   if (esSalida) {
-    if (operario1) datosMovimiento.operario1 = operario1;
-    if (operario2) datosMovimiento.operario2 = operario2;
+    if (operario1Id) datosMovimiento.operario1 = operario1;
+    if (operario2Id) datosMovimiento.operario2 = operario2;
   }
 
   try {
@@ -1029,7 +1153,10 @@ async function registrarMovimiento() {
 
     const { error: errorUpd } = await sb
       .from("instrumentos")
-      .update({ ubicacion_actual: nuevaUbicacion })
+      .update({
+        ubicacion_actual: nuevaUbicacion,
+        ubicacion_id: nuevaUbicacionId
+      })
       .eq("codigo", instrumentoActual.codigo);
 
     if (errorUpd) {
@@ -1045,14 +1172,15 @@ async function registrarMovimiento() {
     }
 
     instrumentoActual.ubicacion_actual = nuevaUbicacion;
+    instrumentoActual.ubicacion_id = nuevaUbicacionId;
 
     await cargarMovimientos(instrumentoActual.codigo);
 
     $("#tipoMovimiento").value = "";
+    $("#maquinaDestino").value = "";
     $("#responsable").value = "";
     $("#operario1").value = "";
     $("#operario2").value = "";
-    $("#destino").value = "";
     $("#observaciones").value = "";
 
     usoBajoResponsabilidad = false;
@@ -1158,10 +1286,10 @@ $("#btnCargarInstrumento").onclick = cargarInstrumento;
 $("#btnRegistrar").onclick = registrarMovimiento;
 $("#btnLimpiar").onclick = () => {
   $("#tipoMovimiento").value = "";
+  $("#maquinaDestino").value = "";
   $("#responsable").value = "";
   $("#operario1").value = "";
   $("#operario2").value = "";
-  $("#destino").value = "";
   $("#observaciones").value = "";
 };
 
@@ -1206,9 +1334,11 @@ $("#btnCerrarQR").onclick = () => {
   cerrarQR();
 };
 
+cargarCatalogosMovimiento();
 actualizarBotonRegistrar();
 </script>
 
 </body>
 </html>
+
 
