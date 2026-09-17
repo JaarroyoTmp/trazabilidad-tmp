@@ -660,7 +660,15 @@ const fmtDate = iso => {
   if (!iso) return "—";
   const d = new Date(iso);
   if (isNaN(d)) return "—";
-  return d.toISOString().replace("T"," ").slice(0,16) + " UTC";
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: "Europe/Madrid",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(d).replace(",", "") + " · Madrid";
 };
 
 const fmtISOshort = iso => {
@@ -747,15 +755,73 @@ async function cargarCatalogosMovimiento() {
   // Máquina / destino se carga desde ubicaciones.
   catalogos.maquinas = catalogos.ubicaciones;
 
-  catalogos.responsables = await leerTabla("responsables");
   catalogos.usuarios = await leerTabla("usuarios");
 
-  const responsables = catalogos.responsables.length ? catalogos.responsables : catalogos.usuarios;
+  // Responsables de Calidad autorizados para movimientos TMP.
+  // Se fijan expresamente para evitar nombres genéricos como "Responsable TMP".
+  catalogos.responsables = [
+    { id: "David", nombre: "David", activo: true },
+    { id: "Guillermo", nombre: "Guillermo", activo: true },
+    { id: "Israel", nombre: "Israel", activo: true },
+    { id: "José Antonio", nombre: "José Antonio", activo: true }
+  ];
 
   pintarSelect("maquinaDestino", catalogos.maquinas, "Selecciona máquina / destino...");
-  pintarSelect("responsable", responsables, "Selecciona responsable calidad...");
+  pintarSelect("responsable", catalogos.responsables, "Selecciona responsable calidad...");
   pintarSelect("operario1", catalogos.usuarios, "Selecciona operario 1...");
   pintarSelect("operario2", catalogos.usuarios, "Selecciona operario 2...");
+}
+
+function seleccionarOpcionPorTexto(selectId, texto) {
+  const sel = document.getElementById(selectId);
+  const objetivo = String(texto || "").trim().toLowerCase();
+  if (!sel || !objetivo) return false;
+
+  const opt = Array.from(sel.options).find(o =>
+    String(o.textContent || "").trim().toLowerCase() === objetivo ||
+    String(o.value || "").trim().toLowerCase() === objetivo
+  );
+
+  if (!opt) return false;
+  sel.value = opt.value;
+  return true;
+}
+
+async function precargarDatosUltimaSalida() {
+  if (!instrumentoActual || !sb) return;
+  if ($("#tipoMovimiento").value !== "Entrada") return;
+
+  try {
+    const { data, error } = await sb
+      .from("movimientos")
+      .select("responsable,operario1,operario2,fecha,tipo_movimiento")
+      .eq("codigo_instrumento", instrumentoActual.codigo)
+      .eq("tipo_movimiento", "Salida")
+      .order("fecha", { ascending:false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("No se pudo recuperar la última salida:", error.message);
+      return;
+    }
+    if (!data) return;
+
+    seleccionarOpcionPorTexto("responsable", data.responsable);
+    seleccionarOpcionPorTexto("operario1", data.operario1);
+    seleccionarOpcionPorTexto("operario2", data.operario2);
+
+    const aviso = document.getElementById("alertMovimiento");
+    if (aviso) {
+      aviso.textContent = "Entrada preparada con los datos de la última salida. Revisa y registra el movimiento.";
+      aviso.style.background = "rgba(30,64,175,.28)";
+      aviso.style.borderColor = "#60a5fa";
+      aviso.style.color = "#dbeafe";
+      aviso.classList.remove("hidden");
+    }
+  } catch (e) {
+    console.warn("Error precargando datos de última salida:", e);
+  }
 }
 
 function construirDestinoTexto() {
@@ -914,6 +980,10 @@ async function cargarInstrumento() {
     pintarInstrumento(data);
 
     await cargarMovimientos(codigo);
+
+    if ($("#tipoMovimiento").value === "Entrada") {
+      await precargarDatosUltimaSalida();
+    }
 
   } catch (e) {
     console.error(e);
@@ -1136,10 +1206,10 @@ async function registrarMovimiento() {
     operario2: null
   };
 
-  if (esSalida) {
-    if (operario1Id) datosMovimiento.operario1 = operario1;
-    if (operario2Id) datosMovimiento.operario2 = operario2;
-  }
+  // En Salida y Entrada se guardan los operarios seleccionados.
+  // En una Entrada normalmente vienen precargados desde la última Salida.
+  if (operario1Id) datosMovimiento.operario1 = operario1;
+  if (operario2Id) datosMovimiento.operario2 = operario2;
 
   try {
     const { error: errorMov } = await sb.from("movimientos").insert(datosMovimiento);
@@ -1299,6 +1369,18 @@ $("#codigoInput").onkeydown = e => {
     cargarInstrumento();
   }
 };
+
+$("#tipoMovimiento").addEventListener("change", async () => {
+  const tipo = $("#tipoMovimiento").value;
+  if (tipo === "Entrada") {
+    // En entrada, el destino es Laboratorio y recuperamos las personas de la última salida.
+    const lab = Array.from($("#maquinaDestino").options).find(o =>
+      String(o.textContent || "").trim().toLowerCase() === "laboratorio"
+    );
+    if (lab) $("#maquinaDestino").value = lab.value;
+    await precargarDatosUltimaSalida();
+  }
+});
 
 $("#btnForzarUso").onclick = () => {
   if (!instrumentoActual) return;

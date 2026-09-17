@@ -46,8 +46,8 @@
     <div class="grid">
       <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
       <div><label>Descripción *</label><input id="descripcion" placeholder="Ej. Tampón liso P/NP"></div>
-      <div><label>Familia de calibración *</label><select id="familia_calibracion_id"><option value="">Cargando familias...</option></select><div class="hint">Define cómo se calibrará el equipo.</div></div>
-      <div><label>Propietario / Cliente *</label><select id="propietario_id"><option value="">Cargando propietarios...</option></select><div class="hint">Diferencia equipos Paramio de equipos de cliente.</div></div>
+      <div><label>Familia de calibración *</label><select id="familia_calibracion_id"><option value="">Cargando familias...</option></select><div class="hint">Dato maestro: determina cómo se calibrará el equipo. No se admite texto libre.</div></div>
+      <div><label>Propietario / Cliente</label><input id="propietario_nombre" list="propietarios_lista" value="Propiedad TMP" placeholder="Propiedad TMP o escribe cliente"><datalist id="propietarios_lista"></datalist><div class="hint">Por defecto: Propiedad TMP. Puedes elegir un cliente existente o escribir uno nuevo.</div></div>
       <div><label>Fabricante *</label><input id="fabricante" placeholder="Ej. Mitutoyo"></div>
       <div><label>Rango / Especificación</label><input id="rango" placeholder="Ej. Ø8 H7"></div>
       <div><label>Precisión</label><input id="precision" placeholder="Ej. 0.01 mm / Atributo"></div>
@@ -90,7 +90,7 @@
     codigo: $("codigo"),
     descripcion: $("descripcion"),
     familia_calibracion_id: $("familia_calibracion_id"),
-    propietario_id: $("propietario_id"),
+    propietario_nombre: $("propietario_nombre"),
     fabricante: $("fabricante"),
     rango: $("rango"),
     precision: $("precision"),
@@ -124,27 +124,102 @@
       return;
     }
 
-    const [familiasRes, propietariosRes, ubicacionesRes] = await Promise.all([
-      supabase.from("familias_calibracion").select("id,nombre,codigo,activo").eq("activo", true).order("nombre"),
-      supabase.from("propietarios_equipos").select("id,nombre,tipo,activo").eq("activo", true).order("nombre"),
-      supabase.from("ubicaciones").select("id,nombre,activo").eq("activo", true).order("nombre")
+    // Familias: primero intenta el catálogo nuevo y, si no existe o viene vacío,
+    // usa la tabla histórica `familias`, que es la que utiliza App_Familias_TMP.html.
+    let familias = [];
+    let familiasError = null;
+
+    const famNueva = await supabase
+      .from("familias_calibracion")
+      .select("*");
+
+    if (!famNueva.error && (famNueva.data || []).length) {
+      familias = (famNueva.data || []).filter(x => x.activo === undefined || x.activo === true);
+    } else {
+      const famHistorica = await supabase
+        .from("familias")
+        .select("*")
+        .order("familia", { ascending:true });
+
+      if (famHistorica.error) {
+        familiasError = famHistorica.error;
+        console.error("Error cargando familias:", famHistorica.error);
+      } else {
+        familias = (famHistorica.data || []).filter(x => {
+          const estado = String(x.estado || "activo").toLowerCase();
+          return estado !== "inactivo" && estado !== "baja";
+        });
+      }
+    }
+
+    const [propietariosRes, ubicacionesRes] = await Promise.all([
+      supabase.from("propietarios_equipos").select("*").order("nombre"),
+      supabase.from("ubicaciones").select("*").order("nombre")
     ]);
 
-    if (familiasRes.error) console.error("Error familias_calibracion:", familiasRes.error);
     if (propietariosRes.error) console.error("Error propietarios_equipos:", propietariosRes.error);
     if (ubicacionesRes.error) console.error("Error ubicaciones:", ubicacionesRes.error);
 
-    f.familia_calibracion_id.innerHTML =
-      `<option value="">Selecciona familia...</option>` +
-      (familiasRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
+    f.familia_calibracion_id.innerHTML = `<option value="">Selecciona familia...</option>` +
+      familias.map(x => optionHTML(x.id, x.nombre || x.familia || x.codigo || "Familia sin nombre")).join("");
 
-    f.propietario_id.innerHTML =
-      `<option value="">Selecciona propietario...</option>` +
-      (propietariosRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
+    if (!familias.length) {
+      f.familia_calibracion_id.innerHTML = `<option value="">No hay familias disponibles</option>`;
+      showMsg(msgAlta, "No se han podido cargar las familias de calibración. Revisa el catálogo de familias antes de guardar.", "err");
+    }
+
+    const listaProp = document.getElementById("propietarios_lista");
+    listaProp.innerHTML = `<option value="Propiedad TMP"></option>` +
+      (propietariosRes.data || [])
+        .filter(x => x && (x.activo === undefined || x.activo === true))
+        .map(x => `<option value="${String(x.nombre || "").replaceAll('"','&quot;')}"></option>`)
+        .join("");
 
     f.ubicacion_id.innerHTML =
       `<option value="">Selecciona ubicación...</option>` +
-      (ubicacionesRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
+      (ubicacionesRes.data || [])
+        .filter(x => x && (x.activo === undefined || x.activo === true))
+        .map(x => optionHTML(x.id, x.nombre)).join("");
+  }
+
+  async function obtenerPropietarioNombre(propietarioId) {
+    if (!propietarioId) return "Propiedad TMP";
+    const { data, error } = await supabase
+      .from("propietarios_equipos")
+      .select("nombre")
+      .eq("id", propietarioId)
+      .maybeSingle();
+    if (error) {
+      console.warn("No se pudo resolver propietario:", error.message);
+      return "Propiedad TMP";
+    }
+    return data?.nombre || "Propiedad TMP";
+  }
+
+  async function resolverPropietarioId(nombreEscrito) {
+    const nombre = String(nombreEscrito || "").trim();
+    if (!nombre || /^propiedad\s+tmp$/i.test(nombre) || /^paramio$/i.test(nombre)) return null;
+
+    const { data: existentes, error: errorBuscar } = await supabase
+      .from("propietarios_equipos")
+      .select("id,nombre")
+      .ilike("nombre", nombre)
+      .limit(1);
+
+    if (!errorBuscar && existentes?.length) return existentes[0].id;
+
+    const { data: creado, error: errorCrear } = await supabase
+      .from("propietarios_equipos")
+      .insert({ nombre, tipo: "CLIENTE", activo: true })
+      .select("id")
+      .single();
+
+    if (errorCrear) {
+      console.error("No se pudo crear propietario/cliente:", errorCrear);
+      throw new Error("No se pudo guardar el propietario / cliente escrito.");
+    }
+
+    return creado?.id || null;
   }
 
   function seleccionarValor(selectEl, valor) {
@@ -173,6 +248,7 @@
   function limpiarFormulario(){
     for(const key in f){ f[key].value = ""; }
     f.tipo_calibracion.value = "Interna";
+    f.propietario_nombre.value = "Propiedad TMP";
     hideMsg(msgAlta);
   }
 
@@ -208,7 +284,7 @@
 
     f.descripcion.value = data.descripcion ?? "";
     seleccionarValor(f.familia_calibracion_id, data.familia_calibracion_id);
-    seleccionarValor(f.propietario_id, data.propietario_id);
+    f.propietario_nombre.value = await obtenerPropietarioNombre(data.propietario_id);
     f.fabricante.value = data.fabricante ?? "";
     f.rango.value = data.rango ?? "";
     f.precision.value = data.precision ?? "";
@@ -237,7 +313,7 @@
     const descripcion = f.descripcion.value.trim();
     const fabricante = f.fabricante.value.trim();
     const familiaId = f.familia_calibracion_id.value || null;
-    const propietarioId = f.propietario_id.value || null;
+    const propietarioNombre = f.propietario_nombre.value.trim() || "Propiedad TMP";
     const ubicacionId = f.ubicacion_id.value || null;
     const ubicacionActual = ubicacionId ? getSelectedText(f.ubicacion_id) : null;
 
@@ -249,12 +325,16 @@
       showMsg(msgAlta,"Selecciona la familia de calibración.","err");
       return;
     }
-    if(!propietarioId){
-      showMsg(msgAlta,"Selecciona el propietario / cliente.","err");
-      return;
-    }
     if(!ubicacionId){
       showMsg(msgAlta,"Selecciona la ubicación actual.","err");
+      return;
+    }
+
+    let propietarioId = null;
+    try {
+      propietarioId = await resolverPropietarioId(propietarioNombre);
+    } catch (e) {
+      showMsg(msgAlta, e.message || "No se pudo resolver el propietario / cliente.", "err");
       return;
     }
 
