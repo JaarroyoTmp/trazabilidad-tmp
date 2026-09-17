@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TMP · Alta / Edición / Baja de Instrumentos</title>
+  <title>TMP · Alta / Edición / Baja de Instrumentos · Familias v3</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
   <style>
     :root{--bg:#0f1b2d;--panel:#12233b;--muted:#a9b4c3;--txt:#e8f0ff;--primary:#1e88e5;--primary-600:#1565c0;--accent:#ff8f00;--danger:#e53935;--chip:#20324b;--input:#0b1627;--border:#1c2a44}
@@ -46,7 +46,16 @@
     <div class="grid">
       <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
       <div><label>Descripción *</label><input id="descripcion" placeholder="Ej. Tampón liso P/NP"></div>
-      <div><label>Familia de calibración *</label><select id="familia_calibracion_id"><option value="">Cargando familias...</option></select><div class="hint">Dato maestro: determina cómo se calibrará el equipo. No se admite texto libre.</div></div>
+      <div>
+        <label>Familia del instrumento *</label>
+        <select id="familia_id"><option value="">Cargando familias...</option></select>
+        <div class="hint">Selecciona qué tipo de instrumento es. Esta familia determina automáticamente su familia/motor de calibración.</div>
+      </div>
+      <div>
+        <label>Calibración asignada</label>
+        <div id="familia_calibracion_info" style="width:100%;background:var(--input);color:var(--txt);border-radius:10px;border:1px solid var(--border);padding:9px 11px;min-height:40px">Pendiente de seleccionar familia</div>
+        <div class="hint">Asignación automática desde Supabase. No se edita manualmente.</div>
+      </div>
       <div><label>Propietario / Cliente</label><input id="propietario_nombre" list="propietarios_lista" value="Propiedad TMP" placeholder="Propiedad TMP o escribe cliente"><datalist id="propietarios_lista"></datalist><div class="hint">Por defecto: Propiedad TMP. Puedes elegir un cliente existente o escribir uno nuevo.</div></div>
       <div><label>Fabricante *</label><input id="fabricante" placeholder="Ej. Mitutoyo"></div>
       <div><label>Rango / Especificación</label><input id="rango" placeholder="Ej. Ø8 H7"></div>
@@ -89,7 +98,8 @@
   const f = {
     codigo: $("codigo"),
     descripcion: $("descripcion"),
-    familia_calibracion_id: $("familia_calibracion_id"),
+    familia_id: $("familia_id"),
+    familia_calibracion_info: $("familia_calibracion_info"),
     propietario_nombre: $("propietario_nombre"),
     fabricante: $("fabricante"),
     rango: $("rango"),
@@ -100,6 +110,38 @@
     fecha_proxima_calibracion: $("fecha_proxima_calibracion"),
     observaciones: $("observaciones"),
   };
+
+  let familiasInstrumento = [];
+  let familiasCalibracion = [];
+  let familiasCalibracionById = new Map();
+
+  function actualizarCalibracionAsignada(){
+    const familiaId = f.familia_id.value || null;
+    const familia = familiasInstrumento.find(x => String(x.id) === String(familiaId));
+
+    if(!familia){
+      f.familia_calibracion_info.textContent = "Pendiente de seleccionar familia";
+      f.familia_calibracion_info.style.borderColor = "var(--border)";
+      return;
+    }
+
+    if(!familia.familia_calibracion_id){
+      f.familia_calibracion_info.textContent = "Sin motor/familia de calibración asignada todavía";
+      f.familia_calibracion_info.style.borderColor = "#ff8f00";
+      return;
+    }
+
+    const cal = familiasCalibracionById.get(String(familia.familia_calibracion_id));
+    if(!cal){
+      f.familia_calibracion_info.textContent = "Asignación configurada, pero no se pudo leer su detalle";
+      f.familia_calibracion_info.style.borderColor = "#ff8f00";
+      return;
+    }
+
+    const codigo = cal.codigo ? ` · ${cal.codigo}` : "";
+    f.familia_calibracion_info.textContent = `${cal.nombre || "Familia de calibración"}${codigo}`;
+    f.familia_calibracion_info.style.borderColor = "#1e88e5";
+  }
 
   function showMsg(el, text, type="info") {
     el.className = "alert " + type;
@@ -124,33 +166,33 @@
       return;
     }
 
-    // Familias: primero intenta el catálogo nuevo y, si no existe o viene vacío,
-    // usa la tabla histórica `familias`, que es la que utiliza App_Familias_TMP.html.
-    let familias = [];
-    let familiasError = null;
+    // Catálogo maestro de tipos de instrumento + catálogo técnico de calibración.
+    // El usuario elige familias_instrumentos; Supabase sincroniza familia_calibracion_id mediante trigger.
+    const [familiasInstRes, familiasCalRes] = await Promise.all([
+      supabase
+        .from("familias_instrumentos")
+        .select("id,nombre,activo,familia_calibracion_id")
+        .eq("activo", true)
+        .order("nombre", { ascending:true }),
+      supabase
+        .from("familias_calibracion")
+        .select("id,nombre,codigo,activo")
+        .eq("activo", true)
+        .order("nombre", { ascending:true })
+    ]);
 
-    const famNueva = await supabase
-      .from("familias_calibracion")
-      .select("*");
-
-    if (!famNueva.error && (famNueva.data || []).length) {
-      familias = (famNueva.data || []).filter(x => x.activo === undefined || x.activo === true);
-    } else {
-      const famHistorica = await supabase
-        .from("familias")
-        .select("*")
-        .order("familia", { ascending:true });
-
-      if (famHistorica.error) {
-        familiasError = famHistorica.error;
-        console.error("Error cargando familias:", famHistorica.error);
-      } else {
-        familias = (famHistorica.data || []).filter(x => {
-          const estado = String(x.estado || "activo").toLowerCase();
-          return estado !== "inactivo" && estado !== "baja";
-        });
-      }
+    if (familiasInstRes.error) {
+      console.error("Error familias_instrumentos:", familiasInstRes.error);
     }
+    if (familiasCalRes.error) {
+      console.error("Error familias_calibracion:", familiasCalRes.error);
+    }
+
+    familiasInstrumento = familiasInstRes.data || [];
+    familiasCalibracion = familiasCalRes.data || [];
+    familiasCalibracionById = new Map(
+      familiasCalibracion.map(x => [String(x.id), x])
+    );
 
     const [propietariosRes, ubicacionesRes] = await Promise.all([
       supabase.from("propietarios_equipos").select("*").order("nombre"),
@@ -160,13 +202,16 @@
     if (propietariosRes.error) console.error("Error propietarios_equipos:", propietariosRes.error);
     if (ubicacionesRes.error) console.error("Error ubicaciones:", ubicacionesRes.error);
 
-    f.familia_calibracion_id.innerHTML = `<option value="">Selecciona familia...</option>` +
-      familias.map(x => optionHTML(x.id, x.nombre || x.familia || x.codigo || "Familia sin nombre")).join("");
+    f.familia_id.innerHTML = `<option value="">Selecciona familia de instrumento...</option>` +
+      familiasInstrumento.map(x => optionHTML(x.id, x.nombre || "Familia sin nombre")).join("");
 
-    if (!familias.length) {
-      f.familia_calibracion_id.innerHTML = `<option value="">No hay familias disponibles</option>`;
-      showMsg(msgAlta, "No se han podido cargar las familias de calibración. Revisa el catálogo de familias antes de guardar.", "err");
+    if (!familiasInstrumento.length) {
+      f.familia_id.innerHTML = `<option value="">No hay familias disponibles</option>`;
+      const detalle = familiasInstRes.error?.message ? ` (${familiasInstRes.error.message})` : "";
+      showMsg(msgAlta, "No se han podido cargar las familias de instrumentos desde Supabase" + detalle, "err");
     }
+
+    actualizarCalibracionAsignada();
 
     const listaProp = document.getElementById("propietarios_lista");
     listaProp.innerHTML = `<option value="Propiedad TMP"></option>` +
@@ -246,9 +291,19 @@
   };
 
   function limpiarFormulario(){
-    for(const key in f){ f[key].value = ""; }
-    f.tipo_calibracion.value = "Interna";
+    f.codigo.value = "";
+    f.descripcion.value = "";
+    f.familia_id.value = "";
     f.propietario_nombre.value = "Propiedad TMP";
+    f.fabricante.value = "";
+    f.rango.value = "";
+    f.precision.value = "";
+    f.tipo_calibracion.value = "Interna";
+    f.ubicacion_id.value = "";
+    f.fecha_calibracion.value = "";
+    f.fecha_proxima_calibracion.value = "";
+    f.observaciones.value = "";
+    actualizarCalibracionAsignada();
     hideMsg(msgAlta);
   }
 
@@ -283,7 +338,8 @@
     }
 
     f.descripcion.value = data.descripcion ?? "";
-    seleccionarValor(f.familia_calibracion_id, data.familia_calibracion_id);
+    seleccionarValor(f.familia_id, data.familia_id);
+    actualizarCalibracionAsignada();
     f.propietario_nombre.value = await obtenerPropietarioNombre(data.propietario_id);
     f.fabricante.value = data.fabricante ?? "";
     f.rango.value = data.rango ?? "";
@@ -312,7 +368,7 @@
     const codigo = f.codigo.value.trim();
     const descripcion = f.descripcion.value.trim();
     const fabricante = f.fabricante.value.trim();
-    const familiaId = f.familia_calibracion_id.value || null;
+    const familiaId = f.familia_id.value || null;
     const propietarioNombre = f.propietario_nombre.value.trim() || "Propiedad TMP";
     const ubicacionId = f.ubicacion_id.value || null;
     const ubicacionActual = ubicacionId ? getSelectedText(f.ubicacion_id) : null;
@@ -322,7 +378,7 @@
       return;
     }
     if(!familiaId){
-      showMsg(msgAlta,"Selecciona la familia de calibración.","err");
+      showMsg(msgAlta,"Selecciona la familia del instrumento.","err");
       return;
     }
     if(!ubicacionId){
@@ -355,7 +411,7 @@
       rango: f.rango.value || null,
       precision: f.precision.value || null,
       tipo_calibracion: f.tipo_calibracion.value || "Interna",
-      familia_calibracion_id: familiaId,
+      familia_id: familiaId,
       propietario_id: propietarioId,
       ubicacion_id: ubicacionId,
       ubicacion_actual: ubicacionActual,
@@ -378,6 +434,8 @@
 
     showMsg(msgAlta,`Instrumento ${codigo} guardado correctamente.`,"ok");
   }
+
+  f.familia_id.addEventListener("change", actualizarCalibracionAsignada);
 
   $("btnGuardar").onclick = guardarInstrumento;
 
