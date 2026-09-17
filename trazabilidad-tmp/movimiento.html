@@ -660,7 +660,11 @@ const fmtDate = iso => {
   if (!iso) return "—";
   const d = new Date(iso);
   if (isNaN(d)) return "—";
-  return d.toISOString().replace("T"," ").slice(0,16) + " UTC";
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: "Europe/Madrid",
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false
+  }).format(d).replace(",", "") + " h";
 };
 
 const fmtISOshort = iso => {
@@ -747,13 +751,16 @@ async function cargarCatalogosMovimiento() {
   // Máquina / destino se carga desde ubicaciones.
   catalogos.maquinas = catalogos.ubicaciones;
 
-  catalogos.responsables = await leerTabla("responsables");
+  catalogos.responsables = [
+    { id: "David", nombre: "David", activo: true },
+    { id: "Guillermo", nombre: "Guillermo", activo: true },
+    { id: "Israel", nombre: "Israel", activo: true },
+    { id: "José Antonio", nombre: "José Antonio", activo: true }
+  ];
   catalogos.usuarios = await leerTabla("usuarios");
 
-  const responsables = catalogos.responsables.length ? catalogos.responsables : catalogos.usuarios;
-
   pintarSelect("maquinaDestino", catalogos.maquinas, "Selecciona máquina / destino...");
-  pintarSelect("responsable", responsables, "Selecciona responsable calidad...");
+  pintarSelect("responsable", catalogos.responsables, "Selecciona responsable calidad...");
   pintarSelect("operario1", catalogos.usuarios, "Selecciona operario 1...");
   pintarSelect("operario2", catalogos.usuarios, "Selecciona operario 2...");
 }
@@ -914,6 +921,7 @@ async function cargarInstrumento() {
     pintarInstrumento(data);
 
     await cargarMovimientos(codigo);
+    await precargarPersonasUltimaSalida();
 
   } catch (e) {
     console.error(e);
@@ -988,6 +996,33 @@ function pintarInstrumento(inst) {
   }
 
   actualizarBotonRegistrar();
+}
+
+/* ===========================================================
+   ENTRADA: RECUPERAR PERSONAS DE LA ÚLTIMA SALIDA
+=========================================================== */
+async function precargarPersonasUltimaSalida() {
+  if (!sb || !instrumentoActual || $("#tipoMovimiento").value !== "Entrada") return;
+  try {
+    const { data, error } = await sb.from("movimientos")
+      .select("responsable,operario1,operario2,fecha")
+      .eq("codigo_instrumento", instrumentoActual.codigo)
+      .eq("tipo_movimiento", "Salida")
+      .order("fecha", { ascending:false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return;
+
+    const setByText = (id, texto) => {
+      const sel = $(id);
+      if (!sel || !texto) return;
+      const opt = Array.from(sel.options).find(o => o.textContent.trim().toLowerCase() === String(texto).trim().toLowerCase());
+      if (opt) sel.value = opt.value;
+    };
+    setByText("#responsable", data.responsable);
+    setByText("#operario1", data.operario1);
+    setByText("#operario2", data.operario2);
+  } catch (e) { console.warn("No se pudo recuperar la última salida:", e); }
 }
 
 /* ===========================================================
@@ -1320,6 +1355,14 @@ $("#btnForzarUso").onclick = () => {
 
   actualizarBotonRegistrar();
 };
+
+
+document.getElementById("tipoMovimiento")?.addEventListener("change", async () => {
+  if ($("#tipoMovimiento").value === "Entrada") {
+    $("#maquinaDestino").value = "";
+    await precargarPersonasUltimaSalida();
+  }
+});
 
 $("#btnCalibrarAhora").onclick = () => {
   if (!instrumentoActual) return;

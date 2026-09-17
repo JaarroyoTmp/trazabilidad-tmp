@@ -47,7 +47,7 @@
       <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
       <div><label>Descripción *</label><input id="descripcion" placeholder="Ej. Tampón liso P/NP"></div>
       <div><label>Familia de calibración *</label><select id="familia_calibracion_id"><option value="">Cargando familias...</option></select><div class="hint">Define cómo se calibrará el equipo.</div></div>
-      <div><label>Propietario / Cliente *</label><select id="propietario_id"><option value="">Cargando propietarios...</option></select><div class="hint">Diferencia equipos Paramio de equipos de cliente.</div></div>
+      <div><label>Propietario / Cliente</label><select id="propietario_id"><option value="">Propiedad TMP (por defecto)</option></select><div class="hint">Opcional. Déjalo en Propiedad TMP salvo que el equipo pertenezca a un cliente externo.</div></div>
       <div><label>Fabricante *</label><input id="fabricante" placeholder="Ej. Mitutoyo"></div>
       <div><label>Rango / Especificación</label><input id="rango" placeholder="Ej. Ø8 H7"></div>
       <div><label>Precisión</label><input id="precision" placeholder="Ej. 0.01 mm / Atributo"></div>
@@ -138,9 +138,12 @@
       `<option value="">Selecciona familia...</option>` +
       (familiasRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
 
+    const propietarios = propietariosRes.data || [];
     f.propietario_id.innerHTML =
-      `<option value="">Selecciona propietario...</option>` +
-      (propietariosRes.data || []).map(x => optionHTML(x.id, x.nombre)).join("");
+      `<option value="">Propiedad TMP (por defecto)</option>` +
+      propietarios.map(x => optionHTML(x.id, x.nombre)).join("");
+    const tmp = propietarios.find(x => /paramio|tmp/i.test(String(x.nombre || "")) && !/cliente/i.test(String(x.tipo || "")));
+    if (tmp) f.propietario_id.value = tmp.id;
 
     f.ubicacion_id.innerHTML =
       `<option value="">Selecciona ubicación...</option>` +
@@ -247,10 +250,6 @@
     }
     if(!familiaId){
       showMsg(msgAlta,"Selecciona la familia de calibración.","err");
-      return;
-    }
-    if(!propietarioId){
-      showMsg(msgAlta,"Selecciona el propietario / cliente.","err");
       return;
     }
     if(!ubicacionId){
