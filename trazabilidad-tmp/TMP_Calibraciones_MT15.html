@@ -41,7 +41,7 @@
       <a href="./home.html">⌂ Inicio</a>
       <a href="./calibraciones.html" class="active">◎ Centro calibración</a>
       <a href="./TMP_Calibraciones_MT15.html" class="active">▣ MT15 lisos</a>
-      <a href="./core/metrology_core/thread/thread_mt16_workflow.html">⦿ MT16 roscados</a>
+      <a href="./mt16.html">⦿ MT16 roscados</a>
       <a href="./App_Patrones_TMP.html">▤ Patrones</a>
       <a href="./calibraciones_historico.html">▥ Historial</a>
     </nav>
@@ -122,5 +122,16 @@
   </main>
 </div>
 <script type="module" src="./calibraciones_mt15 copy/core/metrology_core/app_mt15.js"></script>
+<script type="module">
+  const params = new URLSearchParams(window.location.search);
+  const codigo = (params.get("codigo") || "").trim();
+  if (codigo) {
+    const input = document.getElementById("insCodigo");
+    const btn = document.getElementById("btnCargarInstrumento");
+    if (input) input.value = codigo;
+    // El módulo principal se ejecuta antes que este bloque por orden de módulos.
+    setTimeout(() => { if (btn) btn.click(); }, 0);
+  }
+</script>
 </body>
 </html>

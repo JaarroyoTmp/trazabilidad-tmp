@@ -91,12 +91,12 @@ footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6
       <div><div class="logo-title">PARAMIO</div><div class="logo-sub">TALLERES MECÁNICOS</div></div>
     </div>
     <nav class="nav-list">
-      <a class="nav-item" href="../../home.html"><span class="nav-ico">⌂</span>Inicio</a>
-      <a class="nav-item" href="../../calibraciones.html"><span class="nav-ico">⚗</span>Centro calibración</a>
+      <a class="nav-item" href="/home.html"><span class="nav-ico">⌂</span>Inicio</a>
+      <a class="nav-item" href="/calibraciones.html"><span class="nav-ico">⚗</span>Centro calibración</a>
       <a class="nav-item active" href="#"><span class="nav-ico">◎</span>MT16 roscados</a>
-      <a class="nav-item" href="../../App_Patrones_TMP.html"><span class="nav-ico">▤</span>Patrones</a>
-      <a class="nav-item" href="../../certificados.html"><span class="nav-ico">▧</span>Informes</a>
-      <a class="nav-item" href="../../buscar_instrumento.html"><span class="nav-ico">⌕</span>Buscar</a>
+      <a class="nav-item" href="/App_Patrones_TMP.html"><span class="nav-ico">▤</span>Patrones</a>
+      <a class="nav-item" href="/certificados.html"><span class="nav-ico">▧</span>Informes</a>
+      <a class="nav-item" href="/buscar_instrumento.html"><span class="nav-ico">⌕</span>Buscar</a>
     </nav>
     <div class="sidebar-status">
       <div class="sys-row"><span class="dot"></span><div><strong>MT16</strong><br>Procedimiento guiado</div></div>
@@ -954,7 +954,14 @@ $("#equipmentSearchBtn").addEventListener("click",runEquipmentSearch);
 document.addEventListener("keydown",ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==="k"){ev.preventDefault();$("#equipmentSearch").focus();}});
 setStep(0);
 setTxt("message", "Busca un código real de Supabase. MT16 no calcula hasta resolver equipo y familia.");
-$("#equipmentSearch").focus();
+const urlParams = new URLSearchParams(window.location.search);
+const codigoUrl = (urlParams.get("codigo") || "").trim();
+if (codigoUrl) {
+  $("#equipmentSearch").value = codigoUrl;
+  runEquipmentSearch();
+} else {
+  $("#equipmentSearch").focus();
+}
 </script>
 </body>
 </html>
