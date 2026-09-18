@@ -1223,12 +1223,10 @@
       .map(inst => {
         const cal = estadoCalibracionFromInstrumento(inst);
         const chip = `<span class="calib-chip ${cal.clase}">${escapeHome(cal.estado)}</span>`;
-        const estadoOperativo = inst.estado || (esLaboratorio(inst.ubicacion_actual) ? "En laboratorio" : "En uso");
         const prox = inst.fecha_proxima_calibracion || inst.proxima_calibracion;
         return `<tr>
           <td><strong>${escapeHome(inst.codigo || "")}</strong></td>
           <td>${escapeHome(inst.descripcion || "-")}</td>
-          <td>${escapeHome(estadoOperativo)}</td>
           <td>${chip}</td>
           <td>${formatDateOnly(prox)}</td>
           <td><a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(inst.codigo || "")}">Ver ficha</a></td>
