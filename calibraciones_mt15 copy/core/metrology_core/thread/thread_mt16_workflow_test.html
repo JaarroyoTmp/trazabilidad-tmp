@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP MT16 · V92 UX Laboratorio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#eef6ff;--bg2:#f7fbff;--ink:#0d2340;--muted:#66809a;--panel:#fff;
+  --line:#dbe7f2;--line2:#cbddeb;--blue:#2563eb;--green:#22c55e;--orange:#f59e0b;--red:#ef4444;
+  --shadow:0 14px 36px rgba(15,45,75,.10);--shadow2:0 8px 20px rgba(15,45,75,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 18% -10%,rgba(37,99,235,.16),transparent 30%),radial-gradient(circle at 90% 4%,rgba(14,165,233,.18),transparent 34%),linear-gradient(180deg,var(--bg),var(--bg2))}
+.app{min-height:100vh;display:grid;grid-template-columns:248px minmax(0,1fr)}
+.sidebar{position:sticky;top:0;height:100vh;padding:20px 16px;background:linear-gradient(180deg,#07274a 0%,#082544 55%,#061f3a 100%);color:white;box-shadow:12px 0 34px rgba(8,39,74,.18);display:flex;flex-direction:column;gap:18px;z-index:20}
+.logo-block{display:flex;align-items:center;gap:10px;padding:4px 4px 14px;border-bottom:1px solid rgba(255,255,255,.12)}
+.logo-block img{width:44px;height:44px;border-radius:12px;background:white;object-fit:contain;padding:4px}
+.logo-title{font-size:18px;line-height:1;font-weight:900;letter-spacing:.03em}.logo-sub{font-size:10px;opacity:.75;margin-top:3px}
+.nav-list{display:flex;flex-direction:column;gap:5px;overflow:auto;padding-right:2px}
+.nav-item{display:flex;align-items:center;gap:12px;color:#eaf6ff;text-decoration:none;padding:10px 11px;border-radius:12px;border:1px solid transparent;font-weight:760;font-size:14px;transition:.18s ease}
+.nav-item:hover,.nav-item.active{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-color:rgba(255,255,255,.14);transform:translateX(2px);box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.nav-ico{width:24px;height:24px;display:grid;place-items:center;font-size:17px;opacity:.95;flex:0 0 auto}
+.sidebar-status{margin-top:auto;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:rgba(255,255,255,.07);padding:13px;display:grid;gap:10px}
+.sys-row{display:flex;align-items:center;gap:9px;font-size:12px;color:#d9ecff}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.16)}
+.version-side{color:#b9d4ec;font-size:12px;display:flex;justify-content:space-between;padding:0 4px}
+.main{min-width:0;padding:22px 26px 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+.top-left{display:flex;align-items:center;gap:18px}.hamb{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:#17446e;font-weight:900;box-shadow:var(--shadow2)}
+.title-line h1{margin:0;font-size:29px;letter-spacing:-.04em;color:#0d2b50}.title-line span{color:var(--muted);font-size:13px;font-weight:700}
+.top-actions{display:flex;align-items:center;gap:12px}.global-search{width:min(460px,35vw);min-width:280px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow2)}
+.global-search input{border:0;outline:0;background:transparent;width:100%;color:var(--ink);font-size:13px}
+.kbd{font-size:10px;border:1px solid var(--line2);border-radius:8px;padding:3px 6px;color:var(--muted);font-weight:800}
+.user-pill{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 11px 6px 6px;box-shadow:var(--shadow2)}.avatar{width:34px;height:34px;border-radius:50%;background:#1d4ed8;color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px}
+.user-pill strong{display:block;font-size:12px}.user-pill span{display:block;font-size:11px;color:var(--muted)}
+.dashboard{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+
+.hero{grid-column:1/-1;background:linear-gradient(135deg,#1e88d6,#083c8c);color:#fff;border-radius:22px;box-shadow:var(--shadow);padding:22px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:center;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.10)}
+.hero h2{margin:0;font-size:30px;letter-spacing:-.04em}.hero p{margin:7px 0 0;color:rgba(255,255,255,.82);font-size:14px}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.hero-badge{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:850}
+.hero-info{position:relative;z-index:1;display:grid;gap:10px}.hero-info-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.20);border-radius:17px;padding:12px}
+.hero-info-card small{display:block;color:rgba(255,255,255,.68);font-weight:850;text-transform:uppercase;font-size:10px;letter-spacing:.06em;margin-bottom:4px}.hero-info-card strong{font-size:15px}
+
+.wizard{grid-column:1/-1;background:linear-gradient(135deg,#ffffff,#f4f9ff);border:1px solid #bfd7ec;border-radius:28px;box-shadow:0 24px 60px rgba(15,45,75,.14);padding:22px;display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px;min-height:640px}
+.left{border-radius:26px;background:linear-gradient(155deg,#062b6f,#0d63bf 52%,#0ea5e9);color:#fff;padding:22px;display:flex;flex-direction:column;justify-content:space-between}
+.mark{width:88px;height:88px;border-radius:27px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center;font-size:48px;margin-bottom:16px}
+.left h2{margin:0 0 8px;font-size:26px;letter-spacing:-.04em}.left p{margin:0;color:rgba(255,255,255,.86);line-height:1.45;font-size:13px}
+.bullets{display:grid;gap:8px;margin-top:18px}.bullet{display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);border-radius:16px;padding:10px;font-size:12px;font-weight:850}.bullet i{width:22px;height:22px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.18);font-style:normal}
+.progress{margin-top:20px;display:grid;gap:7px}.step{display:flex;gap:10px;align-items:center;color:rgba(255,255,255,.72);font-size:12px;font-weight:850}.step .n{width:26px;height:26px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}.step.active{color:#fff}.step.active .n{background:#22c55e;border-color:#22c55e}.step.done{color:#bbf7d0}
+.mainwiz{display:grid;grid-template-rows:auto auto auto 1fr auto;gap:14px}.head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.head h2{margin:0;color:#0d2b50;font-size:30px;letter-spacing:-.05em}.head p{margin:7px 0 0;color:#66809a;font-size:14px;line-height:1.45}
+.chip{display:inline-flex;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:950;background:#fff8eb;color:#b45309;border:1px solid #fed7aa;white-space:nowrap}.chip.ok{background:#ecfdf3;color:#15803d;border-color:#bbf7d0}.chip.bad{background:#fff2f2;color:#dc2626;border-color:#fecaca}
+.msg{border-radius:20px;border:1px solid #bfdbfe;background:linear-gradient(135deg,#eff6ff,#f8fbff);padding:15px;color:#1d4ed8;font-size:15px;font-weight:900;line-height:1.45}
+.critical{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.tile{border:1px solid #dbe7f2;background:#fff;border-radius:18px;padding:13px;box-shadow:0 6px 16px rgba(15,45,75,.05)}.tile span{display:block;color:#66809a;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.tile strong{display:block;color:#0d2b50;font-size:18px;letter-spacing:-.02em}.tile.rod{background:#fff8eb;border-color:#fed7aa}.tile.rod strong{color:#b45309}.tile.nom{background:#ecfdf3;border-color:#bbf7d0}.tile.nom strong{color:#15803d}
+.work{border:1px solid #dbe7f2;border-radius:24px;background:#fff;padding:18px;min-height:300px;display:grid;align-content:start;gap:14px}.stage{display:none}.stage.active{display:grid;gap:14px}.stage h3{margin:0;color:#0d2b50;font-size:23px;letter-spacing:-.035em}.stage p{margin:0;color:#66809a;font-size:14px;line-height:1.45}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.data{border:1px solid #dbe7f2;background:#f8fbff;border-radius:17px;padding:13px}.data span{display:block;color:#66809a;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.data strong{display:block;color:#0d2b50;font-size:15px}
+.theory{border:1px solid #bbf7d0;background:#ecfdf3;border-radius:20px;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.theory span{display:block;color:#15803d;font-size:11px;font-weight:950;text-transform:uppercase;margin-bottom:5px}.theory strong{color:#064e3b;font-size:20px}
+.help{border-left:4px solid #2563eb;background:#f8fbff;border-radius:14px;padding:12px;color:#0d2b50;font-size:13px;line-height:1.45}
+.read{display:grid;grid-template-columns:1fr 300px;gap:14px}.big{width:100%;border:2px solid #bfdbfe;border-radius:20px;padding:20px;font-size:34px;font-weight:950;color:#0d2b50;text-align:center;background:#f8fbff;outline:none}.big:focus{border-color:#2563eb;box-shadow:0 0 0 5px rgba(37,99,235,.12);background:#fff}
+.list{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}.rbox{border:1px solid #dbe7f2;border-radius:15px;background:#f8fbff;padding:10px;text-align:center}.rbox span{display:block;color:#66809a;font-size:11px;font-weight:950;margin-bottom:5px}.rbox strong{display:block;color:#0d2b50;font-size:16px}
+.reading-grid{margin-top:12px}.rbox.input-rbox{padding:10px;background:#fff}.rbox.input-rbox label{display:block;color:#66809a;font-size:11px;font-weight:950;margin-bottom:6px}.reading-cell{width:100%;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff;color:#0d2b50;font-size:20px;font-weight:950;text-align:center;padding:12px 8px;outline:none}.reading-cell:focus{border-color:#2563eb;box-shadow:0 0 0 4px rgba(37,99,235,.12);background:#fff}.reading-cell.filled{background:#ecfdf3;border-color:#bbf7d0}.read-grid-mode{grid-template-columns:1fr 310px}
+
+
+.procedure-card{border:1px solid #bfdbfe;background:linear-gradient(135deg,#eff6ff,#ffffff);border-radius:20px;padding:15px;display:grid;gap:12px}
+.proc-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.proc-head h4{margin:0;color:#0d2b50;font-size:18px;letter-spacing:-.03em}.proc-head p{margin:4px 0 0;color:#66809a;font-size:13px}
+.proc-badges{display:flex;gap:8px;flex-wrap:wrap}.proc-badge{border:1px solid #dbe7f2;background:#fff;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:950;color:#17446e}.proc-badge.green{background:#ecfdf3;border-color:#bbf7d0;color:#15803d}.proc-badge.orange{background:#fff8eb;border-color:#fed7aa;color:#b45309}.proc-badge.red{background:#fff2f2;border-color:#fecaca;color:#dc2626}
+.checkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.checkitem{border:1px solid #dbe7f2;background:#fff;border-radius:14px;padding:10px 12px;font-size:12px;font-weight:800;color:#0d2b50;display:flex;gap:8px;align-items:flex-start}.checkitem:before{content:'✓';width:19px;height:19px;flex:0 0 19px;border-radius:7px;display:grid;place-items:center;background:#dcfce7;color:#15803d;font-weight:950}.checkitem.warn:before{content:'!';background:#fff7ed;color:#b45309}.checkitem.block:before{content:'×';background:#fee2e2;color:#dc2626}
+.proc-list{margin:0;padding-left:18px;color:#0d2b50;font-size:13px;line-height:1.55}.proc-list li{margin:3px 0}.cap-table{width:100%;border-collapse:collapse;font-size:12px}.cap-table td{border-top:1px solid #dbe7f2;padding:7px}.cap-table td:first-child{color:#66809a;font-weight:900;text-transform:uppercase;font-size:10px;letter-spacing:.05em;width:190px}.status-line{border-radius:16px;padding:12px;font-size:13px;font-weight:850}.status-line.ok{background:#ecfdf3;color:#15803d;border:1px solid #bbf7d0}.status-line.warn{background:#fff8eb;color:#b45309;border:1px solid #fed7aa}.status-line.bad{background:#fff2f2;color:#dc2626;border:1px solid #fecaca}
+
+.actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.actions-left,.actions-right{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:15px;padding:12px 16px;background:#2563eb;color:#fff;font-weight:950;font-size:13px;cursor:pointer;box-shadow:0 8px 20px rgba(37,99,235,.18)}.btn.secondary{background:#fff;color:#0d2b50;border:1px solid #cbddeb;box-shadow:none}.btn.success{background:#22c55e}
+.final{text-align:center;border-radius:24px;padding:22px;background:#ecfdf3;border:1px solid #bbf7d0;color:#15803d}.final.bad{background:#fff2f2;border-color:#fecaca;color:#dc2626}.final .symbol{font-size:58px;line-height:1;font-weight:950}.final h3{font-size:34px;margin:8px 0}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:12px}.result-card{border:1px solid #dbe7f2;background:#f8fbff;border-radius:17px;padding:13px}.result-card b{display:block;color:#0d2b50;font-size:14px;margin-bottom:5px}.result-card span{display:block;color:#66809a;font-size:12px;line-height:1.35}
+.trace-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.trace-card{border:1px solid #dbe7f2;background:linear-gradient(135deg,#f8fbff,#ffffff);border-radius:20px;padding:15px;display:grid;gap:8px;min-height:132px}.trace-card h4{margin:0;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#0d2b50;font-size:15px}.trace-card .trace-status{font-size:10px;font-weight:950;border-radius:999px;padding:5px 8px;background:#fff7ed;color:#b45309;border:1px solid #fed7aa;white-space:nowrap}.trace-card.ok{border-color:#bbf7d0;background:linear-gradient(135deg,#ecfdf3,#ffffff)}.trace-card.ok .trace-status{background:#dcfce7;color:#15803d;border-color:#bbf7d0}.trace-card.warn{border-color:#fed7aa}.trace-card .trace-main{font-size:14px;font-weight:900;color:#0d2b50;line-height:1.35}.trace-card .trace-meta{display:grid;gap:3px;color:#66809a;font-size:12px;line-height:1.35}.trace-card .trace-meta b{color:#0d2b50}.result-hero{border-radius:26px;padding:24px;border:1px solid #bbf7d0;background:linear-gradient(135deg,#ecfdf3,#f7fff9);display:grid;grid-template-columns:180px minmax(0,1fr);gap:20px;align-items:center}.result-hero.bad{background:linear-gradient(135deg,#fff2f2,#fffafa);border-color:#fecaca}.result-hero.warn{background:linear-gradient(135deg,#fff7ed,#ffffff);border-color:#fed7aa}.result-symbol{font-size:66px;text-align:center;font-weight:950;color:#15803d}.result-hero.bad .result-symbol{color:#dc2626}.result-hero.warn .result-symbol{color:#b45309}.result-title{font-size:36px;font-weight:950;letter-spacing:-.04em;color:#0d2b50}.result-sub{color:#66809a;font-size:14px;margin-top:4px}.lab-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.lab-card{border:1px solid #dbe7f2;background:#fff;border-radius:17px;padding:13px}.lab-card span{display:block;color:#66809a;font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.lab-card strong{display:block;color:#0d2b50;font-size:16px}.result-section{border:1px solid #dbe7f2;background:#f8fbff;border-radius:20px;padding:15px;display:grid;gap:10px}.result-section h4{margin:0;color:#0d2b50;font-size:17px}.decision-band{border-left:4px solid #2563eb;background:#fff;border-radius:15px;padding:13px;color:#0d2b50;font-size:13px;line-height:1.45}.decision-band.ok{border-color:#22c55e;background:#ecfdf3}.decision-band.warn{border-color:#f59e0b;background:#fff7ed}.decision-band.bad{border-color:#ef4444;background:#fff2f2}
+.final-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}.final-action{border:0;border-radius:16px;padding:13px 18px;font-weight:950;cursor:pointer;box-shadow:var(--shadow2)}.final-action.save{background:#2563eb;color:#fff}.final-action.pdf{background:#16a34a;color:#fff}.final-action.nok{background:#dc2626;color:#fff}.final-action:disabled{opacity:.45;cursor:not-allowed}.result-lab-note{font-size:12px;color:#66809a;line-height:1.45}.trace-card .trace-action{border-top:1px dashed #dbe7f2;margin-top:4px;padding-top:7px;color:#0d2b50;font-weight:800;font-size:12px}.trace-card.info{border-color:#bfdbfe;background:linear-gradient(135deg,#eff6ff,#ffffff)}.trace-card.info .trace-status{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+
+.tech{grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:18px;display:none}.show-tech .tech{display:block}.tech h3{margin:0 0 12px;font-size:18px;color:#0d2b50}.tech table{width:100%;border-collapse:collapse;font-size:12px}.tech th,.tech td{padding:8px 9px;border-bottom:1px solid #eaf1f7;text-align:left;vertical-align:top}.tech th{background:#f5f9fd;color:#3d5873;width:260px}.ok{color:#15803d;font-weight:900}.warn{color:#b45309;font-weight:900}.bad{color:#dc2626;font-weight:900}pre{background:#09213d;color:#eaf6ff;border-radius:14px;padding:13px;overflow:auto;white-space:pre-wrap;max-height:460px;font-size:12px}
+.logo-mark{width:48px;height:48px;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
+.equipment-search{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0 14px;padding:12px;border:1px solid #cfe0ee;background:#f8fbff;border-radius:18px}.equipment-search label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#66809a;font-weight:950;margin-bottom:6px}.equipment-search input{width:100%;border:0;background:#fff;border:1px solid #dbe7f2;border-radius:14px;padding:13px 14px;font-weight:900;color:#0d2b50;outline:0}.equipment-search button{align-self:end;border:0;border-radius:14px;padding:13px 18px;background:#2563eb;color:#fff;font-weight:950;cursor:pointer}.equipment-search .hint{grid-column:1/-1;color:#66809a;font-size:12px}.equipment-search .hint b{color:#0d2b50}
+footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6px 0}
+@media(max-width:1350px){.wizard{grid-template-columns:1fr}.critical,.read{grid-template-columns:1fr}}@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;flex-direction:row;overflow:auto;padding:10px}.logo-block{border:0;padding:0;min-width:60px}.logo-block div{display:none}.nav-list{flex-direction:row;overflow:visible}.nav-item{min-width:70px;flex-direction:column;font-size:10px;gap:4px;padding:8px}.sidebar-status,.version-side{display:none}.main{padding:14px}.topbar{flex-direction:column;align-items:stretch}.top-actions{justify-content:space-between}.global-search{width:100%;min-width:0}.user-pill{display:none}.grid3,.list,.result,.theory{grid-template-columns:1fr}.head{flex-direction:column}}
+
+.toast-wrap{position:fixed;right:22px;bottom:22px;z-index:9999;display:flex;flex-direction:column;gap:10px}.toast{padding:12px 14px;border-radius:14px;background:#0b1d3a;color:white;box-shadow:0 14px 40px rgba(0,0,0,.18);font-weight:800;max-width:420px}.toast.ok{background:#0f8a3b}.toast.warn{background:#b66a00}.toast.bad{background:#b42318}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo-block">
+      <div class="logo-mark" aria-label="TMP"></div>
+      <div><div class="logo-title">PARAMIO</div><div class="logo-sub">TALLERES MECÁNICOS</div></div>
+    </div>
+    <nav class="nav-list">
+      <a class="nav-item" href="../../home.html"><span class="nav-ico">⌂</span>Inicio</a>
+      <a class="nav-item" href="../../calibraciones.html"><span class="nav-ico">⚗</span>Centro calibración</a>
+      <a class="nav-item active" href="#"><span class="nav-ico">◎</span>MT16 roscados</a>
+      <a class="nav-item" href="../../App_Patrones_TMP.html"><span class="nav-ico">▤</span>Patrones</a>
+      <a class="nav-item" href="../../certificados.html"><span class="nav-ico">▧</span>Informes</a>
+      <a class="nav-item" href="../../buscar_instrumento.html"><span class="nav-ico">⌕</span>Buscar</a>
+    </nav>
+    <div class="sidebar-status">
+      <div class="sys-row"><span class="dot"></span><div><strong>MT16</strong><br>Procedimiento guiado</div></div>
+      <div class="sys-row"><span class="dot"></span><div><strong>Rodillos</strong><br>Selección automática</div></div>
+    </div>
+    <div class="version-side"><span>MT16 V92 UI</span><span>2026</span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="top-left">
+        <div class="hamb">☰</div>
+        <div class="title-line"><h1>MT16</h1><span>Roscados P/NP · Procedimiento guiado</span></div>
+      </div>
+      <div class="top-actions">
+        <div class="user-pill"><div class="avatar">JA</div><div><strong>J. Arroyo</strong><span>Administrador</span></div></div>
+      </div>
+    </div>
+
+    <main class="dashboard">
+      <section class="hero">
+        <div>
+          <h2>Calibración guiada MT16</h2>
+          <p>Procedimiento guiado: rodillo normativo, objetivo Trimos, banco Trimos como patrón metrológico y trazabilidad.</p>
+          <div class="hero-badges">
+            <span class="hero-badge">ISO 1502</span><span class="hero-badge">ISO 965</span><span class="hero-badge">Motor MT16</span><span class="hero-badge">Patrón Trimos</span><span class="hero-badge">ILAC-G8</span>
+          </div>
+        </div>
+        <div class="hero-info">
+          <div class="hero-info-card"><small>Regla</small><strong>La pantalla sólo muestra lo que calcula V60</strong></div>
+          <div class="hero-info-card"><small>Operario</small><strong>Rodillos + objetivo antes de medir</strong></div>
+        </div>
+      </section>
+
+      <section class="wizard">
+        <div class="left">
+          <div>
+            <div class="mark">⌖</div>
+            <h2>Modo operario</h2>
+            <p>La pantalla guía al operario; los cálculos se realizan automáticamente según el procedimiento.</p>
+            <div class="bullets">
+              <div class="bullet"><i>✓</i><span>Rodillo normativo desde V60</span></div>
+              <div class="bullet"><i>✓</i><span>Objetivo Trimos PASA / NO PASA</span></div>
+              <div class="bullet"><i>✓</i><span>Trazabilidad con clasificador</span></div>
+            </div>
+          </div>
+          <div class="progress">
+            <div class="step active" data-step="0"><span class="n">1</span><span>Equipo</span></div>
+            <div class="step" data-step="1"><span class="n">2</span><span>Norma + rodillo</span></div>
+            <div class="step" data-step="2"><span class="n">3</span><span>Trazabilidad</span></div>
+            <div class="step" data-step="3"><span class="n">4</span><span>Preparación</span></div>
+            <div class="step" data-step="4"><span class="n">5</span><span>PASA</span></div>
+            <div class="step" data-step="5"><span class="n">6</span><span>NO PASA</span></div>
+            <div class="step" data-step="6"><span class="n">7</span><span>Resultado</span></div>
+          </div>
+        </div>
+
+        <div class="mainwiz">
+          <div class="head">
+            <div>
+              <h2 id="title">Calibración MT16 guiada</h2>
+              <p id="subtitle">Resolveremos la designación y mostraremos rodillos y objetivos Trimos antes de medir.</p>
+            </div>
+            <span id="chip" class="chip">Pendiente</span>
+          </div>
+
+          <div class="msg" id="message">Pulsa Resolver equipo.</div>
+
+          <div class="critical">
+            <div class="tile"><span>Equipo</span><strong id="stripEquipo">Pendiente</strong></div>
+            <div class="tile rod"><span>Rodillo normativo</span><strong id="stripRodillo">Pendiente</strong></div>
+            <div class="tile nom"><span>Objetivo PASA Trimos</span><strong id="stripPass">Pendiente</strong></div>
+            <div class="tile nom"><span>Objetivo NO PASA Trimos</span><strong id="stripNoPass">Pendiente</strong></div>
+          </div>
+
+          <div class="work">
+            <div class="stage active" data-stage="0">
+              <h3>1 · Equipo</h3>
+              <p>Busca primero el equipo real en Supabase. MT16 no calcula hasta resolver código y familia.</p>
+              <div class="equipment-search">
+                <div>
+                  <label for="equipmentSearch">Código de equipo a calibrar</label>
+                  <input id="equipmentSearch" placeholder="Ejemplo: 75148" autocomplete="off">
+                </div>
+                <button id="equipmentSearchBtn" type="button">Buscar equipo</button>
+                <div class="hint">Resultado esperado: <b>código leído de Supabase</b> → familia resuelta → si no es roscado, MT16 queda bloqueado.</div>
+              </div>
+              <div class="grid3">
+                <div class="data"><span>Código</span><input id="codigo" value="" style="width:100%;border:0;background:transparent;font-weight:900;color:#0d2b50;font-size:15px;outline:0"></div>
+                <div class="data"><span>Descripción</span><input id="descripcion" value="" style="width:100%;border:0;background:transparent;font-weight:900;color:#0d2b50;font-size:15px;outline:0"></div>
+                <div class="data"><span>Rango / designación</span><input id="rango" value="" style="width:100%;border:0;background:transparent;font-weight:900;color:#0d2b50;font-size:15px;outline:0"></div>
+              </div>
+            </div>
+
+            <div class="stage" data-stage="1">
+              <h3>2 · Rodillo y objetivos Trimos</h3>
+              <p>Estos valores salen del motor V61.</p>
+              <div class="theory">
+                <div><span>Rodillo normativo</span><strong id="rodillo">Pendiente</strong></div>
+                <div><span>Objetivo PASA Trimos</span><strong id="passTarget">Pendiente</strong></div>
+                <div><span>Objetivo NO PASA Trimos</span><strong id="noPassTarget">Pendiente</strong></div>
+              </div>
+              <div class="grid3">
+                <div class="data"><span>Rosca</span><strong id="rosca">Pendiente</strong></div>
+                <div class="data"><span>Clase</span><strong id="clase">Pendiente</strong></div>
+                <div class="data"><span>Corrección Trimos</span><strong id="correction">Pendiente</strong></div>
+              </div>
+              <div class="grid3" style="margin-top:10px">
+                <div class="data"><span id="d2BasicLabel">Diámetro básico normativo</span><strong id="d2Basic">Pendiente</strong></div>
+                <div class="data"><span id="d2PassLabel">Límite PASA normativo</span><strong id="d2Pass">Pendiente</strong></div>
+                <div class="data"><span id="d2NoPassLabel">Límite NO PASA normativo</span><strong id="d2NoPass">Pendiente</strong></div>
+              </div>
+              <div class="help" id="objectiveHelp"><strong>Importante:</strong> si aquí no aparece rodillo u objetivo, el motor V60 no está cargando sus dependencias o la designación no se ha resuelto.</div>
+            </div>
+
+            <div class="stage" data-stage="2">
+              <h3>3 · Trazabilidad seleccionada</h3>
+              <p>Criterio MT16 TMP: el patrón trazable es el banco Trimos certificado. Los rodillos son accesorios/útiles de medición seleccionados por el motor; no se tratan como patrones ni aportan incertidumbre independiente.</p>
+              <div class="trace-cards">
+                <div class="trace-card" id="bankCard"><h4>Banco <span class="trace-status" id="bankStatus">Pendiente</span></h4><div class="trace-main" id="bank">Pendiente</div><div class="trace-meta" id="bankMeta"></div></div>
+                <div class="trace-card" id="rollersCard"><h4>Accesorios empleados <span class="trace-status" id="rollersStatus">Pendiente</span></h4><div class="trace-main" id="rollers">Pendiente</div><div class="trace-meta" id="rollersMeta"></div></div>
+                <div class="trace-card ok" id="modelCard"><h4>Modelo metrológico <span class="trace-status">TMP MT16</span></h4><div class="trace-main">Patrón único: banco Trimos</div><div class="trace-meta"><div>Los rodillos/hilos se registran como útiles de medición para reproducibilidad, no como patrones.</div></div></div>
+              </div>
+              <div class="help" id="traceHelp">Pendiente.</div>
+            </div>
+
+            <div class="stage" data-stage="3">
+              <h3>4 · Procedimiento y preparación</h3>
+              <p>MT16 resuelve automáticamente el método, accesorios, trazabilidad e instrucciones antes de medir.</p>
+
+              <div class="procedure-card">
+                <div class="proc-head">
+                  <div>
+                    <h4 id="procTitle">Procedimiento pendiente</h4>
+                    <p id="procSummary">Busca y resuelve un instrumento para cargar el procedimiento experto.</p>
+                  </div>
+                  <div class="proc-badges">
+                    <span class="proc-badge" id="procState">Pendiente</span>
+                    <span class="proc-badge" id="procCert">Certificado pendiente</span>
+                  </div>
+                </div>
+                <table class="cap-table">
+                  <tr><td>Normas</td><td id="procStandards">Pendiente</td></tr>
+                  <tr><td>Método</td><td id="procMethod">Pendiente</td></tr>
+                  <tr><td>Equipo</td><td id="procEquipment">Pendiente</td></tr>
+                  <tr><td>Accesorios</td><td id="procAccessories">Pendiente</td></tr>
+                  <tr><td>Trazabilidad</td><td id="procTraceability">Pendiente</td></tr>
+                  <tr><td>Incertidumbre</td><td id="procUncertainty">Pendiente</td></tr>
+                  <tr><td>Decisión</td><td id="procDecision">Pendiente</td></tr>
+                </table>
+                <div class="status-line warn" id="procBlockReason">Pendiente de resolver.</div>
+              </div>
+
+              <div class="theory">
+                <div><span>Montar rodillos</span><strong id="prepRodillo">Pendiente</strong></div>
+                <div><span>Lectura PASA hacia</span><strong id="prepPass">Pendiente</strong></div>
+                <div><span>Lectura NO PASA hacia</span><strong id="prepNoPass">Pendiente</strong></div>
+              </div>
+
+              <div class="procedure-card">
+                <div class="proc-head"><h4>Checklist obligatorio del operario</h4></div>
+                <div class="checkgrid" id="operatorChecklist"></div>
+                <ol class="proc-list" id="procSteps"></ol>
+              </div>
+            </div>
+
+            <div class="stage" data-stage="4">
+              <h3>5 · Lecturas PASA</h3>
+              <p>Introduce 5 lecturas. Objetivo visible para no equivocarse de magnitud.</p>
+              <div class="read read-grid-mode">
+                <div>
+                  <div class="help"><strong>Objetivo PASA Trimos:</strong> <span id="passNominal">Pendiente</span><br><strong>Diámetro medio PASA:</strong> <span id="passD2Reading">Pendiente</span></div>
+                  <div id="passList" class="list reading-grid" aria-label="Lecturas PASA"></div>
+                </div>
+                <div class="help" id="passHelp">Rellena L1 a L5 directamente en sus casillas.</div>
+              </div>
+            </div>
+
+            <div class="stage" data-stage="5">
+              <h3>6 · Lecturas NO PASA</h3>
+              <p>Introduce 5 lecturas del lado NO PASA.</p>
+              <div class="read read-grid-mode">
+                <div>
+                  <div class="help"><strong>Objetivo NO PASA Trimos:</strong> <span id="noPassNominal">Pendiente</span><br><strong>Diámetro medio NO PASA:</strong> <span id="noPassD2Reading">Pendiente</span></div>
+                  <div id="noPassList" class="list reading-grid" aria-label="Lecturas NO PASA"></div>
+                </div>
+                <div class="help" id="noPassHelp">Rellena L1 a L5 directamente en sus casillas.</div>
+              </div>
+            </div>
+
+            <div class="stage" data-stage="6">
+              <h3>7 · Resultado</h3>
+              <p>El sistema evalúa lecturas, incertidumbre y decisión.</p>
+              <div id="finalBox" class="result-hero warn"><div class="result-symbol">○</div><div><div class="result-title">Pendiente</div><div class="result-sub">Introduce y confirma lecturas para generar la evaluación técnica.</div></div></div>
+              <div class="result-section">
+                <h4>Resumen de calibración</h4>
+                <div class="lab-grid">
+                  <div class="lab-card"><span>Equipo</span><strong id="resEquipo">Pendiente</strong></div>
+                  <div class="lab-card"><span>Rosca</span><strong id="resRosca">Pendiente</strong></div>
+                  <div class="lab-card"><span>Clase</span><strong id="resClase">Pendiente</strong></div>
+                  <div class="lab-card"><span>Rodillo</span><strong id="resRodillo">Pendiente</strong></div>
+                  <div class="lab-card"><span>Banco</span><strong id="resBanco">Pendiente</strong></div>
+                  <div class="lab-card"><span>Norma</span><strong id="resNorma">Pendiente</strong></div>
+                  <div class="lab-card"><span>Estado certificado</span><strong id="resCertState">Pendiente</strong></div>
+                  <div class="lab-card"><span>Regla decisión</span><strong id="resDecisionRule">ILAC-G8</strong></div>
+                </div>
+              </div>
+              <div class="result-section">
+                <h4>Resultados de lectura</h4>
+                <div class="lab-grid">
+                  <div class="lab-card"><span>Objetivo PASA</span><strong id="resPassTarget">Pendiente</strong></div>
+                  <div class="lab-card"><span>Media PASA</span><strong id="resPassMean">Pendiente</strong></div>
+                  <div class="lab-card"><span>Error PASA</span><strong id="resPassError">Pendiente</strong></div>
+                  <div class="lab-card"><span>s PASA</span><strong id="resPassStd">Pendiente</strong></div>
+                  <div class="lab-card"><span>Objetivo NO PASA</span><strong id="resNoPassTarget">Pendiente</strong></div>
+                  <div class="lab-card"><span>Media NO PASA</span><strong id="resNoPassMean">Pendiente</strong></div>
+                  <div class="lab-card"><span>Error NO PASA</span><strong id="resNoPassError">Pendiente</strong></div>
+                  <div class="lab-card"><span>s NO PASA</span><strong id="resNoPassStd">Pendiente</strong></div>
+                </div>
+              </div>
+              <div class="result-section">
+                <h4>Evaluación metrológica</h4>
+                <div class="lab-grid">
+                  <div class="lab-card"><span>Decisión global</span><strong id="decisionText">Pendiente</strong></div>
+                  <div class="lab-card"><span>Resultado técnico</span><strong id="technicalText">Pendiente</strong></div>
+                  <div class="lab-card"><span>Certificado completo</span><strong id="certificateText">Pendiente</strong></div>
+                  <div class="lab-card"><span>U(k=2)</span><strong id="resUncertainty">Pendiente</strong></div>
+                </div>
+                <div class="decision-band" id="decisionBand">Pendiente de evaluación.</div>
+                <div class="decision-band warn" id="warningsText">Pendiente</div>
+                <div class="final-actions">
+                  <button class="final-action save" id="saveCalibrationBtn" disabled>Guardar calibración</button>
+                  <button class="final-action pdf" id="pdfCertificateBtn" disabled>Generar certificado PDF</button>
+                  <button class="final-action nok" id="nokReportBtn" disabled>Generar informe NOK</button>
+                </div>
+                <div class="result-lab-note" id="finalActionNote">Los botones se habilitan cuando existe evaluación técnica completa.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <div class="actions-left">
+              <button class="btn secondary" id="backBtn" type="button">Atrás</button>
+              <button class="btn secondary" id="techBtn" type="button">Modo auditor</button>
+            </div>
+            <div class="actions-right">
+              <button class="btn" id="primaryBtn" type="button">Resolver equipo</button>
+              <button class="btn success" id="saveReadingBtn" type="button" style="display:none;">Guardar lectura</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tech">
+        <h3>Modo Auditor MT16 · Cadena técnica</h3>
+        <table><tbody id="rows"></tbody></table>
+      </section>
+      <section class="tech">
+        <h3>Auditoría ISO / Trimos / Trazabilidad</h3>
+        <table><tbody id="diagRows"></tbody></table>
+      </section>
+      <section class="tech">
+        <h3>JSON técnico completo</h3>
+        <pre id="json">{}</pre>
+      </section>
+      <footer>Talleres Mecánicos Paramio · MT16 Motor MT16 UX Laboratorio · 2026</footer>
+    </main>
+  </div>
+</div>
+
+<script src="../certificates/certificate_utils.js"></script>
+<script src="../certificates/certificate_layout.js"></script>
+<script src="../certificates/certificate_header.js"></script>
+<script src="../certificates/certificate_identification.js"></script>
+<script src="../certificates/certificate_environment.js"></script>
+<script src="../certificates/certificate_traceability.js"></script>
+<script src="../certificates/certificate_results.js"></script>
+<script src="../certificates/certificate_decision.js"></script>
+<script src="../certificates/certificate_signatures.js"></script>
+<script src="../certificates/certificate_footer.js"></script>
+<script src="../certificates/blocks/thread_gauge_block.js"></script>
+<script src="../certificates/certificate_numbering.js"></script>
+<script src="../certificates/certificate_engine.js"></script>
+<script type="module">
+import { resolveMT16Core } from "./core/mt16_master_engine.js";
+import { loadEquipmentByCode } from "../calibration/calibration_equipment_loader.js";
+import { resolveFamily, TMP_FAMILY_KEYS } from "../family_resolver.js";
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+const fmt = v => v === null || v === undefined || v === "" ? "Pendiente" : (Number.isFinite(Number(v)) ? `${Number(v)} mm` : String(v));
+const readNums = arr => arr.map(v => Number(String(v).replace(",", "."))).filter(Number.isFinite);
+
+let supabase = null;
+let core = null;
+let loadedEquipment = null;
+let resolvedFamily = null;
+let lastSearchCode = null;
+let step = 0;
+let passVals = [];
+let noPassVals = [];
+
+async function loadSupabase(){
+  if(supabase) return supabase;
+
+  // MT16 puede estar dentro de calibraciones_mt15 copy/core/metrology_core/thread/.
+  // En ese caso ../supabase_client.js existe, pero en tu ZIP venia sin claves.
+  // Por eso NO devolvemos null al primer intento: probamos varias rutas hasta encontrar cliente real.
+  const paths = [
+    "../supabase_client.js",
+    "../../supabase_client.js",
+    "../../../supabase_client.js",
+    "../../../../calibraciones_mt15/core/supabase_client.js",
+    "../../../../../calibraciones_mt15/core/supabase_client.js",
+    "./supabase_client.js"
+  ];
+
+  const attempts = [];
+
+  for(const p of paths){
+    try{
+      const mod = await import(p);
+
+      if(mod.ensureSupabase){
+        const client = await mod.ensureSupabase();
+        attempts.push({path:p, method:"ensureSupabase", ok:!!client});
+        if(client){
+          supabase = client;
+          window.MT16_SUPABASE_SOURCE = { path:p, method:"ensureSupabase", attempts };
+          return supabase;
+        }
+      }
+
+      if(mod.getSupabaseClient){
+        const res = await mod.getSupabaseClient();
+        attempts.push({path:p, method:"getSupabaseClient", ok:!!res?.client, source:res?.source, error:res?.error});
+        if(res?.client){
+          supabase = res.client;
+          window.MT16_SUPABASE_SOURCE = { path:p, method:"getSupabaseClient", attempts };
+          return supabase;
+        }
+      }
+    }catch(e){
+      attempts.push({path:p, ok:false, error:e?.message || String(e)});
+    }
+  }
+
+  window.MT16_SUPABASE_SOURCE = { path:null, attempts };
+  console.warn("MT16 no ha encontrado cliente Supabase util", attempts);
+  return null;
+}
+
+function equipment(){
+  return loadedEquipment || { codigo:$("#codigo").value, descripcion:$("#descripcion").value, rango:$("#rango").value };
+}
+
+function clearResolvedState(){
+  core = null;
+  loadedEquipment = null;
+  resolvedFamily = null;
+  passVals = [];
+  noPassVals = [];
+  setTxt("stripRodillo", "Pendiente");
+  setTxt("stripPass", "Pendiente");
+  setTxt("stripNoPass", "Pendiente");
+  setTxt("message", "Equipo pendiente de resolver desde Supabase.");
+  renderLists();
+}
+
+function fillEquipmentFields(eq = {}){
+  $("#codigo").value = eq.codigo || "";
+  $("#descripcion").value = eq.descripcion || "";
+  $("#rango").value = eq.rango || eq.designation || eq.range || "";
+  setTxt("stripEquipo", eq.codigo || "-");
+}
+
+async function loadRealEquipmentFromSupabase(){
+  const sb = await loadSupabase();
+  const code = String($("#codigo").value || $("#equipmentSearch").value || "").trim();
+  lastSearchCode = code;
+
+  if(!sb){
+    throw new Error("MT16 no encuentra cliente Supabase real. Revisa que el HTML este dentro de la carpeta del proyecto y que cargue el supabase_client.js configurado. Mira consola: window.MT16_SUPABASE_SOURCE");
+  }
+
+  clearResolvedState();
+
+  const loaded = await loadEquipmentByCode(sb, code);
+  if(!loaded.ok){
+    throw new Error(`${loaded.error}: ${loaded.message || "No se pudo cargar el equipo."}`);
+  }
+
+  loadedEquipment = loaded.instrumento;
+  fillEquipmentFields(loadedEquipment);
+
+  resolvedFamily = await resolveFamily(sb, loadedEquipment, { loadFromSupabase:false });
+
+  if(resolvedFamily.family !== TMP_FAMILY_KEYS.TAMPON_ROSCADO_PNP && resolvedFamily.family !== TMP_FAMILY_KEYS.ANILLO_ROSCADO){
+    core = {
+      ok:false,
+      status:"MT16_BLOCKED_WRONG_FAMILY",
+      equipment: loadedEquipment,
+      resolvedFamily,
+      warnings:[`El equipo ${loadedEquipment.codigo} se ha resuelto como ${resolvedFamily.family}. No debe abrir MT16.`],
+      summary:{ designation: loadedEquipment.rango || "", global_decision:null },
+      traceability:{}
+    };
+    sync();
+    throw new Error(`Equipo ${loadedEquipment.codigo} no pertenece a MT16. Familia resuelta: ${resolvedFamily.family}.`);
+  }
+
+  return { equipment: loadedEquipment, family: resolvedFamily };
+}
+
+function itemSummary(item){
+  if(!item) return "No registrado";
+  return `${item.codigo || "-"} · ${item.descripcion || "-"} · Cert: ${item.certificado || "-"} · Score ${item.score ?? "-"} · Vigente: ${item.vigente ? "SI" : "NO"}`;
+}
+function itemMain(item, fallback="No registrado"){
+  if(!item) return fallback;
+  return `${item.codigo || "-"} · ${item.descripcion || "-"}`;
+}
+function setCardState(cardId,statusId,item,extraOk=false,info=false){
+  const card=$("#"+cardId), st=$("#"+statusId);
+  const ok=!!item || extraOk;
+  if(card) card.className="trace-card "+(ok?"ok":(info?"info":"warn"));
+  if(st) st.textContent=ok?"Trazable":(info?"Requisito":"Pendiente");
+}
+function itemMeta(item, fallback){
+  if(!item) return fallback || "<div><b>Estado:</b> pendiente de seleccionar desde Supabase.</div>";
+  return `<div><b>Certificado:</b> ${esc(item.certificado || "-")}</div><div><b>Score:</b> ${esc(item.score ?? "-")}</div><div><b>Vigente:</b> ${item.vigente ? "SI" : "NO"}</div>`;
+}
+function traceRequirementHtml(title, action){
+  return `<div><b>Estado:</b> no registrado en Supabase</div><div class="trace-action">${esc(action || title || "Registrar trazabilidad antes de certificar.")}</div>`;
+}
+function nums(arr){ return (arr||[]).map(x=>Number(String(x).replace(",","."))).filter(Number.isFinite); }
+function mean(arr){ const a=nums(arr); return a.length?a.reduce((s,x)=>s+x,0)/a.length:null; }
+function std(arr){ const a=nums(arr); if(a.length<2) return null; const m=mean(a); return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1)); }
+function signedMm(v,digits=6){ if(v===null||v===undefined||Number.isNaN(Number(v))) return "Pendiente"; const n=Number(v); return `${n>=0?"+":""}${n.toFixed(digits).replace(/0+$/,"").replace(/\.$/,"")} mm`; }
+
+function setTxt(id,v){ const el = $("#"+id); if(el) el.textContent = v ?? "Pendiente"; }
+
+function valFirst(...vals){
+  for(const v of vals){
+    if(v !== null && v !== undefined && v !== "" && !Number.isNaN(v)) return v;
+  }
+  return null;
+}
+function mm(v, digits=6){
+  if(v === null || v === undefined || v === "" || Number.isNaN(Number(v))) return "Pendiente";
+  return `${Number(v).toFixed(digits).replace(/0+$/," ").replace(/\. $/,"").trim()} mm`;
+}
+function mt16Values(){
+  const s = core?.summary || {};
+  const passPoint = core?.trimos?.plan?.points?.find?.(p => p.id === "PASA") || core?.trimos?.plan?.points?.[0] || {};
+  const noPassPoint = core?.trimos?.plan?.points?.find?.(p => p.id === "NO_PASA") || core?.trimos?.plan?.points?.[1] || {};
+  return {
+    rodillo: valFirst(s.rodillo_mm, core?.trimos?.wire?.selected_wire_mm),
+    d2Basic: valFirst(s.D2_basic_mm, core?.iso724?.internal_thread_basic_mm?.pitch_diameter_D2),
+    d2Pass: valFirst(core?.iso1502?.summary?.pass_d2_nominal_mm, passPoint.d2_nominal_mm),
+    d2NoPass: valFirst(core?.iso1502?.summary?.no_pass_d2_nominal_mm, noPassPoint.d2_nominal_mm),
+    passTarget: valFirst(s.pass_target_trimos_mm, passPoint.target_trimos_mm),
+    noPassTarget: valFirst(s.no_pass_target_trimos_mm, noPassPoint.target_trimos_mm),
+    correction: valFirst(s.trimos_correction_mm, core?.trimos?.correction?.correction_mm)
+  };
+}
+
+function normativeLabels(){
+  const s = core?.summary || {};
+  return {
+    familyLabel: s.normative_standard || (core?.parsed?.thread_system === "BSPP_ISO228" ? "ISO 228-1 / ISO 228-2" : core?.parsed?.thread_system === "BSPT_ISO7" ? "ISO 7-1 / ISO 7-2" : "ISO 724 / ISO 965 / ISO 1502"),
+    basic: s.diameter_basic_label || (core?.parsed?.thread_system === "BSPP_ISO228" ? "Diámetro de paso básico ISO 228-1" : core?.parsed?.thread_system === "BSPT_ISO7" ? "Diámetro de paso en plano de calibre ISO 7-1" : "Diámetro básico normativo"),
+    pass: s.pass_limit_label || (core?.parsed?.thread_system === "BSPP_ISO228" ? "Límite PASA ISO 228-2" : core?.parsed?.thread_system === "BSPT_ISO7" ? "Calibre cónico ISO 7-2" : "Límite PASA normativo"),
+    noPass: s.no_pass_limit_label || (core?.parsed?.thread_system === "BSPP_ISO228" ? "Límite NO PASA ISO 228-2" : core?.parsed?.thread_system === "BSPT_ISO7" ? "Escalón +/- ISO 7-2" : "Límite NO PASA normativo")
+  };
+}
+
+
+function listText(arr){ return Array.isArray(arr) && arr.length ? arr.join(" · ") : "Pendiente"; }
+function procedureObject(){ return core?.procedure || core?.audit?.procedure || null; }
+function renderProcedurePanel(){
+  const p = procedureObject();
+  if(!p){
+    setTxt("procTitle","Procedimiento pendiente");
+    setTxt("procSummary","Busca y resuelve un instrumento para cargar el procedimiento experto.");
+    setTxt("procState","Pendiente");
+    setTxt("procCert","Certificado pendiente");
+    setTxt("procStandards","Pendiente"); setTxt("procMethod","Pendiente"); setTxt("procEquipment","Pendiente"); setTxt("procAccessories","Pendiente"); setTxt("procTraceability","Pendiente"); setTxt("procUncertainty","Pendiente"); setTxt("procDecision","Pendiente");
+    setTxt("procBlockReason","Pendiente de resolver.");
+    const ch = $("#operatorChecklist"); if(ch) ch.innerHTML = "";
+    const st = $("#procSteps"); if(st) st.innerHTML = "";
+    return;
+  }
+  const cert = p.certificate || {};
+  const caps = p.capabilities || {};
+  const meas = p.measurement || {};
+  const env = p.environment || {};
+  const op = p.operator || {};
+  const tr = p.traceability || {};
+  setTxt("procTitle", op.title || p.id || "Procedimiento MT16");
+  setTxt("procSummary", op.summary || "Procedimiento experto cargado.");
+  setTxt("procState", p.state || "Pendiente");
+  setTxt("procCert", cert.can_emit ? "Certificable" : "Certificado bloqueado");
+  const stateEl = $("#procState"); if(stateEl) stateEl.className = "proc-badge " + (p.state === "LISTO PARA CERTIFICADO" ? "green" : (p.state ? "orange" : ""));
+  const certEl = $("#procCert"); if(certEl) certEl.className = "proc-badge " + (cert.can_emit ? "green" : "orange");
+  setTxt("procStandards", listText(p.standards));
+  setTxt("procMethod", `${meas.method || "Pendiente"} · ${meas.repetitions || 5} lecturas por punto`);
+  setTxt("procEquipment", listText(meas.equipment));
+  setTxt("procAccessories", listText(meas.accessories));
+  setTxt("procTraceability", "Banco Trimos certificado como patrón. Rodillos/hilos como accesorios de montaje.");
+  setTxt("procUncertainty", `${p.uncertainty?.model || "Pendiente"} · k=${p.uncertainty?.k || 2}`);
+  setTxt("procDecision", `${p.decision?.rule || "ILAC-G8 / ISO 14253"} · operario decide: NO`);
+  const block = cert.can_emit ? "Procedimiento certificable: permite lecturas, evaluación y certificado si la trazabilidad está vigente." : (cert.blocked_reason || p.certificate_blocked_reason || "Certificado bloqueado hasta completar límites normativos oficiales.");
+  setTxt("procBlockReason", block);
+  const br = $("#procBlockReason"); if(br) br.className = "status-line " + (cert.can_emit ? "ok" : "warn");
+  const checklist = [
+    {txt:"Instrumento localizado en Supabase", ok:!!loadedEquipment},
+    {txt:"Familia resuelta como tampón/anillo roscado", ok:!!resolvedFamily},
+    {txt:`Banco Trimos seleccionado como patrón: ${itemSummary(core?.traceability?.selected_bank)}`, ok:!!core?.traceability?.selected_bank},
+    {txt:`Rodillo/hilo calculado como accesorio: ${mt16Values().rodillo ? "Ø " + mt16Values().rodillo + " mm" : "pendiente"}`, ok:!!mt16Values().rodillo},
+    {txt:"Temperatura 20 ±1 °C y estabilización confirmadas", ok:true},
+    {txt: cert.can_emit ? "Certificado permitido por procedimiento" : "Certificado bloqueado: modo validación/norma pendiente", ok:cert.can_emit, warn:!cert.can_emit}
+  ];
+  const ch = $("#operatorChecklist");
+  if(ch) ch.innerHTML = checklist.map(x=>`<div class="checkitem ${x.ok ? "" : (x.warn ? "warn" : "block")}">${esc(x.txt)}</div>`).join("");
+  const st = $("#procSteps");
+  if(st) st.innerHTML = (op.steps || []).map(x=>`<li>${esc(x)}</li>`).join("") || "<li>Procedimiento pendiente.</li>";
+}
+
+function sync(){
+  const v = mt16Values();
+  const s = core?.summary || {};
+  const t = core?.traceability || {};
+  const labels = normativeLabels();
+  setTxt("stripEquipo", $("#codigo").value || "-");
+  setTxt("stripRodillo", v.rodillo ? `Ø ${v.rodillo} mm` : "Pendiente");
+  setTxt("stripPass", mm(v.passTarget));
+  setTxt("stripNoPass", mm(v.noPassTarget));
+
+  setTxt("rodillo", v.rodillo ? `Ø ${v.rodillo} mm` : "Pendiente");
+  setTxt("passTarget", mm(v.passTarget));
+  setTxt("noPassTarget", mm(v.noPassTarget));
+  setTxt("rosca", s.designation || (s.nominal_mm && s.pitch_mm ? `${s.nominal_label || "M"+s.nominal_mm} x ${s.pitch_mm}` : "Pendiente"));
+  setTxt("clase", s.class || "Pendiente");
+  setTxt("correction", mm(v.correction, 9));
+  setTxt("d2BasicLabel", labels.basic);
+  setTxt("d2PassLabel", labels.pass);
+  setTxt("d2NoPassLabel", labels.noPass);
+  setTxt("d2Basic", mm(v.d2Basic, 6));
+  setTxt("d2Pass", mm(v.d2Pass, 6));
+  setTxt("d2NoPass", mm(v.d2NoPass, 6));
+  setTxt("objectiveHelp", (v.passTarget && v.noPassTarget) ? "Objetivos Trimos disponibles. Ya se pueden tomar lecturas." : "Objetivos Trimos no disponibles para certificado: la familia esta en modo geometria/procedimiento seguro o falta completar tabla normativa oficial.");
+
+  setTxt("bank", itemMain(t.selected_bank, "Banco Trimos no seleccionado"));
+  setTxt("rollers", v.rodillo ? `Rodillos / hilos requeridos Ø ${v.rodillo} mm` : "Rodillos / hilos pendientes");
+  const bankMeta=$("#bankMeta"), rollersMeta=$("#rollersMeta");
+  if(bankMeta) bankMeta.innerHTML = itemMeta(t.selected_bank, traceRequirementHtml("Banco Trimos", "Seleccionar banco Trimos certificado y vigente. Es el único patrón trazable del procedimiento MT16."));
+  if(rollersMeta) rollersMeta.innerHTML = `<div><b>Diámetro requerido:</b> ${esc(v.rodillo ? "Ø "+v.rodillo+" mm" : "Pendiente")}</div><div><b>Tipo:</b> útil de medición / accesorio de montaje</div><div><b>Incertidumbre:</b> no se considera fuente independiente en el modelo TMP MT16</div><div class="trace-action">Registrar juego o identificación si existe para reproducibilidad del montaje.</div>`;
+  setCardState("bankCard","bankStatus",t.selected_bank);
+  setCardState("rollersCard","rollersStatus",null,true,!!v.rodillo);
+  const traceState = t.selected_bank ? "Trazabilidad metrológica definida: banco Trimos certificado. Rodillos registrados como accesorios del montaje." : "Trazabilidad pendiente: seleccionar banco Trimos certificado. Los rodillos no bloquean por trazabilidad; solo deben coincidir con el diámetro indicado por el motor.";
+  setTxt("traceHelp", traceState);
+
+  setTxt("prepRodillo", v.rodillo ? `Ø ${v.rodillo} mm` : "Pendiente");
+  setTxt("prepPass", mm(v.passTarget));
+  setTxt("prepNoPass", mm(v.noPassTarget));
+  setTxt("passNominal", mm(v.passTarget));
+  setTxt("noPassNominal", mm(v.noPassTarget));
+  setTxt("passD2Reading", mm(v.d2Pass));
+  setTxt("noPassD2Reading", mm(v.d2NoPass));
+
+  const pMean=mean(passVals), npMean=mean(noPassVals), pStd=std(passVals), npStd=std(noPassVals);
+  setTxt("resEquipo", loadedEquipment?.codigo || $("#codigo").value || "Pendiente");
+  setTxt("resRosca", s.designation || "Pendiente");
+  setTxt("resClase", s.class || "Pendiente");
+  setTxt("resRodillo", v.rodillo ? `Ø ${v.rodillo} mm` : "Pendiente");
+  setTxt("resBanco", t.selected_bank?.codigo || "Pendiente");
+  setTxt("resNorma", labels.familyLabel || "Pendiente");
+  setTxt("resCertState", core?.can_emit_full_certificate ? "LISTO PARA CERTIFICADO" : "NO LISTO PARA CERTIFICADO");
+  setTxt("resDecisionRule", core?.procedure?.decision?.rule || "ILAC-G8 / ISO 14253");
+  setTxt("resPassTarget", mm(v.passTarget)); setTxt("resNoPassTarget", mm(v.noPassTarget));
+  setTxt("resPassMean", mm(pMean)); setTxt("resNoPassMean", mm(npMean));
+  setTxt("resPassError", signedMm(pMean!==null && v.passTarget!==null ? pMean-Number(v.passTarget) : null));
+  setTxt("resNoPassError", signedMm(npMean!==null && v.noPassTarget!==null ? npMean-Number(v.noPassTarget) : null));
+  setTxt("resPassStd", mm(pStd)); setTxt("resNoPassStd", mm(npStd));
+  setTxt("resUncertainty", core?.summary?.U_mm ? mm(core.summary.U_mm) : "Pendiente");
+  setTxt("decisionText", s.global_decision || "Pendiente");
+  setTxt("technicalText", core?.can_emit_technical_result ? "SI" : "NO");
+  setTxt("certificateText", core?.can_emit_full_certificate ? "SI" : "NO");
+  const warnText=(core?.warnings || []).join("\n") || "Sin avisos";
+  setTxt("warningsText", warnText);
+  const band=$("#decisionBand");
+  if(band){
+    const dec=s.global_decision || "Pendiente";
+    band.className="decision-band "+(dec==="OK"?"ok":dec==="NOK"?"bad":"warn");
+    band.textContent = dec==="OK" ? "Evaluación conforme. El sistema decide APTO si las lecturas, incertidumbre y regla de decisión son válidas." : dec==="NOK" ? "Evaluación no conforme. Revisar lecturas y emitir informe NOK." : "Evaluación pendiente o incompleta. El certificado queda bloqueado hasta completar condiciones técnicas.";
+  }
+  const saveBtn=$("#saveCalibrationBtn"), pdfBtn=$("#pdfCertificateBtn"), nokBtn=$("#nokReportBtn"), note=$("#finalActionNote");
+  const decision=s.global_decision || "Pendiente";
+  const technicalAllowed=!!core?.can_emit_technical_result && decision !== "Pendiente";
+  const certAllowed=!!core?.can_emit_full_certificate && decision === "OK";
+  if(saveBtn) saveBtn.disabled = !technicalAllowed;
+  if(pdfBtn) pdfBtn.disabled = !technicalAllowed;
+  if(nokBtn) nokBtn.disabled = decision !== "NOK";
+  if(note){
+    note.textContent = certAllowed ? "Calibración evaluada. Puedes guardar y generar certificado PDF." : technicalAllowed ? "Resultado técnico disponible. Revisa los avisos antes de emitir el certificado." : "Introduce lecturas y ejecuta la evaluación para habilitar acciones.";
+  }
+
+  renderProcedurePanel();
+  renderTech();
+  renderLists();
+}
+
+function renderReadingInputs(containerId, values, side){
+  const cls = side === "PASA" ? "pass-reading" : "nopass-reading";
+  const aria = side === "PASA" ? "Lectura PASA" : "Lectura NO PASA";
+  const html = [0,1,2,3,4].map(i=>{
+    const val = values[i] ?? "";
+    const filled = String(val).trim() ? " filled" : "";
+    return `<div class="rbox input-rbox"><label for="${cls}-${i}">L${i+1}</label><input id="${cls}-${i}" class="reading-cell ${cls}${filled}" data-index="${i}" inputmode="decimal" autocomplete="off" placeholder="0.000" aria-label="${aria} ${i+1}" value="${esc(val)}"></div>`;
+  }).join("");
+  $(containerId).innerHTML = html;
+}
+function readGridValues(selector){
+  const arr = [];
+  $$(selector).forEach(inp=>{
+    const idx = Number(inp.dataset.index);
+    const val = inp.value.trim().replace(",",".");
+    if(val) arr[idx] = val;
+  });
+  return arr;
+}
+function countFilled(values){ return values.filter(v=>String(v||"").trim()).length; }
+function attachReadingHandlers(){
+  $$(".pass-reading").forEach(inp=>{
+    inp.addEventListener("input",()=>{ passVals = readGridValues(".pass-reading"); inp.classList.toggle("filled", !!inp.value.trim()); renderReadingHelp(); });
+    inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const next=$("#pass-reading-"+(Number(inp.dataset.index)+1)); if(next) next.focus(); else saveReading(); } });
+  });
+  $$(".nopass-reading").forEach(inp=>{
+    inp.addEventListener("input",()=>{ noPassVals = readGridValues(".nopass-reading"); inp.classList.toggle("filled", !!inp.value.trim()); renderReadingHelp(); });
+    inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const next=$("#nopass-reading-"+(Number(inp.dataset.index)+1)); if(next) next.focus(); else saveReading(); } });
+  });
+}
+function renderReadingHelp(){
+  const v = mt16Values();
+  const pc = countFilled(passVals);
+  const nc = countFilled(noPassVals);
+  setTxt("passHelp", pc < 5 ? `Rellena las 5 casillas PASA. Completadas ${pc}/5. Objetivo Trimos: ${mm(v.passTarget)} · D2 PASA: ${mm(v.d2Pass)}` : "PASA completo. Pulsa Confirmar lecturas para continuar.");
+  setTxt("noPassHelp", nc < 5 ? `Rellena las 5 casillas NO PASA. Completadas ${nc}/5. Objetivo Trimos: ${mm(v.noPassTarget)} · D2 NO PASA: ${mm(v.d2NoPass)}` : "NO PASA completo. Pulsa Confirmar lecturas para calcular.");
+}
+function renderLists(){
+  renderReadingInputs("#passList", passVals, "PASA");
+  renderReadingInputs("#noPassList", noPassVals, "NO_PASA");
+  attachReadingHandlers();
+  renderReadingHelp();
+}
+
+function setStep(n){
+  step = Math.max(0,Math.min(6,n));
+  $$(".stage").forEach(el=>el.classList.toggle("active", Number(el.dataset.stage) === step));
+  $$(".step").forEach((el,i)=>{ el.classList.toggle("done", i < step); el.classList.toggle("active", i === step); });
+  const states=[
+    ["Equipo","Confirma el instrumento.","Pulsa Resolver equipo.","Resolver equipo","Pendiente"],
+    ["Rodillo y objetivos","Valores calculados por Motor MT16.","Monta el rodillo indicado y usa los objetivos Trimos.", "Continuar a trazabilidad","Motor OK"],
+    ["Trazabilidad","Modelo metrológico MT16.","Revisa banco Trimos certificado y accesorios empleados.","Continuar a preparación","Trazabilidad"],
+    ["Preparación","Prepara banco, rodillos y tampón.","Deja todo preparado antes de tomar lecturas.","Continuar a PASA","Montaje"],
+    ["Lecturas PASA","Introduce 5 lecturas.","Objetivo PASA visible.","","PASA"],
+    ["Lecturas NO PASA","Introduce 5 lecturas.","Objetivo NO PASA visible.","","NO PASA"],
+    ["Resultado","Evaluación técnica con lecturas.","Genera evaluación metrológica con Motor MT16.","Generar evaluación","Decisión"]
+  ];
+  setTxt("title", states[step][0]);
+  setTxt("subtitle", states[step][1]);
+  setTxt("message", states[step][2]);
+  $("#primaryBtn").textContent = states[step][3];
+  $("#primaryBtn").style.display = (step === 4 || step === 5) ? "none" : "";
+  $("#saveReadingBtn").style.display = (step === 4 || step === 5) ? "" : "none";
+  $("#saveReadingBtn").textContent = step === 4 ? "Confirmar PASA" : step === 5 ? "Confirmar NO PASA" : "Confirmar lecturas";
+  $("#chip").textContent = states[step][4];
+  $("#chip").className = "chip " + (step > 0 ? "ok" : "");
+  sync();
+}
+
+async function resolve(withReadings=false){
+  const sb = await loadSupabase();
+
+  if(!loadedEquipment || loadedEquipment.codigo !== String($("#codigo").value || "").trim()){
+    await loadRealEquipmentFromSupabase();
+  }
+
+  const readingsByPoint = withReadings ? { PASA:readNums(passVals), NO_PASA:readNums(noPassVals) } : null;
+  core = await resolveMT16Core({ equipment:loadedEquipment, supabase:sb, readingsByPoint });
+  core.resolvedFamily = resolvedFamily;
+  core.searchAudit = { searched_code:lastSearchCode, resolved_code:loadedEquipment?.codigo, same:String(lastSearchCode)===String(loadedEquipment?.codigo), source:"Supabase instrumentos.codigo exact/flexible" };
+  sync();
+  return core;
+}
+
+function saveReading(){
+  const vobj = mt16Values();
+  if(step===4 && !vobj.passTarget){ showToast("No hay objetivo PASA Trimos calculado. Revisa Modo Auditor.", "warn"); return; }
+  if(step===5 && !vobj.noPassTarget){ showToast("No hay objetivo NO PASA Trimos calculado. Revisa Modo Auditor.", "warn"); return; }
+  if(step===4){
+    passVals = readGridValues(".pass-reading");
+    if(countFilled(passVals) < 5){ showToast("Rellena las 5 lecturas PASA en L1 a L5.", "warn"); return; }
+    renderLists();
+    setStep(5);
+    setTimeout(()=>{ const first=$("#nopass-reading-0"); if(first) first.focus(); },100);
+  } else if(step===5){
+    noPassVals = readGridValues(".nopass-reading");
+    if(countFilled(noPassVals) < 5){ showToast("Rellena las 5 lecturas NO PASA en L1 a L5.", "warn"); return; }
+    renderLists();
+    setStep(6);
+  }
+}
+
+function auditStatus(ok){ return ok ? "OK" : "REVISAR"; }
+function renderTech(){
+  if(!core) return;
+  const s = core.summary || {}, t = core.traceability || {};
+  const v = mt16Values();
+  const audit = core.audit || {};
+  const chain = audit.chain || [];
+  const labels = normativeLabels();
+  const firstRealIssue = chain.find(x=>!x.ok && !["TRAZABILIDAD"].includes(x.step));
+  const rows = [
+    ["Código buscado / resuelto", `${core.searchAudit?.searched_code || "-"} / ${core.searchAudit?.resolved_code || core.equipment?.codigo || "-"}`, core.searchAudit?.same ? "ok" : "bad"],
+    ["Familia resuelta", core.resolvedFamily?.family || resolvedFamily?.family || "-", (core.resolvedFamily?.family || resolvedFamily?.family) === "TAMPON_ROSCADO_PNP" || (core.resolvedFamily?.family || resolvedFamily?.family) === "ANILLO_ROSCADO" ? "ok" : "warn"],
+    ["Estado Motor", core.status, core.ok ? "ok" : "warn"],
+    ["Procedimiento activo", core.procedure?.id || core.audit?.procedure?.id || "Pendiente", core.procedure ? "ok" : "warn"],
+    ["Estado procedimiento", core.procedure?.state || "Pendiente", core.procedure?.state === "LISTO PARA CERTIFICADO" ? "ok" : "warn"],
+    ["Certificado", core.procedure?.certificate?.can_emit ? "Permitido" : (core.procedure?.certificate?.blocked_reason || "Bloqueado / pendiente"), core.procedure?.certificate?.can_emit ? "ok" : "warn"],
+    ["Motor maestro", core.version || core.source || "-", ""],
+    ["Designación original", core.equipment?.rango || core.equipment?.designation || "-", ""],
+    ["Designación normalizada", s.designation || core.parsed?.normalized || "-", core.parsed?.ok ? "ok" : "warn"],
+    ["Sistema / Familia", `${s.thread_system ?? core.parsed?.thread_system ?? "-"} / ${s.family ?? core.parsed?.family ?? "-"} · ${labels.familyLabel}`, core.parsed?.ok ? "ok" : "warn"],
+    ["Nominal / Paso / TPI / Clase", `${s.nominal_label ?? s.nominal_mm ?? "-"} / ${s.pitch_mm ?? "-"} / ${s.tpi ?? "-"} / ${s.class ?? "-"}`, ""],
+    [labels.basic, `${auditStatus(core.iso724?.ok)} · ${mm(v.d2Basic)}`, core.iso724?.ok ? "ok" : "warn"],
+    [core.parsed?.thread_system === "METRIC_ISO" ? "ISO 965" : "Motor tolerancias", `${auditStatus(core.iso965?.ok)} · clave ${core.iso965?.key || "-"} · TD2 ${mm(core.iso965?.summary?.TD2_mm, 9)}`, core.iso965?.ok ? "ok" : "warn"],
+    [core.parsed?.thread_system === "METRIC_ISO" ? "ISO 1502" : (core.parsed?.thread_system === "BSPP_ISO228" ? "ISO 228-2" : "Motor verificación"), `${auditStatus(core.iso1502?.ok)} · clave ${core.iso1502?.key || "-"} · ${core.iso1502?.status || core.iso1502?.error || "-"}`, core.iso1502?.ok ? "ok" : "warn"],
+    [core.parsed?.thread_system === "METRIC_ISO" ? "Tabla ISO1502 usada" : "Tabla normativa usada", core.iso1502?.table?.row?.id || core.iso1502?.detail?.table?.row?.id || core.iso1502?.key || "No aplicada / no encontrada", core.iso1502?.ok ? "ok" : "warn"],
+    [labels.pass, mm(v.d2Pass), v.d2Pass ? "ok" : "warn"],
+    [labels.noPass, mm(v.d2NoPass), v.d2NoPass ? "ok" : "warn"],
+    ["Rodillo TMP", v.rodillo ? `Ø ${v.rodillo} mm` : "Pendiente", v.rodillo ? "ok" : "warn"],
+    ["Corrección Trimos", mm(v.correction,9), v.correction ? "ok" : "warn"],
+    ["Objetivo PASA Trimos", mm(v.passTarget), v.passTarget ? "ok" : "warn"],
+    ["Objetivo NO PASA Trimos", mm(v.noPassTarget), v.noPassTarget ? "ok" : "warn"],
+    ["Primer punto a revisar", (firstRealIssue?.step || "Sin fallo en cadena normativa"), firstRealIssue ? "warn" : "ok"],
+    ["Avisos", (core.warnings || []).join("\n") || "Sin avisos", (core.warnings || []).length ? "warn" : "ok"]
+  ];
+  $("#rows").innerHTML = rows.map(r=>`<tr><th>${esc(r[0])}</th><td class="${r[2]}">${esc(r[1])}</td></tr>`).join("");
+
+  const chainRows = chain.map(c => [
+    c.step,
+    `${auditStatus(c.ok)}${c.version ? " · " + c.version : ""}${c.error ? " · " + c.error : ""}`,
+    c.ok ? "ok" : "warn"
+  ]);
+  const extraRows = [
+    ["Patrón metrológico", itemSummary(t.selected_bank), t.selected_bank ? "ok" : "warn"],
+    ["Accesorios: rodillos/hilos", v.rodillo ? `Ø ${v.rodillo} mm · útil de medición, no patrón` : "Pendiente", v.rodillo ? "ok" : "warn"],
+    ["Modelo incertidumbre", "Banco Trimos + resolución + repetibilidad + ambiente. Sin u_rodillos independiente.", "ok"],
+    ["Patrón de rosca", "No aplica en el procedimiento TMP MT16", "ok"]
+  ];
+  $("#diagRows").innerHTML = [...chainRows, ...extraRows].map(r=>`<tr><th>${esc(r[0])}</th><td class="${r[2]||""}">${esc(r[1])}</td></tr>`).join("");
+  $("#json").textContent = JSON.stringify(core,null,2);
+}
+
+
+$("#primaryBtn").addEventListener("click", async ()=>{
+  if(step===0){ await resolve(false); setStep(1); }
+  else if(step===1){ setStep(2); }
+  else if(step===2){ setStep(3); }
+  else if(step===3){ setStep(4); setTimeout(()=>{ const first=$("#pass-reading-0"); if(first) first.focus(); },100); }
+  else if(step===6){
+    await resolve(true);
+    const dec = core?.summary?.global_decision || "Pendiente";
+    const fb=$("#finalBox");
+    if(fb){
+      fb.className = "result-hero " + (dec === "NOK" ? "bad" : dec === "OK" ? "" : "warn");
+      fb.innerHTML = `<div class="result-symbol">${dec==="NOK"?"✕":dec==="OK"?"✓":"○"}</div><div><div class="result-title">${esc(dec)}</div><div class="result-sub">${dec==="OK"?"El equipo es APTO según Motor MT16. Revisa trazabilidad y genera certificado si está permitido.":dec==="NOK"?"El equipo es NO APTO según Motor MT16. Genera informe NOK.":"Resultado pendiente o incompleto."}</div></div>`;
+    }
+    $("#chip").textContent = dec;
+    $("#chip").className = "chip " + (dec==="OK"?"ok":dec==="NOK"?"bad":"");
+  }
+});
+$("#backBtn").addEventListener("click",()=>setStep(step-1));
+$("#saveReadingBtn").addEventListener("click",saveReading);
+$("#techBtn").addEventListener("click",()=>document.body.classList.toggle("show-tech"));
+
+function showToast(message, type="ok"){
+  let wrap = document.querySelector(".toast-wrap");
+  if(!wrap){ wrap = document.createElement("div"); wrap.className="toast-wrap"; document.body.appendChild(wrap); }
+  const t = document.createElement("div");
+  t.className = "toast " + (type || "ok");
+  t.textContent = message;
+  wrap.appendChild(t);
+  setTimeout(()=>{ t.style.opacity="0"; t.style.transform="translateY(8px)"; }, 3200);
+  setTimeout(()=>t.remove(), 3900);
+}
+function mt16CertificatePayload(){
+  return {
+    core,
+    equipment: loadedEquipment,
+    readings: { PASA: readNums(passVals), NO_PASA: readNums(noPassVals) },
+    decision: core?.summary?.global_decision || "Pendiente"
+  };
+}
+function downloadMT16Json(){
+  const payload = mt16CertificatePayload();
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  const code = loadedEquipment?.codigo || $("#codigo").value || "MT16";
+  a.href = URL.createObjectURL(blob);
+  a.download = `MT16_${code}_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  showToast("Respaldo JSON de calibración generado.", "ok");
+}
+function openCertificateView(kind="CERTIFICADO"){
+  if(!core){ showToast("Primero evalúa la calibración.", "warn"); return; }
+  if(!window.TMPCertificateEngine){ showToast("Motor de certificado no cargado.", "bad"); return; }
+  const res = window.TMPCertificateEngine.openCertificate(mt16CertificatePayload(), kind);
+  if(!res.ok){
+    showToast("El navegador bloqueó la pestaña. Se descarga HTML del certificado.", "warn");
+    const blob = new Blob([res.html], {type:"text/html"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `MT16_certificado_${loadedEquipment?.codigo || "equipo"}.html`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(a.href);
+  } else {
+    showToast(kind === "NOK" ? "Informe NOK abierto." : "Certificado abierto. Usa Imprimir / guardar como PDF.", "ok");
+  }
+}
+const saveBtnAction = $("#saveCalibrationBtn");
+if(saveBtnAction) saveBtnAction.addEventListener("click",()=>downloadMT16Json());
+const pdfBtnAction = $("#pdfCertificateBtn");
+if(pdfBtnAction) pdfBtnAction.addEventListener("click",()=>openCertificateView("CERTIFICADO"));
+const nokBtnAction = $("#nokReportBtn");
+if(nokBtnAction) nokBtnAction.addEventListener("click",()=>openCertificateView("NOK"));
+async function runEquipmentSearch(){
+  $("#codigo").value=$("#equipmentSearch").value.trim();
+  try{
+    await loadRealEquipmentFromSupabase();
+    await resolve(false);
+    setStep(1);
+  }catch(err){
+    setStep(0);
+    setTxt("message", err.message || String(err));
+    console.error(err);
+  }
+}
+$("#equipmentSearch").addEventListener("keydown",async e=>{ if(e.key==="Enter") runEquipmentSearch(); });
+$("#equipmentSearchBtn").addEventListener("click",runEquipmentSearch);
+document.addEventListener("keydown",ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==="k"){ev.preventDefault();$("#equipmentSearch").focus();}});
+setStep(0);
+setTxt("message", "Busca un código real de Supabase. MT16 no calcula hasta resolver equipo y familia.");
+
+// Entrada directa desde Home / Centro de calibración mediante ?codigo=XXXX
+try {
+  const params = new URLSearchParams(window.location.search);
+  const codigoInicial = String(params.get("codigo") || "").trim();
+  if (codigoInicial) {
+    $("#equipmentSearch").value = codigoInicial;
+    $("#codigo").value = codigoInicial;
+    setTxt("message", `Cargando equipo ${codigoInicial} desde Supabase...`);
+    setTimeout(() => runEquipmentSearch(), 150);
+  } else {
+    $("#equipmentSearch").focus();
+  }
+} catch (err) {
+  console.warn("MT16: no se pudo leer código de URL", err);
+  $("#equipmentSearch").focus();
+}
+</script>
+</body>
+</html>
