@@ -614,7 +614,7 @@
 
       <section class="mov-section panel">
         <div class="mov-header">
-          <div><h2 class="section-title">Últimos movimientos</h2><p class="muted">Entradas, salidas, destino y responsables. Vista operativa del laboratorio.</p></div>
+          <div><h2 class="section-title">Últimos movimientos</h2><p class="muted">Entradas, salidas, destino y responsables. Mostrando solo los últimos 50 movimientos.</p></div>
           <div class="mov-toolbar">
             <input id="mov-search" type="text" placeholder="Buscar...">
             <select id="mov-tipo">
@@ -1207,12 +1207,12 @@
       return;
     }
 
-    // Últimos 120 movimientos, ahora con operario1 y operario2
+    // Últimos 50 movimientos, ahora con operario1 y operario2
     const { data: movs, error: errMov } = await supabase
       .from("movimientos")
       .select("fecha, codigo_instrumento, tipo_movimiento, destino, responsable, operario1, operario2")
       .order("fecha", { ascending:false })
-      .limit(120);
+      .limit(50);
 
     if (errMov){
       console.error("Error cargando movimientos:", errMov);
@@ -1311,31 +1311,97 @@
   function gEsc(v) {
     return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
-  function gClassify(inst = {}) {
-    const text = gNorm([inst.codigo,inst.descripcion,inst.descripcion_equipo,inst.tipo,inst.tipo_instrumento,inst.familia,inst.rango,inst.modelo].filter(Boolean).join(" "));
-    if (text.includes("ROSCA") || text.includes("ROSCADO") || text.includes("THREAD") || /\bM\s*\d+(?:\.\d+)?\s*(?:X|-)\s*\d+(?:\.\d+)?/.test(text)) {
-      return { label:"MT16 · Tampón roscado", href:`core/metrology_core/thread/thread_mt16_workflow_test.html?codigo=${encodeURIComponent(inst.codigo || guidedInput.value || "")}`, notes:["ISO 1502 / ISO 965", "Banco Trimos certificado", "Rodillos calculados por norma"] };
+  function gRouteByMotor(inst = {}, familiaCal = null) {
+    const codigoMotor = String(familiaCal?.codigo || "").trim().toUpperCase();
+
+    const routes = {
+      TAMPON_LISO_PNP: {
+        label: "MT15 · Tampón liso P/NP",
+        href: `TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(inst.codigo || guidedInput.value || "")}`,
+        notes: ["Familia asignada en Supabase", "Motor: TAMPON_LISO_PNP", "Flujo MT15"]
+      },
+      TAMPON_ROSCA_PNP: {
+        label: "MT16 · Tampón roscado P/NP",
+        href: `core/metrology_core/thread/thread_mt16_workflow_test.html?codigo=${encodeURIComponent(inst.codigo || guidedInput.value || "")}`,
+        notes: ["Familia asignada en Supabase", "Motor: TAMPON_ROSCA_PNP", "Flujo MT16"]
+      }
+    };
+
+    if (routes[codigoMotor]) return routes[codigoMotor];
+
+    if (codigoMotor) {
+      return {
+        label: `${familiaCal?.nombre || "Familia de calibración"} · módulo pendiente`,
+        href: `buscar_instrumento.html?codigo=${encodeURIComponent(inst.codigo || guidedInput.value || "")}`,
+        notes: [
+          `Motor asignado: ${codigoMotor}`,
+          "Familia correctamente registrada",
+          "Módulo de calibración todavía no implementado"
+        ]
+      };
     }
-    if (text.includes("TAMPON") || text.includes("TAPÓN") || text.includes("PASA") || text.includes("NO PASA") || text.includes("P/NP") || text.includes("LISO")) {
-      return { label:"MT15 · Tampón liso", href:`TMP_Calibraciones_Lab.html?codigo=${encodeURIComponent(inst.codigo || guidedInput.value || "")}`, notes:["ISO 286 / ISO 1938", "Patrón dimensional certificado", "Decisión automática"] };
-    }
-    return { label:"Revisión manual", href:`buscar_instrumento.html?codigo=${encodeURIComponent(inst.codigo || guidedInput.value || "")}`, notes:["Familia no confirmada", "Revisar ficha del instrumento"] };
+
+    return {
+      label: "Familia de calibración no asignada",
+      href: `alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || guidedInput.value || "")}`,
+      notes: [
+        "El instrumento existe",
+        "No tiene familia_calibracion_id",
+        "Revisar ficha antes de calibrar"
+      ]
+    };
   }
   async function gFindEquipment(code) {
     if (!guidedSupabase) throw new Error("Supabase no disponible.");
     const clean = String(code || "").trim();
-    const attempts = [
-      () => guidedSupabase.from("instrumentos").select("*").eq("codigo", clean).limit(1),
-      () => guidedSupabase.from("instrumentos").select("*").eq("codigo_interno", clean).limit(1),
-      () => guidedSupabase.from("instrumentos").select("*").ilike("codigo", `%${clean}%`).limit(1)
-    ];
-    for (const run of attempts) {
-      try {
-        const { data, error } = await run();
-        if (!error && Array.isArray(data) && data.length) return data[0];
-      } catch(e) {}
+
+    // Primero coincidencia exacta por código
+    try {
+      const { data, error } = await guidedSupabase
+        .from("instrumentos")
+        .select("*")
+        .eq("codigo", clean)
+        .limit(1);
+
+      if (error) throw error;
+      if (Array.isArray(data) && data.length) return data[0];
+    } catch (e) {
+      console.warn("Búsqueda exacta de instrumento:", e);
     }
+
+    // Segundo intento: búsqueda parcial por código
+    try {
+      const { data, error } = await guidedSupabase
+        .from("instrumentos")
+        .select("*")
+        .ilike("codigo", `%${clean}%`)
+        .limit(1);
+
+      if (error) throw error;
+      if (Array.isArray(data) && data.length) return data[0];
+    } catch (e) {
+      console.warn("Búsqueda parcial de instrumento:", e);
+    }
+
     return null;
+  }
+
+  async function gFindCalibrationFamily(inst) {
+    const familiaId = inst?.familia_calibracion_id;
+    if (!familiaId) return null;
+
+    const { data, error } = await guidedSupabase
+      .from("familias_calibracion")
+      .select("id,nombre,codigo,activo")
+      .eq("id", familiaId)
+      .limit(1);
+
+    if (error) {
+      console.error("Error cargando familia de calibración:", error);
+      return null;
+    }
+
+    return Array.isArray(data) && data.length ? data[0] : null;
   }
   function gRender(inst, route, msg = "") {
     guidedResult.classList.add("show");
@@ -1352,27 +1418,56 @@
   }
   async function gBuscar() {
     const code = guidedInput.value.trim();
+
     if (!code) {
       guidedResult.classList.add("show");
       guidedResult.innerHTML = `<strong>Introduce un código de equipo.</strong>`;
       return;
     }
+
     guidedResult.classList.add("show");
-    guidedResult.innerHTML = `<strong>Buscando equipo...</strong>`;
-    let inst = null, msg = "";
-    try { inst = await gFindEquipment(code); } catch(e) { msg = e.message || "No se pudo consultar Supabase."; }
-    if (!inst) {
-      inst = { codigo: code, descripcion: code, rango: code };
-      msg = msg || "No encontrado en Supabase. Clasificación provisional por texto/código.";
+    guidedResult.innerHTML = `<strong>Buscando equipo y familia de calibración...</strong>`;
+
+    let inst = null;
+    let familiaCal = null;
+    let msg = "";
+
+    try {
+      inst = await gFindEquipment(code);
+    } catch (e) {
+      msg = e.message || "No se pudo consultar Supabase.";
     }
-    gRender(inst, gClassify(inst), msg);
+
+    if (!inst) {
+      guidedResult.innerHTML = `
+        <strong>Equipo no encontrado.</strong>
+        <div style="margin-top:6px;color:rgba(255,255,255,.82);font-size:13px;">
+          El código ${gEsc(code)} no existe en instrumentos. No se realizará una clasificación provisional.
+        </div>`;
+      return;
+    }
+
+    try {
+      familiaCal = await gFindCalibrationFamily(inst);
+    } catch (e) {
+      console.error(e);
+    }
+
+    const route = gRouteByMotor(inst, familiaCal);
+
+    if (familiaCal?.codigo) {
+      msg = `Enrutado desde Supabase mediante familia_calibracion_id · ${familiaCal.codigo}`;
+    } else {
+      msg = "El equipo existe, pero no tiene una familia de calibración resoluble.";
+    }
+
+    gRender(inst, route, msg);
   }
   guidedBtn?.addEventListener("click", gBuscar);
   guidedInput?.addEventListener("keydown", ev => { if (ev.key === "Enter") gBuscar(); });
   guidedDemo?.addEventListener("click", () => {
     guidedInput.value = "75148";
-    const inst = { codigo:"75148", descripcion:"Tampón de Rosca P/NP", rango:"M12 x 1.25 - 6H" };
-    gRender(inst, gClassify(inst), "Demo local MT16.");
+    gBuscar();
   });
 
   // Sin tocar la lógica original: sólo sincroniza leyenda visual cuando cargan KPIs.
