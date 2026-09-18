@@ -1193,6 +1193,14 @@ async function registrarMovimiento() {
     nuevaUbicacionId = maquinaId || null;
   }
 
+  // Mantener sincronizados ubicación y estado operativo del instrumento.
+  let nuevoEstado = instrumentoActual.estado || "";
+  if (tipo === "Entrada") nuevoEstado = "En laboratorio";
+  else if (tipo === "Salida") nuevoEstado = "En uso";
+  else if (tipo === "Préstamo externo") nuevoEstado = "Préstamo externo";
+  else if (tipo === "Revisión / reparación") nuevoEstado = "Revisión / reparación";
+  else if (tipo === "Envío a calibración externa") nuevoEstado = "Calibración externa";
+
   const esSalida = (tipo === "Salida");
 
   const datosMovimiento = {
@@ -1225,13 +1233,14 @@ async function registrarMovimiento() {
       .from("instrumentos")
       .update({
         ubicacion_actual: nuevaUbicacion,
-        ubicacion_id: nuevaUbicacionId
+        ubicacion_id: nuevaUbicacionId,
+        estado: nuevoEstado
       })
       .eq("codigo", instrumentoActual.codigo);
 
     if (errorUpd) {
       console.error(errorUpd);
-      alertBox.textContent = "Movimiento guardado, pero ha fallado la actualización de la ubicación.";
+      alertBox.textContent = "Movimiento guardado, pero ha fallado la actualización de ubicación/estado.";
       alertBox.classList.remove("hidden");
     } else {
       alertBox.textContent = "Movimiento registrado con éxito";
@@ -1243,6 +1252,7 @@ async function registrarMovimiento() {
 
     instrumentoActual.ubicacion_actual = nuevaUbicacion;
     instrumentoActual.ubicacion_id = nuevaUbicacionId;
+    instrumentoActual.estado = nuevoEstado;
 
     await cargarMovimientos(instrumentoActual.codigo);
 

@@ -294,6 +294,7 @@
     .chart-card2{grid-column:4/span 3}
     .guided-calibration-section{grid-column:7/span 6}
     .quick-access{grid-column:1/-1}
+    .machine-section{grid-column:1/-1}
 
     .panel-head,.alerts-header,.mov-header,.guided-header{
       display:flex;
@@ -396,6 +397,19 @@
     .op-chip{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:850;white-space:nowrap}
     .op1{background:#dbeafe;color:#2563eb}.op2{background:#ffedd5;color:#ea580c}
 
+
+
+    /* Equipos por maquina */
+    .machine-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .machine-toolbar select,.machine-toolbar input{
+      border:1px solid var(--line2);border-radius:12px;background:#fff;padding:10px 13px;color:#0d2b50;outline:0;font-size:12px;
+    }
+    .machine-toolbar select{min-width:250px}
+    .machine-toolbar input{min-width:220px;flex:1}
+    .machine-summary{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 12px}
+    .machine-count{font-size:12px;font-weight:900;color:#0d2b50;background:#edf7ff;border:1px solid #bfdbfe;border-radius:999px;padding:5px 10px}
+    .machine-empty{padding:18px;border:1px dashed var(--line2);border-radius:14px;background:#f8fbff;color:#66809a;text-align:center;font-size:13px}
+
     /* Charts visuales */
     .fake-donut{
       width:160px;height:160px;border-radius:50%;
@@ -483,7 +497,7 @@
       .nav-list{flex-direction:row;overflow:visible}.nav-item{min-width:70px;flex-direction:column;font-size:10px;gap:4px;padding:8px}
       .sidebar-status,.version-side{display:none}
       .main{padding:14px}.topbar{flex-direction:column;align-items:stretch}.top-actions{justify-content:space-between}.global-search{width:100%;min-width:0}.user-pill{display:none}
-      .kpi-row{grid-template-columns:1fr}.alert-summary-grid{grid-template-columns:1fr}.guided-box{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}
+      .kpi-row{grid-template-columns:1fr}.alert-summary-grid{grid-template-columns:1fr}.guided-box{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}.machine-toolbar select,.machine-toolbar input{width:100%;min-width:0}
     }
   </style>
 </head>
@@ -635,6 +649,32 @@
           <div><button class="btn" id="mov-prev">&lt; Anterior</button><button class="btn" id="mov-next">Siguiente &gt;</button></div>
           <div id="mov-page-info">–</div>
         </div>
+      </section>
+
+      <section class="machine-section panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="section-title">Equipos por máquina</h2>
+            <p class="muted">Consulta qué equipos están asignados actualmente a cada máquina según su ubicación actual.</p>
+          </div>
+          <div class="machine-toolbar">
+            <select id="machine-select">
+              <option value="">Selecciona máquina...</option>
+            </select>
+            <input id="machine-search" type="text" placeholder="Filtrar por código o descripción..." disabled>
+          </div>
+        </div>
+        <div class="machine-summary">
+          <span class="machine-count" id="machine-count">Selecciona una máquina</span>
+          <span class="badge badge-soft" id="machine-status">Ubicación actual de instrumentos</span>
+        </div>
+        <div id="machine-empty" class="machine-empty">Selecciona una máquina para ver los equipos que tiene actualmente.</div>
+        <table class="mini-table" id="table-machine-equipment" style="display:none;">
+          <thead>
+            <tr><th>Código</th><th>Descripción</th><th>Estado operativo</th><th>Calibración</th><th>Próxima calibración</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="tbody-machine-equipment"></tbody>
+        </table>
       </section>
 
       <section class="chart-card panel">
@@ -813,7 +853,16 @@
   const movPageInfo    = document.getElementById("mov-page-info");
 
   let cacheMovimientos = [];
+  let cacheInstrumentosHome = [];
   const MOV_POR_PAG = 8;
+
+  const machineSelect = document.getElementById("machine-select");
+  const machineSearch = document.getElementById("machine-search");
+  const machineCount = document.getElementById("machine-count");
+  const machineStatus = document.getElementById("machine-status");
+  const machineEmpty = document.getElementById("machine-empty");
+  const tableMachineEquipment = document.getElementById("table-machine-equipment");
+  const tbodyMachineEquipment = document.getElementById("tbody-machine-equipment");
   let movPaginaActual = 1;
 
   // Utilidades
@@ -886,12 +935,16 @@
     const { data: instrumentos, error } = await supabase
       .from("instrumentos")
       // usamos las dos columnas para compatibilidad
-      .select("codigo, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
+      .select("codigo, descripcion, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
 
     if (error) {
       console.error("Error cargando instrumentos en home:", error);
       return;
     }
+
+    cacheInstrumentosHome = instrumentos || [];
+    refrescarSelectorMaquinas();
+    renderEquiposMaquina();
 
     const total = instrumentos.length;
     const hoy = new Date();
@@ -1089,6 +1142,100 @@
     }
   }
 
+  // ====== EQUIPOS POR MAQUINA ======
+  function esLaboratorio(ubicacion){
+    return String(ubicacion || "").trim().toLowerCase() === "laboratorio";
+  }
+
+  function refrescarSelectorMaquinas(){
+    if (!machineSelect) return;
+
+    const actual = machineSelect.value;
+    const maquinas = Array.from(new Set(
+      (cacheInstrumentosHome || [])
+        .map(i => String(i.ubicacion_actual || "").trim())
+        .filter(Boolean)
+        .filter(u => !esLaboratorio(u))
+    )).sort((a,b) => a.localeCompare(b, "es", {sensitivity:"base"}));
+
+    machineSelect.innerHTML = `<option value="">Selecciona máquina...</option>` +
+      maquinas.map(m => `<option value="${m.replaceAll('&','&amp;').replaceAll('"','&quot;')}">${m}</option>`).join("");
+
+    if (actual && maquinas.includes(actual)) machineSelect.value = actual;
+  }
+
+  function formatDateOnly(str){
+    const d = parseDate(str);
+    return d ? d.toLocaleDateString("es-ES") : "—";
+  }
+
+  function escapeHome(v){
+    return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"','&quot;');
+  }
+
+  function renderEquiposMaquina(){
+    if (!machineSelect || !tbodyMachineEquipment) return;
+
+    const maquina = machineSelect.value;
+    const q = (machineSearch?.value || "").trim().toLowerCase();
+
+    if (!maquina){
+      machineCount.textContent = "Selecciona una máquina";
+      machineStatus.textContent = "Ubicación actual de instrumentos";
+      machineSearch.disabled = true;
+      machineEmpty.style.display = "block";
+      machineEmpty.textContent = "Selecciona una máquina para ver los equipos que tiene actualmente.";
+      tableMachineEquipment.style.display = "none";
+      tbodyMachineEquipment.innerHTML = "";
+      return;
+    }
+
+    machineSearch.disabled = false;
+
+    const equiposMaquina = (cacheInstrumentosHome || []).filter(inst =>
+      String(inst.ubicacion_actual || "").trim() === maquina
+    );
+
+    const filtrados = equiposMaquina.filter(inst => {
+      if (!q) return true;
+      return String(inst.codigo || "").toLowerCase().includes(q) ||
+             String(inst.descripcion || "").toLowerCase().includes(q);
+    });
+
+    machineCount.textContent = `${maquina} · ${equiposMaquina.length} equipo${equiposMaquina.length === 1 ? "" : "s"}`;
+    machineStatus.textContent = q ? `${filtrados.length} coinciden con el filtro` : "Equipos actualmente asignados";
+
+    if (!filtrados.length){
+      machineEmpty.style.display = "block";
+      machineEmpty.textContent = q
+        ? "No hay equipos en esta máquina que coincidan con el filtro."
+        : "No hay equipos asignados actualmente a esta máquina.";
+      tableMachineEquipment.style.display = "none";
+      tbodyMachineEquipment.innerHTML = "";
+      return;
+    }
+
+    machineEmpty.style.display = "none";
+    tableMachineEquipment.style.display = "table";
+
+    tbodyMachineEquipment.innerHTML = filtrados
+      .sort((a,b) => String(a.codigo || "").localeCompare(String(b.codigo || ""), "es", {numeric:true}))
+      .map(inst => {
+        const cal = estadoCalibracionFromInstrumento(inst);
+        const chip = `<span class="calib-chip ${cal.clase}">${escapeHome(cal.estado)}</span>`;
+        const estadoOperativo = inst.estado || (esLaboratorio(inst.ubicacion_actual) ? "En laboratorio" : "En uso");
+        const prox = inst.fecha_proxima_calibracion || inst.proxima_calibracion;
+        return `<tr>
+          <td><strong>${escapeHome(inst.codigo || "")}</strong></td>
+          <td>${escapeHome(inst.descripcion || "-")}</td>
+          <td>${escapeHome(estadoOperativo)}</td>
+          <td>${chip}</td>
+          <td>${formatDateOnly(prox)}</td>
+          <td><a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(inst.codigo || "")}">Ver ficha</a></td>
+        </tr>`;
+      }).join("");
+  }
+
   // ====== LÓGICA ÚLTIMOS MOVIMIENTOS ======
 
   function estadoCalibracionFromInstrumento(inst){
@@ -1284,6 +1431,13 @@
     movPaginaActual++;
     renderMovimientos();
   });
+
+  machineSelect?.addEventListener("change", () => {
+    if (machineSearch) machineSearch.value = "";
+    renderEquiposMaquina();
+  });
+
+  machineSearch?.addEventListener("input", renderEquiposMaquina);
 
   // Cargar al inicio + refresco periódico
   cargarDashboard();
