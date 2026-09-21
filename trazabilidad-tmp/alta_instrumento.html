@@ -23,6 +23,12 @@
     .qr-box{background:#0c1a2c;border:1px dashed var(--border);border-radius:12px;height:320px;display:flex;align-items:center;justify-content:center;font-size:.9rem;text-align:center;color:var(--muted)}
     .btn-float{position:fixed;right:20px;bottom:20px;background:#1e88e5;color:#fff;border:none;border-radius:999px;padding:9px 18px;cursor:pointer;font-size:.9rem;box-shadow:0 0 10px rgba(0,0,0,.4);z-index:20}.btn-float:hover{background:#1565c0}
     .hint{font-size:.75rem;color:var(--muted);margin-top:4px}
+    .retire-card{margin-top:14px;border:1px solid #29405f;border-radius:14px;background:#0d1d31;padding:14px}
+    .retire-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .retire-item{background:#0b1627;border:1px solid var(--border);border-radius:10px;padding:9px 10px}
+    .retire-item span{display:block;color:var(--muted);font-size:.72rem;margin-bottom:3px}.retire-item strong{font-size:.9rem}
+    .retire-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.btn-repair{background:#f59e0b;color:#132235}.btn-danger{background:#dc2626;color:#fff}.btn-history{background:#334155;color:#fff}
+    @media(max-width:700px){.retire-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -70,17 +76,44 @@
   </section>
 
   <section id="panelBaja" class="panel">
-    <h2>Dar de baja técnica por QR / código</h2>
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div><h2>Retirada / baja de instrumento</h2><div class="hint">El instrumento nunca se elimina de la base de datos: se retira del uso activo y conserva toda su trazabilidad.</div></div>
+      <button class="btn btn-history" type="button" onclick="window.location.href='bajas_instrumentos.html'">📚 Historial de bajas</button>
+    </div>
     <div id="msgBaja" class="alert info hidden"></div>
-    <div class="grid">
+    <div class="grid" style="margin-top:14px">
       <div>
         <div id="qrReader" class="qr-box">Enfoca el código QR del instrumento.</div>
         <div class="actions" style="margin-top:10px"><button class="btn btn-primary" id="btnIniciarEscaneo">📷 Iniciar escaneo</button><button class="btn btn-ghost" id="btnDetenerEscaneo">✋ Detener</button></div>
       </div>
       <div>
-        <label>Dar de baja manualmente</label>
-        <div class="row"><input id="codigoBaja" placeholder="Código del instrumento"><button class="btn btn-warn" id="btnBajaManual">🗑 Baja técnica</button></div>
-        <div class="hint">No borra el instrumento: lo marca como BAJA TÉCNICA para mantener trazabilidad.</div>
+        <label>Buscar equipo por código</label>
+        <div class="row"><input id="codigoBaja" placeholder="Código del instrumento"><button class="btn btn-primary" id="btnBuscarBaja">🔎 Buscar</button></div>
+        <div class="hint">Primero se muestra el equipo. Después eliges reparación o baja definitiva.</div>
+
+        <div id="fichaBaja" class="retire-card hidden">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><strong id="bajaTitulo">Equipo</strong><span id="bajaEstado" style="font-size:.78rem;color:#cfe1ff"></span></div>
+          <div class="retire-grid">
+            <div class="retire-item"><span>Código</span><strong id="bajaCodigo">—</strong></div>
+            <div class="retire-item"><span>Descripción</span><strong id="bajaDescripcion">—</strong></div>
+            <div class="retire-item"><span>Ubicación actual</span><strong id="bajaUbicacion">—</strong></div>
+            <div class="retire-item"><span>Próxima calibración</span><strong id="bajaProxima">—</strong></div>
+          </div>
+          <div style="margin-top:12px">
+            <label>Motivo *</label>
+            <select id="motivoBaja">
+              <option value="">Selecciona motivo...</option>
+              <option>Golpe / rotura</option><option>Desgaste</option><option>Irreparable</option><option>Obsoleto</option><option>Pérdida</option><option>Otro</option>
+            </select>
+          </div>
+          <div style="margin-top:10px"><label>Responsable *</label><select id="responsableBaja"><option value="">Selecciona responsable...</option><option>David</option><option>Guillermo</option><option>Israel</option><option>José Antonio</option></select></div>
+          <div style="margin-top:10px"><label>Observaciones</label><textarea id="observacionesBaja" placeholder="Daño observado, decisión tomada, referencia de reparación, etc."></textarea></div>
+          <div class="retire-actions">
+            <button class="btn btn-repair" id="btnReparacion" type="button">🛠 Enviar a revisión / reparación</button>
+            <button class="btn btn-danger" id="btnBajaDefinitiva" type="button">🗑 Baja definitiva</button>
+          </div>
+          <div class="hint">La baja definitiva bloquea el equipo para nuevas salidas, pero conserva código, movimientos, calibraciones y certificados. El código no se reutiliza.</div>
+        </div>
       </div>
     </div>
   </section>
@@ -440,79 +473,144 @@
   $("btnGuardar").onclick = guardarInstrumento;
 
   let html5Qr = null;
+  let instrumentoBajaActual = null;
+
+  function fmtFechaBaja(v){
+    if(!v) return "—";
+    const d = new Date(v);
+    if(Number.isNaN(d.getTime())) return String(v);
+    return d.toLocaleDateString("es-ES");
+  }
+
+  function limpiarFichaBaja(){
+    instrumentoBajaActual = null;
+    $("fichaBaja").classList.add("hidden");
+    $("motivoBaja").value = "";
+    $("responsableBaja").value = "";
+    $("observacionesBaja").value = "";
+  }
+
+  function pintarFichaBaja(inst){
+    instrumentoBajaActual = inst;
+    $("bajaTitulo").textContent = `${inst.codigo || ""} · ${inst.descripcion || "Instrumento"}`;
+    $("bajaCodigo").textContent = inst.codigo || "—";
+    $("bajaDescripcion").textContent = inst.descripcion || "—";
+    $("bajaUbicacion").textContent = inst.ubicacion_actual || inst.ubicacion || "—";
+    $("bajaProxima").textContent = fmtFechaBaja(inst.fecha_proxima_calibracion || inst.proxima_calibracion);
+    $("bajaEstado").textContent = inst.estado ? `Estado actual: ${inst.estado}` : "";
+    $("fichaBaja").classList.remove("hidden");
+  }
+
+  async function buscarEquipoBaja(codigo){
+    hideMsg(msgBaja);
+    limpiarFichaBaja();
+    const code = String(codigo || "").trim();
+    if(!code){ showMsg(msgBaja,"Introduce un código.","err"); return; }
+
+    const { data, error } = await supabase.from("instrumentos").select("*").eq("codigo", code).maybeSingle();
+    if(error){ console.error(error); showMsg(msgBaja,"Error consultando el equipo: " + error.message,"err"); return; }
+    if(!data){ showMsg(msgBaja,`No existe ningún instrumento con código ${code}.`,"err"); return; }
+    pintarFichaBaja(data);
+
+    const est = String(data.estado || "").toUpperCase();
+    if(est.includes("BAJA") || est === "RETIRADO"){
+      showMsg(msgBaja,`El instrumento ${code} ya consta como retirado. Puedes consultar su historial de bajas.`,"info");
+    } else {
+      showMsg(msgBaja,`Instrumento ${code} localizado. Revisa los datos y selecciona la acción.`,"ok");
+    }
+  }
+
+  async function registrarMovimientoBaja(tipo, destino, responsable, observaciones){
+    const datos = {
+      codigo_instrumento: instrumentoBajaActual.codigo,
+      fecha: new Date().toISOString(),
+      tipo_movimiento: tipo,
+      responsable,
+      destino,
+      observaciones,
+      operario1: null,
+      operario2: null
+    };
+    const { error } = await supabase.from("movimientos").insert(datos);
+    if(error) throw error;
+  }
+
+  async function enviarReparacion(){
+    if(!instrumentoBajaActual){ showMsg(msgBaja,"Busca primero el instrumento.","err"); return; }
+    const motivo = $("motivoBaja").value;
+    const responsable = $("responsableBaja").value;
+    const obs = $("observacionesBaja").value.trim();
+    if(!motivo || !responsable){ showMsg(msgBaja,"Selecciona motivo y responsable.","err"); return; }
+    if(!confirm(`¿Enviar ${instrumentoBajaActual.codigo} a revisión / reparación?`)) return;
+
+    const ubicacionAnterior = instrumentoBajaActual.ubicacion_actual || "";
+    const detalle = `Motivo: ${motivo}\nUbicación anterior: ${ubicacionAnterior || "—"}${obs ? `\nObservaciones: ${obs}` : ""}`;
+    const { error } = await supabase.from("instrumentos").update({estado:"Revisión / reparación",ubicacion_actual:"Revisión / reparación"}).eq("codigo",instrumentoBajaActual.codigo);
+    if(error){ showMsg(msgBaja,"Error actualizando el equipo: " + error.message,"err"); return; }
+    try{ await registrarMovimientoBaja("Revisión / reparación","Revisión / reparación",responsable,detalle); }
+    catch(e){ console.error(e); showMsg(msgBaja,"El equipo pasó a reparación, pero no se pudo registrar el movimiento: " + e.message,"err"); return; }
+    showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} enviado a revisión / reparación.`,"ok");
+    await buscarEquipoBaja(instrumentoBajaActual.codigo);
+  }
+
+  async function bajaDefinitiva(){
+    if(!instrumentoBajaActual){ showMsg(msgBaja,"Busca primero el instrumento.","err"); return; }
+    const motivo = $("motivoBaja").value;
+    const responsable = $("responsableBaja").value;
+    const obs = $("observacionesBaja").value.trim();
+    if(!motivo || !responsable){ showMsg(msgBaja,"Selecciona motivo y responsable.","err"); return; }
+    if(!confirm(`BAJA DEFINITIVA de ${instrumentoBajaActual.codigo}.\n\nEl equipo dejará de estar disponible para taller, pero NO se borrará su historial. ¿Continuar?`)) return;
+
+    const ubicacionAnterior = instrumentoBajaActual.ubicacion_actual || "";
+    const estadoAnterior = instrumentoBajaActual.estado || "";
+    const detalle = `Motivo baja: ${motivo}\nEstado anterior: ${estadoAnterior || "—"}\nUbicación anterior: ${ubicacionAnterior || "—"}${obs ? `\nObservaciones: ${obs}` : ""}`;
+
+    const { error } = await supabase.from("instrumentos").update({estado:"Baja definitiva",ubicacion_actual:"Retirado",ubicacion_id:null}).eq("codigo",instrumentoBajaActual.codigo);
+    if(error){ showMsg(msgBaja,"Error al dar de baja: " + error.message,"err"); return; }
+    try{ await registrarMovimientoBaja("Baja definitiva","Retirado",responsable,detalle); }
+    catch(e){ console.error(e); showMsg(msgBaja,"El equipo quedó retirado, pero no se pudo registrar el movimiento de baja: " + e.message,"err"); return; }
+
+    showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado definitivamente. Su trazabilidad permanece disponible.`,"ok");
+    await buscarEquipoBaja(instrumentoBajaActual.codigo);
+  }
 
   async function iniciarEscaneo(){
     hideMsg(msgBaja);
-
     try{
-      if(!html5Qr){
-        html5Qr = new Html5Qrcode("qrReader");
-      }
-
+      if(!html5Qr) html5Qr = new Html5Qrcode("qrReader");
       await html5Qr.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 220, height: 220 } },
         async decodedText => {
           await detenerEscaneo();
-
           let code = decodedText;
           if(decodedText.startsWith("http")){
-            const parts = decodedText.split("/");
-            code = decodeURIComponent(parts.filter(Boolean).pop());
+            try{
+              const u = new URL(decodedText);
+              code = u.searchParams.get("codigo") || decodeURIComponent(u.pathname.split("/").filter(Boolean).pop() || "");
+            }catch(e){ code = decodedText.split("/").filter(Boolean).pop() || decodedText; }
           }
-
-          confirmarBaja(code);
+          $("codigoBaja").value = code;
+          buscarEquipoBaja(code);
         }
       );
-
       showMsg(msgBaja,"Escaneando...","info");
-    } catch(e){
-      console.error(e);
-      showMsg(msgBaja,"No se pudo iniciar la cámara.","err");
-    }
+    }catch(e){ console.error(e); showMsg(msgBaja,"No se pudo iniciar la cámara.","err"); }
   }
 
   async function detenerEscaneo(){
     try{
-      if(html5Qr && html5Qr.isScanning){
-        await html5Qr.stop();
-      }
-      if(html5Qr){ await html5Qr.clear(); }
+      if(html5Qr && html5Qr.isScanning) await html5Qr.stop();
+      if(html5Qr) await html5Qr.clear();
     }catch(e){ console.error(e); }
-  }
-
-  async function confirmarBaja(codigo){
-    const ok = confirm(`⚠️ ¿Deseas dar de BAJA TÉCNICA el instrumento ${codigo}?`);
-    if(!ok) return;
-
-    const { error } = await supabase
-      .from("instrumentos")
-      .update({
-        estado: "BAJA TÉCNICA",
-        ubicacion_actual: "Baja técnica"
-      })
-      .eq("codigo", codigo);
-
-    if(error){
-      console.error(error);
-      showMsg(msgBaja,"Error al dar de baja: " + error.message,"err");
-      return;
-    }
-
-    showMsg(msgBaja,`Instrumento ${codigo} marcado como BAJA TÉCNICA.`,"ok");
   }
 
   $("btnIniciarEscaneo").onclick = iniciarEscaneo;
   $("btnDetenerEscaneo").onclick = detenerEscaneo;
-
-  $("btnBajaManual").onclick = () => {
-    const code = $("codigoBaja").value.trim();
-    if(!code){
-      showMsg(msgBaja,"Introduce un código.","err");
-      return;
-    }
-    confirmarBaja(code);
-  };
+  $("btnBuscarBaja").onclick = () => buscarEquipoBaja($("codigoBaja").value);
+  $("codigoBaja").addEventListener("keydown", e => { if(e.key === "Enter") buscarEquipoBaja($("codigoBaja").value); });
+  $("btnReparacion").onclick = enviarReparacion;
+  $("btnBajaDefinitiva").onclick = bajaDefinitiva;
 
   cargarCatalogos();
 </script>

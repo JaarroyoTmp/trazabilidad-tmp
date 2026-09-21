@@ -838,6 +838,7 @@ function construirDestinoTexto() {
 let instrumentoActual = null;
 let movimientosCount = 0;
 let estadoActualInstrumento = null;
+let instrumentoRetirado = false;
 let usoBajoResponsabilidad = false;
 let responsableAutorizado = "";
 
@@ -859,7 +860,7 @@ function actualizarBotonRegistrar() {
   const btn = $("#btnRegistrar");
   if (!btn) return;
 
-  if (!instrumentoActual) {
+  if (!instrumentoActual || instrumentoRetirado) {
     btn.disabled = true;
     return;
   }
@@ -934,6 +935,7 @@ async function cargarInstrumento() {
     alertBox.textContent = "Introduce un código";
     alertBox.classList.remove("hidden");
     instrumentoActual = null;
+    instrumentoRetirado = false;
     actualizarBotonRegistrar();
     return;
   }
@@ -977,9 +979,20 @@ async function cargarInstrumento() {
     }
 
     instrumentoActual = data;
+    instrumentoRetirado = ["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(String(data.estado || "").trim().toUpperCase());
     pintarInstrumento(data);
 
     await cargarMovimientos(codigo);
+
+    if (instrumentoRetirado) {
+      alertBox.textContent = `⛔ Instrumento ${codigo} retirado / dado de baja. Se conserva su historial, pero no admite nuevos movimientos.`;
+      alertBox.style.background = "rgba(127,29,29,.55)";
+      alertBox.style.borderColor = "#ef4444";
+      alertBox.style.color = "#fee2e2";
+      alertBox.classList.remove("hidden");
+      actualizarBotonRegistrar();
+      return;
+    }
 
     if ($("#tipoMovimiento").value === "Entrada") {
       await precargarDatosUltimaSalida();
@@ -1152,6 +1165,12 @@ async function registrarMovimiento() {
 
   if (tipo !== "Entrada" && !maquinaId) {
     alertBox.textContent = "Selecciona una máquina / destino";
+    alertBox.classList.remove("hidden");
+    return;
+  }
+
+  if (instrumentoRetirado || ["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(String(instrumentoActual.estado || "").trim().toUpperCase())) {
+    alertBox.textContent = "Este instrumento está retirado / dado de baja y no puede registrar nuevos movimientos.";
     alertBox.classList.remove("hidden");
     return;
   }
