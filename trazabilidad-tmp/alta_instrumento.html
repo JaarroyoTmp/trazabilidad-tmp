@@ -78,7 +78,10 @@
   <section id="panelBaja" class="panel">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
       <div><h2>Retirada / baja de instrumento</h2><div class="hint">El instrumento nunca se elimina de la base de datos: se retira del uso activo y conserva toda su trazabilidad.</div></div>
-      <button class="btn btn-history" type="button" onclick="window.location.href='bajas_instrumentos.html'">📚 Historial de bajas</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-history" type="button" onclick="window.location.href='bajas_instrumentos.html'">📚 Historial de bajas</button>
+        <button class="btn btn-history" type="button" onclick="window.location.href='reposiciones.html'">🛒 Lista de reposición</button>
+      </div>
     </div>
     <div id="msgBaja" class="alert info hidden"></div>
     <div class="grid" style="margin-top:14px">
@@ -108,6 +111,14 @@
           </div>
           <div style="margin-top:10px"><label>Responsable *</label><select id="responsableBaja"><option value="">Selecciona responsable...</option><option>David</option><option>Guillermo</option><option>Israel</option><option>José Antonio</option></select></div>
           <div style="margin-top:10px"><label>Observaciones</label><textarea id="observacionesBaja" placeholder="Daño observado, decisión tomada, referencia de reparación, etc."></textarea></div>
+          <div style="margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.05)">
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input id="anadirReposicion" type="checkbox" checked style="width:auto"> Añadir a lista de compra / reposición</label>
+            <div class="row" style="margin-top:9px">
+              <div style="flex:0 0 120px"><label>Cantidad</label><input id="cantidadReposicion" type="number" min="1" step="1" value="1"></div>
+              <div style="flex:1"><label>Prioridad</label><select id="prioridadReposicion"><option>Normal</option><option>Alta</option><option>Urgente</option></select></div>
+            </div>
+            <div class="hint">La baja conserva el historial. Si esta opción está marcada, además crea una necesidad de reposición para Compras/Calidad.</div>
+          </div>
           <div class="retire-actions">
             <button class="btn btn-repair" id="btnReparacion" type="button">🛠 Enviar a revisión / reparación</button>
             <button class="btn btn-danger" id="btnBajaDefinitiva" type="button">🗑 Baja definitiva</button>
@@ -553,6 +564,28 @@
     await buscarEquipoBaja(instrumentoBajaActual.codigo);
   }
 
+  async function crearReposicionDesdeBaja(inst, motivo, responsable, observaciones){
+    if(!$(`anadirReposicion`)?.checked) return {ok:true, omitida:true};
+    const cantidad = Math.max(1, Number($("cantidadReposicion")?.value || 1));
+    const prioridad = $("prioridadReposicion")?.value || "Normal";
+    const payload = {
+      instrumento_codigo: inst.codigo,
+      descripcion: inst.descripcion || null,
+      familia_id: inst.familia_id || null,
+      motivo_baja: motivo || null,
+      responsable_baja: responsable || null,
+      observaciones: observaciones || null,
+      cantidad,
+      prioridad,
+      estado: "Pendiente",
+      fecha_baja: new Date().toISOString(),
+      notificacion_estado: "Pendiente"
+    };
+    const { error } = await supabase.from("reposiciones").upsert(payload,{onConflict:"instrumento_codigo"});
+    if(error) return {ok:false,error};
+    return {ok:true};
+  }
+
   async function bajaDefinitiva(){
     if(!instrumentoBajaActual){ showMsg(msgBaja,"Busca primero el instrumento.","err"); return; }
     const motivo = $("motivoBaja").value;
@@ -570,7 +603,14 @@
     try{ await registrarMovimientoBaja("Baja definitiva","Retirado",responsable,detalle); }
     catch(e){ console.error(e); showMsg(msgBaja,"El equipo quedó retirado, pero no se pudo registrar el movimiento de baja: " + e.message,"err"); return; }
 
-    showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado definitivamente. Su trazabilidad permanece disponible.`,"ok");
+    const repo = await crearReposicionDesdeBaja(instrumentoBajaActual,motivo,responsable,obs);
+    if(!repo.ok){
+      console.error(repo.error);
+      showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado y trazabilidad guardada. No se pudo añadir a reposición: ${repo.error.message}`,"err");
+    } else {
+      const extra = repo.omitida ? "" : " Añadido también a la lista de reposición.";
+      showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado definitivamente. Su trazabilidad permanece disponible.${extra}`,"ok");
+    }
     await buscarEquipoBaja(instrumentoBajaActual.codigo);
   }
 

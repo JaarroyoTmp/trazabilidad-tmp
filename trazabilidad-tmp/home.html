@@ -418,7 +418,7 @@
       position:relative;
     }
     .fake-donut::after{
-      content:"812\A Total equipos";
+      content:"812\A Equipos activos";
       white-space:pre;
       position:absolute;inset:38px;border-radius:50%;background:#fff;
       display:grid;place-items:center;text-align:center;font-weight:900;color:#0d2b50;font-size:18px;
@@ -567,7 +567,7 @@
       <section class="kpi-row">
         <div class="kpi-card" id="kpi-card-total">
           <div class="kpi-icon i-blue">▧</div>
-          <div><div class="kpi-label">Total equipos</div><div class="kpi-value" id="kpi-total">–</div><div class="kpi-extra" id="kpi-total-extra"></div></div>
+          <div><div class="kpi-label">Equipos activos</div><div class="kpi-value" id="kpi-total">–</div><div class="kpi-extra" id="kpi-total-extra"></div></div>
         </div>
         <a href="listado_instrumentos.html?filtro=calibrados" class="kpi-link">
           <div class="kpi-card" id="kpi-card-cal">
@@ -731,6 +731,8 @@
         <div class="quick-title">Accesos rápidos</div>
         <div class="quick-grid">
           <a class="quick-card" href="alta_instrumento.html"><span class="quick-ico">✎</span>Alta / Edición</a>
+          <a class="quick-card" href="bajas_instrumentos.html"><span class="quick-ico">⌫</span>Histórico bajas</a>
+          <a class="quick-card" href="reposiciones.html"><span class="quick-ico">🛒</span>Reposición</a>
           <a class="quick-card" href="movimiento.html"><span class="quick-ico">↔</span>Movimientos</a>
           <a class="quick-card" href="qr/qr.index.html"><span class="quick-ico">▦</span>Generar QR</a>
           <a class="quick-card" href="TMP_Calibraciones_Lab.html"><span class="quick-ico">⚗</span>Calibraciones Lab</a>
@@ -942,11 +944,22 @@
       return;
     }
 
-    cacheInstrumentosHome = instrumentos || [];
+    const esBajaDefinitiva = inst => {
+      const estado = String(inst?.estado || "").trim().toUpperCase();
+      const ubic = String(inst?.ubicacion_actual || "").trim().toUpperCase();
+      return ["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(estado) || ubic === "RETIRADO";
+    };
+
+    const instrumentosActivos = (instrumentos || []).filter(inst => !esBajaDefinitiva(inst));
+    const totalBajas = (instrumentos || []).length - instrumentosActivos.length;
+
+    // El circuito operativo trabaja únicamente con equipos activos.
+    // Los retirados permanecen en Supabase para conservar toda su trazabilidad.
+    cacheInstrumentosHome = instrumentosActivos;
     refrescarSelectorMaquinas();
     renderEquiposMaquina();
 
-    const total = instrumentos.length;
+    const total = instrumentosActivos.length;
     const hoy = new Date();
     const mas30 = new Date(hoy.getTime() + 30*86400000);
 
@@ -957,7 +970,7 @@
     const fueraLista = [];
     const proxLista  = [];
 
-    instrumentos.forEach(inst => {
+    instrumentosActivos.forEach(inst => {
       // Ubicación
       const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
       if (ubic === "laboratorio") enLab++;
@@ -990,7 +1003,7 @@
     kpi_proximos.textContent   = proxLista.length;
     kpi_fuera.textContent      = fueraLista.length;
 
-    kpi_total_extra.textContent      = "";
+    kpi_total_extra.textContent      = totalBajas ? `${totalBajas} retirado${totalBajas === 1 ? "" : "s"} en histórico` : "Sin equipos retirados";
     kpi_uso_extra.textContent        = total ? `${pct(enUso,total)} del total` : "";
     kpi_lab_extra.textContent        = total ? `${pct(enLab,total)} del total` : "";
     kpi_calibrados_extra.textContent = total ? `${pct(calibrados,total)} en vigor` : "";
@@ -1635,7 +1648,7 @@
     set("legend-fuera", fuera);
     set("legend-lab", lab);
     const donut = document.querySelector(".fake-donut");
-    if (donut && total !== "–") donut.setAttribute("title", `Total equipos: ${total}`);
+    if (donut && total !== "–") donut.setAttribute("title", `Equipos activos: ${total}`);
   }, 1000);
 </script>
 </body>
