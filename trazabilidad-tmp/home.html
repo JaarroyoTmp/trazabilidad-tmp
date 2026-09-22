@@ -499,46 +499,35 @@
       .main{padding:14px}.topbar{flex-direction:column;align-items:stretch}.top-actions{justify-content:space-between}.global-search{width:100%;min-width:0}.user-pill{display:none}
       .kpi-row{grid-template-columns:1fr}.alert-summary-grid{grid-template-columns:1fr}.guided-box{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}.machine-toolbar select,.machine-toolbar input{width:100%;min-width:0}
     }
+  
+
+    /* HOME V4 - Navegación superior tipo programa, sin duplicados */
+    .app{display:block!important;min-height:100vh;}
+    .main{width:100%!important;max-width:none!important;padding:18px 22px 26px!important;}
+    .hamb{display:none!important;}
+    .topbar{margin-bottom:12px!important;}
+    .program-menu{margin-bottom:16px;padding:12px 14px!important;}
+    .program-menu-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;}
+    .program-menu-title{font-size:14px;font-weight:900;color:#0d2b50;}
+    .program-menu-sub{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px;}
+    .program-status{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#41627e;white-space:nowrap;}
+    .program-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.14);}
+    .program-menu-grid{display:grid;grid-template-columns:repeat(10,minmax(86px,1fr));gap:8px;}
+    .program-card{min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:12px;color:#123b61;font-size:10.5px;font-weight:850;text-align:center;padding:7px 5px;box-shadow:0 5px 14px rgba(15,56,93,.05);transition:.16s ease;}
+    .program-card:hover{transform:translateY(-2px);border-color:#9fc3ef;box-shadow:0 9px 20px rgba(15,56,93,.10);}
+    .program-card.active{background:linear-gradient(135deg,#edf5ff,#fff);border-color:#8db9ef;}
+    .program-card-accent{background:linear-gradient(135deg,#eefbf5,#fff);border-color:#9adab8;}
+    .program-ico{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:#eef5ff;color:#2563eb;font-size:16px;font-weight:900;}
+    .program-card-accent .program-ico{background:#eaf9f0;color:#15803d;}
+    @media(max-width:1450px){.program-menu-grid{grid-template-columns:repeat(8,minmax(86px,1fr));}}
+    @media(max-width:1100px){.program-menu-grid{grid-template-columns:repeat(6,minmax(86px,1fr));}.topbar{align-items:flex-start;}.top-actions{flex-wrap:wrap;justify-content:flex-end}.global-search{min-width:240px;}}
+    @media(max-width:760px){.main{padding:10px!important}.program-menu-grid{display:flex;overflow-x:auto;gap:7px;padding-bottom:4px}.program-card{min-width:94px}.program-menu-head{align-items:flex-start}.program-status{display:none}.top-actions{width:100%}.global-search{width:100%;min-width:0}.user-pill{display:none}}
+
   </style>
 </head>
 
 <body>
 <div class="app">
-  <aside class="sidebar">
-    <div class="logo-block">
-      <img src="img/tmp-quality.png" alt="TMP">
-      <div>
-        <div class="logo-title">PARAMIO</div>
-        <div class="logo-sub">TALLERES MECÁNICOS</div>
-      </div>
-    </div>
-
-    <nav class="nav-list">
-      <a class="nav-item active" href="#"><span class="nav-ico">⌂</span>Inicio</a>
-      <a class="nav-item" href="alta_instrumento.html"><span class="nav-ico">✎</span>Alta / Edición</a>
-      <a class="nav-item" href="movimiento.html"><span class="nav-ico">↔</span>Movimientos</a>
-      <a class="nav-item" href="calibraciones.html"><span class="nav-ico">⚗</span>Calibraciones Lab</a>
-      <a class="nav-item" href="App_Patrones_TMP.html"><span class="nav-ico">▤</span>Patrones</a>
-      <a class="nav-item" href="App_Familias_TMP.html"><span class="nav-ico">▣</span>Familias</a>
-      <a class="nav-item" href="equipos-referencia-consulta.html"><span class="nav-ico">⌘</span>Equipos</a>
-      <a class="nav-item" href="buscar_instrumento.html"><span class="nav-ico">⌕</span>Buscar</a>
-      <a class="nav-item" href="qr/qr.index.html"><span class="nav-ico">▦</span>Generar QR</a>
-      <a class="nav-item" href="certificados.html"><span class="nav-ico">▧</span>Informes</a>
-      <a class="nav-item" href="alcance_kpi.html"><span class="nav-ico">▥</span>Alcance & KPIs</a>
-      <a class="nav-item" href="criterios.html"><span class="nav-ico">◇</span>Criterios</a>
-      <a class="nav-item" href="equipos-referencia-crear.html"><span class="nav-ico">▣</span>Referencias</a>
-      <a class="nav-item" href="equipos-referencia-consulta.html"><span class="nav-ico">▤</span>Tablas</a>
-      <a class="nav-item" href="chat.html"><span class="nav-ico">☏</span>Consultas</a>
-      <a class="nav-item" href="#"><span class="nav-ico">⚙</span>Configuración</a>
-    </nav>
-
-    <div class="sidebar-status">
-      <div class="sys-row"><span class="dot"></span><div><strong>Sistema</strong><br>Conectado</div></div>
-      <div class="sys-row"><span class="dot"></span><div><strong>Supabase</strong><br>Online</div></div>
-    </div>
-    <div class="version-side"><span>v3.0.0</span><span>2026</span></div>
-  </aside>
-
   <div class="main">
     <div class="topbar">
       <div class="top-left">
@@ -562,6 +551,37 @@
         </div>
       </div>
     </div>
+
+    <section class="program-menu panel" aria-label="Menú principal TMP">
+      <div class="program-menu-head">
+        <div>
+          <div class="program-menu-title">Menú principal</div>
+          <div class="program-menu-sub">Accesos directos del sistema metrológico</div>
+        </div>
+        <div class="program-status"><span class="program-dot"></span>Sistema conectado · Supabase online</div>
+      </div>
+      <div class="program-menu-grid">
+        <a class="program-card active" href="home.html"><span class="program-ico">⌂</span><span>Inicio</span></a>
+        <a class="program-card" href="alta_instrumento.html"><span class="program-ico">✎</span><span>Alta / Edición</span></a>
+        <a class="program-card" href="bajas_instrumentos.html"><span class="program-ico">⌫</span><span>Histórico bajas</span></a>
+        <a class="program-card program-card-accent" href="reposiciones.html"><span class="program-ico">🛒</span><span>Necesidades laboratorio</span></a>
+        <a class="program-card" href="movimiento.html"><span class="program-ico">↔</span><span>Movimientos</span></a>
+        <a class="program-card" href="calibraciones.html"><span class="program-ico">◎</span><span>Centro calibración</span></a>
+        <a class="program-card" href="TMP_Calibraciones_Lab.html"><span class="program-ico">⚗</span><span>Calibraciones Lab</span></a>
+        <a class="program-card" href="App_Patrones_TMP.html"><span class="program-ico">▧</span><span>Patrones</span></a>
+        <a class="program-card" href="App_Familias_TMP.html"><span class="program-ico">▣</span><span>Familias</span></a>
+        <a class="program-card" href="equipos-referencia-consulta.html"><span class="program-ico">☷</span><span>Equipos</span></a>
+        <a class="program-card" href="buscar_instrumento.html"><span class="program-ico">⌕</span><span>Buscar</span></a>
+        <a class="program-card" href="qr/qr.index.html"><span class="program-ico">▦</span><span>Generar QR</span></a>
+        <a class="program-card" href="certificados.html"><span class="program-ico">▤</span><span>Informes</span></a>
+        <a class="program-card" href="alcance_kpi.html"><span class="program-ico">▥</span><span>Alcance & KPIs</span></a>
+        <a class="program-card" href="criterios.html"><span class="program-ico">◇</span><span>Criterios</span></a>
+        <a class="program-card" href="equipos-referencia-crear.html"><span class="program-ico">＋</span><span>Referencias / Crear</span></a>
+        <a class="program-card" href="equipos-referencia-consulta.html"><span class="program-ico">▤</span><span>Tablas</span></a>
+        <a class="program-card" href="chat.html"><span class="program-ico">☏</span><span>Consultas</span></a>
+        <a class="program-card" href="#"><span class="program-ico">⚙</span><span>Configuración</span></a>
+      </div>
+    </section>
 
     <main class="dashboard">
       <section class="kpi-row">
@@ -726,28 +746,6 @@
           </div>
         </div>
       </section>
-
-      <section class="quick-access panel">
-        <div class="quick-title">Accesos rápidos</div>
-        <div class="quick-grid">
-          <a class="quick-card" href="alta_instrumento.html"><span class="quick-ico">✎</span>Alta / Edición</a>
-          <a class="quick-card" href="bajas_instrumentos.html"><span class="quick-ico">⌫</span>Histórico bajas</a>
-          <a class="quick-card" href="reposiciones.html"><span class="quick-ico">🛒</span>Necesidades laboratorio</a>
-          <a class="quick-card" href="movimiento.html"><span class="quick-ico">↔</span>Movimientos</a>
-          <a class="quick-card" href="qr/qr.index.html"><span class="quick-ico">▦</span>Generar QR</a>
-          <a class="quick-card" href="TMP_Calibraciones_Lab.html"><span class="quick-ico">⚗</span>Calibraciones Lab</a>
-          <a class="quick-card" href="App_Patrones_TMP.html"><span class="quick-ico">▧</span>Patrones</a>
-          <a class="quick-card" href="App_Familias_TMP.html"><span class="quick-ico">▣</span>Familias</a>
-          <a class="quick-card" href="equipos-referencia-consulta.html"><span class="quick-ico">☷</span>Equipos</a>
-          <a class="quick-card" href="buscar_instrumento.html"><span class="quick-ico">⌕</span>Buscar</a>
-          <a class="quick-card" href="certificados.html"><span class="quick-ico">▤</span>Informes</a>
-          <a class="quick-card" href="alcance_kpi.html"><span class="quick-ico">▥</span>Alcance & KPIs</a>
-          <a class="quick-card" href="criterios.html"><span class="quick-ico">◇</span>Criterios</a>
-          <a class="quick-card" href="equipos-referencia-crear.html"><span class="quick-ico">▣</span>Crear tabla</a>
-          <a class="quick-card" href="#"><span class="quick-ico">⚙</span>Configuración</a>
-        </div>
-      </section>
-
       <footer>Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2026</footer>
     </main>
   </div>
