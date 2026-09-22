@@ -80,7 +80,7 @@
       <div><h2>Retirada / baja de instrumento</h2><div class="hint">El instrumento nunca se elimina de la base de datos: se retira del uso activo y conserva toda su trazabilidad.</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-history" type="button" onclick="window.location.href='bajas_instrumentos.html'">📚 Historial de bajas</button>
-        <button class="btn btn-history" type="button" onclick="window.location.href='reposiciones.html'">🛒 Lista de reposición</button>
+        <button class="btn btn-history" type="button" onclick="window.location.href='reposiciones.html'">🛒 Necesidades laboratorio</button>
       </div>
     </div>
     <div id="msgBaja" class="alert info hidden"></div>
@@ -112,12 +112,12 @@
           <div style="margin-top:10px"><label>Responsable *</label><select id="responsableBaja"><option value="">Selecciona responsable...</option><option>David</option><option>Guillermo</option><option>Israel</option><option>José Antonio</option></select></div>
           <div style="margin-top:10px"><label>Observaciones</label><textarea id="observacionesBaja" placeholder="Daño observado, decisión tomada, referencia de reparación, etc."></textarea></div>
           <div style="margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.05)">
-            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input id="anadirReposicion" type="checkbox" checked style="width:auto"> Añadir a lista de compra / reposición</label>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input id="anadirReposicion" type="checkbox" checked style="width:auto"> Añadir como necesidad de reposición</label>
             <div class="row" style="margin-top:9px">
               <div style="flex:0 0 120px"><label>Cantidad</label><input id="cantidadReposicion" type="number" min="1" step="1" value="1"></div>
               <div style="flex:1"><label>Prioridad</label><select id="prioridadReposicion"><option>Normal</option><option>Alta</option><option>Urgente</option></select></div>
             </div>
-            <div class="hint">La baja conserva el historial. Si esta opción está marcada, además crea una necesidad de reposición para Compras/Calidad.</div>
+            <div class="hint">La baja conserva el historial. Si esta opción está marcada, además crea una necesidad de tipo Reposición en el módulo Necesidades del laboratorio.</div>
           </div>
           <div class="retire-actions">
             <button class="btn btn-repair" id="btnReparacion" type="button">🛠 Enviar a revisión / reparación</button>
@@ -579,10 +579,18 @@
       prioridad,
       estado: "Pendiente",
       fecha_baja: new Date().toISOString(),
-      notificacion_estado: "Pendiente"
+      notificacion_estado: "Pendiente",
+      origen: "Baja definitiva",
+      tipo_necesidad: "Reposición",
+      solicitado_por: responsable || null,
+      justificacion: motivo || null
     };
-    const { error } = await supabase.from("reposiciones").upsert(payload,{onConflict:"instrumento_codigo"});
-    if(error) return {ok:false,error};
+    const existente = await supabase.from("reposiciones").select("id").eq("instrumento_codigo",inst.codigo).eq("origen","Baja definitiva").maybeSingle();
+    if(existente.error) return {ok:false,error:existente.error};
+    const result = existente.data?.id
+      ? await supabase.from("reposiciones").update({...payload,actualizado_en:new Date().toISOString()}).eq("id",existente.data.id)
+      : await supabase.from("reposiciones").insert(payload);
+    if(result.error) return {ok:false,error:result.error};
     return {ok:true};
   }
 
@@ -608,7 +616,7 @@
       console.error(repo.error);
       showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado y trazabilidad guardada. No se pudo añadir a reposición: ${repo.error.message}`,"err");
     } else {
-      const extra = repo.omitida ? "" : " Añadido también a la lista de reposición.";
+      const extra = repo.omitida ? "" : " Añadido también a Necesidades del laboratorio como reposición.";
       showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado definitivamente. Su trazabilidad permanece disponible.${extra}`,"ok");
     }
     await buscarEquipoBaja(instrumentoBajaActual.codigo);
