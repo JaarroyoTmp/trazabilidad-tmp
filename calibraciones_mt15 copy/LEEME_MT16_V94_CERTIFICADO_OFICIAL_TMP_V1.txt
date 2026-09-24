@@ -1,0 +1,13 @@
+MT16 V94 - Certificado Oficial TMP V1
+
+Instalacion:
+- Copiar el contenido del ZIP sobre calibraciones_mt15 copy/
+- Sustituir archivos
+- Recargar MT16 con Ctrl + F5
+
+Cambios:
+- Nuevo certificado oficial TMP V1 en 2 paginas A4.
+- Pagina 1: identificacion, equipo, condiciones, trazabilidad, resultados, dictamen, firmas y QR/hash.
+- Pagina 2: anexo tecnico con calculos, incertidumbre, regla de decision, motor y observaciones.
+- Mantiene API TMPCertificateEngine.openCertificate usada por MT16.
+- No modifica calculos metrologicos.

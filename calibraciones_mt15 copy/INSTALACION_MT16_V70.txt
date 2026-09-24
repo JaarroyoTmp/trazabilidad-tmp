@@ -1,0 +1,28 @@
+MT16 V70 - Router normativo estable
+
+INSTALACION
+1) Tener copia de seguridad de:
+   calibraciones_mt15 copy/core/metrology_core/thread/
+
+2) Copiar el contenido de este ZIP sobre:
+   calibraciones_mt15 copy/
+
+3) Deben sustituirse estos archivos:
+   core/metrology_core/thread/thread_mt16_workflow_test.html
+   core/metrology_core/thread/thread_mt16_workflow.html
+   core/metrology_core/thread/core/mt16_master_engine.js
+   core/metrology_core/thread/core/thread_parser.js
+
+4) Recargar navegador con Ctrl + F5.
+
+PRUEBAS RECOMENDADAS
+- 03-03          -> M16x2, certificable.
+- 01186311      -> G 7/8 - 14, certificable ISO 228.
+- R 1/2 o R 1 1/4 - 11 -> modo seguro ISO 7.
+- 5/16-18 UNC   -> modo seguro UN/ASME, geometria y rodillo, certificado bloqueado.
+- 1/4-18 NPT    -> modo seguro NPT, geometria y rodillo, certificado bloqueado.
+
+CRITERIO V70
+- Verde / CERTIFICABLE: motor completo con limites y objetivo Trimos.
+- Amarillo / OPERATIVO_SEGURO: parser + geometria + rodillo, certificado bloqueado hasta cargar limites oficiales.
+- Rojo / NO_IDENTIFICADA: la designacion no se interpreta.

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>TMP · Home Calibraciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./calibracion_home.css">
+</head>
+<body>
+  <div id="toastBox" class="toast-box"></div>
+
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">TMP · Metrology Platform</div>
+      <h1>Home de calibraciones</h1>
+      <p>Busca o escanea un equipo. El sistema detecta familia, procedimiento y flujo recomendado.</p>
+    </div>
+    <div class="status-cluster">
+      <span id="supabaseBadge" class="badge warn">Supabase pendiente</span>
+      <span id="versionBadge" class="badge">HOME_V1</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero-card">
+      <div class="search-area">
+        <label for="equipmentCode">Código / QR del equipo</label>
+        <div class="search-row">
+          <input id="equipmentCode" placeholder="Ej. 75148, 40205..." autocomplete="off">
+          <button id="btnSearch">Buscar equipo</button>
+          <button id="btnDemoThread" class="secondary">Demo roscado</button>
+        </div>
+        <div class="hint">Este Home no sustituye MT15/MT16. Es la puerta de entrada para derivar al flujo correcto.</div>
+      </div>
+
+      <aside class="quick-stats">
+        <div class="stat"><span>Estado</span><strong id="mainState">Pendiente</strong></div>
+        <div class="stat"><span>Familia</span><strong id="familyState">-</strong></div>
+        <div class="stat"><span>Procedimiento</span><strong id="procedureState">-</strong></div>
+      </aside>
+    </section>
+
+    <section class="grid">
+      <article class="panel big">
+        <div class="panel-title">
+          <div><h2>Equipo detectado</h2><p>Datos principales y estado de calibración.</p></div>
+          <span id="decisionChip" class="chip neutral">Sin equipo</span>
+        </div>
+        <div id="equipmentCard" class="empty-box">Introduce un código para cargar el equipo desde Supabase.</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title"><div><h2>Procedimiento recomendado</h2><p>Conocimiento aplicado al equipo.</p></div></div>
+        <div id="procedureCard" class="empty-box">Pendiente de identificar familia.</div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title"><div><h2>Derivación</h2><p>El sistema propone el flujo adecuado.</p></div></div>
+        <div id="routeCard" class="empty-box">Pendiente de búsqueda.</div>
+      </article>
+
+      <article class="panel big">
+        <div class="panel-title">
+          <div><h2>Asistente de operario</h2><p>Primer vistazo del procedimiento guiado.</p></div>
+          <button id="btnWhy" class="secondary mini-btn">¿Por qué?</button>
+        </div>
+        <div id="wizardPreview" class="timeline">
+          <div class="empty-box">Cuando se detecte el equipo, aquí aparecerán los pasos guiados.</div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <dialog id="whyDialog">
+    <div class="dialog-head"><h2>Explicación del sistema</h2><button id="btnCloseWhy" class="secondary mini-btn">Cerrar</button></div>
+    <div id="whyContent" class="why-content">Pendiente de cargar equipo.</div>
+  </dialog>
+
+  <script type="module" src="./calibracion_home.js"></script>
+</body>
+</html>

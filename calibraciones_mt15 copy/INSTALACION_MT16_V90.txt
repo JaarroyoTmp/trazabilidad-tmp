@@ -1,0 +1,23 @@
+MT16 V90 PRODUCTO LABORATORIO
+
+Instalacion:
+1. Copiar el contenido de este ZIP sobre la carpeta:
+   calibraciones_mt15 copy/
+2. Sustituir archivos cuando Windows lo pregunte.
+3. Abrir MT16 y hacer Ctrl + F5.
+
+Cambios principales:
+- Eliminado popup placeholder de acciones finales.
+- Guardar calibracion intenta guardar en Supabase usando calibration_save_helper.js.
+- Si Supabase no permite guardar, crea respaldo JSON automatico y muestra aviso no bloqueante.
+- Generar certificado abre una vista imprimible para guardar como PDF.
+- Informe NOK abre una vista imprimible especifica para no conformidades.
+- Todas las acciones usan notificaciones tipo toast, sin ventanas emergentes.
+- Estado de certificado mas claro: CERTIFICABLE / NO CERTIFICABLE.
+
+Archivos incluidos:
+- core/metrology_core/thread/thread_mt16_workflow_test.html
+- core/metrology_core/thread/thread_mt16_workflow.html
+- core/metrology_core/thread/core/mt16_master_engine.js
+- core/metrology_core/thread/core/thread_parser.js
+- core/metrology_core/thread/procedure_rules/*

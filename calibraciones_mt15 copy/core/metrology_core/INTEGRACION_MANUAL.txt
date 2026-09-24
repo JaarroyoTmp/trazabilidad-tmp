@@ -1,0 +1,89 @@
+TMP APP MT15 BRIDGE V1 - INTEGRACION MANUAL
+
+COPIAR ARCHIVO:
+calibraciones_mt15 copy/core/app_mt15_bridge.js
+
+IMPORTANTE:
+Este puente NO sustituye app.js entero.
+Primero se integra de forma controlada.
+
+============================================================
+1) ARRIBA DEL TODO EN app.js
+============================================================
+
+Añadir debajo del import de supabase:
+
+import {
+  calcularResultadosDesdeStateTMP,
+  buildMT15CertificateBlock,
+  renderMT15TraceHTML
+} from "./core/app_mt15_bridge.js";
+
+============================================================
+2) DENTRO DE calcularResultados()
+============================================================
+
+Justo al principio de la función calcularResultados(), después de leer:
+
+const ladoGlobal=$("#ladoMed").value;
+const nominalGO=parseNum($("#nominalGO").value);
+const nominalNOGO=parseNum($("#nominalNOGO").value);
+const ref=$("#refError").value;
+const tol=parseNum($("#tolGlobal").value);
+const uBase=parseNum($("#uBase").value);
+
+añadir:
+
+const resultadoTMP = calcularResultadosDesdeStateTMP(state, {
+  ladoGlobal,
+  nominalGO,
+  nominalNOGO,
+  refError: ref,
+  tolGlobalMm: tol,
+  uBaseMm: uBase,
+  regla_decision: "ERROR_ABSOLUTO_ILAC_G8"
+});
+
+window.__TMP_LAST_RESULT__ = resultadoTMP;
+
+============================================================
+3) EN LA PARTE DE TRAZABILIDAD DE calcularResultados()
+============================================================
+
+Después de:
+
+$("#trazabilidadBox").innerHTML = traz;
+
+añadir:
+
+$("#trazabilidadBox").innerHTML += renderMT15TraceHTML(resultadoTMP);
+
+============================================================
+4) DENTRO DE buildCertJSON()
+============================================================
+
+Justo antes del return final, añadir:
+
+const resultadoTMP = window.__TMP_LAST_RESULT__ || null;
+const bloqueMT15 = resultadoTMP ? buildMT15CertificateBlock(resultadoTMP) : null;
+
+Y dentro del objeto return añadir:
+
+motor_mt15: bloqueMT15,
+
+============================================================
+5) OBJETIVO DE ESTA V1
+============================================================
+
+Esta primera integración NO elimina tu cálculo actual.
+Lo deja funcionar, pero añade:
+
+- familia motor
+- normas generales
+- normas específicas
+- requisitos de auditoría
+- decision_engine
+- uncertainty_engine
+- bloque motor_mt15 dentro del certificado JSON
+
+Cuando confirmemos que esto funciona, en V2 sustituimos el cálculo antiguo por el cálculo del motor.

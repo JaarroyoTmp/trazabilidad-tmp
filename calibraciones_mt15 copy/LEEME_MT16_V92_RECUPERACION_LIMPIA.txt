@@ -1,0 +1,11 @@
+MT16 V92 Recuperacion limpia
+
+IMPORTANTE:
+1) Cierra la pagina MT16 en Firefox.
+2) En core/metrology_core/thread/ elimina manualmente estos dos archivos:
+   - thread_mt16_workflow_test.html
+   - thread_mt16_workflow.html
+3) Copia el contenido de este ZIP sobre calibraciones_mt15 copy/.
+4) Abre de nuevo con Ctrl+F5.
+
+Esta version parte de V81 estable y elimina el codigo JavaScript pintado en pantalla.

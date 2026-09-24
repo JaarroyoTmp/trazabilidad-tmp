@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MC-01 · Nominales y combinaciones disponibles</title>
+<style>
+:root{--ink:#071847;--line:#c9dcff;--primary:#4f52f7;--bg:#eef5ff;--ok:#166534;--warn:#92400e}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial;background:var(--bg);color:var(--ink)}.wrap{max-width:1500px;margin:24px auto;padding:0 18px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}.grid{display:grid;grid-template-columns:2fr repeat(5,1fr);gap:10px;align-items:end}label{display:block;font-size:12px;font-weight:800;color:#355083;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px}button{padding:11px 15px;border:0;border-radius:9px;background:var(--primary);color:#fff;font-weight:800;cursor:pointer}.secondary{background:#f2f6ff;color:var(--ink);border:1px solid var(--line)}.status{padding:12px;border-radius:10px;background:#f3f8ff;border:1px solid var(--line)}.ok{background:#ecfdf3;border-color:#9be2ad;color:var(--ok)}.warn{background:#fff7ed;border-color:#fdba74;color:var(--warn)}.table-wrap{overflow:auto;max-height:650px;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse}th{position:sticky;top:0;background:#10204b;color:#fff;text-align:left;padding:10px;font-size:12px}td{padding:9px 10px;border-bottom:1px solid #dbe7ff;font-size:13px;vertical-align:top}tr:hover td{background:#f8fbff}.mono{font-family:Consolas,monospace}.right{text-align:right}.pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#e8efff;font-weight:700;font-size:11px}.details{white-space:normal;min-width:300px}.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}.metric{border:1px solid var(--line);border-radius:10px;padding:10px}.metric b{display:block;font-size:21px}.metric span{font-size:11px;color:#58709f;font-weight:800}.hidden{display:none}.selected{background:#eef3ff}.modal{position:fixed;inset:0;background:rgba(8,18,47,.45);display:grid;place-items:center;padding:20px}.modal-card{background:white;border-radius:16px;max-width:1000px;width:100%;max-height:85vh;overflow:auto;padding:20px}@media(max-width:1000px){.grid,.summary{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="card"><h1>MC-01 · Nominales y combinaciones disponibles</h1><p>Genera los nominales físicamente alcanzables con los elementos certificados reales. Ningún elemento físico se reutiliza en una combinación.</p></div>
+<div class="card">
+<div id="status" class="status">Inicializando...</div>
+<div class="grid" style="margin-top:14px">
+<div><label>Patrón discreto</label><select id="patron"></select></div>
+<div><label>Fecha de uso</label><input id="fecha" type="date"></div>
+<div><label>Desde (mm)</label><input id="desde" value="0"></div>
+<div><label>Hasta (mm)</label><input id="hasta" value="200"></div>
+<div><label>Máx. elementos</label><input id="maxElementos" type="number" min="1" max="10" value="6"></div>
+<div><label>Alternativas/nominal</label><input id="maxAlternativas" type="number" min="1" max="20" value="5"></div>
+<div><button id="generar">Generar tabla</button></div>
+<div><button id="guardar" class="secondary">Guardar catálogo</button></div>
+</div>
+<div class="summary">
+<div class="metric"><span>ELEMENTOS DISPONIBLES</span><b id="mElementos">0</b></div>
+<div class="metric"><span>NOMINALES POSIBLES</span><b id="mNominales">0</b></div>
+<div class="metric"><span>DESDE</span><b id="mDesde">-</b></div>
+<div class="metric"><span>HASTA</span><b id="mHasta">-</b></div>
+<div class="metric"><span>SELECCIONADO</span><b id="mSeleccion">-</b></div>
+</div>
+</div>
+<div class="card">
+<div style="display:flex;gap:10px;align-items:end;margin-bottom:12px">
+<div style="flex:1"><label>Buscar nominal o código</label><input id="buscar" placeholder="Ej. 63 o 180244"></div>
+<div><button id="limpiar" class="secondary">Limpiar</button></div>
+</div>
+<div class="table-wrap"><table><thead><tr>
+<th>Elegir</th><th>Nominal</th><th>Mejor combinación</th><th>Nº</th><th>Valor certificado</th><th>Corrección</th><th>U(k=2)</th><th>Alternativas</th>
+</tr></thead><tbody id="tbody"></tbody></table></div>
+</div>
+<div id="modal" class="modal hidden"><div class="modal-card"><div style="display:flex;justify-content:space-between"><h2>Alternativas del nominal</h2><button id="cerrar" class="secondary">Cerrar</button></div><div id="modalBody"></div></div></div>
+</div>
+<script type="module">
+import { ensureSupabase } from './core/metrology_core/supabase_client.js';
+import { fetchAvailablePatternElements, generateCombinationCatalog, saveCombinationCatalog } from './core/metrology_core/engines/pattern_combination_engine.js';
+const $=id=>document.getElementById(id); let sb, current=null, selected=null, patronRows=[];
+const fmt=(v,d=6)=>Number.isFinite(Number(v))?Number(v).toFixed(d).replace('.',','):'-';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const setStatus=(t,k='')=>{$('status').className='status '+k;$('status').textContent=t};
+function comboText(combo){return combo.items.map(x=>`${fmt(x.nominal,3)} [${x.code}]`).join(' + ')}
+function render(){
+ const q=$('buscar').value.trim().toLowerCase();
+ const rows=(current?.catalog||[]).filter(entry=>!q||String(entry.nominal).includes(q)||entry.alternatives.some(c=>comboText(c).toLowerCase().includes(q)));
+ $('tbody').innerHTML=rows.map((entry,i)=>{const c=entry.best;const id=`r${i}`;return `<tr data-nominal="${entry.nominal}">
+ <td><button class="secondary choose" data-nominal="${entry.nominal}">Elegir</button></td>
+ <td class="right"><b>${fmt(entry.nominal,3)} mm</b></td>
+ <td class="details">${esc(comboText(c))}</td><td class="right">${c.elementCount}</td>
+ <td class="right mono">${fmt(c.value,6)}</td><td class="right mono">${fmt(c.correction,6)}</td>
+ <td class="right mono">${fmt(c.uncertainty,6)}</td>
+ <td><button class="secondary alternatives" data-nominal="${entry.nominal}">${entry.alternativeCount}</button></td></tr>`}).join('');
+ document.querySelectorAll('.choose').forEach(btn=>btn.onclick=()=>selectNominal(Number(btn.dataset.nominal)));
+ document.querySelectorAll('.alternatives').forEach(btn=>btn.onclick=()=>showAlternatives(Number(btn.dataset.nominal)));
+}
+function selectNominal(n){selected=current.catalog.find(x=>Math.abs(x.nominal-n)<1e-9)||null;$('mSeleccion').textContent=selected?fmt(selected.nominal,3):'-';document.querySelectorAll('tbody tr').forEach(tr=>tr.classList.toggle('selected',Math.abs(Number(tr.dataset.nominal)-n)<1e-9));}
+function showAlternatives(n){const entry=current.catalog.find(x=>Math.abs(x.nominal-n)<1e-9);if(!entry)return;$('modalBody').innerHTML=`<h3>${fmt(n,3)} mm</h3><table><thead><tr><th>Ranking</th><th>Combinación</th><th>Nº</th><th>Corrección</th><th>U</th></tr></thead><tbody>${entry.alternatives.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(comboText(c))}</td><td>${c.elementCount}</td><td>${fmt(c.correction,6)}</td><td>${fmt(c.uncertainty,6)}</td></tr>`).join('')}</tbody></table>`;$('modal').classList.remove('hidden')}
+async function init(){
+ $('fecha').value=new Date().toISOString().slice(0,10); sb=await ensureSupabase();
+ const {data,error}=await sb.from('mc_patrones').select('id,codigo,descripcion,activo,estado').eq('activo',true).order('codigo');
+ if(error)throw error; patronRows=data||[]; $('patron').innerHTML=patronRows.map(p=>`<option value="${p.id}">${esc(p.codigo)} · ${esc(p.descripcion)}</option>`).join(''); setStatus(`${patronRows.length} patrones disponibles.`,'ok');
+}
+$('generar').onclick=async()=>{try{setStatus('Generando combinaciones físicas...','warn');const elements=await fetchAvailablePatternElements(sb,{patronId:$('patron').value,usageDate:$('fecha').value});current=generateCombinationCatalog({elements,minNominal:$('desde').value,maxNominal:$('hasta').value,maxElements:Number($('maxElementos').value),maxAlternativesPerNominal:Number($('maxAlternativas').value),resolution:0.001});$('mElementos').textContent=current.elementCount;$('mNominales').textContent=current.nominalCount;$('mDesde').textContent=fmt(current.minNominal,3);$('mHasta').textContent=fmt(current.maxNominal,3);selected=null;$('mSeleccion').textContent='-';render();setStatus(`${current.nominalCount} nominales alcanzables generados con ${current.elementCount} elementos físicos.`,'ok')}catch(e){setStatus(e.message,'warn')}};
+$('guardar').onclick=async()=>{try{if(!current)throw new Error('Primero genera el catálogo.');setStatus('Guardando catálogo en Supabase...','warn');const {data:models,error}=await sb.from('mc_patron_modelos_resolucion').select('id,certificado_id').eq('patron_id',$('patron').value).eq('estado','ACTIVO').order('prioridad').limit(1);if(error)throw error;const model=models?.[0]||{};const count=await saveCombinationCatalog(sb,{patronId:$('patron').value,certificateId:model.certificado_id||null,modelId:model.id||null,catalogResult:current,replaceExisting:true});setStatus(`${count} combinaciones guardadas.`,'ok')}catch(e){setStatus(e.message,'warn')}};
+$('buscar').oninput=render;$('limpiar').onclick=()=>{$('buscar').value='';render()};$('cerrar').onclick=()=>$('modal').classList.add('hidden');
+init().catch(e=>setStatus(e.message,'warn'));
+</script></body></html>

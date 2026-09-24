@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>TMP · Dashboard Metrológico V3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/tmp-quality.png" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#020617;
+      --bg2:#07111f;
+      --panel:#071426;
+      --panel2:#0b1c33;
+      --card:#0a1728;
+      --border:rgba(148,163,184,.20);
+      --border2:rgba(56,189,248,.32);
+      --txt:#e5f0ff;
+      --muted:#93a4b8;
+      --blue:#38bdf8;
+      --blue2:#0ea5e9;
+      --green:#22c55e;
+      --yellow:#f59e0b;
+      --red:#ef4444;
+      --violet:#8b5cf6;
+      --shadow:0 24px 80px rgba(0,0,0,.55);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--txt);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(14,165,233,.24), transparent 38%),
+        radial-gradient(circle at 100% 0%, rgba(139,92,246,.18), transparent 36%),
+        radial-gradient(circle at 50% 120%, rgba(34,197,94,.10), transparent 45%),
+        linear-gradient(180deg,#020617,#020617 55%,#000);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(20px);
+      background:linear-gradient(90deg,rgba(2,6,23,.96),rgba(7,20,38,.88));
+      border-bottom:1px solid rgba(148,163,184,.18);
+      box-shadow:0 18px 50px rgba(0,0,0,.45);
+    }
+
+    .topbar{
+      max-width:1360px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand-logo{
+      width:46px;
+      height:46px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(circle at 30% 10%,rgba(56,189,248,.95),transparent 55%),
+        radial-gradient(circle at 70% 90%,rgba(14,165,233,.75),transparent 55%),
+        #020617;
+      border:1px solid rgba(56,189,248,.38);
+      box-shadow:0 0 35px rgba(56,189,248,.26);
+      overflow:hidden;
+    }
+
+    .brand-logo img{
+      width:36px;
+      height:auto;
+    }
+
+    .brand-title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .brand-title b{
+      font-size:17px;
+      letter-spacing:.03em;
+    }
+
+    .brand-title span{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .header-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:7px 11px;
+      border:1px solid rgba(148,163,184,.22);
+      color:#cbd5e1;
+      background:rgba(15,23,42,.72);
+      font-size:12px;
+    }
+
+    .status-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 0 5px rgba(34,197,94,.16);
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:9px 14px;
+      cursor:pointer;
+      background:rgba(15,23,42,.75);
+      color:var(--txt);
+      border:1px solid rgba(148,163,184,.25);
+      font-size:12px;
+      font-weight:700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      transition:.14s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(56,189,248,.55);
+      background:rgba(15,23,42,.95);
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,var(--blue2),var(--blue));
+      color:#02111f;
+      border-color:transparent;
+      box-shadow:0 16px 36px rgba(14,165,233,.25);
+    }
+
+    main{
+      max-width:1360px;
+      margin:20px auto 44px;
+      padding:0 18px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
+      align-items:stretch;
+      margin-bottom:18px;
+    }
+
+    @media(max-width:1050px){
+      .hero{grid-template-columns:1fr}
+    }
+
+    .hero-card{
+      border-radius:28px;
+      padding:24px;
+      border:1px solid rgba(56,189,248,.22);
+      background:
+        linear-gradient(135deg,rgba(15,23,42,.92),rgba(7,20,38,.88)),
+        radial-gradient(circle at 0 0,rgba(56,189,248,.30),transparent 50%);
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero-card::after{
+      content:"";
+      position:absolute;
+      inset:auto -20% -45% auto;
+      width:420px;
+      height:420px;
+      background:radial-gradient(circle,rgba(56,189,248,.16),transparent 65%);
+      pointer-events:none;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:11px;
+      color:#bae6fd;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+      border:1px solid rgba(56,189,248,.30);
+      background:rgba(2,132,199,.10);
+      padding:5px 9px;
+      border-radius:999px;
+    }
+
+    .hero h1{
+      margin:14px 0 8px;
+      font-size:34px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      max-width:780px;
+      line-height:1.55;
+    }
+
+    .health-panel{
+      border-radius:28px;
+      padding:20px;
+      border:1px solid rgba(148,163,184,.20);
+      background:linear-gradient(145deg,rgba(7,20,38,.92),rgba(2,6,23,.90));
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .health-title{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .health-title b{
+      font-size:15px;
+    }
+
+    .health-title span{
+      font-size:12px;
+      color:var(--muted);
+      display:block;
+      margin-top:4px;
+    }
+
+    .health-score{
+      font-size:44px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+
+    .health-score.ok{color:#86efac}
+    .health-score.warn{color:#fde68a}
+    .health-score.bad{color:#fecaca}
+
+    .bar{
+      height:9px;
+      border-radius:999px;
+      background:rgba(148,163,184,.15);
+      overflow:hidden;
+      margin-top:10px;
+    }
+
+    .bar-fill{
+      height:100%;
+      border-radius:999px;
+      width:0%;
+      background:linear-gradient(90deg,var(--green),var(--blue));
+      transition:width .5s ease;
+    }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    @media(max-width:1180px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:720px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+
+    .kpi{
+      border-radius:20px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(circle at 0 0,rgba(56,189,248,.12),transparent 52%),
+        linear-gradient(145deg,rgba(7,20,38,.88),rgba(2,6,23,.88));
+      padding:15px;
+      min-height:128px;
+      box-shadow:0 18px 44px rgba(0,0,0,.34);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .kpi::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      width:100%;
+      height:3px;
+      background:linear-gradient(90deg,var(--blue),transparent);
+      opacity:.78;
+    }
+
+    .kpi .label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      font-weight:800;
+    }
+
+    .kpi .value{
+      margin-top:8px;
+      font-size:31px;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .kpi .note{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+      line-height:1.35;
+    }
+
+    .kpi.critical::before{background:linear-gradient(90deg,var(--red),transparent)}
+    .kpi.warning::before{background:linear-gradient(90deg,var(--yellow),transparent)}
+    .kpi.good::before{background:linear-gradient(90deg,var(--green),transparent)}
+    .kpi.violet::before{background:linear-gradient(90deg,var(--violet),transparent)}
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.25fr .75fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    @media(max-width:1050px){.layout{grid-template-columns:1fr}}
+
+    .panel{
+      border-radius:24px;
+      border:1px solid var(--border);
+      background:linear-gradient(145deg,rgba(7,20,38,.88),rgba(2,6,23,.90));
+      padding:18px;
+      box-shadow:0 18px 48px rgba(0,0,0,.32);
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:12px;
+    }
+
+    .panel-title{
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .panel-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.45;
+    }
+
+    .chart-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    @media(max-width:820px){.chart-grid{grid-template-columns:1fr}}
+
+    .chart-box{
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.16);
+      background:rgba(2,6,23,.45);
+      padding:14px;
+      min-height:320px;
+    }
+
+    .chart-title{
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:10px;
+      color:#e0f2fe;
+    }
+
+    canvas{max-height:265px}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+
+    th,td{
+      padding:10px 8px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      text-align:left;
+      vertical-align:top;
+    }
+
+    th{
+      color:#bae6fd;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      background:rgba(2,6,23,.35);
+      position:sticky;
+      top:0;
+    }
+
+    td{
+      color:#dbeafe;
+    }
+
+    .table-wrap{
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.16);
+      overflow:auto;
+      max-height:360px;
+      background:rgba(2,6,23,.38);
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:11px;
+      font-weight:800;
+      border:1px solid rgba(148,163,184,.20);
+      white-space:nowrap;
+    }
+
+    .pill.ok{color:#bbf7d0;background:rgba(22,101,52,.25);border-color:rgba(34,197,94,.35)}
+    .pill.warn{color:#fef3c7;background:rgba(113,63,18,.30);border-color:rgba(245,158,11,.35)}
+    .pill.bad{color:#fee2e2;background:rgba(127,29,29,.30);border-color:rgba(239,68,68,.40)}
+    .pill.info{color:#dbeafe;background:rgba(30,64,175,.26);border-color:rgba(96,165,250,.35)}
+
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    @media(max-width:1050px){.two-col{grid-template-columns:1fr}}
+
+    .audit-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    @media(max-width:650px){.audit-grid{grid-template-columns:1fr}}
+
+    .audit-card{
+      border-radius:18px;
+      padding:14px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.42);
+    }
+
+    .audit-card b{
+      display:block;
+      font-size:13px;
+      margin-bottom:6px;
+    }
+
+    .audit-card span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    footer{
+      max-width:1360px;
+      margin:8px auto 26px;
+      padding:0 18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">
+        <img src="img/tmp-quality.png" alt="TMP">
+      </div>
+      <div class="brand-title">
+        <b>Dashboard Metrológico TMP · V3</b>
+        <span>Control ejecutivo de calibración, ubicación, propiedad y trazabilidad</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span id="onlineText">Conectando con Supabase...</span>
+      </div>
+      <button class="btn" id="btnRefresh" type="button">⟳ Actualizar</button>
+      <a class="btn primary" href="home.html">← Panel principal</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <article class="hero-card">
+      <div class="eyebrow">Sistema metrológico · Auditoría · Producción</div>
+      <h1>Estado real de la flota de control TMP</h1>
+      <p>
+        Vista ejecutiva para saber, de un vistazo, qué instrumentos están en regla, cuáles vencen pronto,
+        dónde están físicamente, si pertenecen a TMP o a cliente y si existe riesgo de uso de equipos vencidos
+        en producción.
+      </p>
+    </article>
+
+    <aside class="health-panel">
+      <div class="health-title">
+        <div>
+          <b>Salud global del sistema</b>
+          <span id="healthText">Calculando indicadores...</span>
+        </div>
+        <span class="pill info" id="healthPill">—</span>
+      </div>
+      <div>
+        <div class="health-score ok" id="healthScore">—%</div>
+        <div class="bar"><div class="bar-fill" id="healthBar"></div></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="kpi-grid">
+    <div class="kpi good">
+      <div class="label">Total instrumentos</div>
+      <div class="value" id="kpiTotal">—</div>
+      <div class="note">Flota registrada en Supabase</div>
+    </div>
+
+    <div class="kpi good">
+      <div class="label">En regla</div>
+      <div class="value" id="kpiOk">—</div>
+      <div class="note" id="kpiOkNote">Calibración vigente</div>
+    </div>
+
+    <div class="kpi warning">
+      <div class="label">Próximos 30 días</div>
+      <div class="value" id="kpiSoon">—</div>
+      <div class="note">Requieren planificación</div>
+    </div>
+
+    <div class="kpi critical">
+      <div class="label">Fuera calibración</div>
+      <div class="value" id="kpiExpired">—</div>
+      <div class="note">Riesgo metrológico</div>
+    </div>
+
+    <div class="kpi critical">
+      <div class="label">Vencidos en producción</div>
+      <div class="value" id="kpiExpiredProd">—</div>
+      <div class="note">KPI crítico de auditoría</div>
+    </div>
+
+    <div class="kpi violet">
+      <div class="label">Ubicación conocida</div>
+      <div class="value" id="kpiLocated">—%</div>
+      <div class="note">Trazabilidad física</div>
+    </div>
+  </section>
+
+  <section class="layout">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">📊 Panel gráfico OEM</div>
+          <div class="panel-sub">Distribución por calibración, ubicación, propiedad y familia metrológica.</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-box">
+          <div class="chart-title">Estado de calibración</div>
+          <canvas id="chartCal"></canvas>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-title">Ubicación física</div>
+          <canvas id="chartUbic"></canvas>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-title">Propiedad</div>
+          <canvas id="chartProp"></canvas>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-title">Familias de calibración</div>
+          <canvas id="chartFam"></canvas>
+        </div>
+      </div>
+    </article>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">🚨 Top próximos vencimientos</div>
+          <div class="panel-sub">Instrumentos más urgentes por fecha de próxima calibración.</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Ubicación</th>
+              <th>Próx.</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaVencimientos">
+            <tr><td colspan="5">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </aside>
+  </section>
+
+  <section class="two-col">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">📍 Trazabilidad por ubicación</div>
+          <div class="panel-sub">Resumen de equipos por máquina, laboratorio, calidad o área asignada.</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ubicación</th>
+              <th>Total</th>
+              <th>En regla</th>
+              <th>Próximos</th>
+              <th>Vencidos</th>
+            </tr>
+          </thead>
+          <tbody id="tablaUbicaciones">
+            <tr><td colspan="5">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">🏢 Propiedad y clientes</div>
+          <div class="panel-sub">Equipos TMP por defecto y equipos de cliente cuando estén asignados.</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Propietario</th>
+              <th>Total</th>
+              <th>Vencidos</th>
+              <th>Próx. 30 días</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPropiedad">
+            <tr><td colspan="4">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <div class="panel-title">✅ Panel auditoría ISO / IATF</div>
+        <div class="panel-sub">Indicadores preparados para explicar control, trazabilidad, planificación y reacción ante desviaciones.</div>
+      </div>
+      <span class="pill info" id="auditPill">Evaluando...</span>
+    </div>
+
+    <div class="audit-grid">
+      <div class="audit-card">
+        <b>Objetivo 1 · 0 equipos vencidos en producción</b>
+        <span id="auditProd">Calculando...</span>
+      </div>
+      <div class="audit-card">
+        <b>Objetivo 2 · Trazabilidad de ubicación 100%</b>
+        <span id="auditUbic">Calculando...</span>
+      </div>
+      <div class="audit-card">
+        <b>Objetivo 3 · Calibraciones planificadas</b>
+        <span id="auditPlan">Calculando...</span>
+      </div>
+      <div class="audit-card">
+        <b>Objetivo 4 · Propiedad identificada</b>
+        <span id="auditProp">Por defecto, todo equipo sin propietario asignado se considera propiedad de PARAMIO.</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Talleres Mecánicos Paramio · Dashboard Metrológico TMP V3 · Datos vivos desde Supabase
+</footer>
+
+<script type="module" src="config.mjs"></script>
+
+<script type="module">
+  const supabase = window.supabase;
+
+  const $ = id => document.getElementById(id);
+
+  let charts = {};
+
+  function setText(id, value){
+    const el = $(id);
+    if (el) el.textContent = value;
+  }
+
+  function fmtDate(v){
+    if (!v) return "—";
+    const d = new Date(String(v).replace(/_/g,"-"));
+    if (isNaN(d)) return "—";
+    return d.toLocaleDateString("es-ES");
+  }
+
+  function daysTo(v){
+    if (!v) return null;
+    const d = new Date(String(v).replace(/_/g,"-"));
+    if (isNaN(d)) return null;
+    const now = new Date();
+    return Math.ceil((d - now) / 86400000);
+  }
+
+  function estadoCal(inst){
+    const dias = daysTo(inst.fecha_proxima_calibracion);
+    if (dias === null) return "Sin fecha";
+    if (dias < 0) return "Fuera";
+    if (dias <= 30) return "Próximo";
+    return "En regla";
+  }
+
+  function clsEstado(e){
+    if (e === "En regla") return "ok";
+    if (e === "Próximo") return "warn";
+    if (e === "Fuera") return "bad";
+    return "info";
+  }
+
+  function isLaboratorio(ubic){
+    return String(ubic || "").trim().toLowerCase() === "laboratorio";
+  }
+
+  function isProduccion(ubic){
+    const u = String(ubic || "").trim().toLowerCase();
+    return u && u !== "laboratorio" && u !== "baja técnica" && u !== "baja tecnica";
+  }
+
+  function propNombre(inst, propietarios){
+    if (!inst.propietario_id) return "PARAMIO";
+    const p = propietarios.find(x => String(x.id) === String(inst.propietario_id));
+    return p?.nombre || "PARAMIO";
+  }
+
+  function famNombre(inst, familias){
+    if (!inst.familia_calibracion_id) return "Sin familia";
+    const f = familias.find(x => String(x.id) === String(inst.familia_calibracion_id));
+    return f?.nombre || "Sin familia";
+  }
+
+  function inc(map, key, n=1){
+    const k = key || "Sin dato";
+    map[k] = (map[k] || 0) + n;
+  }
+
+  function pct(n,total){
+    if (!total) return 0;
+    return Math.round((n / total) * 100);
+  }
+
+  function renderChart(id, type, labels, data, label){
+    const ctx = $(id).getContext("2d");
+    if (charts[id]) charts[id].destroy();
+
+    charts[id] = new Chart(ctx, {
+      type,
+      data:{
+        labels,
+        datasets:[{
+          label: label || "Instrumentos",
+          data
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{
+            position:"bottom",
+            labels:{color:"#e5e7eb", boxWidth:12}
+          }
+        },
+        scales: type === "bar" ? {
+          x:{ticks:{color:"#cbd5e1"}, grid:{color:"rgba(148,163,184,.08)"}},
+          y:{ticks:{color:"#cbd5e1", precision:0}, grid:{color:"rgba(148,163,184,.08)"}, beginAtZero:true}
+        } : undefined
+      }
+    });
+  }
+
+  function rowStatus(e){
+    return `<span class="pill ${clsEstado(e)}">${e}</span>`;
+  }
+
+  function renderTopVencimientos(items){
+    const tbody = $("tablaVencimientos");
+    const urgentes = items
+      .filter(x => x.fecha_proxima_calibracion)
+      .map(x => ({...x, dias: daysTo(x.fecha_proxima_calibracion), estadoCal: estadoCal(x)}))
+      .sort((a,b) => a.dias - b.dias)
+      .slice(0,10);
+
+    if (!urgentes.length){
+      tbody.innerHTML = `<tr><td colspan="5">No hay fechas de próxima calibración registradas.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = urgentes.map(x => `
+      <tr onclick="window.location.href='qr/qr_info_instrumentos.html?codigo=${encodeURIComponent(x.codigo)}'" style="cursor:pointer">
+        <td><b>${x.codigo || "—"}</b></td>
+        <td>${x.descripcion || "—"}</td>
+        <td>${x.ubicacion_actual || "—"}</td>
+        <td>${fmtDate(x.fecha_proxima_calibracion)}</td>
+        <td>${rowStatus(x.estadoCal)}</td>
+      </tr>
+    `).join("");
+  }
+
+  function renderTablaUbicaciones(items){
+    const groups = {};
+
+    items.forEach(x => {
+      const key = x.ubicacion_actual || "Sin ubicación";
+      if (!groups[key]) groups[key] = {total:0, ok:0, soon:0, expired:0};
+      groups[key].total++;
+      const e = estadoCal(x);
+      if (e === "En regla") groups[key].ok++;
+      if (e === "Próximo") groups[key].soon++;
+      if (e === "Fuera") groups[key].expired++;
+    });
+
+    const rows = Object.entries(groups)
+      .sort((a,b) => b[1].total - a[1].total)
+      .slice(0,14);
+
+    $("tablaUbicaciones").innerHTML = rows.map(([k,v]) => `
+      <tr>
+        <td><b>${k}</b></td>
+        <td>${v.total}</td>
+        <td>${v.ok}</td>
+        <td>${v.soon}</td>
+        <td>${v.expired}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="5">Sin datos.</td></tr>`;
+  }
+
+  function renderTablaPropiedad(items, propietarios){
+    const groups = {};
+
+    items.forEach(x => {
+      const key = propNombre(x, propietarios);
+      if (!groups[key]) groups[key] = {total:0, expired:0, soon:0};
+      groups[key].total++;
+      const e = estadoCal(x);
+      if (e === "Fuera") groups[key].expired++;
+      if (e === "Próximo") groups[key].soon++;
+    });
+
+    const rows = Object.entries(groups).sort((a,b)=>b[1].total-a[1].total);
+
+    $("tablaPropiedad").innerHTML = rows.map(([k,v]) => `
+      <tr>
+        <td><b>${k}</b></td>
+        <td>${v.total}</td>
+        <td>${v.expired}</td>
+        <td>${v.soon}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="4">Sin datos.</td></tr>`;
+  }
+
+  async function loadDashboard(){
+    if (!supabase){
+      setText("onlineText", "Supabase no disponible");
+      return;
+    }
+
+    setText("onlineText", "Conectando...");
+
+    try{
+      const [insRes, propRes, famRes] = await Promise.all([
+        supabase.from("instrumentos").select(`
+          codigo,
+          descripcion,
+          rango,
+          estado,
+          ubicacion_actual,
+          ubicacion_id,
+          propietario_id,
+          familia_calibracion_id,
+          tipo_calibracion,
+          fecha_proxima_calibracion
+        `),
+        supabase.from("propietarios_equipos").select("id,nombre,tipo,activo"),
+        supabase.from("familias_calibracion").select("id,nombre,codigo,activo")
+      ]);
+
+      if (insRes.error) throw insRes.error;
+
+      const items = insRes.data || [];
+      const propietarios = propRes.data || [];
+      const familias = famRes.data || [];
+
+      setText("onlineText", `Online · ${items.length} instrumentos`);
+
+      const total = items.length;
+      let ok = 0, soon = 0, expired = 0, noDate = 0, located = 0, lab = 0, prod = 0, expiredProd = 0;
+
+      const calMap = {};
+      const ubicMap = {};
+      const propMap = {};
+      const famMap = {};
+
+      items.forEach(inst => {
+        const e = estadoCal(inst);
+        inc(calMap, e);
+
+        if (e === "En regla") ok++;
+        else if (e === "Próximo") soon++;
+        else if (e === "Fuera") expired++;
+        else noDate++;
+
+        const ubic = inst.ubicacion_actual || "Sin ubicación";
+        inc(ubicMap, ubic);
+
+        if (inst.ubicacion_actual) located++;
+        if (isLaboratorio(inst.ubicacion_actual)) lab++;
+        if (isProduccion(inst.ubicacion_actual)) prod++;
+        if (e === "Fuera" && isProduccion(inst.ubicacion_actual)) expiredProd++;
+
+        inc(propMap, propNombre(inst, propietarios));
+        inc(famMap, famNombre(inst, familias));
+      });
+
+      const health = Math.max(0, Math.min(100, Math.round(
+        (pct(ok,total) * .55) +
+        (pct(located,total) * .25) +
+        ((expiredProd === 0 ? 100 : 0) * .20)
+      )));
+
+      setText("kpiTotal", total);
+      setText("kpiOk", ok);
+      setText("kpiOkNote", `${pct(ok,total)}% vigentes`);
+      setText("kpiSoon", soon);
+      setText("kpiExpired", expired);
+      setText("kpiExpiredProd", expiredProd);
+      setText("kpiLocated", `${pct(located,total)}%`);
+
+      setText("healthScore", `${health}%`);
+      $("healthBar").style.width = `${health}%`;
+
+      const healthScore = $("healthScore");
+      const healthPill = $("healthPill");
+      healthScore.className = "health-score " + (health >= 90 ? "ok" : health >= 75 ? "warn" : "bad");
+      healthPill.className = "pill " + (health >= 90 ? "ok" : health >= 75 ? "warn" : "bad");
+      healthPill.textContent = health >= 90 ? "ÓPTIMA" : health >= 75 ? "ACEPTABLE" : "CRÍTICA";
+
+      setText(
+        "healthText",
+        expiredProd === 0
+          ? "Sin equipos vencidos detectados en producción."
+          : `${expiredProd} equipos vencidos ubicados fuera de laboratorio.`
+      );
+
+      setText("auditProd", expiredProd === 0
+        ? "Cumplido: no hay equipos vencidos en producción."
+        : `Atención: ${expiredProd} equipo(s) vencidos están en producción o fuera del laboratorio.`);
+
+      setText("auditUbic", pct(located,total) === 100
+        ? "Cumplido: todos los equipos tienen ubicación actual registrada."
+        : `Pendiente: ${total-located} equipo(s) sin ubicación actual.`);
+
+      setText("auditPlan", soon === 0
+        ? "Sin vencimientos en los próximos 30 días."
+        : `${soon} equipo(s) vencen en los próximos 30 días y requieren planificación.`);
+
+      const auditOk = expiredProd === 0 && pct(located,total) >= 98;
+      $("auditPill").className = "pill " + (auditOk ? "ok" : "warn");
+      $("auditPill").textContent = auditOk ? "CONTROLADO" : "REVISAR";
+
+      renderChart("chartCal", "doughnut", Object.keys(calMap), Object.values(calMap), "Estado");
+      renderChart("chartUbic", "bar", Object.keys(ubicMap).slice(0,12), Object.values(ubicMap).slice(0,12), "Ubicación");
+      renderChart("chartProp", "doughnut", Object.keys(propMap), Object.values(propMap), "Propiedad");
+      renderChart("chartFam", "bar", Object.keys(famMap).slice(0,12), Object.values(famMap).slice(0,12), "Familias");
+
+      renderTopVencimientos(items);
+      renderTablaUbicaciones(items);
+      renderTablaPropiedad(items, propietarios);
+
+    } catch(e){
+      console.error(e);
+      setText("onlineText", "Error cargando dashboard");
+      setText("healthText", e.message || "Error inesperado");
+    }
+  }
+
+  $("btnRefresh").onclick = loadDashboard;
+
+  loadDashboard();
+  setInterval(loadDashboard, 60000);
+</script>
+
+</body>
+</html>

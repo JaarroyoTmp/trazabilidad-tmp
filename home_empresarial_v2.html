@@ -1,0 +1,2453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TMP · Trazabilidad Metrológica</title>
+
+  <style>
+    :root{
+      --bg:#0d1117;
+      --panel:#161b22;
+      --txt:#f0f6fc;
+      --muted:#8b949e;
+      --border:#30363d;
+      --card-bg:#1c2431;
+      --hover:#263041;
+      /* Color principal: verde */
+      --accent:#22c55e;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --success:#22c55e;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto;
+      background:radial-gradient(circle at 0 0,#111827 0,transparent 55%),
+                 radial-gradient(circle at 100% 0,#0f172a 0,transparent 55%),
+                 var(--bg);
+      color:var(--txt);
+    }
+
+    header{
+      background:linear-gradient(135deg,#020617,#020617 55%,#02141d);
+      border-bottom:1px solid var(--border);
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      position:sticky;
+      top:0;
+      z-index:5;
+      backdrop-filter:blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .brand img{
+      height:46px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:20px;
+    }
+    .brand span{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    main{
+      max-width:1100px;
+      margin:26px auto;
+      padding:0 18px 40px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:18px;
+    }
+
+    /* Bloques superiores: KPIs + alertas ocupan todo el ancho */
+    .kpi-section,
+    .alerts-section{
+      grid-column:1 / -1;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px 18px 16px;
+      box-shadow:0 16px 40px rgba(0,0,0,.4);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .kpi-section::before,
+    .alerts-section::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      background:conic-gradient(
+        from 140deg,
+        rgba(34,197,94,.7),
+        transparent 40%,
+        transparent 60%,
+        rgba(34,197,94,.6),
+        rgba(34,197,94,.7)
+      );
+      opacity:0.12;
+      pointer-events:none;
+      mix-blend-mode:screen;
+    }
+
+    .section-title{
+      margin:0 0 8px;
+      font-size:18px;
+      font-weight:600;
+      color:var(--accent);
+      letter-spacing:.02em;
+    }
+
+    .muted{
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 12px;
+    }
+
+    /* KPIs */
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:10px;
+    }
+
+    .kpi-card{
+      background:var(--card-bg);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:10px 12px;
+      transition:all .3s ease;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 10px 24px rgba(0,0,0,.45);
+    }
+
+    .kpi-card::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      background:conic-gradient(
+        from 200deg,
+        rgba(34,197,94,.9),
+        transparent 45%,
+        transparent 55%,
+        rgba(34,197,94,.7),
+        rgba(34,197,94,.9)
+      );
+      opacity:0;
+      transition:opacity .25s ease;
+      pointer-events:none;
+      mix-blend-mode:screen;
+    }
+
+    .kpi-card::after{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      background:radial-gradient(circle at 0 0,#0b1220 0,transparent 55%),
+                 linear-gradient(145deg,#020617,#020617 40%,#020c15);
+      z-index:0;
+    }
+
+    .kpi-card.updated {
+      box-shadow:0 0 24px rgba(34,197,94,.55);
+    }
+    .kpi-card.updated::before{
+      opacity:1;
+    }
+
+    .kpi-card:hover{
+      transform:translateY(-3px) scale(1.01);
+      box-shadow:0 18px 40px rgba(0,0,0,.65);
+    }
+
+    .kpi-card > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .kpi-label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    .kpi-value{
+      font-size:22px;
+      font-weight:700;
+      line-height:1.1;
+    }
+
+    .kpi-extra{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* ALERTAS RESUMIDAS */
+    .alerts-header{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:6px;
+      position:relative;
+      z-index:1;
+    }
+
+    .alert-summary-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:12px;
+      position:relative;
+      z-index:1;
+    }
+
+    .alert-summary-card{
+      background:radial-gradient(circle at 0 0,#020617 0,#020617 55%,#020617);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:10px 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .alert-summary-card::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      background:conic-gradient(
+        from 160deg,
+        rgba(239,68,68,.8),
+        transparent 40%,
+        transparent 60%,
+        rgba(245,158,11,.7),
+        rgba(239,68,68,.8)
+      );
+      opacity:0;
+      transition:opacity .25s ease;
+      mix-blend-mode:screen;
+    }
+
+    .alert-summary-card.critical::before{
+      opacity:.35;
+    }
+
+    .alert-summary-card > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .alert-title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+    }
+
+    .alert-title-main{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:15px;
+      font-weight:600;
+    }
+
+    .badge{
+      font-size:11px;
+      padding:3px 9px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      white-space:nowrap;
+      background:#020617;
+    }
+
+    .badge-danger{
+      border-color:var(--danger);
+      color:var(--danger);
+      animation:blink 1.6s infinite;
+    }
+    .badge-warning{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+    .badge-soft{
+      border-color:var(--accent);
+      color:var(--accent);
+      background:#020617;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity:1; }
+      50% { opacity:.3; }
+    }
+
+    .alert-meta{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .alert-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:4px;
+    }
+
+    .btn{
+      border-radius:999px;
+      font-size:11px;
+      padding:4px 10px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+      transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover{
+      background:var(--hover);
+      transform:translateY(-1px);
+      box-shadow:0 10px 24px rgba(0,0,0,.4);
+    }
+
+    .btn-primary{
+      border-color:var(--accent);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#ecfeff;
+    }
+    .btn-primary:hover{
+      filter:brightness(1.05);
+    }
+
+    .mini-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    .mini-table th,
+    .mini-table td{
+      padding:3px 4px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      white-space:nowrap;
+    }
+
+    .mini-table thead{
+      background:#020617;
+    }
+
+    .mini-table tbody tr:nth-child(even){
+      background:#020617;
+    }
+
+    .chip-severity{
+      display:inline-flex;
+      align-items:center;
+      padding:1px 6px;
+      border-radius:999px;
+      font-size:10px;
+      border:1px solid var(--border);
+    }
+    .chip-critical{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+    .chip-high{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+    .chip-info{
+      border-color:var(--accent);
+      color:var(--accent);
+    }
+
+    /* Tarjetas de navegación — Estilo C (Pro-Line con borde animado) */
+    .card{
+      position:relative;
+      background:var(--panel);
+      border-radius:18px;
+      border:1px solid var(--border);
+      padding:18px 18px 16px;
+      text-decoration:none;
+      color:var(--txt);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      transition:transform .2s ease, box-shadow .25s ease;
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      background:conic-gradient(
+        from 180deg,
+        rgba(34,197,94,.9),
+        transparent 35%,
+        transparent 65%,
+        rgba(34,197,94,.8),
+        rgba(34,197,94,.9)
+      );
+      opacity:0;
+      transition:opacity .25s ease;
+      mix-blend-mode:screen;
+      pointer-events:none;
+    }
+
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
+                 linear-gradient(135deg,#020617,#020617 40%,#020c1a);
+      z-index:0;
+    }
+
+    .card > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .card:hover{
+      transform:translateY(-4px) scale(1.01);
+      box-shadow:0 18px 40px rgba(0,0,0,.7);
+    }
+
+    .card:hover::before{
+      opacity:1;
+    }
+
+    .card-title{
+      font-size:17px;
+      font-weight:600;
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .card-title-icon{
+      font-size:18px;
+    }
+
+    .card-desc{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.3;
+    }
+
+    footer{
+      grid-column:1 / -1;
+      text-align:center;
+      margin-top:10px;
+      padding-bottom:20px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    /* DIALOGOS (ver todos) */
+    dialog::backdrop{
+      background:rgba(15,23,42,.85);
+    }
+    dialog{
+      border:none;
+      border-radius:16px;
+      background:#020617;
+      color:var(--txt);
+      max-width:900px;
+      width:min(96vw,900px);
+      padding:14px 16px 12px;
+      box-shadow:0 24px 60px rgba(0,0,0,.85);
+    }
+    .dialog-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .dialog-title{
+      font-size:15px;
+      font-weight:600;
+    }
+    .dialog-sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .dialog-table-wrap{
+      max-height:420px;
+      overflow:auto;
+      border-radius:10px;
+      border:1px solid var(--border);
+    }
+    .dialog-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    .dialog-table th,
+    .dialog-table td{
+      padding:5px 6px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+      text-align:left;
+    }
+    .dialog-table thead{
+      background:#020617;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    .dialog-footer{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:8px;
+      gap:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* TOAST / NOTIFICACIÓN SUPERIOR */
+    .toast{
+      position:fixed;
+      top:14px;
+      right:16px;
+      background:#020617;
+      border-radius:999px;
+      border:1px solid var(--border);
+      padding:8px 12px;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 8px 24px rgba(0,0,0,.85);
+      z-index:50;
+      opacity:0;
+      transform:translateY(-8px);
+      pointer-events:none;
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+      pointer-events:auto;
+    }
+    .toast-icon{
+      font-size:16px;
+    }
+    .toast-msg-main{
+      font-weight:600;
+    }
+    .toast-msg-sub{
+      color:var(--muted);
+    }
+    .toast-close{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:14px;
+    }
+
+/* ================== GLOBO DE ALERTAS IMPORTANTES ================== */
+
+.alert-globe{
+  position:fixed;
+  top:100px !important;
+  right:28px;
+  width:66px;
+  height:66px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.85) 0, transparent 45%),
+    radial-gradient(circle at 70% 80%, rgba(34,197,94,0.5) 0, transparent 55%),
+    radial-gradient(circle at 50% 50%, #16a34a 0, #065f46 55%, #022c22 100%);
+  box-shadow:
+    0 0 0 2px rgba(16,185,129,0.8),
+    0 0 28px rgba(16,185,129,0.95),
+    0 12px 30px rgba(0,0,0,0.75);
+  display:none;              /* Oculto si no hay alertas */
+  align-items:center;
+  justify-content:center;
+  z-index:70;
+  cursor:pointer;
+  transform:translateZ(0);
+  transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+
+.alert-globe-inner{
+  width:68%;
+  height:68%;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ecfeff;
+  font-size:32px;
+  text-shadow:0 0 6px rgba(0,0,0,0.8);
+}
+
+.alert-globe-badge{
+  position:absolute;
+  top:-6px;
+  right:-8px;
+  min-width:30px;
+  height:30px;
+  border-radius:999px;
+  background:#ef4444;
+  color:#fff;
+  font-weight:700;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    0 0 0 2px #020617,
+    0 0 16px rgba(248,113,113,0.9);
+}
+
+/* Estado activo: animaciones fuertes */
+.alert-globe.alert-globe-active{
+  animation:
+    globePulse 1s infinite ease-in-out,
+    globeGlow 2.4s infinite ease-in-out alternate,
+    globeShake 4s infinite ease-in-out;
+}
+
+/* Hover en escritorio */
+@media (hover:hover){
+  .alert-globe.alert-globe-active:hover{
+    transform:scale(1.06);
+    box-shadow:
+      0 0 0 2px rgba(34,197,94,1),
+      0 0 38px rgba(34,197,94,1),
+      0 16px 40px rgba(0,0,0,0.9);
+  }
+}
+
+/* Animación latido */
+@keyframes globePulse{
+  0%   { transform:scale(1);   box-shadow:0 0 0 2px rgba(16,185,129,0.7), 0 10px 26px rgba(0,0,0,0.8); }
+  50%  { transform:scale(1.12);box-shadow:0 0 0 4px rgba(45,212,191,1),   0 18px 40px rgba(0,0,0,0.9); }
+  100% { transform:scale(1);   box-shadow:0 0 0 2px rgba(16,185,129,0.7), 0 10px 26px rgba(0,0,0,0.8); }
+}
+
+/* Respiración del glow */
+@keyframes globeGlow{
+  0%   { filter:brightness(1) saturate(1); }
+  100% { filter:brightness(1.15) saturate(1.25); }
+}
+
+/* Pequeña vibración estilo móvil */
+@keyframes globeShake{
+  0%, 92%, 100% { transform:translateX(0) scale(1); }
+  94% { transform:translateX(-2px) scale(1.03); }
+  96% { transform:translateX(2px)  scale(1.03); }
+  98% { transform:translateX(0)   scale(1.03); }
+}
+
+/* Ajuste en móvil */
+@media (max-width:640px){
+  .alert-globe{
+    top:14px;
+    right:16px;
+    width:64px;
+    height:64px;
+  }
+  .alert-globe-inner{
+    font-size:26px;
+  }
+  .alert-globe-badge{
+    min-width:26px;
+    height:26px;
+    font-size:14px;
+    top:-5px;
+    right:-6px;
+  }
+}
+
+
+    
+    @media (max-width:640px){
+      header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:8px;
+      }
+      .toast{
+        left:10px;
+        right:10px;
+        border-radius:12px;
+      }
+    }
+
+    /* ====== KPI CARDS CLICABLES ====== */
+
+    .kpi-card.kpi-clickable {
+      cursor: pointer;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .kpi-card.kpi-clickable:hover {
+      background: #263041;
+      box-shadow: 0 0 12px rgba(34,197,94,0.35);
+      transform: translateY(-2px);
+    }
+
+    .kpi-card.kpi-clickable:active {
+      transform: scale(0.97);
+    }
+
+    /* ====== ÚLTIMOS MOVIMIENTOS ====== */
+
+    .mov-section{
+      grid-column:1 / -1;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 16px 40px rgba(0,0,0,.4);
+    }
+
+    .mov-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:6px;
+    }
+
+    .mov-toolbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .mov-toolbar input,
+    .mov-toolbar select{
+      background:#0b1627;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--txt);
+      outline:none;
+    }
+
+    .mov-toolbar input:focus,
+    .mov-toolbar select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(34,197,94,.4);
+    }
+
+    .mov-pagination{
+      margin-top:8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .mov-pagination .btn{
+      padding:4px 12px;
+    }
+
+    .mov-row-in{
+      color:var(--accent);
+      font-weight:600;
+    }
+    .mov-row-out{
+      color:var(--danger);
+      font-weight:600;
+    }
+    .mov-row-ok{
+      color:var(--success);
+      font-weight:600;
+    }
+
+    .calib-chip{
+      display:inline-flex;
+      align-items:center;
+      padding:1px 6px;
+      border-radius:999px;
+      font-size:10px;
+      border:1px solid var(--border);
+    }
+    .calib-ok{
+      border-color:var(--success);
+      color:var(--success);
+    }
+    .calib-warn{
+      border-color:var(--warning);
+      color:var(--warning);
+    }
+    .calib-bad{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+
+    @media (max-width:720px){
+      .mov-header{
+        align-items:flex-start;
+      }
+      .mov-toolbar{
+        width:100%;
+        justify-content:flex-start;
+      }
+    }
+
+    /* Operarios: chips */
+    .op-chip {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:600;
+      white-space:nowrap;
+    }
+    .op1 {
+      background:#0ea5e9;   /* azul */
+      color:#ffffff;
+    }
+    .op2 {
+      background:#f97316;   /* naranja */
+      color:#ffffff;
+    }
+
+    /* ===================== CHAT FLOTANTE TMP ===================== */
+
+    .chat-fab{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      width:54px;
+      height:54px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 12px 30px rgba(0,0,0,.7);
+      cursor:pointer;
+      z-index:60;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    .chat-fab:hover{
+      transform:translateY(-2px) scale(1.03);
+      box-shadow:0 16px 40px rgba(0,0,0,.8);
+    }
+
+    .chat-fab-icon{
+      font-size:22px;
+    }
+
+    .chat-fab-badge{
+      position:absolute;
+      top:-6px;
+      right:-4px;
+      min-width:22px;
+      height:22px;
+      border-radius:999px;
+      background:#ef4444;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:700;
+      box-shadow:0 0 0 2px #020617;
+    }
+
+    .chat-fab.chat-has-important{
+      animation:chatPulse 1.4s infinite;
+    }
+
+    @keyframes chatPulse{
+      0%{ box-shadow:0 0 0 0 rgba(239,68,68,.7); }
+      70%{ box-shadow:0 0 0 12px rgba(239,68,68,0); }
+      100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
+    }
+
+    /* Panel del chat (ventana emergente) */
+    #chat-panel{
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      background:#020617;
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 18px 40px rgba(0,0,0,.7);
+      width: 480px;
+      height: 520px;
+      display:flex;               /* SIEMPRE flex */
+      flex-direction:column;
+      overflow:hidden;
+      z-index:40;
+      opacity:0;                   /* Oculto por defecto */
+      pointer-events:none;
+      transform:translateY(10px);
+      transition:opacity .18s ease, transform .18s ease;
+    }
+
+/* Abrir panel del chat */
+#chat-panel.open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+}
+
+
+    .chat-header{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+
+    .chat-title{
+      font-size:14px;
+      font-weight:600;
+      color:var(--accent);
+    }
+
+    .chat-subtitle{
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .chat-close-btn{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:16px;
+      padding:4px 6px;
+      border-radius:999px;
+    }
+    .chat-close-btn:hover{
+      background:#020617;
+      color:#fff;
+    }
+
+    /* Área donde se ven los mensajes */
+    #chat-messages{
+      flex:1;
+      padding:12px 14px;
+      overflow-y:auto;
+      font-size:13px;
+    }
+
+    .chat-empty{
+      text-align:center;
+      color:var(--muted);
+      margin-top:12px;
+    }
+
+    .chat-msg-wrapper{
+      margin-bottom:6px;
+    }
+
+    .chat-message{
+      padding:6px 8px;
+      border-radius:10px;
+      border:1px solid #1f2937;
+      background:radial-gradient(circle at 0 0,#020617 0,transparent 55%),
+                 #020617;
+    }
+
+    .chat-message.mine{
+      border-color:var(--accent);
+      background:radial-gradient(circle at 100% 0,#022c22 0,transparent 55%),
+                 #020617;
+    }
+
+    .chat-message-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:6px;
+      margin-bottom:2px;
+    }
+
+    .chat-author{
+      font-weight:600;
+      font-size:11px;
+    }
+
+    .chat-meta{
+      font-size:10px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .chat-text{
+      font-size:12px;
+      margin:2px 0 4px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .chat-tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      align-items:center;
+      margin-top:2px;
+      font-size:10px;
+    }
+
+    .chat-tag{
+      border-radius:999px;
+      padding:2px 6px;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+
+    .chat-tag-important{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+
+    .chat-tag-dest{
+      border-color:var(--accent);
+      color:var(--accent);
+    }
+
+    .chat-done-btn{
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--muted);
+      font-size:10px;
+      padding:2px 8px;
+      cursor:pointer;
+      margin-left:auto;
+    }
+    .chat-done-btn:hover{
+      background:var(--hover);
+      color:#fff;
+    }
+
+    .chat-input-area{
+      border-top:1px solid var(--border);
+      padding:8px 10px 10px;
+      background:#020617;
+      position:relative;
+    }
+
+    .chat-input-row textarea{
+      width:100%;
+      resize:vertical;
+      min-height:60px;
+      max-height:120px;
+      background:#020617;
+      border-radius:8px;
+      border:1px solid var(--border);
+      color:var(--txt);
+      font-size:13px;
+      padding:6px 8px;
+      outline:none;
+    }
+
+    .chat-input-row textarea:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(34,197,94,.4);
+    }
+
+    .chat-input-extra{
+      margin-top:4px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .chat-important-label{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .chat-important-word{
+      color:var(--danger);
+      font-weight:600;
+    }
+
+    .chat-input-extra input[type="checkbox"]{
+      width:12px;
+      height:12px;
+    }
+
+    .chat-to-label{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      flex:1;
+      min-width:140px;
+    }
+
+    .chat-dest-btn{
+      flex:1;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--txt);
+      font-size:11px;
+      padding:4px 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      cursor:pointer;
+    }
+    .chat-dest-btn span{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .chat-dest-btn::after{
+      content:"▾";
+      font-size:10px;
+      margin-left:6px;
+      color:var(--muted);
+    }
+    .chat-dest-btn:hover{
+      background:#020617;
+      border-color:var(--accent);
+    }
+
+    .chat-send-btn{
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      color:#ecfeff;
+      font-size:12px;
+      padding:4px 10px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .chat-send-btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .chat-status{
+      margin-top:3px;
+      font-size:10px;
+      color:var(--muted);
+    }
+
+    /* Panel de selección de destinatarios */
+    .chat-dest-panel{
+      position:absolute;
+      left:10px;
+      right:10px;
+      bottom:74px;
+      background:#020617;
+      border-radius:12px;
+      border:1px solid var(--border);
+      box-shadow:0 18px 40px rgba(0,0,0,.9);
+      padding:6px 8px 8px;
+      font-size:12px;
+      display:none;
+      z-index:80;
+    }
+
+    .chat-dest-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:4px;
+    }
+
+    .chat-dest-title{
+      font-size:12px;
+      font-weight:600;
+      color:var(--accent);
+    }
+
+    .chat-dest-close{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:14px;
+      padding:2px 4px;
+      border-radius:999px;
+    }
+    .chat-dest-close:hover{
+      background:#020617;
+      color:#fff;
+    }
+
+    .chat-dest-body{
+      max-height:140px;
+      overflow-y:auto;
+      padding:2px 0;
+      margin-bottom:4px;
+    }
+
+    .chat-dest-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:2px 2px;
+      cursor:pointer;
+      user-select:none;
+      font-size:12px;
+    }
+    .chat-dest-item input{
+      width:12px;
+      height:12px;
+      margin:0;
+    }
+
+    .chat-dest-footer{
+      display:flex;
+      justify-content:flex-end;
+    }
+
+    @media (max-width:640px){
+      #chat-panel{
+        right:10px;
+        left:10px;
+        width:auto;
+        max-height:75vh;
+      }
+      .chat-dest-panel{
+        left:6px;
+        right:6px;
+      }
+    }
+
+/* === GLOBO 3D DE ALERTAS IMPORTANTES === */
+.alert-globe{
+  position:fixed;
+  top:58px;
+  right:28px;
+  width:66px;
+  height:66px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #34d399, #059669 60%, #064e3b);
+  box-shadow:
+    0 0 12px rgba(34,197,94,0.65),
+    0 0 22px rgba(34,197,94,0.45),
+    inset 0 0 12px rgba(255,255,255,0.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:9000;
+  transform:scale(0);
+  opacity:0;
+  transition:transform .25s ease, opacity .25s ease;
+}
+
+/* Cuando hay alertas → aparece */
+.alert-globe.show{
+  transform:scale(1);
+  opacity:1;
+  animation:pulseGlow 1.5s infinite ease-in-out;
+}
+
+/* Icono interno */
+.alert-globe-inner{
+  font-size:26px;
+  filter:drop-shadow(0 0 6px rgba(255,255,255,0.55));
+}
+
+/* Badge rojo del número */
+.alert-globe-badge{
+  position:absolute;
+  bottom:-4px;
+  right:-4px;
+  background:#ef4444;
+  color:white;
+  border-radius:50%;
+  font-size:13px;
+  font-weight:700;
+  width:26px;
+  height:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 8px rgba(0,0,0,0.6);
+}
+
+/* Animación respiración + glow TMP */
+@keyframes pulseGlow{
+  0% { box-shadow:0 0 12px rgba(34,197,94,.6), 0 0 22px rgba(34,197,94,.4); transform:scale(1); }
+  50%{ box-shadow:0 0 22px rgba(34,197,94,.9), 0 0 36px rgba(34,197,94,.7); transform:scale(1.06); }
+  100%{ box-shadow:0 0 12px rgba(34,197,94,.6), 0 0 22px rgba(34,197,94,.4); transform:scale(1); }
+}
+
+    
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" alt="TMP">
+    <div>
+      <h1>TMP · Control Metrológico</h1>
+      <span>Trazabilidad · Instrumentos · Laboratorio</span>
+    </div>
+  </div>
+</header>
+
+
+<!-- GLOBO 3D DE ALERTAS IMPORTANTES -->
+<div id="alert-globe" class="alert-globe" title="Tienes alertas importantes pendientes">
+  <div class="alert-globe-inner">
+    🔔
+  </div>
+  <div class="alert-globe-badge" id="alert-globe-count">0</div>
+</div>
+
+  
+<!-- TOAST DE ALERTA GLOBAL -->
+<div id="toast" class="toast">
+  <div class="toast-icon">🚨</div>
+  <div>
+    <div class="toast-msg-main" id="toast-main">Atención metrológica requerida</div>
+    <div class="toast-msg-sub" id="toast-sub">Hay equipos que requieren calibración prioritaria.</div>
+  </div>
+  <button class="toast-close" id="toast-close">✕</button>
+</div>
+
+<main>
+
+  <!-- KPIs -->
+  <section class="kpi-section">
+    <h2 class="section-title">Resumen del laboratorio</h2>
+    <p class="muted">Indicadores calculados en tiempo real desde Supabase.</p>
+
+    <div class="kpi-grid">
+
+      <div class="kpi-card" id="kpi-card-total">
+        <div class="kpi-label">Instrumentos totales</div>
+        <div class="kpi-value" id="kpi-total">–</div>
+        <div class="kpi-extra" id="kpi-total-extra"></div>
+      </div>
+
+      <a href="listado_instrumentos.html?filtro=uso" class="kpi-link">
+        <div class="kpi-card" id="kpi-card-uso">
+          <div class="kpi-label">En uso (fuera de laboratorio)</div>
+          <div class="kpi-value" id="kpi-uso">–</div>
+          <div class="kpi-extra" id="kpi-uso-extra"></div>
+        </div>
+      </a>
+   
+      <a href="listado_instrumentos.html?filtro=laboratorio" class="kpi-link">
+        <div class="kpi-card" id="kpi-card-lab">
+          <div class="kpi-label">En laboratorio</div>
+          <div class="kpi-value" id="kpi-lab">–</div>
+          <div class="kpi-extra" id="kpi-lab-extra"></div>
+        </div>
+      </a>
+
+      <a href="listado_instrumentos.html?filtro=calibrados" class="kpi-link">
+        <div class="kpi-card" id="kpi-card-cal">
+          <div class="kpi-label">Calibrados</div>
+          <div class="kpi-value" id="kpi-calibrados">–</div>
+          <div class="kpi-extra" id="kpi-calibrados-extra"></div>
+        </div>
+      </a>
+
+      <div class="kpi-card" id="kpi-card-prox">
+        <div class="kpi-label">Próximos (&lt; 30 días)</div>
+        <div class="kpi-value" id="kpi-proximos">–</div>
+        <div class="kpi-extra" id="kpi-proximos-extra"></div>
+      </div>
+
+      <div class="kpi-card" id="kpi-card-fuera">
+        <div class="kpi-label">Fuera de calibración</div>
+        <div class="kpi-value" id="kpi-fuera">–</div>
+        <div class="kpi-extra" id="kpi-fuera-extra"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ALERTAS COMPACTAS -->
+  <section class="alerts-section">
+    <div class="alerts-header">
+      <div>
+        <h2 class="section-title">Alertas de calibración</h2>
+        <p class="muted">Vista compacta de lo realmente crítico. Detalle completo disponible bajo demanda.</p>
+      </div>
+      <div class="badge badge-soft" id="badge-resumen-global">Sin alertas críticas</div>
+    </div>
+
+    <div class="alert-summary-grid">
+
+      <!-- Fuera de calibración -->
+      <div class="alert-summary-card" id="card-alert-fuera">
+        <div class="alert-title-row">
+          <div class="alert-title-main">
+            <span>❌ Fuera de calibración</span>
+            <span class="badge badge-danger" id="badge-fuera-count">0</span>
+          </div>
+        </div>
+        <div class="alert-meta" id="meta-fuera">
+          No hay instrumentos fuera de calibración.
+        </div>
+
+        <table class="mini-table" id="table-fuera-top" style="display:none;">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Ubicación</th>
+              <th>Vencido (días)</th>
+              <th>Severidad</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-fuera-top"></tbody>
+        </table>
+
+        <div class="alert-actions">
+          <button class="btn btn-primary" id="btn-fuera-ver-todos" style="display:none;">Ver todos</button>
+          <a href="TMP_Calibraciones_Lab.html" class="btn">Ir a Calibraciones Lab</a>
+        </div>
+      </div>
+
+      <!-- Próximos a calibrar -->
+      <div class="alert-summary-card" id="card-alert-prox">
+        <div class="alert-title-row">
+          <div class="alert-title-main">
+            <span>⚠️ Próximos (&lt; 30 días)</span>
+            <span class="badge badge-warning" id="badge-prox-count">0</span>
+          </div>
+        </div>
+        <div class="alert-meta" id="meta-prox">
+          No hay instrumentos con calibración próxima en los próximos 30 días.
+        </div>
+
+        <table class="mini-table" id="table-prox-top" style="display:none;">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Ubicación</th>
+              <th>Faltan (días)</th>
+              <th>Severidad</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-prox-top"></tbody>
+        </table>
+
+        <div class="alert-actions">
+          <button class="btn btn-primary" id="btn-prox-ver-todos" style="display:none;">Ver todos</button>
+          <a href="TMP_Calibraciones_Lab.html" class="btn">Planificar calibración</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ÚLTIMOS MOVIMIENTOS -->
+  <section class="mov-section">
+    <div class="mov-header">
+      <div>
+        <h2 class="section-title">Últimos movimientos</h2>
+        <p class="muted">Entradas, salidas y movimientos recientes. Incluye responsables y operarios asignados.</p>
+      </div>
+      <div class="mov-toolbar">
+        <input id="mov-search" type="text" placeholder="Buscar por código, destino, responsable u operarios...">
+        <select id="mov-tipo">
+          <option value="">Todos los tipos</option>
+          <option value="Entrada">Entrada</option>
+          <option value="Salida">Salida</option>
+          <option value="Préstamo externo">Préstamo externo</option>
+          <option value="Revisión / reparación">Revisión / reparación</option>
+          <option value="Envío a calibración externa">Envío a calibración externa</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="mini-table" id="table-movimientos">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Código</th>
+          <th>Tipo</th>
+          <th>Operario 1</th>
+          <th>Operario 2</th>
+          <th>Destino</th>
+          <th>Responsable</th>
+          <th>Calibración</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-movimientos">
+        <tr><td colspan="9">Cargando movimientos...</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mov-pagination">
+      <div>
+        <button class="btn" id="mov-prev">&lt; Anterior</button>
+        <button class="btn" id="mov-next">Siguiente &gt;</button>
+      </div>
+      <div id="mov-page-info">–</div>
+    </div>
+  </section>
+
+  <!-- TARJETAS / ACCESOS -->
+  <a class="card" href="alta_instrumento.html">
+    <div class="card-title">
+      <span class="card-title-icon">➕</span>
+      <span>Alta / Edición</span>
+    </div>
+    <div class="card-desc">Registrar instrumentos, editar fichas, generar QR y gestionar estados.</div>
+  </a>
+
+  <a class="card" href="movimiento.html">
+    <div class="card-title">
+      <span class="card-title-icon">🔄</span>
+      <span>Movimientos</span>
+    </div>
+    <div class="card-desc">Registrar entradas, salidas, ubicaciones y responsables.</div>
+  </a>
+
+  <a class="card" href="qr/qr.index.html">
+    <div class="card-title">
+      <span class="card-title-icon">🏷</span>
+      <span>Generar QR</span>
+    </div>
+    <div class="card-desc">Crear códigos QR para identificación rápida y trazabilidad.</div>
+  </a>
+
+  <a class="card" href="TMP_Calibraciones_Lab.html">
+    <div class="card-title">
+      <span class="card-title-icon">📏</span>
+      <span>Calibraciones Lab</span>
+    </div>
+    <div class="card-desc">Gestión de calibraciones internas del laboratorio TMP.</div>
+  </a>
+
+  <a class="card" href="App_Patrones_TMP.html">
+    <div class="card-title">
+      <span class="card-title-icon">📐</span>
+      <span>Patrones</span>
+    </div>
+    <div class="card-desc">Inventario y control de patrones del laboratorio.</div>
+  </a>
+
+  <a class="card" href="App_Familias_TMP.html">
+    <div class="card-title">
+      <span class="card-title-icon">🧩</span>
+      <span>Familias</span>
+    </div>
+    <div class="card-desc">Clasificación y agrupación de instrumentos TMP.</div>
+  </a>
+
+  <a class="card" href="criterios.html">
+    <div class="card-title">
+      <span class="card-title-icon">📘</span>
+      <span>Criterios de Aceptación</span>
+    </div>
+    <div class="card-desc">Requisitos metrológicos TMP: aceptación interna y externa. Documento clave para auditorías.</div>
+  </a>
+
+  <a class="card" href="alcance_kpi.html">
+    <div class="card-title">
+      <span class="card-title-icon">📊</span>
+      <span>Alcance Laboratorio & KPIs</span>
+    </div>
+    <div class="card-desc">Magnitudes cubiertas, rangos y panel avanzado de indicadores del laboratorio TMP.</div>
+  </a>
+
+<a class="card" href="certificados.html">
+  <div class="card-title">
+    <span class="card-title-icon">📄</span>
+    <span>Informes de Calibración</span>
+  </div>
+  <div class="card-desc">
+    Historial profesional y visualización avanzada de certificados (PDF oficial).
+  </div>
+</a>
+
+  
+  <a class="card" href="buscar_instrumento.html">
+    <div class="card-title">🔎 Buscar instrumento</div>
+    <div class="card-desc">Consulta rápida de existencia, estado y datos básicos de cualquier equipo.</div>
+  </a>
+
+<a class="card" href="equipos-referencia-crear.html">
+    <div class="card-title">
+        <span class="card-title-icon">📋</span>
+        <span>Crear tabla de equipos</span>
+    </div>
+    <div class="card-desc">
+        Registrar una nueva referencia con los equipos necesarios para medirla.
+    </div>
+</a>
+
+<a class="card" href="equipos-referencia-consulta.html">
+    <div class="card-title">
+        <span class="card-title-icon">🔍</span>
+        <span>Consultar tablas de equipos</span>
+    </div>
+    <div class="card-desc">
+        Buscar una referencia, ver sus equipos definidos y editar versiones anteriores.
+    </div>
+</a>
+
+  
+  <footer>
+    Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2025
+  </footer>
+
+</main>
+
+<!-- DIALOGOS: LISTA COMPLETA FUERA / PRÓXIMOS -->
+<dialog id="dialog-fuera">
+  <div class="dialog-header">
+    <div>
+      <div class="dialog-title">Equipos fuera de calibración</div>
+      <div class="dialog-sub" id="dialog-fuera-sub">Listado completo de instrumentos vencidos.</div>
+    </div>
+    <button class="btn" id="dialog-fuera-cerrar">Cerrar</button>
+  </div>
+  <div class="dialog-table-wrap">
+    <table class="dialog-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Ubicación</th>
+          <th>Próxima calibración</th>
+          <th>Vencido (días)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-fuera-modal"></tbody>
+    </table>
+  </div>
+  <div class="dialog-footer">
+    <span>Revisa estos equipos con prioridad. Puedes abrir su ficha desde la columna “Ver”.</span>
+  </div>
+</dialog>
+
+<dialog id="dialog-prox">
+  <div class="dialog-header">
+    <div>
+      <div class="dialog-title">Equipos próximos a calibrar (&lt; 30 días)</div>
+      <div class="dialog-sub" id="dialog-prox-sub">Listado completo de instrumentos cuya calibración vence pronto.</div>
+    </div>
+    <button class="btn" id="dialog-prox-cerrar">Cerrar</button>
+  </div>
+  <div class="dialog-table-wrap">
+    <table class="dialog-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Ubicación</th>
+          <th>Próxima calibración</th>
+          <th>Faltan (días)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-prox-modal"></tbody>
+    </table>
+  </div>
+  <div class="dialog-footer">
+    <span>Úsalos para planificar el trabajo del laboratorio y evitar acumulaciones.</span>
+  </div>
+</dialog>
+
+<!-- ================= CHAT FLOTANTE: BOTÓN + PANEL ================ -->
+<div id="chat-fab" class="chat-fab">
+  <span class="chat-fab-icon">💬</span>
+  <span id="chat-fab-badge" class="chat-fab-badge" style="display:none;">0</span>
+</div>
+
+<div id="chat-panel" class="chat-panel">
+  <div class="chat-header">
+    <div>
+      <div class="chat-title">Chat interno TMP</div>
+      <div class="chat-subtitle">
+        Avisos generales y mensajes importantes. Usuario: <span id="chat-user-label">-</span>
+      </div>
+    </div>
+    <button id="chat-close" class="chat-close-btn">✕</button>
+  </div>
+
+  <div id="chat-messages">
+    <div class="chat-empty">Todavía no hay mensajes en el chat.</div>
+  </div>
+
+  <div class="chat-input-area">
+    <div class="chat-input-row">
+      <textarea id="chat-input" rows="2" placeholder="Escribe un mensaje (Enter = salto, Ctrl+Enter = enviar)"></textarea>
+    </div>
+    <div class="chat-input-extra">
+      <label class="chat-important-label">
+        <input type="checkbox" id="chat-important">
+        <span>Marcar como <span class="chat-important-word">IMPORTANTE</span></span>
+      </label>
+
+      <div class="chat-to-label">
+        <span>Para:</span>
+        <button type="button" id="chat-dest-open" class="chat-dest-btn">
+          <span id="chat-dest-summary">Todos</span>
+        </button>
+      </div>
+
+      <button id="chat-send" class="chat-send-btn">Enviar</button>
+    </div>
+    <div id="chat-status" class="chat-status"></div>
+
+    <!-- Panel de selección de destinatarios -->
+    <div id="chat-dest-panel" class="chat-dest-panel">
+      <div class="chat-dest-header">
+        <div class="chat-dest-title">Seleccionar destinatarios</div>
+        <button type="button" id="chat-dest-close" class="chat-dest-close">✕</button>
+      </div>
+      <div id="chat-dest-body" class="chat-dest-body">
+        <!-- Se rellena por JS -->
+      </div>
+      <div class="chat-dest-footer">
+        <button type="button" id="chat-dest-apply" class="chat-send-btn">Aplicar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CARGAR SUPABASE -->
+<script type="module" src="config.mjs"></script>
+
+<!-- SCRIPT PRINCIPAL DASHBOARD (KPIs + MOVIMIENTOS) -->
+<script type="module">
+  const supabase = window.supabase;
+
+  // Helpers DOM
+  const kpi_total          = document.getElementById("kpi-total");
+  const kpi_uso            = document.getElementById("kpi-uso");
+  const kpi_lab            = document.getElementById("kpi-lab");
+  const kpi_calibrados     = document.getElementById("kpi-calibrados");
+  const kpi_proximos       = document.getElementById("kpi-proximos");
+  const kpi_fuera          = document.getElementById("kpi-fuera");
+
+  const kpi_total_extra      = document.getElementById("kpi-total-extra");
+  const kpi_uso_extra        = document.getElementById("kpi-uso-extra");
+  const kpi_lab_extra        = document.getElementById("kpi-lab-extra");
+  const kpi_calibrados_extra = document.getElementById("kpi-calibrados-extra");
+  const kpi_proximos_extra   = document.getElementById("kpi-proximos-extra");
+  const kpi_fuera_extra      = document.getElementById("kpi-fuera-extra");
+
+  const kpi_card_total = document.getElementById("kpi-card-total");
+  const kpi_card_uso   = document.getElementById("kpi-card-uso");
+  const kpi_card_lab   = document.getElementById("kpi-card-lab");
+  const kpi_card_cal   = document.getElementById("kpi-card-cal");
+  const kpi_card_prox  = document.getElementById("kpi-card-prox");
+  const kpi_card_fuera = document.getElementById("kpi-card-fuera");
+
+  const badgeResumenGlobal = document.getElementById("badge-resumen-global");
+
+  const badge_fuera_count = document.getElementById("badge-fuera-count");
+  const badge_prox_count  = document.getElementById("badge-prox-count");
+
+  const meta_fuera = document.getElementById("meta-fuera");
+  const meta_prox  = document.getElementById("meta-prox");
+
+  const table_fuera_top = document.getElementById("table-fuera-top");
+  const table_prox_top  = document.getElementById("table-prox-top");
+  const tbody_fuera_top = document.getElementById("tbody-fuera-top");
+  const tbody_prox_top  = document.getElementById("tbody-prox-top");
+
+  const btn_fuera_ver_todos = document.getElementById("btn-fuera-ver-todos");
+  const btn_prox_ver_todos  = document.getElementById("btn-prox-ver-todos");
+
+  const dlgFuera = document.getElementById("dialog-fuera");
+  const dlgProx  = document.getElementById("dialog-prox");
+  const dlgFueraCerrar = document.getElementById("dialog-fuera-cerrar");
+  const dlgProxCerrar  = document.getElementById("dialog-prox-cerrar");
+  const tbody_fuera_modal = document.getElementById("tbody-fuera-modal");
+  const tbody_prox_modal  = document.getElementById("tbody-prox-modal");
+
+  const toast      = document.getElementById("toast");
+  const toastMain  = document.getElementById("toast-main");
+  const toastSub   = document.getElementById("toast-sub");
+  const toastClose = document.getElementById("toast-close");
+
+  // MOVIMIENTOS DOM
+  const tbodyMov       = document.getElementById("tbody-movimientos");
+  const movSearch      = document.getElementById("mov-search");
+  const movTipoSelect  = document.getElementById("mov-tipo");
+  const movPrevBtn     = document.getElementById("mov-prev");
+  const movNextBtn     = document.getElementById("mov-next");
+  const movPageInfo    = document.getElementById("mov-page-info");
+
+  let cacheMovimientos = [];
+  const MOV_POR_PAG = 8;
+  let movPaginaActual = 1;
+
+  // Utilidades
+  function parseDate(str) {
+    if (!str) return null;
+    const norm = String(str).replace(/_/g, "-"); // soporta YYYY_MM_DD
+    const d = new Date(norm);
+    return isNaN(d) ? null : d;
+  }
+
+  function formatDate(d){
+    if (!d) return "—";
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth() + 1).padStart(2,"0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
+
+  function daysBetween(a,b){
+    const MS = 86400000;
+    return Math.floor((a - b)/MS);
+  }
+
+  function animateCard(el){
+    if (!el) return;
+    el.classList.add("updated");
+    setTimeout(()=>el.classList.remove("updated"), 900);
+  }
+
+  function pct(part, total){
+    if (!total) return "0%";
+    return `${Math.round((part/total)*100)}%`;
+  }
+
+  function severityChip(days, mode){
+    // mode: "vencido" (negativo) o "futuro"
+    let cls = "chip-severity chip-info";
+    let txt = "Info";
+
+    if (mode === "vencido"){
+      if (days > 60){ cls = "chip-severity chip-critical"; txt = "CRÍTICO"; }
+      else if (days > 30){ cls = "chip-severity chip-high"; txt = "ALTA"; }
+      else { cls = "chip-severity chip-info"; txt = "MEDIA"; }
+    } else {
+      if (days <= 7){ cls = "chip-severity chip-high"; txt = "ALTA"; }
+      else if (days <= 15){ cls = "chip-severity chip-info"; txt = "MEDIA"; }
+      else { cls = "chip-severity chip-info"; txt = "BAJA"; }
+    }
+    return `<span class="${cls}">${txt}</span>`;
+  }
+
+  function showToast(main, sub){
+    toastMain.textContent = main;
+    toastSub.textContent  = sub;
+    toast.classList.add("show");
+    setTimeout(()=>toast.classList.remove("show"), 10000);
+  }
+
+  toastClose.addEventListener("click", () => {
+    toast.classList.remove("show");
+  });
+
+  // LÓGICA PRINCIPAL DASHBOARD
+  async function cargarDashboard() {
+    if (!supabase) {
+      console.error("Supabase no disponible en home.html");
+      return;
+    }
+
+    const { data: instrumentos, error } = await supabase
+      .from("instrumentos")
+      // usamos las dos columnas para compatibilidad
+      .select("codigo, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
+
+    if (error) {
+      console.error("Error cargando instrumentos en home:", error);
+      return;
+    }
+
+    const total = instrumentos.length;
+    const hoy = new Date();
+    const mas30 = new Date(hoy.getTime() + 30*86400000);
+
+    let enLab = 0;
+    let enUso = 0;
+
+    let calibrados = 0;  // equipos EN VIGOR (no vencidos)
+    const fueraLista = [];
+    const proxLista  = [];
+
+    instrumentos.forEach(inst => {
+      // Ubicación
+      const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
+      if (ubic === "laboratorio") enLab++;
+      else enUso++;
+
+      // Fecha próxima (nueva + vieja columna)
+      const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+
+      if (prox) {
+        if (prox < hoy) {
+          // Fuera de calibración
+          fueraLista.push(inst);
+        } else {
+          // EN VIGOR (calibrado)
+          calibrados++;
+
+          // Además, si está dentro de los próximos 30 días → próximos
+          if (prox <= mas30) {
+            proxLista.push(inst);
+          }
+        }
+      }
+    });
+
+    // KPIs
+    kpi_total.textContent      = total;
+    kpi_uso.textContent        = enUso;
+    kpi_lab.textContent        = enLab;
+    kpi_calibrados.textContent = calibrados;
+    kpi_proximos.textContent   = proxLista.length;
+    kpi_fuera.textContent      = fueraLista.length;
+
+    kpi_total_extra.textContent      = "";
+    kpi_uso_extra.textContent        = total ? `${pct(enUso,total)} del total` : "";
+    kpi_lab_extra.textContent        = total ? `${pct(enLab,total)} del total` : "";
+    kpi_calibrados_extra.textContent = total ? `${pct(calibrados,total)} en vigor` : "";
+    kpi_proximos_extra.textContent   = total ? `${pct(proxLista.length,total)} del total` : "";
+    kpi_fuera_extra.textContent      = total ? `${pct(fueraLista.length,total)} del total` : "";
+
+    animateCard(kpi_card_total);
+    animateCard(kpi_card_uso);
+    animateCard(kpi_card_lab);
+    animateCard(kpi_card_cal);
+    animateCard(kpi_card_prox);
+    animateCard(kpi_card_fuera);
+
+    // Tarjetas de alerta para dar glow cuando hay crisis
+    const cardAlertFuera = document.getElementById("card-alert-fuera");
+    const cardAlertProx  = document.getElementById("card-alert-prox");
+    cardAlertFuera.classList.remove("critical");
+    cardAlertProx.classList.remove("critical");
+
+    // Resumen global de alertas
+    const totalAlertas = fueraLista.length + proxLista.length;
+    if (fueraLista.length > 0) {
+      badgeResumenGlobal.textContent = `⚠ ${totalAlertas} equipos requieren atención (prioridad fuera de calibración)`;
+      badgeResumenGlobal.classList.remove("badge-soft");
+      badgeResumenGlobal.classList.add("badge-danger");
+      cardAlertFuera.classList.add("critical");
+      showToast(
+        "Equipos fuera de calibración",
+        `Tienes ${fueraLista.length} equipos vencidos y ${proxLista.length} próximos.`
+      );
+    } else if (proxLista.length > 0) {
+      badgeResumenGlobal.textContent = `⏳ ${proxLista.length} equipos próximos a calibrar (<30 días)`;
+      badgeResumenGlobal.classList.remove("badge-soft");
+      badgeResumenGlobal.classList.add("badge-warning");
+      cardAlertProx.classList.add("critical");
+    } else {
+      badgeResumenGlobal.textContent = "Sin equipos vencidos ni próximos en 30 días";
+      badgeResumenGlobal.classList.add("badge-soft");
+    }
+
+    // ---- FUERA: TOP + MODAL ----
+    badge_fuera_count.textContent = fueraLista.length;
+    if (fueraLista.length === 0) {
+      meta_fuera.textContent = "No hay instrumentos fuera de calibración. Mantén esta situación bajo control.";
+      table_fuera_top.style.display = "none";
+      btn_fuera_ver_todos.style.display = "none";
+      tbody_fuera_modal.innerHTML = "";
+    } else {
+      // Ordenar por más vencidos primero
+      const ordenados = [...fueraLista].sort((a,b) => {
+        const da = parseDate(a.fecha_proxima_calibracion) || parseDate(a.proxima_calibracion);
+        const db = parseDate(b.fecha_proxima_calibracion) || parseDate(b.proxima_calibracion);
+        return da - db; // más antiguo (más vencido) primero
+      });
+
+      const MAX_TOP = 3;
+      const top = ordenados.slice(0, MAX_TOP);
+
+      meta_fuera.textContent = `${fueraLista.length} equipos vencidos. Mostrando los ${top.length} más críticos (más días de retraso).`;
+      table_fuera_top.style.display = "table";
+      btn_fuera_ver_todos.style.display = "inline-flex";
+
+      tbody_fuera_top.innerHTML = top.map(inst => {
+        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        const dias = dProx ? daysBetween(hoy, dProx) : 0; // días vencidos (>0)
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${dias}</td>
+            <td>${severityChip(dias,"vencido")}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Modal completo
+      tbody_fuera_modal.innerHTML = ordenados.map(inst => {
+        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        const dias = dProx ? daysBetween(hoy, dProx) : 0;
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${formatDate(dProx)}</td>
+            <td>${dias}</td>
+            <td>
+              <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || "")}">
+                Ver ficha
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // ---- PRÓXIMOS: TOP + MODAL ----
+    badge_prox_count.textContent = proxLista.length;
+    if (proxLista.length === 0) {
+      meta_prox.textContent = "No hay instrumentos cuya calibración venza en los próximos 30 días.";
+      table_prox_top.style.display = "none";
+      btn_prox_ver_todos.style.display = "none";
+      tbody_prox_modal.innerHTML = "";
+    } else {
+      const ordenadosProx = [...proxLista].sort((a,b) => {
+        const da = parseDate(a.fecha_proxima_calibracion) || parseDate(a.proxima_calibracion);
+        const db = parseDate(b.fecha_proxima_calibracion) || parseDate(b.proxima_calibracion);
+        return da - db; // más cercano primero
+      });
+
+      const MAX_TOP = 3;
+      const topProx = ordenadosProx.slice(0, MAX_TOP);
+
+      meta_prox.textContent = `${proxLista.length} equipos con calibración próxima. Mostrando los ${topProx.length} más urgentes.`;
+      table_prox_top.style.display = "table";
+      btn_prox_ver_todos.style.display = "inline-flex";
+
+      tbody_prox_top.innerHTML = topProx.map(inst => {
+        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        // días que faltan = prox - hoy (>0)
+        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0;
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${dias}</td>
+            <td>${severityChip(dias,"futuro")}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Modal completo
+      tbody_prox_modal.innerHTML = ordenadosProx.map(inst => {
+        const dProx = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+        const dias = dProx ? daysBetween(dProx, hoy) * -1 : 0;
+        return `
+          <tr>
+            <td>${inst.codigo || ""}</td>
+            <td>${inst.ubicacion_actual || ""}</td>
+            <td>${formatDate(dProx)}</td>
+            <td>${dias}</td>
+            <td>
+              <a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(inst.codigo || "")}">
+                Ver ficha
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+  }
+
+  // ====== LÓGICA ÚLTIMOS MOVIMIENTOS ======
+
+  function estadoCalibracionFromInstrumento(inst){
+    const hoy = new Date();
+    const prox = parseDate(inst?.fecha_proxima_calibracion) || parseDate(inst?.proxima_calibracion);
+    if (!prox) return {estado:"SIN FECHA", clase:"calib-warn"};
+
+    if (prox < hoy) return {estado:"FUERA", clase:"calib-bad"};
+
+    const mas30 = new Date(hoy.getTime() + 30*86400000);
+    if (prox <= mas30) return {estado:"PRÓXIMA", clase:"calib-warn"};
+
+    return {estado:"OK", clase:"calib-ok"};
+  }
+
+  function aplicarFiltrosMovimientos(){
+    const q = (movSearch.value || "").toLowerCase();
+    const tipo = movTipoSelect.value;
+
+    return cacheMovimientos.filter(mov => {
+      if (tipo && mov.tipo_movimiento !== tipo) return false;
+
+      if (q){
+        const hay =
+          (mov.codigo_instrumento || "").toLowerCase().includes(q) ||
+          (mov.destino || "").toLowerCase().includes(q) ||
+          (mov.responsable || "").toLowerCase().includes(q) ||
+          (mov.operario1 || "").toLowerCase().includes(q) ||
+          (mov.operario2 || "").toLowerCase().includes(q);
+
+        if (!hay) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderMovimientos(){
+    const filtrados = aplicarFiltrosMovimientos();
+    const total = filtrados.length;
+
+    if (total === 0){
+      tbodyMov.innerHTML = `<tr><td colspan="9">No hay movimientos que coincidan con el filtro.</td></tr>`;
+      movPageInfo.textContent = "0 de 0";
+      movPrevBtn.disabled = true;
+      movNextBtn.disabled = true;
+      return;
+    }
+
+    const totalPaginas = Math.max(1, Math.ceil(total / MOV_POR_PAG));
+    if (movPaginaActual > totalPaginas) movPaginaActual = totalPaginas;
+    if (movPaginaActual < 1) movPaginaActual = 1;
+
+    const inicio = (movPaginaActual - 1) * MOV_POR_PAG;
+    const fin    = inicio + MOV_POR_PAG;
+    const pageItems = filtrados.slice(inicio, fin);
+
+    tbodyMov.innerHTML = pageItems.map(mov => {
+
+      const fecha = mov.fecha ? new Date(mov.fecha) : null;
+      const fechaTxt = fecha
+        ? fecha.toLocaleString("es-ES", { dateStyle:"short", timeStyle:"short" })
+        : "—";
+
+      let icon = "✚";
+      let claseTipo = "mov-row-ok";
+
+      if (mov.tipo_movimiento === "Entrada"){ icon = "⬅"; claseTipo = "mov-row-in"; }
+      else if (mov.tipo_movimiento === "Salida"){ icon = "➡"; claseTipo = "mov-row-out"; }
+      else if (mov.tipo_movimiento === "Préstamo externo"){ icon = "🔁"; }
+      else if (mov.tipo_movimiento === "Revisión / reparación"){ icon = "🛠"; }
+      else if (mov.tipo_movimiento === "Envío a calibración externa"){ icon = "📦"; }
+
+      const estadoCal = mov.estadoCal || {estado:"", clase:""};
+      const chip = estadoCal.estado
+        ? `<span class="calib-chip ${estadoCal.clase}">${estadoCal.estado}</span>`
+        : "";
+
+      // Operarios SOLO visibles si es salida
+      let op1 = "";
+      let op2 = "";
+
+      if (mov.tipo_movimiento === "Salida") {
+        if (mov.operario1)
+          op1 = `<span class="op-chip op1">${mov.operario1}</span>`;
+        if (mov.operario2)
+          op2 = `<span class="op-chip op2">${mov.operario2}</span>`;
+      }
+
+      return `
+        <tr>
+          <td>${fechaTxt}</td>
+          <td>${mov.codigo_instrumento || ""}</td>
+          <td class="${claseTipo}">${icon} ${mov.tipo_movimiento}</td>
+          <td>${op1 || "-"}</td>
+          <td>${op2 || "-"}</td>
+          <td>${mov.destino || "-"}</td>
+          <td>${mov.responsable || "-"}</td>
+          <td>${chip}</td>
+          <td>
+            <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
+              Ver ficha
+            </a>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    movPageInfo.textContent = `Página ${movPaginaActual} de ${totalPaginas} · ${total} movimientos`;
+    movPrevBtn.disabled = movPaginaActual <= 1;
+    movNextBtn.disabled = movPaginaActual >= totalPaginas;
+  }
+
+  async function cargarMovimientos(){
+    if (!supabase){
+      console.error("Supabase no disponible en home.html para movimientos");
+      return;
+    }
+
+    // Últimos 120 movimientos, ahora con operario1 y operario2
+    const { data: movs, error: errMov } = await supabase
+      .from("movimientos")
+      .select("fecha, codigo_instrumento, tipo_movimiento, destino, responsable, operario1, operario2")
+      .order("fecha", { ascending:false })
+      .limit(120);
+
+    if (errMov){
+      console.error("Error cargando movimientos:", errMov);
+      tbodyMov.innerHTML = `<tr><td colspan="9">Error al cargar movimientos.</td></tr>`;
+      return;
+    }
+
+    if (!movs || movs.length === 0){
+      tbodyMov.innerHTML = `<tr><td colspan="9">Todavía no hay movimientos registrados.</td></tr>`;
+      movPageInfo.textContent = "0 de 0";
+      movPrevBtn.disabled = true;
+      movNextBtn.disabled = true;
+      return;
+    }
+
+    // Traer estado de calibración de los instrumentos implicados
+    const codigos = Array.from(new Set(movs.map(m => m.codigo_instrumento).filter(Boolean)));
+
+    let mapaInst = {};
+    if (codigos.length > 0){
+      const { data: insts, error: errInst } = await supabase
+        .from("instrumentos")
+        .select("codigo, fecha_proxima_calibracion, proxima_calibracion")
+        .in("codigo", codigos);
+
+      if (!errInst && insts){
+        insts.forEach(inst => {
+          mapaInst[inst.codigo] = inst;
+        });
+      }
+    }
+
+    cacheMovimientos = movs.map(m => {
+      const inst = mapaInst[m.codigo_instrumento];
+      const estadoCal = inst ? estadoCalibracionFromInstrumento(inst) : {estado:"", clase:""};
+      return {
+        ...m,
+        estadoCal
+      };
+    });
+
+    movPaginaActual = 1;
+    renderMovimientos();
+  }
+
+  // Eventos diálogos
+  btn_fuera_ver_todos.addEventListener("click", () => dlgFuera.showModal());
+  btn_prox_ver_todos.addEventListener("click", () => dlgProx.showModal());
+  dlgFueraCerrar.addEventListener("click", () => dlgFuera.close());
+  dlgProxCerrar.addEventListener("click", () => dlgProx.close());
+
+  // Eventos filtros movimientos
+  movSearch.addEventListener("input", () => {
+    movPaginaActual = 1;
+    renderMovimientos();
+  });
+
+  movTipoSelect.addEventListener("change", () => {
+    movPaginaActual = 1;
+    renderMovimientos();
+  });
+
+  movPrevBtn.addEventListener("click", () => {
+    movPaginaActual--;
+    renderMovimientos();
+  });
+
+  movNextBtn.addEventListener("click", () => {
+    movPaginaActual++;
+    renderMovimientos();
+  });
+
+  // Cargar al inicio + refresco periódico
+  cargarDashboard();
+  cargarMovimientos();
+
+  setInterval(() => {
+    cargarDashboard();
+    cargarMovimientos();
+  }, 30000);
+</script>
+
+<!-- SCRIPT CHAT: SOLO BADGE + BOTÓN QUE ABRE chat.html -->
+<script type="module">
+  const supabase = window.supabase;
+
+  // Usuario logado
+  let operario = null;
+  try {
+    operario = JSON.parse(localStorage.getItem("operario"));
+  } catch (e) {
+    operario = null;
+  }
+  const USER = operario?.username || "invitado";
+
+  const chatFab      = document.getElementById("chat-fab");
+  const chatFabBadge = document.getElementById("chat-fab-badge");
+
+  // 1) Al hacer click -> abrir chat.html
+  if (chatFab) {
+    chatFab.addEventListener("click", () => {
+      window.location.href = "chat.html";
+    });
+  }
+
+  // 2) Contar mensajes IMPORTANTES pendientes para este usuario
+  async function actualizarBadgeImportantes() {
+    if (!supabase || !USER || USER === "invitado") return;
+
+    const { data, error } = await supabase
+      .from("chat_mensajes")
+      .select("id, importante, destinatarios, leido_por")
+      .eq("importante", true)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (error) {
+      console.error("Error cargando mensajes importantes:", error);
+      return;
+    }
+
+    const lista = (data || []).filter(msg => {
+      const dest = msg.destinatarios;
+      const leidos = Array.isArray(msg.leido_por) ? msg.leido_por : [];
+
+      // ¿Es para mí?
+      let esParaMi = false;
+
+      // sin destinatarios => mensaje general (todos)
+      if (!dest || dest.length === 0) {
+        esParaMi = true;
+      } else if (Array.isArray(dest)) {
+        esParaMi = dest.includes(USER);
+      }
+
+      // ¿Ya marcado como hecho?
+      const yaHecho = leidos.includes(USER);
+
+      return esParaMi && !yaHecho;
+    });
+
+    const pendientes = lista.length;
+
+    if (!chatFabBadge) return;
+    if (pendientes > 0) {
+      chatFabBadge.textContent = pendientes;
+      chatFabBadge.style.display = "flex";
+      chatFab.classList.add("chat-has-important");
+    } else {
+      chatFabBadge.style.display = "none";
+      chatFab.classList.remove("chat-has-important");
+    }
+  }
+
+  // Llamada inicial + refresco cada 20 s
+  actualizarBadgeImportantes();
+  setInterval(actualizarBadgeImportantes, 20000);
+</script>
+
+<!-- === GLOBO 3D SUPABASE ALERTAS IMPORTANTES === -->
+<script type="module">
+  const supabase = window.supabase;
+
+  const alertGlobe = document.getElementById("alert-globe");
+  const alertGlobeCount = document.getElementById("alert-globe-count");
+
+  // Lógica para contar mensajes importantes NO leídos
+  async function actualizarGloboAlertas(){
+    const userData = JSON.parse(localStorage.getItem("operario"));
+    const USER = userData?.username || null;
+    if(!USER) return;
+
+    const { data, error } = await supabase
+      .from("chat_mensajes")
+      .select("*");
+
+    if(error){
+      console.error("Error cargando mensajes para globo:", error);
+      return;
+    }
+
+    let pendientes = 0;
+
+    data.forEach(msg=>{
+      if(!msg.importante) return;
+
+      const destinatarios = msg.destinatarios || [];
+      const leidos = msg.leido_por || [];
+
+      const esGeneral = destinatarios.length === 0;
+      const esParaMi = destinatarios.includes(USER);
+
+      if((esGeneral || esParaMi) && !leidos.includes(USER)){
+        pendientes++;
+      }
+    });
+
+    if(pendientes > 0){
+      alertGlobeCount.textContent = pendientes;
+      alertGlobe.classList.add("show");
+    }
+    else{
+      alertGlobe.classList.remove("show");
+    }
+  }
+
+  // Click → al chat completo
+  alertGlobe.addEventListener("click", ()=>{
+    window.location.href = "chat.html";
+  });
+
+  // Realtime Supabase
+  supabase
+    .channel("alertas-importantes")
+    .on("postgres_changes",
+        { event:"*", schema:"public", table:"chat_mensajes"},
+        payload => actualizarGloboAlertas()
+    )
+    .subscribe();
+
+  // Primera carga
+  actualizarGloboAlertas();
+
+  // Refresco cada 30s
+  setInterval(actualizarGloboAlertas, 30000);
+</script>
+
+  
+</body>
+</html

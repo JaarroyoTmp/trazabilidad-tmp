@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP MT16 · Inspector patrones reales</title>
+<style>
+:root{--bg:#07111f;--panel:#10243a;--panel2:#071426;--line:#24425f;--txt:#e7f2fb;--muted:#91a7bd;--blue:#3d9cff;--green:#2bd47c;--red:#ff6b6b;--yellow:#ffd15c}
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:18px}
+.version{background:#06101d;border:1px solid var(--blue);border-radius:12px;padding:12px;margin-bottom:14px;color:var(--yellow);font-weight:bold;line-height:1.45}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+input,select{background:var(--panel2);color:white;border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;font-weight:bold}
+button{background:var(--blue);color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer;margin:4px 4px 4px 0}
+button.secondary{background:#183b60}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+th,td{border-bottom:1px solid var(--line);padding:7px;text-align:left;vertical-align:top}
+th{background:#183b60;position:sticky;top:0;z-index:2}
+pre{background:#050b14;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap;max-height:520px}
+.ok{color:var(--green);font-weight:bold}.bad{color:var(--red);font-weight:bold}.warn{color:var(--yellow);font-weight:bold}.muted{color:var(--muted)}
+.box-ok{border:1px solid var(--green);background:#082719;border-radius:12px;padding:10px;margin-top:8px}.box-warn{border:1px solid var(--yellow);background:#2a2107;border-radius:12px;padding:10px;margin-top:8px}.box-bad{border:1px solid var(--red);background:#2a0b12;border-radius:12px;padding:10px;margin-top:8px}
+.table-wrap{overflow:auto;max-height:620px;border:1px solid var(--line);border-radius:12px}
+.pill{display:inline-block;padding:3px 7px;border-radius:999px;background:#071426;border:1px solid var(--line);margin:2px}
+@media(max-width:1000px){.grid4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="version">
+HTML REVISION: TMP_MT16_PATTERN_REAL_INSPECTOR_HTML_V22_20260625<br>
+OBJETIVO: ver columnas reales de v_patron_valores_activos y diagnosticar por que MT16 encuentra banco pero no rodillos/patron rosca
+</div>
+
+<h1>TMP MT16 · Inspector patrones reales Supabase</h1>
+<p class="muted">Esta pantalla no calibra. Solo lee la misma vista que MT16 para ver exactamente qué datos devuelve Supabase.</p>
+
+<div class="card">
+  <h3>1 · Lectura real de Supabase</h3>
+  <div class="grid4">
+    <div><label>Vista / tabla</label><input id="viewName" value="v_patron_valores_activos"></div>
+    <div><label>Límite</label><input id="limitRows" value="2000"></div>
+    <div><label>Buscar texto</label><input id="searchText" placeholder="rosca, rodillo, trimos, M12..."></div>
+    <div style="align-self:end"><button id="btnLoad">Cargar datos reales</button></div>
+  </div>
+  <div id="status" class="box-warn">Pendiente de cargar.</div>
+</div>
+
+<div id="summaryCard" class="card" style="display:none">
+  <h3>2 · Resumen automático</h3>
+  <div id="summary"></div>
+</div>
+
+<div id="columnsCard" class="card" style="display:none">
+  <h3>3 · Columnas detectadas</h3>
+  <div id="columns"></div>
+</div>
+
+<div id="tableCard" class="card" style="display:none">
+  <h3>4 · Registros reales</h3>
+  <p class="muted">Aquí vemos todo lo que devuelve Supabase, sin interpretar. Si rodillos o patrones no salen aquí, el problema está en la vista/datos. Si salen con otro nombre, ajustamos el filtro.</p>
+  <div class="table-wrap">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="diagnosisCard" class="card" style="display:none">
+  <h3>5 · Diagnóstico MT16</h3>
+  <div id="diagnosis"></div>
+</div>
+
+<div id="jsonCard" class="card" style="display:none">
+  <h3>JSON técnico</h3>
+  <button id="btnCopyJson" class="secondary">Copiar JSON</button>
+  <pre id="json">{}</pre>
+</div>
+
+<script type="module">
+import { ensureSupabase as conectarSupabase } from "../../../supabase_client.js";
+
+const HTML_REVISION = "TMP_MT16_PATTERN_REAL_INSPECTOR_HTML_V22_20260625";
+
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+const normalize = v => String(v ?? "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/,/g,".").replace(/\s+/g," ").trim();
+
+let sb = null;
+let rows = [];
+let filtered = [];
+let lastPayload = {};
+
+function box(sel,type,html){
+  const b=$(sel);
+  b.className=type==="ok"?"box-ok":type==="bad"?"box-bad":"box-warn";
+  b.innerHTML=html;
+}
+
+function getText(row){
+  return normalize(Object.values(row || {}).filter(v => v !== null && v !== undefined).join(" "));
+}
+
+function isExpired(value){
+  if(!value) return true;
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return true;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  d.setHours(0,0,0,0);
+  return d < today;
+}
+
+function getExpiry(row){
+  return row.fecha_vencimiento || row.proxima_calibracion || row.fecha_proxima_calibracion || row.caducidad || row.valid_until || "";
+}
+
+function isActive(row){
+  return row.activo === true || row.activo === "true" || row.activo === 1 || row.activo === "1" || row.activo === null || row.activo === undefined;
+}
+
+function isProbablyValid(row){
+  const e = normalize(row.estado || "");
+  const estadoOk = !e || e.includes("VIGENTE") || e.includes("OK") || e.includes("APTO") || e.includes("VALID");
+  return isActive(row) && estadoOk && !isExpired(getExpiry(row));
+}
+
+function detectType(row){
+  const t = getText(row);
+  const code = String(row.codigo || row.codigo_equipo || row.codigo_patron || "").trim();
+
+  if(code === "1288" || t.includes("TRIMOS") || t.includes("BANCO") || t.includes("TELMA")) return "BANCO_TRIMOS";
+  if(t.includes("RODIL") || t.includes("HILO") || t.includes("WIRE") || t.includes("TRES HILOS") || t.includes("JUEGO DE HILOS")) return "RODILLOS_HILOS";
+  if(t.includes("PATRON ROSCA") || t.includes("PATRON DE ROSCA") || t.includes("PATRON ROSCADO") || t.includes("MASTER ROSCA") || t.includes("ANILLO ROSCA") || t.includes("TAMPON ROSCA") || t.includes("ROSCA")) return "PATRON_ROSCA";
+  if(t.includes("TAMPON") || t.includes("PASA") || t.includes("NO PASA")) return "TAMPON_OTRO";
+  return "SIN_CLASIFICAR";
+}
+
+function allColumns(data){
+  const set = new Set();
+  data.forEach(r => Object.keys(r || {}).forEach(k => set.add(k)));
+  return Array.from(set);
+}
+
+function usefulColumns(cols){
+  const preferred = [
+    "codigo","codigo_equipo","codigo_patron","descripcion","descripcion_equipo","nombre",
+    "familia","tipo","tipo_patron","subtipo","estado","activo",
+    "numero_certificado","certificado","certificado_numero",
+    "fecha_calibracion","fecha_vencimiento","proxima_calibracion","fecha_proxima_calibracion",
+    "nominal","nominal_num","valor_medio","diametro","diametro_mm",
+    "correccion","correccion_num","error","error_num","desviacion","desviacion_num",
+    "incertidumbre","incertidumbre_num","incertidumbre_us","incertidumbre_us_num","u","u_expandida","k",
+    "observaciones","source_rule"
+  ];
+  const found = preferred.filter(c => cols.includes(c));
+  const rest = cols.filter(c => !found.includes(c));
+  return found.concat(rest);
+}
+
+function renderSummary(data){
+  const types = {};
+  const validTypes = {};
+  data.forEach(r => {
+    const type = detectType(r);
+    types[type] = (types[type] || 0) + 1;
+    if(isProbablyValid(r)) validTypes[type] = (validTypes[type] || 0) + 1;
+  });
+
+  const rowsHtml = Object.keys(types).sort().map(k => `
+    <tr><th>${esc(k)}</th><td>${types[k]}</td><td>${validTypes[k] || 0}</td></tr>
+  `).join("");
+
+  $("#summary").innerHTML = `
+    <table>
+      <tbody>
+        <tr><th>Total registros leídos</th><td>${data.length}</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>Tipo detectado</th><th>Total</th><th>Probablemente vigente</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+  `;
+  $("#summaryCard").style.display = "";
+}
+
+function renderColumns(cols){
+  $("#columns").innerHTML = cols.map(c => `<span class="pill">${esc(c)}</span>`).join("");
+  $("#columnsCard").style.display = "";
+}
+
+function renderTable(data){
+  const cols = usefulColumns(allColumns(data));
+  $("#thead").innerHTML = `<tr>
+    <th>#</th>
+    <th>tipo_detectado</th>
+    <th>vigente_detectado</th>
+    ${cols.map(c => `<th>${esc(c)}</th>`).join("")}
+  </tr>`;
+
+  $("#tbody").innerHTML = data.map((r,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td class="${detectType(r)==="SIN_CLASIFICAR"?"warn":"ok"}">${esc(detectType(r))}</td>
+      <td class="${isProbablyValid(r)?"ok":"warn"}">${isProbablyValid(r) ? "SI" : "NO / revisar"}</td>
+      ${cols.map(c => `<td>${esc(r[c])}</td>`).join("")}
+    </tr>
+  `).join("");
+
+  $("#tableCard").style.display = "";
+}
+
+function renderDiagnosis(data){
+  const banco = data.filter(r => detectType(r) === "BANCO_TRIMOS");
+  const rodillos = data.filter(r => detectType(r) === "RODILLOS_HILOS");
+  const rosca = data.filter(r => detectType(r) === "PATRON_ROSCA");
+  const unclassified = data.filter(r => detectType(r) === "SIN_CLASIFICAR");
+
+  const lines = [];
+
+  lines.push(`<tr><th>Banco Trimos detectado</th><td class="${banco.length?"ok":"bad"}">${banco.length}</td></tr>`);
+  lines.push(`<tr><th>Rodillos / hilos detectados</th><td class="${rodillos.length?"ok":"bad"}">${rodillos.length}</td></tr>`);
+  lines.push(`<tr><th>Patrón rosca detectado</th><td class="${rosca.length?"ok":"bad"}">${rosca.length}</td></tr>`);
+  lines.push(`<tr><th>Sin clasificar</th><td class="${unclassified.length?"warn":"ok"}">${unclassified.length}</td></tr>`);
+
+  const advice = [];
+  if(!rodillos.length) advice.push("No se detectan rodillos/hilos por texto. Revisar si en Supabase se llaman de otra forma o si no están en v_patron_valores_activos.");
+  if(!rosca.length) advice.push("No se detectan patrones de rosca. Revisar si están cargados como tampones roscados, anillos o certificados con otra descripción.");
+  if(rows.length && !filtered.length) advice.push("El filtro de búsqueda no devuelve filas. Limpia el campo Buscar texto para ver todo.");
+
+  $("#diagnosis").innerHTML = `
+    <table><tbody>${lines.join("")}</tbody></table>
+    <div class="${advice.length ? "box-warn" : "box-ok"}">${advice.length ? advice.map(esc).join("<br>") : "Datos suficientes para ajustar el selector MT16."}</div>
+  `;
+
+  $("#diagnosisCard").style.display = "";
+}
+
+async function load(){
+  $("#summaryCard").style.display = "none";
+  $("#columnsCard").style.display = "none";
+  $("#tableCard").style.display = "none";
+  $("#diagnosisCard").style.display = "none";
+  $("#jsonCard").style.display = "none";
+
+  const view = $("#viewName").value.trim() || "v_patron_valores_activos";
+  const limit = Number($("#limitRows").value || 2000) || 2000;
+  const search = normalize($("#searchText").value);
+
+  box("#status","warn","Conectando con Supabase...");
+
+  sb = await conectarSupabase();
+  if(!sb || typeof sb.from !== "function"){
+    box("#status","bad","No se pudo conectar con Supabase usando core/supabase_client.js.");
+    return;
+  }
+
+  box("#status","warn",`Leyendo ${esc(view)}...`);
+
+  const { data, error } = await sb.from(view).select("*").limit(limit);
+
+  if(error){
+    box("#status","bad",`Error leyendo ${esc(view)}: ${esc(error.message || String(error))}`);
+    return;
+  }
+
+  rows = Array.isArray(data) ? data : [];
+  filtered = search ? rows.filter(r => getText(r).includes(search)) : rows.slice();
+
+  box("#status","ok",`Conectado. Registros leídos: ${rows.length}. Registros mostrados: ${filtered.length}.`);
+
+  const cols = allColumns(rows);
+  renderSummary(filtered);
+  renderColumns(cols);
+  renderTable(filtered);
+  renderDiagnosis(filtered);
+
+  lastPayload = {
+    html: HTML_REVISION,
+    view,
+    limit,
+    search,
+    total_rows: rows.length,
+    shown_rows: filtered.length,
+    columns: cols,
+    summary: {
+      banco_trimos: filtered.filter(r => detectType(r)==="BANCO_TRIMOS").length,
+      rodillos_hilos: filtered.filter(r => detectType(r)==="RODILLOS_HILOS").length,
+      patron_rosca: filtered.filter(r => detectType(r)==="PATRON_ROSCA").length,
+      sin_clasificar: filtered.filter(r => detectType(r)==="SIN_CLASIFICAR").length
+    },
+    rows: filtered
+  };
+
+  $("#json").textContent = JSON.stringify(lastPayload, null, 2);
+  $("#jsonCard").style.display = "";
+}
+
+$("#btnLoad").addEventListener("click", load);
+$("#searchText").addEventListener("keydown", e => {
+  if(e.key === "Enter") load();
+});
+$("#btnCopyJson").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(lastPayload, null, 2));
+    box("#status","ok","JSON copiado al portapapeles.");
+  } catch(e) {
+    box("#status","warn","No se pudo copiar automáticamente. Copia el JSON manualmente.");
+  }
+});
+</script>
+</body>
+</html>

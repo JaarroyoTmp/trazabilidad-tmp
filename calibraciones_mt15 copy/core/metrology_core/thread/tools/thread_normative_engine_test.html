@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP MT16 · Test motor normativo</title>
+<style>
+:root{--bg:#07111f;--panel:#10243a;--panel2:#071426;--line:#24425f;--txt:#e7f2fb;--muted:#91a7bd;--blue:#3d9cff;--green:#2bd47c;--red:#ff6b6b;--yellow:#ffd15c}
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:18px}.version{background:#06101d;border:1px solid var(--blue);border-radius:12px;padding:12px;margin-bottom:14px;color:var(--yellow);font-weight:bold}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}input{background:var(--panel2);color:white;border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;font-weight:bold}button{background:var(--blue);color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer;margin-top:10px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;font-size:13px}th{background:#183b60;width:280px}.ok{color:var(--green);font-weight:bold}.warn{color:var(--yellow);font-weight:bold}.bad{color:var(--red);font-weight:bold}pre{background:#050b14;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap;max-height:600px}
+</style>
+</head>
+<body>
+<div class="version">
+HTML REVISION: TMP_MT16_NORMATIVE_ENGINE_TEST_HTML_V1_20260629<br>
+ENGINE: TMP_THREAD_NORMATIVE_ENGINE_V1
+</div>
+
+<h1>TMP MT16 · Test motor normativo de roscas</h1>
+
+<div class="card">
+  <h3>Rosca</h3>
+  <input id="designation" value="M12 x 1.25 - 6H">
+  <button id="btn">Resolver norma</button>
+</div>
+
+<div class="card">
+  <h3>Ficha normativa</h3>
+  <table><tbody id="rows"></tbody></table>
+</div>
+
+<div class="card">
+  <h3>JSON técnico</h3>
+  <pre id="json">{}</pre>
+</div>
+
+<script type="module">
+import { buildThreadNormativeSheet, TMP_THREAD_NORMATIVE_ENGINE_VERSION } from "../engines/thread_normative_engine.js";
+
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+
+function render() {
+  const sheet = buildThreadNormativeSheet($("#designation").value);
+
+  const s = sheet.summary || {};
+  const rows = [
+    ["Estado", sheet.status, sheet.can_evaluate ? "ok" : "warn"],
+    ["Designación", s.designation, ""],
+    ["Nominal", `${s.nominal_mm} mm`, ""],
+    ["Paso", `${s.pitch_mm} mm`, ""],
+    ["Clase", s.class, ""],
+    ["Ángulo", `${s.angle_deg}°`, ""],
+    ["D2 básico ISO724", `${s.d2_basic_mm} mm`, ""],
+    ["D1 básico ISO724", `${s.d1_basic_mm} mm`, ""],
+    ["ISO965", sheet.iso965?.status || sheet.iso965?.error, sheet.iso965?.ok ? "ok" : "warn"],
+    ["ISO1502", sheet.iso1502?.status || sheet.iso1502?.error, sheet.iso1502?.ok ? "ok" : "warn"],
+    ["Rodillo ideal", `${sheet.wire?.ideal_wire_mm} mm`, ""],
+    ["Rodillo seleccionado", `Ø ${s.wire_mm} mm`, "ok"],
+    ["Corrección Trimos", `${s.correction_mm} mm`, ""],
+    ["PASA objetivo Trimos", `${s.pass_target_trimos_mm} mm`, "ok"],
+    ["NO PASA objetivo Trimos", `${s.no_pass_target_trimos_mm} mm`, "ok"],
+    ["Avisos", (sheet.warnings || []).join("\\n"), "warn"]
+  ];
+
+  $("#rows").innerHTML = rows.map(r => `<tr><th>${esc(r[0])}</th><td class="${r[2]}">${esc(r[1])}</td></tr>`).join("");
+  $("#json").textContent = JSON.stringify({ engine: TMP_THREAD_NORMATIVE_ENGINE_VERSION, sheet }, null, 2);
+}
+
+$("#btn").addEventListener("click", render);
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+MT16 V41 - paquete final de correccion tecnica
+
+Copiar el contenido de este ZIP dentro de:
+calibraciones_mt15 copy/core/metrology_core/thread/
+
+Debe quedar asi:
+thread_mt16_workflow_test.html
+core/mt16_master_engine.js
+core/iso965_engine.js
+core/iso1502_engine.js
+data/thread_iso965_database.js
+data/thread_iso1502_tables.js
+
+Despues recargar navegador con Ctrl + F5.
+
+Casos comprobados en motor:
+M12 x 1.25 - 6H -> objetivos Trimos OK
+M14 x 1.5 - 6H -> objetivos Trimos OK
+M16 x 2 - 6H -> objetivos Trimos OK
+
+El Modo Auditor queda integrado para ver parser, ISO724, ISO965, ISO1502, Trimos y trazabilidad.

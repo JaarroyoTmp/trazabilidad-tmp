@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP ISO286 Test Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  :root {
+    --bg:#07111f;
+    --card:#0d1b2e;
+    --card2:#10243d;
+    --txt:#eaf2ff;
+    --muted:#8ea4c4;
+    --line:#263a57;
+    --blue:#3b82f6;
+    --ok:#22c55e;
+    --bad:#ef4444;
+    --warn:#f59e0b;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--txt);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  header {
+    padding: 20px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(135deg, #0d1b2e, #10243d);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  .sub {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  main {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  input {
+    background: #06101d;
+    border: 1px solid var(--line);
+    color: var(--txt);
+    border-radius: 10px;
+    padding: 11px 12px;
+    min-width: 260px;
+    font-size: 15px;
+  }
+
+  button {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-weight: 800;
+    cursor: pointer;
+    background: var(--blue);
+    color: white;
+  }
+
+  button.secondary {
+    background: #475569;
+  }
+
+  button.warn {
+    background: var(--warn);
+    color: #111827;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .ok {
+    background: rgba(34,197,94,.15);
+    color: #86efac;
+    border: 1px solid rgba(34,197,94,.45);
+  }
+
+  .bad {
+    background: rgba(239,68,68,.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,.45);
+  }
+
+  .warn-pill {
+    background: rgba(245,158,11,.15);
+    color: #fcd34d;
+    border: 1px solid rgba(245,158,11,.45);
+  }
+
+  .table-box {
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1100px;
+  }
+
+  th {
+    background: #12325a;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+  }
+
+  td {
+    border-top: 1px solid var(--line);
+    padding: 9px 10px;
+    vertical-align: top;
+    font-size: 13px;
+  }
+
+  tr:nth-child(even) td {
+    background: rgba(255,255,255,.02);
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  pre {
+    background: #06101d;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    overflow: auto;
+    color: #dbeafe;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  @media (min-width: 1000px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+</head>
+
+<body>
+<header>
+  <h1>TMP ISO286 Test Panel</h1>
+  <div class="sub">
+    Panel interno para probar designaciones ISO286 sin crear equipos reales en Supabase.
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Prueba rápida</h2>
+
+    <div class="row">
+      <input id="designationInput" value="Ø8.5 H8" placeholder="Ejemplo: Ø20 k6">
+      <button id="btnQuick">Probar designación</button>
+      <button id="btnDefault" class="secondary">Ejecutar batería estándar</button>
+      <button id="btnClear" class="warn">Limpiar</button>
+    </div>
+
+    <p class="muted">
+      Ejemplos: Ø8.5 H8 · Ø8 h6 · Ø8 JS7 · Ø20 k6 · Ø25 m6 · Ø30 n6 · Ø40 p6 · Ø50 r6 · Ø60 s6
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Resultados</h2>
+
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Estado</th>
+            <th>Designación</th>
+            <th>Origen</th>
+            <th>Versión</th>
+            <th>Nominal</th>
+            <th>Tolerancia</th>
+            <th>Tipo</th>
+            <th>PASA</th>
+            <th>NO PASA</th>
+            <th>LI</th>
+            <th>LS</th>
+            <th>Dev. inf µm</th>
+            <th>Dev. sup µm</th>
+            <th>Fórmula / criterio</th>
+            <th>Mensaje</th>
+          </tr>
+        </thead>
+        <tbody id="resultRows">
+          <tr>
+            <td colspan="15" class="muted">Sin resultados todavía.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>JSON último resultado</h2>
+      <pre id="jsonBox">{}</pre>
+    </div>
+
+    <div class="card">
+      <h2>Notas</h2>
+      <p class="muted">
+        Si el origen aparece como <strong>ISO286_DATABASE</strong>, la clase se ha leído desde
+        <code>iso286_database.js</code>.
+      </p>
+      <p class="muted">
+        Si aparece como <strong>FORMULA_FALLBACK_V3</strong>, todavía no existe esa clase cargada
+        en la base y el motor usa la fórmula de respaldo.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import {
+    runISO286SelfTest,
+    runISO286QuickTest
+  } from "./core/metrology_core/iso286_test_runner.js";
+
+  const resultRows = document.getElementById("resultRows");
+  const jsonBox = document.getElementById("jsonBox");
+  const designationInput = document.getElementById("designationInput");
+
+  function fmt(value, decimals = 6) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "-";
+    return Number(n.toFixed(decimals)).toString();
+  }
+
+  function statusPill(ok) {
+    return ok
+      ? '<span class="pill ok">OK</span>'
+      : '<span class="pill bad">ERROR</span>';
+  }
+
+  function renderRows(rows) {
+    if (!rows || !rows.length) {
+      resultRows.innerHTML = '<tr><td colspan="15" class="muted">Sin resultados.</td></tr>';
+      return;
+    }
+
+    resultRows.innerHTML = rows.map((r) => `
+      <tr>
+        <td>${statusPill(r.ok)}</td>
+        <td><strong>${r.designacion}</strong></td>
+        <td><span class="pill ${r.source === "ISO286_DATABASE" ? "ok" : "warn-pill"}">${r.source}</span></td>
+        <td>${r.engine_version || "-"}</td>
+        <td class="num">${fmt(r.nominal, 6)}</td>
+        <td>${r.tolerancia || "-"}</td>
+        <td>${r.tipo || "-"}</td>
+        <td class="num">${fmt(r.pasa, 6)}</td>
+        <td class="num">${fmt(r.no_pasa, 6)}</td>
+        <td class="num">${fmt(r.li, 6)}</td>
+        <td class="num">${fmt(r.ls, 6)}</td>
+        <td class="num">${fmt(r.desviacion_inf_um, 3)}</td>
+        <td class="num">${fmt(r.desviacion_sup_um, 3)}</td>
+        <td>${r.formula || "-"}</td>
+        <td>${r.mensaje || "-"}</td>
+      </tr>
+    `).join("");
+  }
+
+  document.getElementById("btnQuick").addEventListener("click", () => {
+    const text = designationInput.value.trim() || "Ø8.5 H8";
+    const result = runISO286QuickTest(text);
+
+    renderRows([result.row]);
+    jsonBox.textContent = JSON.stringify(result.raw, null, 2);
+  });
+
+  document.getElementById("btnDefault").addEventListener("click", () => {
+    const result = runISO286SelfTest();
+
+    renderRows(result.rows);
+    jsonBox.textContent = JSON.stringify(result, null, 2);
+  });
+
+  document.getElementById("btnClear").addEventListener("click", () => {
+    resultRows.innerHTML = '<tr><td colspan="15" class="muted">Sin resultados todavía.</td></tr>';
+    jsonBox.textContent = "{}";
+  });
+</script>
+</body>
+</html>

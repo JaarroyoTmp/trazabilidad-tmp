@@ -1,0 +1,13 @@
+P2 - Patrones reales TMP
+
+1. Guarda este ZIP en trazabilidad-tmp/parches/.
+2. Copia la carpeta trazabilidad-tmp encima de TRAZABILIDAD-TMP-MAIN/.
+3. Abre Supabase > SQL Editor.
+4. Ejecuta el SQL:
+   trazabilidad-tmp/trazabilidad-tmp/calibraciones_mt15 copy/core/metrology_core/sql/P2_patron_componentes_metodos.sql
+5. Verifica que existen:
+   - patron_componentes
+   - patron_metodos
+   - v_patrones_metrologia
+
+No toca MT15, MT16 ni MT17.

@@ -1,0 +1,29 @@
+MT16 V74 - Procedimiento operador guiado
+
+Instalacion:
+1. Copiar el contenido del ZIP sobre la carpeta raiz: calibraciones_mt15 copy/
+2. Sustituir archivos existentes.
+3. Recargar navegador con Ctrl + F5.
+
+Archivos incluidos:
+- core/metrology_core/thread/thread_mt16_workflow_test.html
+- core/metrology_core/thread/thread_mt16_workflow.html
+- core/metrology_core/thread/core/mt16_master_engine.js
+- core/metrology_core/thread/core/thread_parser.js
+- core/metrology_core/thread/procedure_rules/*.js
+
+Cambios principales V74:
+- Nueva pantalla de Procedimiento y preparacion.
+- El operario ve metodo, normas, accesorios, trazabilidad, incertidumbre y regla de decision.
+- Checklist obligatorio antes de lecturas.
+- Auditor muestra procedimiento activo, estado y bloqueo/permiso de certificado.
+- No cambia el calculo metrologico de V73; solo expone el modelo experto al operario.
+
+Pruebas recomendadas:
+- 03-03
+- 01186311
+- 7/16-14 UNF - 2B
+- 5/16-18 UNC - 2B
+- 1/4-18 NPT
+- 1/4-20 BSW
+- R 1/2

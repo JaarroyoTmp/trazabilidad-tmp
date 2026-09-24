@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TMP P1.5 - Pie de Rey + MC-01 Patrones</title>
+  <style>
+    :root{--bg:#edf5ff;--card:#fff;--ink:#071b4a;--muted:#5f719c;--line:#c7d8f5;--blue:#4057f4;--navy:#102456;--ok:#0b7a2a;--okbg:#eaffef;--warn:#a86400;--warnbg:#fff5dc;--bad:#b42318;--badbg:#fff0ed}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+    .wrap{max-width:1380px;margin:22px auto;padding:0 18px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 42px rgba(14,38,86,.08);padding:22px;margin:0 0 18px}.hero h1{font-size:42px;margin:0 0 8px}.hero p{font-size:19px;color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.field{background:#f8fbff;border:1px solid var(--line);border-radius:14px;padding:14px}.label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#4e628f;font-weight:800}.value{font-size:18px;font-weight:900;margin-top:4px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.input{width:100%;padding:14px;border:1px solid var(--line);border-radius:13px;font-size:18px;font-weight:800}.btn{border:0;border-radius:13px;padding:14px 18px;font-weight:900;background:var(--blue);color:white;cursor:pointer}.btn.secondary{background:white;color:var(--ink);border:1px solid var(--line)}.chip{display:inline-flex;align-items:center;border-radius:999px;padding:8px 12px;font-weight:900;background:var(--okbg);border:1px solid #a9e9b6;color:var(--ok);margin:4px}.chip.warn{background:var(--warnbg);border-color:#ffd17b;color:var(--warn)}.chip.bad{background:var(--badbg);border-color:#ffb0aa;color:var(--bad)}.status{padding:12px 14px;border-radius:13px;margin-top:12px;border:1px solid #a9e9b6;background:var(--okbg);color:var(--ok);font-weight:900}.status.warn{border-color:#ffd17b;background:var(--warnbg);color:var(--warn)}.status.bad{border-color:#ffb0aa;background:var(--badbg);color:var(--bad)}
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px;overflow:hidden;border-radius:12px;border:1px solid var(--line)}th{background:var(--navy);color:white;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:11px}td{padding:10px;border-top:1px solid var(--line);font-weight:700;font-size:13px;vertical-align:top}.section-title{font-size:24px;margin:8px 0 10px}.small{font-size:12px;color:var(--muted);font-weight:700}.boxline{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:center}.arrow{font-weight:900;color:var(--blue);font-size:22px;text-align:center}.mono{font-family:Consolas,monospace}.hidden{display:none}.check{font-size:18px;font-weight:800;margin-right:16px}.check input{transform:scale(1.2);margin-right:6px}.subcard{background:#f8fbff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
+    @media(max-width:900px){.grid,.grid4,.boxline{grid-template-columns:1fr}.arrow{display:none}.hero h1{font-size:30px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card hero">
+    <h1>TMP P1.5 - Pie de Rey + MC-01 Patrones</h1>
+    <p>Panel aislado: equipo desde Supabase, pauta bajo/medio/alto y seleccion dinamica de patrones.</p>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">1 - Buscar equipo real</h2>
+    <div class="row">
+      <input id="codigoEquipo" class="input" style="flex:1" placeholder="Codigo de pie de rey" />
+      <button id="btnBuscar" class="btn">Buscar equipo</button>
+      <button id="btnDemo" class="btn secondary">Demo 0-200</button>
+    </div>
+    <div id="estadoBusqueda" class="status warn">Pendiente de buscar equipo.</div>
+  </section>
+
+  <section id="equipoCard" class="card hidden">
+    <h2 class="section-title">2 - Equipo detectado</h2>
+    <div class="grid">
+      <div class="field"><div class="label">Codigo</div><div id="eqCodigo" class="value">-</div></div>
+      <div class="field"><div class="label">Descripcion</div><div id="eqDescripcion" class="value">-</div></div>
+      <div class="field"><div class="label">Rango Supabase</div><div id="eqRango" class="value">-</div></div>
+      <div class="field"><div class="label">Familia</div><div id="eqFamilia" class="value">PIE_DE_REY</div></div>
+      <div class="field"><div class="label">Tipo detectado</div><div id="eqTipo" class="value">-</div></div>
+      <div class="field"><div class="label">Rango maximo</div><div id="eqRangoMax" class="value">-</div></div>
+      <div class="field"><div class="label">Resolucion</div><div id="eqResolucion" class="value">-</div></div>
+      <div class="field"><div class="label">Confianza deteccion</div><div id="eqConfianza" class="value">-</div></div>
+    </div>
+    <div id="estadoEquipo" class="status">Caracteristicas detectadas desde Supabase. Si falta rango/resolucion/tipo, debe corregirse en alta de equipo.</div>
+  </section>
+
+  <section id="funcionesCard" class="card hidden">
+    <h2 class="section-title">3 - Funciones a calibrar</h2>
+    <p class="small">Solo se pregunta lo que pertenece al procedimiento. Tipo, rango y resolucion vienen del alta del equipo.</p>
+    <div class="row" style="margin-top:12px">
+      <label class="check"><input id="fnExt" type="checkbox" checked />Exteriores</label>
+      <label class="check"><input id="fnInt" type="checkbox" checked />Interiores</label>
+      <label class="check"><input id="fnProf" type="checkbox" checked />Profundidad</label>
+      <label class="check"><input id="fnEsc" type="checkbox" />Escalon</label>
+      <label class="check">Lecturas/punto <input id="lecturas" type="number" min="1" max="10" value="5" style="width:70px;padding:8px;border:1px solid var(--line);border-radius:8px;font-weight:900" /></label>
+    </div>
+    <button id="btnGenerar" class="btn" style="margin-top:16px">Generar pauta y seleccionar patrones</button>
+  </section>
+
+  <section id="resultadoCard" class="card hidden">
+    <h2 class="section-title">4 - Pauta inteligente y patrones propuestos</h2>
+    <div id="summary" class="status"></div>
+
+    <h3>Cadena de calibracion</h3>
+    <div class="boxline">
+      <div class="field"><div class="label">Patrones</div><div class="value">MC-01</div><div class="small">Seleccion dinamica desde Supabase.</div></div>
+      <div class="arrow">→</div>
+      <div class="field"><div class="label">Montaje</div><div class="value">Guia TMP</div><div class="small">Segun funcion calibrada.</div></div>
+      <div class="arrow">→</div>
+      <div class="field"><div class="label">Equipo</div><div id="chainEquipo" class="value">-</div><div class="small">Instrumento calibrado.</div></div>
+    </div>
+
+    <h3>Patrones recomendados por funcion</h3>
+    <div id="patternSummary"></div>
+
+    <h3>Puntos generados</h3>
+    <div id="pointsTable"></div>
+
+    <h3>Guia operativa</h3>
+    <div id="guides"></div>
+  </section>
+</div>
+
+<script type="module">
+import { getSupabaseClient } from "../supabase_client.js";
+import { buildPieDeReyPlan } from "../procedure_rules/pie_de_rey_experto.js";
+import { selectPatternsForPieDeReyPlan, selectPatternForPieDeReyFunction, getPatternLabel } from "../engines/pattern_selection_engine.js";
+
+const $ = (id) => document.getElementById(id);
+let supabase = null;
+let currentEquipment = null;
+let currentPlan = null;
+
+function setStatus(el, msg, kind="ok") { el.className = `status ${kind === "ok" ? "" : kind}`; el.innerHTML = msg; }
+function show(el, yes=true){ el.classList.toggle("hidden", !yes); }
+function esc(v){ return String(v ?? "-").replace(/[&<>]/g, s => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[s])); }
+
+async function initSupabase(){
+  try {
+    const res = await getSupabaseClient();
+    if (res.ok && res.client) { supabase = res.client; return true; }
+    if (window.tmpSupabaseClient) { supabase = window.tmpSupabaseClient; return true; }
+    setStatus($("estadoBusqueda"), `Supabase no configurado en este panel: ${esc(res.error || "sin cliente")}`, "warn");
+    return false;
+  } catch(e) {
+    setStatus($("estadoBusqueda"), `Error cargando Supabase: ${esc(e.message || e)}`, "bad");
+    return false;
+  }
+}
+
+async function queryByColumn(table, column, value){
+  const { data, error } = await supabase.from(table).select("*").eq(column, value).limit(1);
+  if (error) throw error;
+  return data && data[0] ? data[0] : null;
+}
+
+async function loadEquipmentByCode(code){
+  if (!supabase) throw new Error("Supabase no disponible");
+  const columns = ["codigo", "codigo_instrumento", "codigo_equipo", "id_instrumento", "identificacion"];
+  let lastError = null;
+  for (const col of columns) {
+    try {
+      const row = await queryByColumn("instrumentos", col, code);
+      if (row) return row;
+    } catch(e) { lastError = e; }
+  }
+  throw new Error(lastError?.message || "No se encontro el instrumento en tabla instrumentos");
+}
+
+function isPieDeRey(eq){
+  const txt = [eq.familia, eq.descripcion, eq.tipo, eq.rango, eq.designacion].filter(Boolean).join(" ").toLowerCase();
+  return txt.includes("pie") || txt.includes("calibre") || txt.includes("rey");
+}
+
+function renderEquipment(eq){
+  const plan = buildPieDeReyPlan({ equipo: eq, funciones: { exteriores:true, interiores:true, profundidad:true, escalon:false }});
+  currentPlan = plan;
+  $("eqCodigo").textContent = eq.codigo || eq.codigo_instrumento || eq.codigo_equipo || eq.id || "-";
+  $("eqDescripcion").textContent = eq.descripcion || eq.nombre || "-";
+  $("eqRango").textContent = eq.rango || eq.designacion || eq.alcance || "-";
+  $("eqFamilia").textContent = eq.familia || plan.family;
+  $("eqTipo").textContent = plan.detected.tipo;
+  $("eqRangoMax").textContent = plan.detected.rangoMax !== null ? `${plan.detected.rangoMax} mm` : "Pendiente en alta";
+  $("eqResolucion").textContent = plan.detected.resolucion !== null ? `${plan.detected.resolucion} mm` : "Pendiente en alta";
+  $("eqConfianza").textContent = `${Math.round(plan.detected.confidence * 100)}%`;
+  $("chainEquipo").textContent = `${$("eqCodigo").textContent} - ${$("eqDescripcion").textContent}`;
+  show($("equipoCard")); show($("funcionesCard"));
+}
+
+async function buscarEquipo(){
+  const code = $("codigoEquipo").value.trim();
+  if (!code) { setStatus($("estadoBusqueda"), "Introduce codigo de equipo.", "warn"); return; }
+  setStatus($("estadoBusqueda"), "Buscando en Supabase...", "warn");
+  try {
+    if (!supabase) await initSupabase();
+    const eq = await loadEquipmentByCode(code);
+    if (!isPieDeRey(eq)) throw new Error("El equipo encontrado no parece Pie de Rey. Revisa familia/descripcion en alta.");
+    currentEquipment = eq;
+    renderEquipment(eq);
+    setStatus($("estadoBusqueda"), `Equipo detectado: <b>${esc(eq.codigo || code)}</b> - ${esc(eq.descripcion || "Pie de rey")}`, "ok");
+  } catch(e) {
+    setStatus($("estadoBusqueda"), `No se pudo cargar el equipo: ${esc(e.message || e)}`, "bad");
+  }
+}
+
+function demo(){
+  currentEquipment = { codigo:"DEMO-PDR-200", descripcion:"Pie de rey digital 0-200mm", rango:"0-200mm", resolucion:"0.01 mm", familia:"PIE_DE_REY" };
+  $("codigoEquipo").value = currentEquipment.codigo;
+  renderEquipment(currentEquipment);
+  setStatus($("estadoBusqueda"), "Demo cargada. No usa Supabase para el equipo.", "warn");
+}
+
+function selectedFunctions(){
+  return { exteriores: $("fnExt").checked, interiores: $("fnInt").checked, profundidad: $("fnProf").checked, escalon: $("fnEsc").checked };
+}
+
+function renderPoints(points){
+  const groups = {};
+  points.forEach(p => { (groups[p.funcion] ||= []).push(p); });
+  $("pointsTable").innerHTML = Object.entries(groups).map(([fn, rows]) => `
+    <table><thead><tr><th colspan="5">${esc(fn)}</th></tr><tr><th>ID</th><th>Punto</th><th>Nominal</th><th>Lecturas</th><th>Unidad</th></tr></thead><tbody>
+    ${rows.map(p => `<tr><td>${esc(p.id)}</td><td>${esc(p.punto)}</td><td>${esc(p.nominal)}</td><td>${esc(p.lecturas)}</td><td>${esc(p.unidad)}</td></tr>`).join("")}
+    </tbody></table>`).join("");
+}
+
+function selectionBadge(sel){
+  if (!sel?.selected) return `<span class="chip warn">Sin patron recomendado</span>`;
+  return `<span class="chip">${esc(sel.selected.detectedType)} · ${esc(sel.selected.label)}</span>`;
+}
+
+async function renderPatternSummary(plan){
+  const funcs = [...new Set(plan.points.map(p => p.funcion))];
+  const cards = [];
+  for (const fn of funcs) {
+    const nominal = plan.points.find(p => p.funcion === fn)?.nominal;
+    let result = null;
+    try {
+      result = await selectPatternForPieDeReyFunction(supabase, { funcion: fn, nominal, rangoMax: plan.detected.rangoMax }, { minScore: 500 });
+    } catch(e) {
+      result = { selected:null, alternatives:[], load_ok:false, load_error:e.message || String(e), requirement:{ method:"" } };
+    }
+    cards.push(`
+      <div class="subcard">
+        <div class="label">${esc(fn)}</div>
+        <div style="margin:8px 0">${selectionBadge(result)}</div>
+        <div class="small"><b>Criterio:</b> ${esc(result.requirement?.method || "Seleccion dinamica MC-01")}</div>
+        ${result.selected ? `<div class="small"><b>Certificado:</b> ${esc(result.selected.certificate || "No visible")} · <b>Vence:</b> ${esc(result.selected.expiry || "No visible")} · <b>Score:</b> ${esc(result.selected.score)}</div>` : ""}
+        ${result.alternatives?.length ? `<div class="small"><b>Alternativas:</b> ${result.alternatives.map(a => esc(a.label)).join(" | ")}</div>` : ""}
+        ${result.load_error ? `<div class="small" style="color:#a86400"><b>Aviso:</b> ${esc(result.load_error)}</div>` : ""}
+      </div>`);
+  }
+  $("patternSummary").innerHTML = cards.join("");
+}
+
+function renderGuides(guides){
+  $("guides").innerHTML = guides.map(g => `
+    <div class="subcard"><div class="label">${esc(g.funcion)}</div><div class="value" style="font-size:16px">${esc(g.titulo)}</div>
+    <ul>${g.instrucciones.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("");
+}
+
+async function generar(){
+  if (!currentEquipment) { setStatus($("estadoBusqueda"), "Primero carga un equipo.", "warn"); return; }
+  const plan = buildPieDeReyPlan({ equipo: currentEquipment, funciones: selectedFunctions(), lecturasPorPunto: Number($("lecturas").value || 5) });
+  currentPlan = plan;
+  $("summary").innerHTML = `<b>${plan.points.length} puntos generados</b> · pauta bajo/medio/alto · CT-001 · Decision Engine TMP · MC-01 Pattern Selection`;
+  renderPoints(plan.points);
+  renderGuides(plan.guides);
+  show($("resultadoCard"));
+  await renderPatternSummary(plan);
+  window.scrollTo({ top: $("resultadoCard").offsetTop - 20, behavior:"smooth" });
+}
+
+$("btnBuscar").addEventListener("click", buscarEquipo);
+$("btnDemo").addEventListener("click", demo);
+$("btnGenerar").addEventListener("click", generar);
+$("codigoEquipo").addEventListener("keydown", e => { if (e.key === "Enter") buscarEquipo(); });
+
+initSupabase();
+</script>
+</body>
+</html>

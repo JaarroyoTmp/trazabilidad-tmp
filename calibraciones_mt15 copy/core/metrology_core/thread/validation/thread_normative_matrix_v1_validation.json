@@ -1,0 +1,19 @@
+{
+  "id": "thread_normative_matrix_v1_validation",
+  "cases": [
+    {
+      "family": "METRIC_ISO_INTERNAL",
+      "expected_profile": "ISO68",
+      "expected_geometry": "ISO724",
+      "expected_tolerance": "ISO965",
+      "expected_gauge": "ISO1502"
+    },
+    {
+      "family": "UNC_UNF_UNEF_INTERNAL",
+      "expected_profile": "ASME_B1_1",
+      "expected_geometry": "ASME_B1_1",
+      "expected_tolerance": "ASME_B1_1",
+      "expected_gauge": "ASME_B1_2"
+    }
+  ]
+}

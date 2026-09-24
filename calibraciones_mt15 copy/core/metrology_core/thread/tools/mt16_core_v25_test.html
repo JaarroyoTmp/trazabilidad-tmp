@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP MT16 · Core V25 Test</title>
+<style>
+:root{--bg:#07111f;--panel:#10243a;--panel2:#071426;--line:#24425f;--txt:#e7f2fb;--muted:#91a7bd;--blue:#3d9cff;--green:#2bd47c;--red:#ff6b6b;--yellow:#ffd15c}
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:18px}.version{background:#06101d;border:1px solid var(--blue);border-radius:12px;padding:12px;margin-bottom:14px;color:var(--yellow);font-weight:bold}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}input{background:var(--panel2);color:white;border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;font-weight:bold}button{background:var(--blue);color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer;margin-top:10px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;font-size:13px}th{background:#183b60;width:300px}.ok{color:var(--green);font-weight:bold}.warn{color:var(--yellow);font-weight:bold}.bad{color:var(--red);font-weight:bold}pre{background:#050b14;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap;max-height:600px}.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="version">HTML REVISION: TMP_MT16_CORE_V25_TEST_HTML_20260629<br>MASTER: TMP_MT16_MASTER_ENGINE_V25</div>
+<h1>TMP MT16 · Core V25 Test</h1>
+<p class="muted">Prueba del motor maestro sin tocar la pantalla MT16 V23.</p>
+<div class="card"><h3>Equipo / designación</h3><div class="grid"><div><label>Código</label><input id="codigo" value="75148"></div><div><label>Descripción</label><input id="descripcion" value="Tampón de Rosca P/NP"></div><div><label>Rango</label><input id="rango" value="M12 x 1.25 - 6H"></div></div><button id="btnResolve">Resolver Core V25</button></div>
+<div class="card"><h3>Lecturas opcionales</h3><p class="muted">Si las dejas vacías, sólo resuelve norma/patrones.</p><h4>PASA</h4><div class="grid5"><input class="pasa" value="12.802"><input class="pasa" value="12.803"><input class="pasa" value="12.802"><input class="pasa" value="12.802"><input class="pasa" value="12.803"></div><h4>NO PASA</h4><div class="grid5"><input class="nopasa" value="12.972"><input class="nopasa" value="12.972"><input class="nopasa" value="12.973"><input class="nopasa" value="12.971"><input class="nopasa" value="12.972"></div><button id="btnResolveReadings">Resolver con lecturas</button></div>
+<div class="card"><h3>Resumen</h3><table><tbody id="rows"></tbody></table></div>
+<div class="card"><h3>JSON técnico</h3><pre id="json">{}</pre></div>
+<script type="module">
+import { ensureSupabase } from "../../../supabase_client.js";
+import { resolveMT16Core } from "../core/mt16_master_engine.js";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+const readNums = sel => $$(sel).map(i => Number(String(i.value).replace(",", "."))).filter(Number.isFinite);
+async function run(withReadings=false) {
+  const equipment = { codigo:$("#codigo").value, descripcion:$("#descripcion").value, rango:$("#rango").value };
+  let supabase = null;
+  try { supabase = await ensureSupabase(); } catch(e) { supabase = null; }
+  const readingsByPoint = withReadings ? { PASA:readNums(".pasa"), NO_PASA:readNums(".nopasa") } : null;
+  const result = await resolveMT16Core({ equipment, supabase, readingsByPoint });
+  render(result);
+}
+function render(r) {
+  const s = r.summary || {};
+  const rows = [
+    ["Estado", r.status, r.ok ? "ok" : "warn"],
+    ["Designación", s.designation, ""],
+    ["Nominal", `${s.nominal_mm} mm`, ""],
+    ["Paso", `${s.pitch_mm} mm`, ""],
+    ["Clase", s.class, ""],
+    ["D2 básico", `${s.D2_basic_mm} mm`, ""],
+    ["D1 básico", `${s.D1_basic_mm} mm`, ""],
+    ["ISO965", r.iso965?.status || r.iso965?.error, r.iso965?.ok ? "ok" : "warn"],
+    ["ISO1502", r.iso1502?.status || r.iso1502?.error, r.iso1502?.ok ? "ok" : "warn"],
+    ["Rodillo", `Ø ${s.rodillo_mm} mm`, "ok"],
+    ["Corrección Trimos", `${s.trimos_correction_mm} mm`, ""],
+    ["Objetivo PASA Trimos", `${s.pass_target_trimos_mm} mm`, "ok"],
+    ["Objetivo NO PASA Trimos", `${s.no_pass_target_trimos_mm} mm`, "ok"],
+    ["Banco Supabase", s.bank || "No resuelto", r.patterns?.ok ? "ok" : "warn"],
+    ["Decisión global", s.global_decision || "-", s.global_decision === "OK" ? "ok" : s.global_decision === "NOK" ? "bad" : "warn"],
+    ["Puede emitir certificado", r.can_emit_certificate ? "SI" : "NO", r.can_emit_certificate ? "ok" : "warn"],
+    ["Avisos", (r.warnings || []).join("\\n"), "warn"]
+  ];
+  $("#rows").innerHTML = rows.map(row => `<tr><th>${esc(row[0])}</th><td class="${row[2]}">${esc(row[1])}</td></tr>`).join("");
+  $("#json").textContent = JSON.stringify(r, null, 2);
+}
+$("#btnResolve").addEventListener("click", () => run(false));
+$("#btnResolveReadings").addEventListener("click", () => run(true));
+run(false);
+</script>
+</body>
+</html>

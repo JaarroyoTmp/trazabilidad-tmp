@@ -1,0 +1,25 @@
+TMP REPORT ENGINE V1 PRESENTABLE
+
+Copiar:
+1) report_engine.js
+   en:
+   calibraciones_mt15 copy/core/metrology_core/
+
+2) En app_mt15.js añade arriba:
+   import { openTMPReportPreview } from "./report_engine.js";
+
+3) En app_mt15.js busca el evento de btnVerJSON y sustitúyelo por:
+
+   $("#btnVerJSON").addEventListener("click", () => {
+     openTMPReportPreview(buildFinalJSON());
+   });
+
+4) En TMP_Calibraciones_MT15.html cambia el texto del botón:
+   Ver JSON
+   por:
+   Vista previa informe
+
+Uso:
+- Termina una calibración.
+- Pulsa Vista previa informe.
+- En la nueva ventana pulsa Imprimir / Guardar PDF.

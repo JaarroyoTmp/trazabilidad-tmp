@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP · Centro de Calibración</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#eef6ff;--ink:#0d2340;--muted:#66809a;--line:#dbe7f2;--line2:#cbddeb;--blue:#2563eb;--green:#22c55e;--orange:#f59e0b;--shadow:0 14px 36px rgba(15,45,75,.10)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 18% -10%,rgba(37,99,235,.16),transparent 30%),radial-gradient(circle at 90% 4%,rgba(14,165,233,.18),transparent 34%),linear-gradient(180deg,#eef6ff,#f7fbff)}
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}.side{position:sticky;top:0;height:100vh;background:linear-gradient(180deg,#07274a,#061f3a);color:white;padding:20px 16px;display:flex;flex-direction:column;gap:18px;box-shadow:12px 0 34px rgba(8,39,74,.18)}
+.logo{display:flex;gap:10px;align-items:center;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.12)}.logo img{width:44px;height:44px;border-radius:12px;background:white;padding:4px}.logo b{font-size:18px}.logo small{display:block;opacity:.75;font-size:10px}
+.nav{display:flex;flex-direction:column;gap:5px}.nav a{display:flex;gap:12px;align-items:center;color:#eaf6ff;text-decoration:none;padding:10px 11px;border-radius:12px;font-weight:760;font-size:14px}.nav a:hover,.nav a.active{background:linear-gradient(135deg,#2563eb,#1d4ed8)}.ico{width:24px;text-align:center}
+.status{margin-top:auto;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:rgba(255,255,255,.07);padding:13px;font-size:12px;color:#d9ecff}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px}
+.main{padding:22px 26px}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}.title h1{margin:0;font-size:30px;letter-spacing:-.04em;color:#0d2b50}.title span{color:var(--muted);font-size:13px;font-weight:700}
+.search-top{width:min(520px,38vw);min-width:280px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 14px;display:flex;gap:10px;box-shadow:0 8px 20px rgba(15,45,75,.08)}.search-top input{border:0;outline:0;width:100%;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.hero{grid-column:1/-1;background:linear-gradient(135deg,#1e88d6,#083c8c);color:#fff;border-radius:22px;box-shadow:var(--shadow);padding:24px;display:grid;grid-template-columns:1fr 360px;gap:18px;overflow:hidden}
+.hero h2{margin:0;font-size:32px;letter-spacing:-.05em}.hero p{margin:8px 0 0;color:rgba(255,255,255,.84);font-size:14px;line-height:1.45}.tag{display:inline-flex;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:850;margin:15px 6px 0 0}.hero-panel{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.20);border-radius:18px;padding:15px}
+.box{grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow)}label{display:block;font-size:12px;color:#55708a;font-weight:900;margin-bottom:7px}.row{display:flex;gap:9px;flex-wrap:wrap}.row input{flex:1;min-width:260px;border:1px solid var(--line2);border-radius:14px;padding:13px 14px;font-size:15px;font-weight:800}
+.btn{border:1px solid var(--line2);background:#fff;color:#0d2b50;border-radius:13px;padding:10px 14px;font-size:12px;font-weight:900;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.btn:hover{box-shadow:0 8px 20px rgba(15,45,75,.08)}.primary{background:#2563eb;border-color:#2563eb;color:#fff}
+.result{display:none;margin-top:12px;border:1px solid #bfd7ec;background:#f8fbff;border-radius:17px;padding:13px}.result.show{display:block}.pill{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;margin:7px 5px 0 0}
+.h2{grid-column:1/-1;margin:2px 0 -4px;font-size:18px;font-weight:950;color:#0d2b50}.families{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:18px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:12px;min-height:230px;transition:.18s}.card:hover{transform:translateY(-3px);border-color:#bfdbfe}.head{display:flex;justify-content:space-between}.icon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:29px;font-weight:900}.blue{background:#eff6ff;color:#2563eb}.green{background:#ecfdf3;color:#16a34a}.orange{background:#fff7ed;color:#ea580c}.purple{background:#f5f3ff;color:#7c3aed}.cyan{background:#ecfeff;color:#0891b2}.red{background:#fff2f2;color:#dc2626}.chip{border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:950;height:max-content}.pending{border-color:#fed7aa;background:#fff8eb;color:#b45309}.card h3{margin:0;font-size:18px;color:#0d2b50}.card p{margin:0;color:#66809a;font-size:13px;line-height:1.42}.meta span{display:inline-flex;border:1px solid #dbe7f2;background:#f8fbff;color:#55708a;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;margin:3px}.action{margin-top:auto;color:#1d4ed8;font-size:12px;font-weight:950}
+.info{grid-column:span 6;background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:18px}.info h3{margin:0 0 8px;font-size:18px;color:#0d2b50}.info p{margin:0;color:#66809a;font-size:13px;line-height:1.45}.item{display:flex;gap:10px;border:1px solid #dbe7f2;background:#f8fbff;border-radius:14px;padding:10px;margin-top:8px}.item span{font-size:12px;color:#66809a}footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:8px 0}
+@media(max-width:1350px){.families{grid-template-columns:repeat(3,1fr)}.info{grid-column:1/-1}.hero{grid-template-columns:1fr}}@media(max-width:900px){.app{grid-template-columns:1fr}.side{position:relative;height:auto}.main{padding:14px}.top{flex-direction:column;align-items:stretch}.search-top{width:100%;min-width:0}.families{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="logo"><img src="img/tmp-quality.png"><div><b>PARAMIO</b><small>TALLERES MECÁNICOS</small></div></div>
+  <nav class="nav">
+    <a href="home.html"><span class="ico">⌂</span>Inicio</a><a href="alta_instrumento.html"><span class="ico">✎</span>Alta / Edición</a><a href="movimiento.html"><span class="ico">↔</span>Movimientos</a><a class="active" href="calibraciones.html"><span class="ico">⚗</span>Calibraciones</a><a href="App_Patrones_TMP.html"><span class="ico">▤</span>Patrones</a><a href="buscar_instrumento.html"><span class="ico">⌕</span>Buscar</a><a href="certificados.html"><span class="ico">▧</span>Informes</a><a href="alcance_kpi.html"><span class="ico">▥</span>KPIs</a>
+  </nav>
+  <div class="status"><div><span class="dot"></span><b>Centro</b><br>Calibración guiada</div><br><div><span class="dot"></span><b>Supabase</b><br>Clasificación</div></div>
+</aside>
+<div class="main">
+  <div class="top"><div class="title"><h1>Centro de Calibración</h1><span>Selecciona familia de equipo o busca por código / QR</span></div><div class="search-top"><span>⌕</span><input id="topSearch" placeholder="Buscar equipo, código, familia..."></div></div>
+  <main class="grid">
+    <section class="hero"><div><h2>Calibración guiada por familia</h2><p>El Home gestiona el laboratorio. Este centro decide qué módulo abrir según el tipo de instrumento.</p><span class="tag">MT15 · Lisos</span><span class="tag">MT16 · Roscados</span><span class="tag">Futuros módulos</span><span class="tag">Sistema experto TMP</span></div><div class="hero-panel"><small>Flujo recomendado</small><br><strong>Buscar equipo → detectar familia → abrir módulo correcto</strong><p>Evita que el operario tenga que saber qué procedimiento corresponde.</p></div></section>
+    <section class="box"><label>Código del equipo / QR</label><div class="row"><input id="equipmentCode" placeholder="Ej. 75148, 40205, M12 x 1.25..."><button class="btn primary" id="btnSearch">Detectar módulo</button><button class="btn" id="btnDemoThread">Demo roscado</button><button class="btn" id="btnDemoPlain">Demo liso</button><a class="btn" href="home.html">Volver al Home</a></div><div id="searchResult" class="result"></div></section>
+    <h2 class="h2">Familias disponibles</h2>
+    <section class="families">
+      <a class="card" href="mt16.html"><div class="head"><div class="icon blue">◎</div><span class="chip">Activo</span></div><h3>MT16 · Roscados P/NP</h3><p>Tampones roscados, anillos roscados y verificación con banco Trimos.</p><div class="meta"><span>ISO 1502</span><span>ISO 965</span><span>Trimos</span><span>ILAC-G8</span></div><div class="action">Abrir MT16 →</div></a>
+      <a class="card" href="mt15.html"><div class="head"><div class="icon green">▭</div><span class="chip">Activo</span></div><h3>MT15 · Lisos / Dimensionales</h3><p>Tampones lisos P/NP, patrones dimensionales y calibraciones base.</p><div class="meta"><span>ISO 286</span><span>ISO 1938</span><span>ILAC-G8</span></div><div class="action">Abrir MT15 →</div></a>
+      <a class="card disabled" href="#"><div class="head"><div class="icon orange">▣</div><span class="chip pending">Pendiente</span></div><h3>Pie de rey</h3><p>Exterior, interior, profundidad y sonda. Procedimiento guiado pendiente.</p><div class="meta"><span>DIN 862</span><span>Resolución</span></div><div class="action">Módulo futuro</div></a>
+      <a class="card disabled" href="#"><div class="head"><div class="icon purple">⌐</div><span class="chip pending">Pendiente</span></div><h3>Micrómetros</h3><p>Exteriores e interiores. Control de cero, paralelismo y puntos de rango.</p><div class="meta"><span>ISO 3611</span><span>Bloques</span></div><div class="action">Módulo futuro</div></a>
+      <a class="card disabled" href="#"><div class="head"><div class="icon cyan">↕</div><span class="chip pending">Pendiente</span></div><h3>Comparadores / relojes</h3><p>Recorrido, histéresis, repetibilidad y error de indicación.</p><div class="meta"><span>ISO 463</span></div><div class="action">Módulo futuro</div></a>
+      <a class="card disabled" href="#"><div class="head"><div class="icon blue">⫶</div><span class="chip pending">Pendiente</span></div><h3>Columna / altura</h3><p>Columnas, alturas, escalas y puntos de verificación.</p><div class="meta"><span>Linealidad</span></div><div class="action">Módulo futuro</div></a>
+      <a class="card disabled" href="#"><div class="head"><div class="icon red">⚖</div><span class="chip pending">Pendiente</span></div><h3>Balanzas</h3><p>Carga, excentricidad, repetibilidad y masas patrón.</p><div class="meta"><span>OIML</span></div><div class="action">Módulo futuro</div></a>
+      <a class="card disabled" href="#"><div class="head"><div class="icon orange">↻</div><span class="chip pending">Pendiente</span></div><h3>Dinamométricas</h3><p>Par, sentido, repetibilidad y trazabilidad del patrón de torque.</p><div class="meta"><span>ISO 6789</span></div><div class="action">Módulo futuro</div></a>
+    </section>
+    <section class="info"><h3>Arquitectura correcta</h3><p>El Home queda para laboratorio. Este centro abre el procedimiento adecuado.</p><div class="item"><b>1</b><div><b>Home</b><br><span>KPIs, movimientos, alertas y laboratorio.</span></div></div><div class="item"><b>2</b><div><b>Centro de calibración</b><br><span>Selección inteligente por familia.</span></div></div><div class="item"><b>3</b><div><b>Módulo específico</b><br><span>MT15, MT16 o futuros procedimientos.</span></div></div></section>
+    <section class="info"><h3>Detección automática</h3><p>Busca en Supabase si está disponible. Si no encuentra datos, clasifica por texto/designación.</p><div class="item"><b>◎</b><div><b>Roscados</b><br><span>Rosca, M12 x 1.25, anillo, tampón de rosca → MT16.</span></div></div><div class="item"><b>▭</b><div><b>Lisos</b><br><span>Tampón liso, P/NP, pasa/no pasa → MT15.</span></div></div></section>
+    <footer>Talleres Mecánicos Paramio · Centro de Calibración · 2026</footer>
+  </main>
+</div>
+</div>
+<script type="module" src="config.mjs"></script>
+<script type="module">
+const $=s=>document.querySelector(s); const supabase=window.supabase;
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
+function norm(v=""){return String(v||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/×/g,"X").replace(/,/g,".").replace(/\s+/g," ").trim()}
+function classify(inst={}){
+ const t=norm([inst.codigo,inst.descripcion,inst.descripcion_equipo,inst.tipo,inst.tipo_instrumento,inst.familia,inst.rango,inst.modelo].filter(Boolean).join(" "));
+ if(t.includes("ROSCA")||t.includes("ROSCADO")||t.includes("ANILLO")||/\bM\s*\d+(?:\.\d+)?\s*(?:X|-)\s*\d+(?:\.\d+)?/.test(t)) return {label:"MT16 · Roscados P/NP",href:"mt16.html?codigo="+encodeURIComponent(inst.codigo||$("#equipmentCode").value||""),notes:["ISO 1502","ISO 965","Banco Trimos","Rodillos normativos"],future:false};
+ if(t.includes("TAMPON")||t.includes("TAPÓN")||t.includes("LISO")||t.includes("P/NP")||t.includes("PASA")||t.includes("NO PASA")) return {label:"MT15 · Lisos / Dimensionales",href:"mt15.html?codigo="+encodeURIComponent(inst.codigo||$("#equipmentCode").value||""),notes:["ISO 286","ISO 1938","Patrón dimensional","ILAC-G8"],future:false};
+ if(t.includes("PIE DE REY")||t.includes("CALIBRE")) return {label:"Pie de rey",href:"#",notes:["Módulo pendiente"],future:true};
+ return {label:"Revisión manual",href:"buscar_instrumento.html?codigo="+encodeURIComponent(inst.codigo||$("#equipmentCode").value||""),notes:["Familia no confirmada","Revisar ficha"],future:false};
+}
+async function findEquipment(code){
+ if(!supabase) throw new Error("Supabase no disponible.");
+ const c=String(code||"").trim();
+ for(const run of [()=>supabase.from("instrumentos").select("*").eq("codigo",c).limit(1),()=>supabase.from("instrumentos").select("*").eq("codigo_interno",c).limit(1),()=>supabase.from("instrumentos").select("*").ilike("codigo","%"+c+"%").limit(1)]){
+  try{const {data,error}=await run(); if(!error&&Array.isArray(data)&&data.length)return data[0]}catch(e){}
+ }
+ return null;
+}
+function render(inst,route,msg=""){
+ const box=$("#searchResult"); box.classList.add("show");
+ box.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><strong>${esc(route.label)}</strong><br><span style="color:#66809a;font-size:13px">${esc(inst.codigo||"-")} · ${esc(inst.descripcion||inst.descripcion_equipo||"-")} · ${esc(inst.rango||"-")}</span><div>${route.notes.map(n=>`<span class="pill">${esc(n)}</span>`).join("")}</div>${msg?`<div style="margin-top:8px;color:#66809a;font-size:12px">${esc(msg)}</div>`:""}</div>${route.future?`<span class="btn">Módulo pendiente</span>`:`<a class="btn primary" href="${esc(route.href)}">Abrir módulo</a>`}</div>`;
+}
+async function search(){
+ const code=$("#equipmentCode").value.trim(); if(!code){$("#searchResult").classList.add("show");$("#searchResult").innerHTML="<strong>Introduce un código o designación.</strong>";return}
+ $("#searchResult").classList.add("show");$("#searchResult").innerHTML="<strong>Buscando equipo...</strong>";
+ let inst=null,msg=""; try{inst=await findEquipment(code)}catch(e){msg=e.message||"No se pudo consultar Supabase."}
+ if(!inst){inst={codigo:code,descripcion:code,rango:code};msg=msg||"No encontrado en Supabase. Clasificación provisional por texto/designación."}
+ render(inst,classify(inst),msg);
+}
+$("#btnSearch").addEventListener("click",search); $("#equipmentCode").addEventListener("keydown",e=>{if(e.key==="Enter")search()}); $("#topSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){$("#equipmentCode").value=$("#topSearch").value;search()}});
+$("#btnDemoThread").addEventListener("click",()=>{const i={codigo:"75148",descripcion:"Tampón de Rosca P/NP",rango:"M12 x 1.25 - 6H"};$("#equipmentCode").value=i.codigo;render(i,classify(i),"Demo MT16.")});
+$("#btnDemoPlain").addEventListener("click",()=>{const i={codigo:"40205",descripcion:"Tampón liso P/NP",rango:"Ø 8.5 H8"};$("#equipmentCode").value=i.codigo;render(i,classify(i),"Demo MT15.")});
+document.querySelectorAll(".disabled").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();$("#searchResult").classList.add("show");$("#searchResult").innerHTML="<strong>Módulo pendiente.</strong><br><span style='color:#66809a;font-size:13px'>Esta familia se añadirá después usando la misma arquitectura.</span>";window.scrollTo({top:0,behavior:"smooth"})}));
+</script>
+</body>
+</html>

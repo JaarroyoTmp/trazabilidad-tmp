@@ -1,0 +1,12 @@
+MT16 V80 UX Laboratorio
+
+Instalación:
+1. Copiar el contenido del ZIP sobre la carpeta: calibraciones_mt15 copy/
+2. Sustituir archivos cuando Windows lo pida.
+3. Abrir MT16 y pulsar Ctrl + F5.
+
+Cambios principales:
+- Trazabilidad con tarjetas profesionales para Banco, Rodillos patrón y Patrón rosca.
+- Lecturas siguen en casillas L1-L5.
+- Resultado rediseñado tipo pre-certificado: resumen, medias, errores, desviación, decisión y estado de certificado.
+- Botón final pasa a Evaluar calibración.

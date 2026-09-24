@@ -1,0 +1,25 @@
+TMP - Bloque A MT15 UX integrada
+
+CARPETA ACTIVA DEL PROYECTO:
+trazabilidad-tmp/calibraciones_mt15 copy/
+
+NO ejecutar desde /parches/.
+La carpeta parches es solo almacén de ZIPs.
+
+INSTALACIÓN:
+1. Haz copia de seguridad del proyecto actual.
+2. Descomprime este ZIP en una carpeta temporal.
+3. Copia la carpeta "trazabilidad-tmp" del parche encima de tu carpeta real "trazabilidad-tmp".
+4. Acepta sustituir archivos.
+5. Abre:
+   http://127.0.0.1:5500/trazabilidad-tmp/TMP_Calibraciones_MT15.html
+6. Pulsa Ctrl + F5.
+
+ARCHIVOS MODIFICADOS:
+- trazabilidad-tmp/TMP_Calibraciones_MT15.html
+- trazabilidad-tmp/calibraciones_mt15 copy/core/metrology_core/app_mt15.js
+
+NOTAS:
+- No se toca el motor metrológico MT15.
+- No se modifican cálculos.
+- Solo se integra la interfaz visual con la plataforma TMP y se corrige el enlace a calibración clásica.

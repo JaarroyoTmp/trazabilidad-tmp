@@ -1,0 +1,12 @@
+MT16 V100 - Certificado modular común TMP
+
+Instalación:
+1) Copiar el contenido de este ZIP sobre calibraciones_mt15 copy/
+2) Sustituir archivos.
+3) Abrir MT16 y pulsar Ctrl + F5.
+
+Cambios:
+- Crea infraestructura modular de certificados en core/metrology_core/certificates/
+- Mantiene API window.TMPCertificateEngine.openCertificate(payload, kind)
+- Divide el certificado en cabecera, identificación, ambiente, trazabilidad, resultados, decisión, firmas, pie y bloque técnico MT16.
+- Preparado para reutilizar el mismo certificado en MT15, MT17, MT18, etc. cambiando solo el bloque técnico.

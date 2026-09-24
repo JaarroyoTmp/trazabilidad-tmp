@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Listado de Instrumentos</title>
+
+<style>
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto;
+      background:#0d1117;
+      color:#f0f6fc;
+      padding:20px;
+    }
+
+    h1{
+      margin-top:0;
+      font-size:24px;
+      margin-bottom:4px;
+      color:#00b4d8;
+    }
+    .subtitle{
+      color:#8b949e;
+      margin-bottom:20px;
+      font-size:14px;
+    }
+
+    .panel{
+      background:#161b22;
+      border:1px solid #30363d;
+      border-radius:14px;
+      padding:16px;
+      max-width:1100px;
+      margin:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:12px;
+      font-size:14px;
+    }
+
+    th,td{
+      padding:8px;
+      border-bottom:1px solid #30363d;
+      white-space:nowrap;
+    }
+
+    th{
+      background:#1c2431;
+      position:sticky;
+      top:0;
+      z-index:3;
+    }
+
+    tr:hover{
+      background:#263041;
+    }
+
+    .btn{
+      padding:8px 14px;
+      border-radius:8px;
+      border:1px solid #00b4d8;
+      background:#0d1117;
+      color:#00b4d8;
+      text-decoration:none;
+      display:inline-block;
+      margin-bottom:16px;
+      transition:0.2s;
+    }
+    .btn:hover{
+      background:#263041;
+    }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <a class="btn" href="home.html">⬅ Volver al inicio</a>
+
+  <h1>Listado de instrumentos</h1>
+  <div class="subtitle" id="subtitulo"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Ubicación</th>
+        <th>Estado</th>
+        <th>Próxima calibración</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+
+<!-- SUPABASE -->
+<script type="module" src="config.mjs"></script>
+
+<script type="module">
+
+const supabase = window.supabase;
+
+// ==========================
+// Obtener parámetro "filtro"
+// ==========================
+const params = new URLSearchParams(window.location.search);
+const filtro = params.get("filtro");
+
+// Subtítulo explicativo
+const subtitulo = document.getElementById("subtitulo");
+let textoFiltro = "";
+
+switch(filtro){
+  case "uso": textoFiltro = "Instrumentos fuera de laboratorio (En uso)"; break;
+  case "laboratorio": textoFiltro = "Instrumentos que están actualmente en el laboratorio"; break;
+  case "calibrados": textoFiltro = "Instrumentos dentro del periodo de vigencia de calibración"; break;
+  default: textoFiltro = "Mostrando todos los instrumentos";
+}
+
+subtitulo.textContent = textoFiltro;
+
+
+// ==========================
+// Utilidad: parsear fecha
+// ==========================
+function parseDate(str){
+  if(!str) return null;
+  const norm = String(str).replace(/_/g, "-");
+  const d = new Date(norm);
+  return isNaN(d) ? null : d;
+}
+function formatDate(d){
+  if(!d) return "—";
+  return d.toISOString().split("T")[0].split("-").reverse().join("/");
+}
+
+
+// ==========================
+// Cargar instrumentos
+// ==========================
+async function cargar(){
+  const { data, error } = await supabase
+    .from("instrumentos")
+    .select("codigo, ubicacion_actual, estado, fecha_proxima_calibracion, proxima_calibracion");
+
+  if(error){
+    console.error("Error cargando instrumentos:", error);
+    return;
+  }
+
+  const hoy = new Date();
+  const cuerpo = document.getElementById("tbody");
+  cuerpo.innerHTML = "";
+
+  data.forEach(inst => {
+
+    const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
+    const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+
+    let mostrar = false;
+
+    if(filtro === "uso" && ubic !== "laboratorio") mostrar = true;
+    else if(filtro === "laboratorio" && ubic === "laboratorio") mostrar = true;
+    else if(filtro === "calibrados" && prox && prox >= hoy) mostrar = true;
+    else if(!filtro) mostrar = true;
+
+    if(mostrar){
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${inst.codigo}</td>
+        <td>${inst.ubicacion_actual || "—"}</td>
+        <td>${inst.estado || "—"}</td>
+        <td>${formatDate(prox)}</td>
+      `;
+
+      cuerpo.appendChild(tr);
+    }
+  });
+}
+
+cargar();
+
+</script>
+</body>
+</html>

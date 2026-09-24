@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>TMP P1 - Test Motor Pie de Rey</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#eef5ff;color:#0b1b3a;margin:0;padding:24px}
+    .card{background:white;border:1px solid #cfe0f6;border-radius:18px;padding:18px;margin:0 auto 16px;max-width:1100px;box-shadow:0 12px 30px rgba(15,43,92,.08)}
+    h1{margin:0 0 6px}.muted{color:#637799}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field input,.field select{padding:10px;border:1px solid #cbd8ee;border-radius:10px}.btn{background:#3458f6;color:#fff;border:0;border-radius:12px;padding:11px 18px;font-weight:700;cursor:pointer}.pill{display:inline-block;background:#e9f7ef;color:#08752c;border:1px solid #b8e5c7;border-radius:999px;padding:4px 9px;margin:3px;font-weight:700}.table{width:100%;border-collapse:collapse}.table th,.table td{border-bottom:1px solid #dce7f6;padding:8px;text-align:left}.table th{background:#0d2447;color:#fff}.warn{background:#fff7e8;border:1px solid #f0c36b;border-radius:12px;padding:10px;color:#744400}.ok{background:#eafaf0;border:1px solid #bce8c8;border-radius:12px;padding:10px;color:#006b2b}pre{white-space:pre-wrap;background:#0d2447;color:#dcecff;border-radius:12px;padding:12px;max-height:360px;overflow:auto}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>TMP P1 - Motor experto Pie de Rey</h1>
+    <div class="muted">Panel de validacion aislado. No modifica MT15 ni MT16.</div>
+  </div>
+  <div class="card">
+    <div class="grid">
+      <label class="field">Tipo<select id="tipo"><option>DIGITAL</option><option>ANALOGICO</option></select></label>
+      <label class="field">Rango maximo mm<input id="rango" value="150"></label>
+      <label class="field">Resolucion mm<input id="res" value="0.01"></label>
+      <label class="field">Lecturas por punto<input id="lect" value="5"></label>
+    </div>
+    <p>
+      <label><input type="checkbox" id="ext" checked> Exteriores</label>
+      <label><input type="checkbox" id="int" checked> Interiores</label>
+      <label><input type="checkbox" id="prof" checked> Profundidad</label>
+      <label><input type="checkbox" id="esc"> Escalon</label>
+    </p>
+    <button class="btn" id="generar">Generar pauta</button>
+  </div>
+  <div class="card" id="summary"></div>
+  <div class="card"><h2>Puntos generados</h2><table class="table" id="points"></table></div>
+  <div class="card"><h2>JSON tecnico</h2><pre id="json"></pre></div>
+  <script type="module">
+    import { buildPieDeReyPauta } from '../procedure_rules/pie_de_rey_experto.js';
+    const $ = (id)=>document.getElementById(id);
+    function render(){
+      const pauta = buildPieDeReyPauta({
+        tipo: $('tipo').value,
+        rangoMax: $('rango').value,
+        resolucion: $('res').value,
+        lecturasPorPunto: $('lect').value,
+        exteriores: $('ext').checked,
+        interiores: $('int').checked,
+        profundidad: $('prof').checked,
+        escalon: $('esc').checked
+      });
+      $('summary').innerHTML = `<h2>${pauta.titulo}</h2><p class="ok">${pauta.puntos.length} puntos generados - Certificado ${pauta.certificado} - ${pauta.decision}</p><h3>Accesorios</h3>${pauta.accesorios.map(a=>`<span class="pill">${a}</span>`).join('')}<h3>Checklist previo</h3><ul>${pauta.checklistPrevio.map(x=>`<li>${x}</li>`).join('')}</ul><div class="warn">Fase P1: motor preparado para integrar en la interfaz TMP despues de validar pauta y criterios.</div>`;
+      $('points').innerHTML = `<tr><th>ID</th><th>Magnitud</th><th>Punto</th><th>Patron recomendado</th><th>Metodo</th></tr>` + pauta.puntos.map(p=>`<tr><td>${p.id}</td><td>${p.magnitud}</td><td>${p.etiqueta}</td><td>${p.patronRecomendado}</td><td>${p.metodo}</td></tr>`).join('');
+      $('json').textContent = JSON.stringify(pauta, null, 2);
+    }
+    $('generar').addEventListener('click', render);
+    render();
+  </script>
+</body>
+</html>

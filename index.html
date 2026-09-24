@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMP · Trazabilidad</title>
+
+<style>
+    /* -------------------------------------- */
+    /*            ESTÉTICA GENERAL            */
+    /* -------------------------------------- */
+    body {
+        margin: 0;
+        background: #0a0f1a;
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+    }
+
+    .center-box {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        z-index: 10;
+    }
+
+    .center-box img {
+        width: 180px;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 0 6px #00b7ff);
+    }
+
+    h1 {
+        font-size: 2.1em;
+        margin: 0;
+        color: #e7f5ff;
+        text-shadow: 0 0 12px rgba(0,200,255,0.4);
+    }
+
+    p {
+        font-size: 1.1em;
+        margin-top: 10px;
+        color: #9ec7ff;
+    }
+
+    .btn {
+        margin-top: 25px;
+        padding: 12px 28px;
+        background: #00aaff;
+        color: #00111f;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        cursor: pointer;
+        font-weight: 600;
+        box-shadow: 0 0 15px rgba(0,170,255,.4);
+        transition: .2s;
+    }
+
+    .btn:hover {
+        background: #29c3ff;
+        box-shadow: 0 0 22px rgba(0,200,255,.8);
+    }
+
+
+    /* -------------------------------------- */
+    /*         FONDO ANIMADO INDUSTRIAL       */
+    /* -------------------------------------- */
+    .floating {
+        position: absolute;
+        font-weight: bold;
+        font-size: 26px;
+        opacity: 0.18;
+        color: #9bd6ff;
+        animation: float 12s linear infinite;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    @keyframes float {
+        from { transform: translateY(120vh) rotate(0deg); }
+        to   { transform: translateY(-120vh) rotate(360deg); }
+    }
+
+    /* Pequeños iconos técnicos */
+    .icon {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #79caff;
+        border-radius: 6px;
+        position: absolute;
+        opacity: 0.15;
+        animation: float 18s linear infinite;
+    }
+
+    .icon::after {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border: 2px solid #79caff;
+        border-radius: 3px;
+    }
+
+</style>
+
+</head>
+<body>
+
+<!-- ========================================== -->
+<!--           ELEMENTOS FLOTANTES              -->
+<!-- ========================================== -->
+<script>
+    const symbols = [
+        "⌀", "⌖", "|⟂|", "⟂", "∥", "⌯", "±0.01", "Ra 0.8", 
+        "x̄ = (Σx)/n", "ΔL = Lf − Li", "σ = √(Σ(x−μ)²/n)"
+    ];
+
+    // Generar símbolos animados
+    for (let i = 0; i < 22; i++) {
+        const div = document.createElement("div");
+        div.className = "floating";
+        div.style.left = Math.random()*100 + "vw";
+        div.style.animationDuration = (10 + Math.random()*15) + "s";
+        div.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+        document.body.appendChild(div);
+    }
+
+    // Generar iconos estilo "pie de rey / micrómetro"
+    for (let i = 0; i < 8; i++) {
+        const icon = document.createElement("div");
+        icon.className = "icon";
+        icon.style.left = Math.random()*100 + "vw";
+        icon.style.animationDuration = (18 + Math.random()*10) + "s";
+        icon.style.transform = "rotate(" + (Math.random()*60 - 30) + "deg)";
+        document.body.appendChild(icon);
+    }
+</script>
+
+
+<!-- ========================================== -->
+<!--          CUADRO CENTRAL DE ENTRADA         -->
+<!-- ========================================== -->
+<div class="center-box">
+    <img src="img/tmp-quality.png">
+    
+    <h1>TMP · Sistema de Trazabilidad</h1>
+    <p>Control metrológico · Laboratorio · Movimientos · QR · Gestión completa</p>
+
+    <button class="btn" onclick="location.href='acceso.html'">
+        Entrar al sistema
+    </button>
+</div>
+
+</body>
+</html>
+

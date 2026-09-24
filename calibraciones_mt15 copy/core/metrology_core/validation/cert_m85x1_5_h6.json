@@ -1,0 +1,23 @@
+{
+  "id": "cert_m85x1_5_h6",
+  "designation": "M85 x 1.5 H6",
+  "source": "Certificado historico TMP 594",
+  "nominal_mm": 85,
+  "pitch_mm": 1.5,
+  "class": "H6",
+  "expected": {
+    "wire_mm": 0.895,
+    "correction_mm": 1.385961905,
+    "pass": {
+      "min_mm": 84.035,
+      "max_mm": 84.049,
+      "wear_max_mm": 84.014
+    },
+    "no_pass": {
+      "min_mm": 84.238,
+      "max_mm": 84.252,
+      "wear_max_mm": 84.223
+    }
+  },
+  "note": "Caso historico para validar motor Trimos e ISO 1502."
+}

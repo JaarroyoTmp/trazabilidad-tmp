@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TMP · Patrones de calibración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#0e2235; --bg1:#122b43; --bg2:#1a3b57; --card:#183049;
+    --muted:#8ea6bb; --txt:#e7f2fb; --accent:#47a3ff; --accent-2:#1f8fff;
+    --chip:#203a57; --border:#20466866; --danger:#ff6b6b; --ok:#32d29b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--txt);
+    background: radial-gradient(1200px 800px at 10% 0%, var(--bg2) 0%, var(--bg1) 50%, var(--bg0) 100%);
+  }
+  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+  header{
+    display:flex;align-items:center;gap:16px;
+    padding:12px 0 18px;border-bottom:1px solid #21436040;
+    flex-wrap:wrap;
+  }
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  .badge{font-size:12px;background:var(--chip);padding:6px 10px;border-radius:999px;color:#b9d3ea}
+  .online{background:#103c26;color:#aaf2cd}
+  .offline{background:#3a1b1b;color:#ffc0c0}
+  .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700;margin-left:auto}
+  .logo-mini{height:18px;width:18px;border-radius:4px;background:linear-gradient(135deg,#3dd2ff,#1bb3ff);display:inline-block}
+  .card{
+    background:linear-gradient(180deg,#1a3551aa,#163049aa);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    margin-top:16px;
+  }
+  .card h3{margin:0 0 10px;font-size:14px;font-weight:700;color:#d8e9f8}
+  label{display:block;font-size:12px;color:#a7c0d6;margin-bottom:4px}
+  input,select,textarea,button{font-family:inherit;color:inherit}
+  input[type="text"],input[type="number"],input[type="date"],textarea,select{
+    width:100%;background:#102030;border:1px solid #2a537a;border-radius:10px;
+    padding:9px 11px;color:#e9f4ff;outline:none;font-size:13px;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+  .grid{display:grid;gap:12px}
+  .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media(max-width:900px){ .g-3{grid-template-columns:1fr} }
+  @media(max-width:768px){ .g-2{grid-template-columns:1fr} }
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .right{margin-left:auto}
+  .btn{
+    background:var(--accent-2);border:none;border-radius:10px;padding:9px 14px;
+    color:#fff;font-weight:600;cursor:pointer;font-size:13px;transition:.15s transform, .15s background;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn.secondary{background:#214360}
+  .btn.danger{background:#5b1d1d}
+  .btn.sm{padding:6px 10px;font-size:12px}
+  .mini{font-size:11px;color:#9eb9cf}
+  table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;font-size:13px}
+  th,td{border-bottom:1px solid #244b6a66;padding:8px 6px;text-align:left}
+  thead th{background:#112338;color:#cfe6fa;font-weight:600;font-size:12px}
+  tbody tr:nth-child(odd){background:#11263f80}
+  tbody tr:hover{background:#163552;cursor:pointer}
+  .pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:11px;border:1px solid #2d4e74;color:#b9d3ea;background:#203a57}
+  .status-dot{width:8px;height:8px;border-radius:999px;margin-right:5px;display:inline-block}
+  .dot-ok{background:#32d29b}
+  .dot-warn{background:#ffd15c}
+  .dot-bad{background:#ff6b6b}
+  .search-box input{max-width:260px}
+  .toast{
+    position:fixed;bottom:18px;right:18px;background:#102027;border:1px solid #1f7b53;color:#c8f5dd;
+    padding:10px 14px;border-radius:10px;font-size:12px;box-shadow:0 8px 25px rgba(0,0,0,.45);z-index:50;display:none;
+  }
+  .toast.error{border-color:#ff6b6b;color:#ffdede}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">TMP · Admin</div>
+    <h1>Gestión de patrones de calibración</h1>
+    <div class="stamp"><span class="logo-mini"></span> TMP · Metrología · QA</div>
+    <span id="onlineBadge" class="badge offline">Offline</span>
+  </header>
+
+  <!-- LISTADO -->
+  <div class="card">
+    <div class="row">
+      <h3>Listado de patrones</h3>
+      <div class="row right search-box">
+        <input id="searchPatron" type="text" placeholder="Buscar por código o descripción..." />
+        <button id="btnRefrescarPat" class="btn secondary sm">Refrescar</button>
+      </div>
+    </div>
+    <div style="margin-top:8px;max-height:360px;overflow:auto;border-radius:12px;border:1px solid #2a537a">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Familia</th>
+            <th>U (k=2)</th>
+            <th>F. última cal.</th>
+            <th>Próx. cal.</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="patronesRows"></tbody>
+      </table>
+    </div>
+    <p class="mini" style="margin-top:6px">Estos patrones se utilizan en la aplicación de calibraciones (plan, medición y resultados).</p>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="card">
+    <div class="row">
+      <h3>Ficha de patrón</h3>
+      <span class="mini right" id="patFormMode">Modo: alta</span>
+    </div>
+    <div class="grid g-3" style="margin-top:8px">
+      <div>
+        <label>Código de patrón *</label>
+        <input id="patCodigo" type="text" placeholder="Ej.: BP-01, JG-100, P/0125..." />
+      </div>
+      <div>
+        <label>Descripción *</label>
+        <input id="patDescripcion" type="text" placeholder="Ej.: Banco de medición 0–500 mm, Juego bloques 0–100 mm..." />
+      </div>
+      <div>
+        <label>Familia / Tipo</label>
+        <input id="patFamilia" type="text" placeholder="Ej.: Bloques, Banco, Pesas, Roscas..." />
+      </div>
+
+      <div>
+        <label>Incertidumbre base U(k=2)</label>
+        <input id="patUk2" type="text" placeholder="Ej.: 0.002 mm" />
+      </div>
+      <div>
+        <label>Fecha última calibración</label>
+        <input id="patFechaCal" type="date" />
+      </div>
+      <div>
+        <label>Fecha próxima calibración</label>
+        <input id="patProxCal" type="date" />
+      </div>
+
+      <div>
+        <label>Estado del patrón</label>
+        <select id="patEstado">
+          <option value="vigente">Vigente</option>
+          <option value="proximo">Próximo a vencer</option>
+          <option value="fuera">Fuera de calibración</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1">
+        <label>Nota / Trazabilidad</label>
+        <textarea id="patNota" rows="2" placeholder="Información sobre certificado, referencia de laboratorio, observaciones de uso, etc."></textarea>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:flex-end">
+      <button id="btnPatNuevo" class="btn secondary">Nuevo</button>
+      <button id="btnPatEliminar" class="btn danger">Eliminar</button>
+      <button id="btnPatGuardar" class="btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+/* ========= CONFIG SUPABASE ========= */
+const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw"; // pon aquí tu anon key completa
+
+/* ========= ESTADO ========= */
+const state = {
+  online:false,
+  patrones:[],
+  selectedId:null
+};
+
+/* ========= UTIL ========= */
+const $ = q => document.querySelector(q);
+const $$ = q => Array.from(document.querySelectorAll(q));
+
+const setBadge = ok => {
+  const b = $("#onlineBadge");
+  b.textContent = ok ? "Online (Supabase)" : "Offline";
+  b.classList.toggle("online", ok);
+  b.classList.toggle("offline", !ok);
+  state.online = ok;
+};
+function showToast(msg, isError=false){
+  const t=$("#toast");
+  t.textContent = msg;
+  t.classList.toggle("error", !!isError);
+  t.style.display="block";
+  setTimeout(()=>{t.style.display="none";},2500);
+}
+function fmtFecha(s){
+  if (!s) return "—";
+  try{
+    const d = new Date(s);
+    if (Number.isNaN(+d)) return "—";
+    return d.toISOString().slice(0,10);
+  }catch(e){ return "—"; }
+}
+function parseNum(v){
+  if (typeof v === "number") return v;
+  if (!v) return null;
+  const n = Number(String(v).trim().replace(',','.'));
+  return Number.isFinite(n) ? n : null;
+}
+
+/* ========= SUPABASE CLIENT ========= */
+let supabase = null;
+async function ensureSupabase(){
+  if (!SUPABASE_URL.startsWith("http")) { setBadge(false); return null; }
+  if (!supabase){
+    try{
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.5");
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }catch(e){
+      console.error(e);
+      supabase = null;
+    }
+  }
+  setBadge(!!supabase);
+  return supabase;
+}
+
+/* ========= CARGA PATRONES ========= */
+async function cargarPatrones(){
+  await ensureSupabase();
+  if (!supabase){
+    state.patrones = [];
+    renderTablaPatrones();
+    return;
+  }
+  const { data, error } = await supabase
+    .from("patrones")
+    .select("*")
+    .order("codigo",{ascending:true});
+  if (error){
+    console.error(error);
+    showToast("Error al cargar patrones", true);
+  }
+  state.patrones = data || [];
+  renderTablaPatrones();
+}
+function renderTablaPatrones(){
+  const tbody=$("#patronesRows");
+  const filtro = ($("#searchPatron").value || "").toLowerCase();
+  tbody.innerHTML = state.patrones
+    .filter(p=>{
+      if (!filtro) return true;
+      return (p.codigo||"").toLowerCase().includes(filtro) ||
+             (p.descripcion||"").toLowerCase().includes(filtro);
+    })
+    .map(p=>{
+      const estado = p.estado_cal || p.estado || "vigente";
+      let dotClass="dot-ok";
+      if (estado==="proximo") dotClass="dot-warn";
+      if (estado==="fuera") dotClass="dot-bad";
+
+      return `
+        <tr data-id="${p.id||""}">
+          <td>${p.codigo||"—"}</td>
+          <td>${p.descripcion||"—"}</td>
+          <td>${p.familia||"—"}</td>
+          <td>${p.u_k2 ?? "—"}</td>
+          <td>${fmtFecha(p.fecha_calibracion)}</td>
+          <td>${fmtFecha(p.proxima_calibracion)}</td>
+          <td><span class="pill"><span class="status-dot ${dotClass}"></span>${estado}</span></td>
+        </tr>`;
+    }).join('');
+}
+
+/* ========= FORMULARIO ========= */
+function limpiarPatForm(){
+  state.selectedId = null;
+  $("#patCodigo").value="";
+  $("#patDescripcion").value="";
+  $("#patFamilia").value="";
+  $("#patUk2").value="";
+  $("#patFechaCal").value="";
+  $("#patProxCal").value="";
+  $("#patEstado").value="vigente";
+  $("#patNota").value="";
+  $("#patFormMode").textContent="Modo: alta";
+}
+function cargarPatEnForm(p){
+  state.selectedId = p.id;
+  $("#patCodigo").value = p.codigo || "";
+  $("#patDescripcion").value = p.descripcion || "";
+  $("#patFamilia").value = p.familia || "";
+  $("#patUk2").value = (p.u_k2 ?? "") || "";
+  $("#patFechaCal").value = fmtFecha(p.fecha_calibracion)!=="—" ? fmtFecha(p.fecha_calibracion) : "";
+  $("#patProxCal").value = fmtFecha(p.proxima_calibracion)!=="—" ? fmtFecha(p.proxima_calibracion) : "";
+  $("#patEstado").value = p.estado_cal || p.estado || "vigente";
+  $("#patNota").value = p.nota || "";
+  $("#patFormMode").textContent="Modo: edición";
+}
+async function guardarPatron(){
+  const codigo = $("#patCodigo").value.trim();
+  const descripcion = $("#patDescripcion").value.trim();
+  const familia = $("#patFamilia").value.trim();
+  const uk2 = $("#patUk2").value.trim();
+  const fecha_calibracion = $("#patFechaCal").value || null;
+  const proxima_calibracion = $("#patProxCal").value || null;
+  const estado = $("#patEstado").value;
+  const nota = $("#patNota").value.trim();
+
+  if (!codigo || !descripcion){
+    showToast("Código y descripción son obligatorios.", true);
+    return;
+  }
+  await ensureSupabase();
+  if (!supabase){
+    showToast("Sin conexión a Supabase.", true);
+    return;
+  }
+
+  const payload = {
+    codigo,
+    descripcion,
+    familia,
+    u_k2: uk2 ? parseNum(uk2) : null,
+    fecha_calibracion,
+    proxima_calibracion,
+    estado_cal: estado,
+    nota
+  };
+
+  let error;
+  if (state.selectedId){
+    const resp = await supabase
+      .from("patrones")
+      .update(payload)
+      .eq("id", state.selectedId);
+    error = resp.error;
+  }else{
+    const resp = await supabase
+      .from("patrones")
+      .insert(payload);
+    error = resp.error;
+  }
+
+  if (error){
+    console.error(error);
+    showToast("Error al guardar patrón.", true);
+  }else{
+    showToast("Patrón guardado correctamente.");
+    await cargarPatrones();
+    limpiarPatForm();
+  }
+}
+async function eliminarPatron(){
+  if (!state.selectedId){
+    showToast("Selecciona un patrón primero.", true);
+    return;
+  }
+  if (!confirm("¿Eliminar este patrón? Asegúrate de que no se usa en planes de calibración.")) return;
+  await ensureSupabase();
+  if (!supabase) return;
+  const { error } = await supabase
+    .from("patrones")
+    .delete()
+    .eq("id", state.selectedId);
+  if (error){
+    console.error(error);
+    showToast("Error al eliminar patrón.", true);
+  }else{
+    showToast("Patrón eliminado.");
+    await cargarPatrones();
+    limpiarPatForm();
+  }
+}
+
+/* ========= EVENTOS ========= */
+$("#btnRefrescarPat").addEventListener("click", cargarPatrones);
+$("#searchPatron").addEventListener("input", renderTablaPatrones);
+$("#btnPatNuevo").addEventListener("click", limpiarPatForm);
+$("#btnPatGuardar").addEventListener("click", guardarPatron);
+$("#btnPatEliminar").addEventListener("click", eliminarPatron);
+
+$("#patronesRows").addEventListener("click", ev=>{
+  const tr = ev.target.closest("tr");
+  if (!tr) return;
+  const id = tr.dataset.id;
+  const p = state.patrones.find(x=> String(x.id)===String(id));
+  if (p) cargarPatEnForm(p);
+});
+
+/* ========= ARRANQUE ========= */
+(async ()=>{
+  await ensureSupabase();
+  await cargarPatrones();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TMP MT16 - Inspector patrones Supabase</title>
+  <style>
+    :root{--bg:#07111f;--panel:#10243a;--panel2:#071426;--line:#24425f;--txt:#e7f2fb;--muted:#91a7bd;--blue:#3d9cff;--green:#2bd47c;--red:#ff6b6b;--yellow:#ffd15c}
+    *{box-sizing:border-box}
+    body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:20px}
+    h1{margin:0 0 8px 0}.version{background:#06101d;border:1px solid var(--blue);border-radius:12px;padding:12px;margin-bottom:14px;color:var(--yellow);font-weight:bold;line-height:1.45}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    input{background:var(--panel2);color:white;border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;font-weight:bold}
+    button{background:var(--blue);color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer;margin:4px 4px 4px 0}
+    button.secondary{background:#183b60}button.danger{background:#a93636}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border-bottom:1px solid var(--line);padding:7px;text-align:left;font-size:12px;vertical-align:top}
+    th{background:#183b60;position:sticky;top:0;z-index:2}
+    pre{background:#050b14;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap;max-height:520px}
+    .ok{color:var(--green);font-weight:bold}.bad{color:var(--red);font-weight:bold}.warn{color:var(--yellow);font-weight:bold}.muted{color:var(--muted)}
+    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;margin:2px;background:#071426;font-size:12px}
+    .box-ok{border:1px solid var(--green);background:#082719;border-radius:12px;padding:10px;margin-top:8px}
+    .box-warn{border:1px solid var(--yellow);background:#2a2107;border-radius:12px;padding:10px;margin-top:8px}
+    .box-bad{border:1px solid var(--red);background:#2a0b12;border-radius:12px;padding:10px;margin-top:8px}
+    .scroll{overflow:auto;max-height:620px;border:1px solid var(--line);border-radius:10px}.hidden{display:none!important}
+    @media(max-width:1100px){.grid,.two{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="version">
+    HTML REVISION: TMP_MT16_SUPABASE_PATTERN_INSPECTOR_HTML_V1_20260625<br>
+    OBJETIVO: ver exactamente qué devuelve v_patron_valores_activos para desbloquear MT16
+  </div>
+
+  <h1>TMP MT16 - Inspector patrones Supabase</h1>
+  <p class="muted">Esta pantalla no calibra. Sólo inspecciona patrones/certificados reales para ajustar el resolver MT16 sin adivinar.</p>
+
+  <div class="card">
+    <h3>1 - Conexión</h3>
+    <div class="grid">
+      <div><label>Supabase URL</label><input id="supabaseUrl" value="https://uukxdslfmxesufuxjzvt.supabase.co"></div>
+      <div><label>Supabase anon key</label><input id="supabaseKey" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw"></div>
+      <div><label>Vista / tabla</label><input id="tableName" value="v_patron_valores_activos"></div>
+      <div><label>Límite filas</label><input id="limitRows" value="1000"></div>
+    </div>
+    <button id="btnConnect">Conectar y cargar vista</button>
+    <button id="btnExportJson" class="secondary">Copiar JSON técnico</button>
+    <button id="btnClear" class="danger">Limpiar</button>
+    <div id="statusBox" class="box-warn">Pendiente de conectar.</div>
+  </div>
+
+  <div id="summaryCard" class="card hidden">
+    <h3>2 - Resumen automático</h3>
+    <div id="summaryBox"></div>
+    <table><tbody id="summaryRows"></tbody></table>
+  </div>
+
+  <div id="filtersCard" class="card hidden">
+    <h3>3 - Filtros rápidos</h3>
+    <div class="grid">
+      <div><label>Buscar texto</label><input id="searchText" placeholder="TRIMOS, 1288, RODIL, ROSCA, M12..."></div>
+      <div><label>Código</label><input id="searchCode" placeholder="1288"></div>
+      <div><label>Familia</label><input id="searchFamily" placeholder="familia"></div>
+      <div><label>Tipo patrón</label><input id="searchType" placeholder="tipo_patron"></div>
+    </div>
+    <button data-preset="TRIMOS">Ver TRIMOS</button>
+    <button data-preset="1288">Ver código 1288</button>
+    <button data-preset="RODIL">Ver rodillos</button>
+    <button data-preset="HILO">Ver hilos</button>
+    <button data-preset="WIRE">Ver wire</button>
+    <button data-preset="ROSCA">Ver rosca</button>
+    <button data-preset="PATRON">Ver patrón</button>
+    <button data-preset="M12">Ver M12</button>
+    <button data-preset="0.895">Ver 0.895</button>
+    <button id="btnResetFilters" class="secondary">Quitar filtros</button>
+    <div id="filterStatus" class="box-warn">Sin filtros.</div>
+  </div>
+
+  <div id="candidatesCard" class="card hidden">
+    <h3>4 - Candidatos MT16 detectados</h3>
+    <div class="two">
+      <div><h3>Banco Trimos</h3><div id="trimosCandidateBox"></div></div>
+      <div><h3>Rodillos / hilos</h3><div id="wireCandidateBox"></div></div>
+    </div>
+    <h3>Patrones rosca</h3>
+    <div id="threadCandidateBox"></div>
+  </div>
+
+  <div id="tableCard" class="card hidden">
+    <h3>5 - Filas de la vista</h3>
+    <div class="scroll">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="jsonCard" class="card hidden">
+    <h3>6 - JSON técnico</h3>
+    <pre id="jsonOutput">{}</pre>
+  </div>
+
+<script type="module">
+const INSPECTOR_VERSION = "TMP_MT16_SUPABASE_PATTERN_INSPECTOR_V1_20260625";
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+let sb = null;
+let allRows = [];
+let filteredRows = [];
+let columns = [];
+
+function esc(value){return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");}
+function normalize(value=""){return String(value || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/,/g,".").replace(/\s+/g," ").trim();}
+function show(id){$("#"+id).classList.remove("hidden");}
+function hide(id){$("#"+id).classList.add("hidden");}
+function setStatus(type, html){const box=$("#statusBox");box.className=type==="ok"?"box-ok":type==="bad"?"box-bad":"box-warn";box.innerHTML=html;}
+function rowText(row){return normalize(Object.values(row || {}).filter(v => v !== null && v !== undefined).join(" "));}
+function isExpired(value){if(!value)return true;const d=new Date(value);if(Number.isNaN(d.getTime()))return true;const today=new Date();today.setHours(0,0,0,0);d.setHours(0,0,0,0);return d<today;}
+function getDateValue(row){return row.fecha_vencimiento || row.proxima_calibracion || row.fecha_proxima_calibracion || row.caducidad || row.valid_until || "";}
+function isActive(row){return row.activo===true || row.activo==="true" || row.activo===1 || row.activo==="1" || row.activo===null || row.activo===undefined;}
+function looksVigente(row){const estado=normalize(row.estado || "");const estadoOk=!estado || estado.includes("VIGENTE") || estado.includes("OK") || estado.includes("VALID") || estado.includes("APTO");return isActive(row) && estadoOk && !isExpired(getDateValue(row));}
+function getColumnStats(rows){const set=new Set();rows.forEach(r => Object.keys(r || {}).forEach(k => set.add(k)));return Array.from(set).sort();}
+function countUnique(rows,key){const map=new Map();rows.forEach(r=>{const v=r[key];if(v!==null&&v!==undefined&&String(v).trim()!==""){const s=String(v).trim();map.set(s,(map.get(s)||0)+1);}});return Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).slice(0,40);}
+
+function renderSummary(){
+  const total=allRows.length;
+  const vigentes=allRows.filter(looksVigente).length;
+  const expired=allRows.filter(r=>isExpired(getDateValue(r))).length;
+  columns=getColumnStats(allRows);
+  $("#summaryBox").innerHTML=`<span class="pill">Filas: ${total}</span><span class="pill">Columnas: ${columns.length}</span><span class="pill">Vigentes detectados: ${vigentes}</span><span class="pill">Vencidos/sin fecha: ${expired}</span>`;
+  const important=["codigo","descripcion","fabricante","modelo","familia","tipo_patron","patron_id","certificado_id","numero_certificado","fecha_calibracion","fecha_vencimiento","estado","activo","unidad","nominal_num","correccion_num","incertidumbre_us_num","incertidumbre_num","source_rule"];
+  const rows=[];
+  rows.push(`<tr><th>Columnas detectadas</th><td>${columns.map(c=>`<span class="pill">${esc(c)}</span>`).join(" ")}</td></tr>`);
+  for(const key of important){const exists=columns.includes(key);rows.push(`<tr><th>${esc(key)}</th><td class="${exists?"ok":"warn"}">${exists?"Existe":"No existe"}</td></tr>`);}
+  rows.push(`<tr><th>Códigos más frecuentes</th><td>${countUnique(allRows,"codigo").map(([v,c])=>`<span class="pill">${esc(v)} (${c})</span>`).join(" ") || "-"}</td></tr>`);
+  rows.push(`<tr><th>Familias más frecuentes</th><td>${countUnique(allRows,"familia").map(([v,c])=>`<span class="pill">${esc(v)} (${c})</span>`).join(" ") || "-"}</td></tr>`);
+  rows.push(`<tr><th>Tipos patrón más frecuentes</th><td>${countUnique(allRows,"tipo_patron").map(([v,c])=>`<span class="pill">${esc(v)} (${c})</span>`).join(" ") || "-"}</td></tr>`);
+  rows.push(`<tr><th>Fabricantes más frecuentes</th><td>${countUnique(allRows,"fabricante").map(([v,c])=>`<span class="pill">${esc(v)} (${c})</span>`).join(" ") || "-"}</td></tr>`);
+  $("#summaryRows").innerHTML=rows.join("");
+  show("summaryCard");
+}
+
+function looksLikeTrimos(row){const txt=rowText(row);return String(row.codigo||"").trim()==="1288" || txt.includes("TRIMOS") || txt.includes("BANCO") || txt.includes("TELMA");}
+function looksLikeWire(row){const txt=rowText(row);return txt.includes("RODIL") || txt.includes("HILO") || txt.includes("WIRE") || txt.includes("TRES HILOS") || txt.includes("0.895");}
+function looksLikeThreadPattern(row){const txt=rowText(row);return txt.includes("PATRON ROSCA") || txt.includes("PATRON DE ROSCA") || txt.includes("PATRON ROSCADO") || txt.includes("MASTER ROSCA") || txt.includes("ANILLO ROSCA") || txt.includes("TAMPON ROSCA") || txt.includes("M12");}
+
+function renderMiniRows(rows,max=12){
+  if(!rows.length)return `<div class="box-bad">No encontrado.</div>`;
+  return `<div class="box-${rows.some(looksVigente)?"ok":"warn"}">Encontrados: ${rows.length}. Vigentes detectados: ${rows.filter(looksVigente).length}</div>
+  <table><thead><tr><th>código</th><th>descripción</th><th>familia</th><th>tipo</th><th>certificado</th><th>vencimiento</th><th>nominal</th><th>u</th><th>corrección</th></tr></thead>
+  <tbody>${rows.slice(0,max).map(r=>`<tr><td>${esc(r.codigo)}</td><td>${esc(r.descripcion)}</td><td>${esc(r.familia)}</td><td>${esc(r.tipo_patron)}</td><td>${esc(r.numero_certificado || r.certificado)}</td><td class="${looksVigente(r)?"ok":"warn"}">${esc(getDateValue(r))}</td><td>${esc(r.nominal_num ?? r.nominal ?? "")}</td><td>${esc(r.incertidumbre_us_num ?? r.incertidumbre_num ?? r.incertidumbre ?? "")}</td><td>${esc(r.correccion_num ?? r.correccion ?? "")}</td></tr>`).join("")}</tbody></table>`;
+}
+
+function renderCandidates(){
+  const trimos=allRows.filter(looksLikeTrimos);
+  const wires=allRows.filter(looksLikeWire);
+  const threads=allRows.filter(looksLikeThreadPattern);
+  $("#trimosCandidateBox").innerHTML=renderMiniRows(trimos,20);
+  $("#wireCandidateBox").innerHTML=renderMiniRows(wires,20);
+  $("#threadCandidateBox").innerHTML=renderMiniRows(threads,30);
+  show("candidatesCard");
+}
+
+function applyFilters(){
+  const text=normalize($("#searchText").value), code=normalize($("#searchCode").value), family=normalize($("#searchFamily").value), type=normalize($("#searchType").value);
+  filteredRows=allRows.filter(r=>{const txt=rowText(r);return (!text||txt.includes(text)) && (!code||normalize(r.codigo).includes(code)) && (!family||normalize(r.familia).includes(family)) && (!type||normalize(r.tipo_patron).includes(type));});
+  $("#filterStatus").className=filteredRows.length?"box-ok":"box-bad";
+  $("#filterStatus").innerHTML=`Filas visibles: ${filteredRows.length} / ${allRows.length}`;
+  renderTable();
+  renderJson();
+}
+
+function renderTable(){
+  const activeFilter = $("#searchText").value || $("#searchCode").value || $("#searchFamily").value || $("#searchType").value;
+  const rows = activeFilter ? filteredRows : allRows;
+  const visibleCols=["codigo","descripcion","fabricante","modelo","familia","tipo_patron","patron_id","certificado_id","numero_certificado","fecha_calibracion","fecha_vencimiento","estado","activo","unidad","nominal_num","correccion_num","incertidumbre_us_num","incertidumbre_num","source_rule"].filter(c=>columns.includes(c));
+  const finalCols=visibleCols.length?visibleCols:columns.slice(0,24);
+  $("#tableHead").innerHTML=`<tr>${finalCols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr>`;
+  $("#tableBody").innerHTML=rows.slice(0,500).map(r=>`<tr>${finalCols.map(c=>`<td class="${c==="fecha_vencimiento"||c==="estado" ? (looksVigente(r)?"ok":"warn") : ""}">${esc(r[c] ?? "")}</td>`).join("")}</tr>`).join("");
+  show("tableCard");
+}
+
+function buildDiagnosticJson(){
+  const trimos=allRows.filter(looksLikeTrimos), wires=allRows.filter(looksLikeWire), threads=allRows.filter(looksLikeThreadPattern);
+  return {inspector_version:INSPECTOR_VERSION,table:$("#tableName").value.trim(),total_rows:allRows.length,total_columns:columns.length,columns,counts:{vigentes_detectados:allRows.filter(looksVigente).length,trimos_candidates:trimos.length,wire_candidates:wires.length,thread_pattern_candidates:threads.length},sample_values:{codigos:countUnique(allRows,"codigo"),familias:countUnique(allRows,"familia"),tipos_patron:countUnique(allRows,"tipo_patron"),fabricantes:countUnique(allRows,"fabricante")},candidates:{trimos:trimos.slice(0,20),wires:wires.slice(0,20),thread_patterns:threads.slice(0,30)},filtered_rows:filteredRows.slice(0,100)};
+}
+
+function renderJson(){
+  $("#jsonOutput").textContent=JSON.stringify(buildDiagnosticJson(),null,2);
+  show("jsonCard");
+}
+
+async function connectAndLoad(){
+  setStatus("warn","Conectando a Supabase y cargando vista...");
+  allRows=[];filteredRows=[];columns=[];
+  try{
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.5");
+    sb=createClient($("#supabaseUrl").value.trim(),$("#supabaseKey").value.trim());
+    const table=$("#tableName").value.trim();
+    const limit=Number($("#limitRows").value || 1000);
+    const { data,error } = await sb.from(table).select("*").limit(limit);
+    if(error){setStatus("bad",`Error cargando ${esc(table)}:<br>${esc(error.message || String(error))}`);return;}
+    allRows=Array.isArray(data)?data:[];
+    filteredRows=allRows;
+    columns=getColumnStats(allRows);
+    if(!allRows.length){setStatus("bad",`La vista ${esc(table)} respondió sin filas.`);return;}
+    setStatus("ok",`Vista cargada correctamente: ${esc(table)} - ${allRows.length} filas.`);
+    renderSummary();show("filtersCard");renderCandidates();renderTable();renderJson();
+  }catch(e){setStatus("bad",`Error conectando:<br>${esc(e.message || String(e))}`);}
+}
+
+function clearAll(){
+  allRows=[];filteredRows=[];columns=[];
+  ["summaryCard","filtersCard","candidatesCard","tableCard","jsonCard"].forEach(hide);
+  $("#jsonOutput").textContent="{}";$("#searchText").value="";$("#searchCode").value="";$("#searchFamily").value="";$("#searchType").value="";
+  setStatus("warn","Pendiente de conectar.");
+}
+
+function exportJsonVisible(){
+  const json=JSON.stringify(buildDiagnosticJson(),null,2);
+  $("#jsonOutput").textContent=json;show("jsonCard");
+  if(navigator.clipboard){navigator.clipboard.writeText(json).then(()=>alert("JSON copiado al portapapeles.")).catch(()=>alert("Copia manualmente el JSON técnico."));}
+  else alert("Copia manualmente el JSON técnico.");
+}
+
+$("#btnConnect").addEventListener("click",connectAndLoad);
+$("#btnClear").addEventListener("click",clearAll);
+$("#btnExportJson").addEventListener("click",exportJsonVisible);
+["#searchText","#searchCode","#searchFamily","#searchType"].forEach(sel=>$(sel).addEventListener("input",applyFilters));
+$$("[data-preset]").forEach(btn=>btn.addEventListener("click",()=>{$("#searchText").value=btn.dataset.preset;$("#searchCode").value="";$("#searchFamily").value="";$("#searchType").value="";applyFilters();}));
+$("#btnResetFilters").addEventListener("click",()=>{$("#searchText").value="";$("#searchCode").value="";$("#searchFamily").value="";$("#searchType").value="";filteredRows=allRows;$("#filterStatus").className="box-warn";$("#filterStatus").innerHTML="Sin filtros.";renderTable();renderJson();});
+</script>
+</body>
+</html>
