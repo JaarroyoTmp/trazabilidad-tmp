@@ -125,12 +125,16 @@ async function loadAll(){
   if(!sb){setStatus('error','Sin conexión Supabase');return;}
   setStatus('','Cargando…');
   try{
-    const [eqRes,famRes,priceRes] = await Promise.all([
-      sb.from('instrumentos').select('id,codigo,descripcion,fabricante,rango,precision,estado,ubicacion_actual,fecha_calibracion,fecha_proxima_calibracion,proxima_calibracion,familia_id,familia_calibracion_id,propietario_id,valor_reposicion_especifico,propietarios_equipos(nombre),familias_instrumentos(nombre)').order('codigo',{ascending:true}),
+    const [eqRes,ownerRes,famRes,priceRes] = await Promise.all([
+      // Cargamos instrumentos sin depender de relaciones embebidas de PostgREST.
+      // Así propietario_id se resuelve siempre contra propietarios_equipos.
+      sb.from('instrumentos').select('id,codigo,descripcion,fabricante,rango,precision,estado,ubicacion_actual,fecha_calibracion,fecha_proxima_calibracion,proxima_calibracion,familia_id,familia_calibracion_id,propietario_id,valor_reposicion_especifico').order('codigo',{ascending:true}),
+      sb.from('propietarios_equipos').select('id,nombre,tipo,activo').order('nombre',{ascending:true}),
       sb.from('familias_instrumentos').select('id,nombre,activo').order('nombre',{ascending:true}),
       sb.from('valoracion_familias').select('id,familia_id,valor_reposicion_orientativo,moneda,fuente,observaciones,actualizado_en')
     ]);
     if(eqRes.error) throw eqRes.error;
+    if(ownerRes.error) throw ownerRes.error;
     if(famRes.error) throw famRes.error;
     if(priceRes.error){
       console.warn('valoracion_familias:',priceRes.error);
@@ -142,10 +146,14 @@ async function loadAll(){
       state.precios=new Map((priceRes.data||[]).map(x=>[x.familia_id,x]));
     }
     state.familias=(famRes.data||[]).filter(x=>x.activo!==false);
+
+    const propietariosPorId = new Map((ownerRes.data||[]).map(x=>[x.id,x.nombre]));
+    const familiasPorId = new Map((famRes.data||[]).map(x=>[x.id,x.nombre]));
+
     state.equipos=(eqRes.data||[]).map(e=>({
       ...e,
-      propietario:e.propietarios_equipos?.nombre || 'SIN PROPIETARIO',
-      familia_instrumento:e.familias_instrumentos?.nombre || 'SIN FAMILIA',
+      propietario: propietariosPorId.get(e.propietario_id) || 'SIN PROPIETARIO',
+      familia_instrumento: familiasPorId.get(e.familia_id) || 'SIN FAMILIA',
       fecha_proxima:e.fecha_proxima_calibracion || e.proxima_calibracion || null
     }));
     buildFilters();renderFamilyPrices();applyFilters();setStatus('online','Supabase conectado');
