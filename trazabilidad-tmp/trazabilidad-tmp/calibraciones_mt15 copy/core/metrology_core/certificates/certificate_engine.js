@@ -21,8 +21,8 @@
     const nopass = U.readArr(readings.NO_PASA);
     const pMean = U.mean(pass), nMean = U.mean(nopass);
     const pStd = U.std(pass), nStd = U.std(nopass);
-    const pTarget = U.pick(s.trimos_target_pasa, s.objective_pass_trimos, s.passTarget, null);
-    const nTarget = U.pick(s.trimos_target_no_pasa, s.objective_nopass_trimos, s.noPassTarget, null);
+    const pTarget = U.pick(s.pass_target_trimos_mm, s.trimos_target_pasa, s.objective_pass_trimos, s.passTarget, null);
+    const nTarget = U.pick(s.no_pass_target_trimos_mm, s.trimos_target_no_pasa, s.objective_nopass_trimos, s.noPassTarget, null);
     const decisionRaw = U.pick(s.global_decision, input.decision, 'Pendiente');
     const decision = decisionRaw === 'OK' ? 'APTO' : decisionRaw === 'NOK' ? 'NO APTO' : (['APTO','NO APTO','INDETERMINADO'].includes(decisionRaw) ? decisionRaw : 'INDETERMINADO');
     const now = new Date();
@@ -31,7 +31,7 @@
     const standards = proc.standards || proc.norms || [];
     const standardsText = Array.isArray(standards) && standards.length ? standards.join(' · ') : (s.thread_system === 'METRIC_ISO' ? 'ISO 68-1 · ISO 724 · ISO 965 · ISO 1502 · ILAC-G8 · ISO 14253-1 · GUM' : U.pick(s.standard, s.thread_system, 'Normativa aplicable según designación'));
     const designation = U.pick(s.designation, core.parsed?.normalized, eq.rango, '-');
-    const Uexp = U.pick(s.U_mm, core.summary?.U_mm, core.uncertainty?.U_mm, null);
+    const Uexp = U.pick(s.U_mm, core.uncertainty?.global_U_max_mm, core.uncertainty?.U_mm, null);
     const certNo = input.certificate_number || (global.TMPCertificateNumbering ? global.TMPCertificateNumbering.build(input) : U.certNo(input));
 
     const payload = {
@@ -103,7 +103,7 @@
         decision_raw: decisionRaw
       },
       uncertainty: {
-        pattern: U.pick(core.uncertainty?.u_banco_mm, core.uncertainty?.u_pattern_mm, core.traceability?.selected_bank?.incertidumbre, core.traceability?.selected_bank?.u_k2, '-'),
+        pattern: U.pick(core.uncertainty?.u_banco_mm, core.uncertainty?.u_bank_mm, core.traceability?.selected_bank?.u_standard_mm, '-'),
         resolution: U.pick(core.uncertainty?.u_resolution_mm, '-'),
         repeatability: U.pick(core.uncertainty?.u_repeatability_mm, '-'),
         temperature: U.pick(core.uncertainty?.u_temperature_mm, '-'),
@@ -167,6 +167,10 @@
     return Layout.document(pageOne(p,kind) + pageTwo(p), title);
   }
   function openCertificate(input, kind='CERTIFICADO'){
+    const core = input?.core || {};
+    const dec = core?.summary?.global_decision || input?.decision;
+    if(kind !== 'NOK' && (!core?.can_emit_full_certificate || dec !== 'OK')) return {ok:false, blocked:true, reason:'CERTIFICATE_NOT_AUTHORIZED', html:''};
+    if(kind === 'NOK' && dec !== 'NOK') return {ok:false, blocked:true, reason:'NOK_REPORT_NOT_AUTHORIZED', html:''};
     const html = renderCertificate(input, kind);
     const w = window.open('', '_blank');
     if(!w) return {ok:false, html};

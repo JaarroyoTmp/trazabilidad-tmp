@@ -23,7 +23,7 @@
     .status{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:white;font-size:11px;font-weight:850;color:var(--muted)}.status-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}.status.online .status-dot{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.13)}.status.error .status-dot{background:#ef4444}
     .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;min-width:0}
     .kpis{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:12px;margin-bottom:14px}.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow2);min-height:102px;position:relative;overflow:hidden}.kpi::after{content:"";position:absolute;right:-17px;bottom:-24px;width:86px;height:86px;border-radius:50%;background:rgba(37,99,235,.06)}.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#647d96;font-weight:900}.kpi-value{font-size:28px;font-weight:950;letter-spacing:-.045em;margin-top:7px;color:#0d2b50}.kpi-note{font-size:11px;color:#7890a5;margin-top:3px}.kpi.money .kpi-value{font-size:24px;color:#15803d}
-    .toolbar{display:grid;grid-template-columns:2fr repeat(5,minmax(145px,1fr)) auto;gap:9px;align-items:end;margin-bottom:14px}.field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;font-weight:900;color:#6b8196;margin:0 0 5px}.field input,.field select{width:100%;border:1px solid var(--line2);border-radius:10px;background:#fff;padding:9px 10px;color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.09)}
+    .toolbar{display:grid;grid-template-columns:2fr repeat(4,minmax(150px,1fr)) auto;gap:9px;align-items:end;margin-bottom:14px}.field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;font-weight:900;color:#6b8196;margin:0 0 5px}.field input,.field select{width:100%;border:1px solid var(--line2);border-radius:10px;background:#fff;padding:9px 10px;color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.09)}
     .tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}.tab{border:1px solid var(--line2);background:#fff;color:#526e89;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:900;cursor:pointer}.tab.active{background:#eaf2ff;color:#1d4ed8;border-color:#bfdbfe}
     .grid-main{display:grid;grid-template-columns:minmax(0,1fr) 385px;gap:14px}.table-wrap{overflow:auto;border:1px solid #e3edf6;border-radius:14px;max-height:64vh;background:#fff}.table{width:100%;border-collapse:separate;border-spacing:0;font-size:11px;min-width:1160px}.table th{position:sticky;top:0;z-index:2;background:#f5f9fd;color:#3d5873;text-align:left;padding:10px 9px;border-bottom:1px solid #dbe7f2;white-space:nowrap}.table td{padding:9px;border-bottom:1px solid #edf3f8;vertical-align:top}.table tr:hover td{background:#f9fcff}.code{font-weight:950;color:#0d2b50;white-space:nowrap}.desc{min-width:220px}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:900;border:1px solid}.pill.blue{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}.pill.green{color:#15803d;background:#ecfdf3;border-color:#bbf7d0}.pill.orange{color:#b45309;background:#fff7ed;border-color:#fed7aa}.pill.red{color:#b91c1c;background:#fff1f2;border-color:#fecdd3}.pill.gray{color:#64748b;background:#f8fafc;border-color:#e2e8f0}.pill.purple{color:#6d28d9;background:#f5f3ff;border-color:#ddd6fe}.money-cell{font-weight:900;text-align:right;white-space:nowrap}.muted{color:#7890a5}.empty{text-align:center;padding:38px 20px;color:#7890a5}
     .side{display:flex;flex-direction:column;gap:14px}.side h2{font-size:15px;margin:0 0 4px;color:#0d2b50}.side p{font-size:11px;color:#7890a5;margin:0 0 12px;line-height:1.45}.family-list{display:flex;flex-direction:column;gap:7px;max-height:340px;overflow:auto}.family-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 66px;gap:7px;align-items:center;border:1px solid #e3edf6;border-radius:11px;padding:8px}.family-name{font-size:11px;font-weight:850;line-height:1.2}.family-row input{width:100%;border:1px solid var(--line2);border-radius:8px;padding:7px 6px;text-align:right}.family-row button{border:0;background:#eef5ff;color:#2563eb;border-radius:8px;padding:7px;font-weight:900;cursor:pointer}.family-row button:disabled{opacity:.45;cursor:not-allowed}
@@ -43,6 +43,7 @@
     <div class="top-actions">
       <span id="status" class="status"><span class="status-dot"></span><span id="statusText">Conectando…</span></span>
       <a class="btn" href="home.html">⌂ Inicio</a>
+      <a class="btn" href="mt16.html">MT16 · Roscados</a>
       <button class="btn primary" id="refreshBtn">↻ Actualizar</button>
     </div>
   </header>
@@ -61,8 +62,7 @@
       <div class="field"><label>Buscar</label><input id="search" type="search" placeholder="Código, descripción, fabricante, máquina…"></div>
       <div class="field"><label>Propietario</label><select id="owner"><option value="">Todos</option></select></div>
       <div class="field"><label>Familia</label><select id="family"><option value="">Todas</option></select></div>
-      <div class="field"><label>Estado operativo</label><select id="state"><option value="">Todos</option></select></div>
-      <div class="field"><label>Estado metrológico</label><select id="metrology"><option value="">Todos</option><option>VIGENTE</option><option>PRÓXIMO ≤30 DÍAS</option><option>VENCIDO</option><option>SIN FECHA</option></select></div>
+      <div class="field"><label>Estado</label><select id="state"><option value="">Todos</option></select></div>
       <div class="field"><label>Ubicación</label><select id="location"><option value="">Todas</option></select></div>
       <button class="btn" id="clearBtn">Limpiar filtros</button>
     </div>
@@ -72,8 +72,8 @@
       <div>
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>Código</th><th>Descripción</th><th>Propietario</th><th>Familia</th><th>Estado operativo</th><th>Estado metrológico</th><th>Ubicación actual</th><th>Próx. calibración</th><th>Valor estimado</th><th>Origen valor</th></tr></thead>
-            <tbody id="rows"><tr><td colspan="10" class="empty">Cargando inventario…</td></tr></tbody>
+            <thead><tr><th>Código</th><th>Descripción</th><th>Propietario</th><th>Familia</th><th>Estado</th><th>Ubicación</th><th>Próx. calibración</th><th>Valor estimado</th><th>Origen valor</th></tr></thead>
+            <tbody id="rows"><tr><td colspan="9" class="empty">Cargando inventario…</td></tr></tbody>
           </table>
         </div>
         <div class="muted" id="resultInfo" style="margin-top:8px;font-size:10px"></div>
@@ -94,8 +94,8 @@
         </section>
 
         <section class="panel">
-          <h2>Origen de los datos</h2>
-          <div class="note"><b>Estado operativo</b>: <code>instrumentos.estado</code>.<br><b>Estado metrológico</b>: calculado con la próxima fecha de calibración.<br><b>Ubicación</b>: nombre de <code>ubicaciones</code> mediante <code>ubicacion_id</code>; solo si falta ese vínculo se usa <code>ubicacion_actual</code> como dato legado.<br><b>Propietario</b>: <code>propietario_id</code> → <code>propietarios_equipos</code>.<br><br>El valor mostrado es un <b>valor de reposición orientativo</b>, no una valoración contable.</div>
+          <h2>Criterio de valoración</h2>
+          <div class="note">El importe mostrado es un <b>valor de reposición orientativo</b>, no una valoración contable. Se usa el valor específico del equipo cuando exista; en caso contrario, el valor configurado para su familia física.</div>
         </section>
       </aside>
     </div>
@@ -119,25 +119,19 @@ function uniq(arr){return [...new Set(arr.filter(Boolean))].sort((a,b)=>String(a
 function activeEquipo(e){return !/baja definitiva/i.test(e.estado||'') && !/retirado/i.test(e.ubicacion_actual||'');}
 function ownerName(e){return e.propietario || 'SIN PROPIETARIO';}
 function familyName(e){return e.familia_instrumento || 'SIN FAMILIA';}
-function locationName(e){return e.ubicacion_resuelta || e.ubicacion_actual || 'SIN UBICACIÓN';}
-function metrologyState(e){const v=e.fecha_proxima; if(!v)return 'SIN FECHA'; const d=new Date(String(v).length===10?v+'T12:00:00':v); if(Number.isNaN(d.getTime()))return 'SIN FECHA'; const hoy=new Date(); hoy.setHours(0,0,0,0); d.setHours(0,0,0,0); const dias=Math.ceil((d-hoy)/86400000); if(dias<0)return 'VENCIDO'; if(dias<=30)return 'PRÓXIMO ≤30 DÍAS'; return 'VIGENTE';}
 function getValue(e){const sp=Number(e.valor_reposicion_especifico); if(Number.isFinite(sp)&&sp>0)return {value:sp,source:'ESPECÍFICO'}; const p=state.precios.get(e.familia_id); const v=Number(p?.valor_reposicion_orientativo); return Number.isFinite(v)&&v>0?{value:v,source:'FAMILIA'}:{value:null,source:'SIN VALORAR'};}
 
 async function loadAll(){
   if(!sb){setStatus('error','Sin conexión Supabase');return;}
   setStatus('','Cargando…');
   try{
-    const [eqRes,ownerRes,famRes,locRes,priceRes] = await Promise.all([
-      sb.from('instrumentos').select('id,codigo,descripcion,fabricante,rango,precision,estado,ubicacion_id,ubicacion_actual,fecha_calibracion,fecha_proxima_calibracion,proxima_calibracion,familia_id,familia_calibracion_id,propietario_id,valor_reposicion_especifico').order('codigo',{ascending:true}),
-      sb.from('propietarios_equipos').select('id,nombre,tipo,activo').order('nombre',{ascending:true}),
+    const [eqRes,famRes,priceRes] = await Promise.all([
+      sb.from('instrumentos').select('id,codigo,descripcion,fabricante,rango,precision,estado,ubicacion_actual,fecha_calibracion,fecha_proxima_calibracion,proxima_calibracion,familia_id,familia_calibracion_id,propietario_id,valor_reposicion_especifico,propietarios_equipos(nombre),familias_instrumentos(nombre)').order('codigo',{ascending:true}),
       sb.from('familias_instrumentos').select('id,nombre,activo').order('nombre',{ascending:true}),
-      sb.from('ubicaciones').select('id,nombre,tipo,activo').order('nombre',{ascending:true}),
       sb.from('valoracion_familias').select('id,familia_id,valor_reposicion_orientativo,moneda,fuente,observaciones,actualizado_en')
     ]);
     if(eqRes.error) throw eqRes.error;
-    if(ownerRes.error) throw ownerRes.error;
     if(famRes.error) throw famRes.error;
-    if(locRes.error) throw locRes.error;
     if(priceRes.error){
       console.warn('valoracion_familias:',priceRes.error);
       state.precios=new Map();state.canWritePrices=false;
@@ -148,14 +142,10 @@ async function loadAll(){
       state.precios=new Map((priceRes.data||[]).map(x=>[x.familia_id,x]));
     }
     state.familias=(famRes.data||[]).filter(x=>x.activo!==false);
-    const propietariosPorId=new Map((ownerRes.data||[]).filter(x=>x.activo!==false).map(x=>[String(x.id),x.nombre]));
-    const familiasPorId=new Map((famRes.data||[]).map(x=>[String(x.id),x.nombre]));
-    const ubicacionesPorId=new Map((locRes.data||[]).filter(x=>x.activo!==false).map(x=>[String(x.id),x.nombre]));
     state.equipos=(eqRes.data||[]).map(e=>({
       ...e,
-      propietario:propietariosPorId.get(String(e.propietario_id||'')) || 'SIN PROPIETARIO',
-      familia_instrumento:familiasPorId.get(String(e.familia_id||'')) || 'SIN FAMILIA',
-      ubicacion_resuelta:ubicacionesPorId.get(String(e.ubicacion_id||'')) || e.ubicacion_actual || 'SIN UBICACIÓN',
+      propietario:e.propietarios_equipos?.nombre || 'SIN PROPIETARIO',
+      familia_instrumento:e.familias_instrumentos?.nombre || 'SIN FAMILIA',
       fecha_proxima:e.fecha_proxima_calibracion || e.proxima_calibracion || null
     }));
     buildFilters();renderFamilyPrices();applyFilters();setStatus('online','Supabase conectado');
@@ -166,7 +156,7 @@ function buildFilters(){
   fillSelect('#owner',uniq(state.equipos.map(ownerName)),'Todos');
   fillSelect('#family',uniq(state.equipos.map(familyName)),'Todas');
   fillSelect('#state',uniq(state.equipos.map(x=>x.estado)),'Todos');
-  fillSelect('#location',uniq(state.equipos.map(locationName)),'Todas');
+  fillSelect('#location',uniq(state.equipos.map(x=>x.ubicacion_actual)),'Todas');
   const owners=uniq(state.equipos.map(ownerName));
   $('#ownerTabs').innerHTML=['Todos',...owners].map((o,i)=>`<button class="tab ${i===0?'active':''}" data-owner="${esc(o==='Todos'?'':o)}">${esc(o)}</button>`).join('');
   $('#ownerTabs').querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{ $('#owner').value=b.dataset.owner; $('#ownerTabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyFilters(); }));
@@ -174,10 +164,10 @@ function buildFilters(){
 function fillSelect(sel,vals,label){const el=$(sel),cur=el.value;el.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(''); if(vals.includes(cur))el.value=cur;}
 
 function applyFilters(){
-  const q=$('#search').value.trim().toLowerCase(),owner=$('#owner').value,family=$('#family').value,st=$('#state').value,met=$('#metrology').value,loc=$('#location').value;
+  const q=$('#search').value.trim().toLowerCase(),owner=$('#owner').value,family=$('#family').value,st=$('#state').value,loc=$('#location').value;
   state.visible=state.equipos.filter(e=>{
-    const hay=[e.codigo,e.descripcion,e.fabricante,e.rango,e.precision,locationName(e),e.propietario,e.familia_instrumento,metrologyState(e)].join(' ').toLowerCase();
-    return (!q||hay.includes(q))&&(!owner||ownerName(e)===owner)&&(!family||familyName(e)===family)&&(!st||e.estado===st)&&(!met||metrologyState(e)===met)&&(!loc||locationName(e)===loc);
+    const hay=[e.codigo,e.descripcion,e.fabricante,e.rango,e.precision,e.ubicacion_actual,e.propietario,e.familia_instrumento].join(' ').toLowerCase();
+    return (!q||hay.includes(q))&&(!owner||ownerName(e)===owner)&&(!family||familyName(e)===family)&&(!st||e.estado===st)&&(!loc||e.ubicacion_actual===loc);
   });
   renderTable();renderKPIs();renderBreakdown();
 }
@@ -185,10 +175,10 @@ function applyFilters(){
 function statusPill(v){const s=String(v||'');let c='gray';if(/uso/i.test(s))c='orange';else if(/laboratorio/i.test(s))c='purple';else if(/baja/i.test(s))c='red';return `<span class="pill ${c}">${esc(s||'—')}</span>`;}
 function renderTable(){
   const arr=state.visible;
-  if(!arr.length){$('#rows').innerHTML='<tr><td colspan="10" class="empty">No hay equipos que coincidan con los filtros.</td></tr>';$('#resultInfo').textContent='0 resultados';return;}
+  if(!arr.length){$('#rows').innerHTML='<tr><td colspan="9" class="empty">No hay equipos que coincidan con los filtros.</td></tr>';$('#resultInfo').textContent='0 resultados';return;}
   $('#rows').innerHTML=arr.map(e=>{const val=getValue(e);return `<tr>
     <td class="code">${esc(e.codigo)}</td><td class="desc"><b>${esc(e.descripcion||'—')}</b><br><span class="muted">${esc(e.fabricante||'')} ${esc(e.rango||'')}</span></td>
-    <td><span class="pill blue">${esc(ownerName(e))}</span></td><td>${esc(familyName(e))}</td><td>${statusPill(e.estado)}</td><td><span class="pill ${metrologyState(e)==='VENCIDO'?'red':metrologyState(e)==='VIGENTE'?'green':metrologyState(e)==='SIN FECHA'?'gray':'orange'}">${esc(metrologyState(e))}</span></td><td>${esc(locationName(e))}</td>
+    <td><span class="pill blue">${esc(ownerName(e))}</span></td><td>${esc(familyName(e))}</td><td>${statusPill(e.estado)}</td><td>${esc(e.ubicacion_actual||'—')}</td>
     <td>${fmtDate(e.fecha_proxima)}</td><td class="money-cell">${val.value?money.format(val.value):'—'}</td><td><span class="pill ${val.source==='SIN VALORAR'?'gray':val.source==='ESPECÍFICO'?'green':'blue'}">${val.source}</span></td></tr>`;}).join('');
   $('#resultInfo').textContent=`${arr.length} equipos mostrados de ${state.equipos.length}`;
 }
@@ -225,8 +215,8 @@ async function savePrice(fid){
   state.precios.set(fid,res.data);renderKPIs();renderTable();toast('Valor de familia actualizado');
 }
 
-['search','owner','family','state','metrology','location'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',()=>{if(id==='owner'){$('#ownerTabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.owner===$('#owner').value));}applyFilters();}));
-$('#clearBtn').addEventListener('click',()=>{['search','owner','family','state','metrology','location'].forEach(id=>$('#'+id).value='');$('#ownerTabs').querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('active',i===0));applyFilters();});
+['search','owner','family','state','location'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',()=>{if(id==='owner'){$('#ownerTabs').querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.owner===$('#owner').value));}applyFilters();}));
+$('#clearBtn').addEventListener('click',()=>{['search','owner','family','state','location'].forEach(id=>$('#'+id).value='');$('#ownerTabs').querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('active',i===0));applyFilters();});
 $('#refreshBtn').addEventListener('click',loadAll);
 loadAll();
 </script>

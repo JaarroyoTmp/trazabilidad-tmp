@@ -700,7 +700,7 @@ function sync(){
   const technicalAllowed=!!core?.can_emit_technical_result && decision !== "Pendiente";
   const certAllowed=!!core?.can_emit_full_certificate && decision === "OK";
   if(saveBtn) saveBtn.disabled = !technicalAllowed;
-  if(pdfBtn) pdfBtn.disabled = !technicalAllowed;
+  if(pdfBtn) pdfBtn.disabled = !certAllowed;
   if(nokBtn) nokBtn.disabled = decision !== "NOK";
   if(note){
     note.textContent = certAllowed ? "Calibración evaluada. Puedes guardar y generar certificado PDF." : technicalAllowed ? "Resultado técnico disponible. Revisa los avisos antes de emitir el certificado." : "Introduce lecturas y ejecuta la evaluación para habilitar acciones.";

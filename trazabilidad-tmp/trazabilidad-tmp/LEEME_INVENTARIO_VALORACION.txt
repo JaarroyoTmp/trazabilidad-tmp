@@ -1,0 +1,31 @@
+TMP - INVENTARIO Y VALORACION
+=============================
+
+Cambios incluidos:
+1. Nuevo acceso "Inventario & Valor" en home.html.
+2. Nueva pantalla inventario_valoracion.html.
+3. SQL_INVENTARIO_VALORACION.sql con estructura incremental de valoración y vistas.
+
+ANTES DE USAR LA VALORACION DESDE EL HTML
+------------------------------------------
+Ejecutar una vez SQL_INVENTARIO_VALORACION.sql en Supabase SQL Editor.
+El script:
+- no elimina instrumentos;
+- añade valor_reposicion_especifico si no existe;
+- crea/actualiza valoracion_familias;
+- habilita RLS y políticas necesarias para la aplicación web actual;
+- crea las vistas de inventario y valoración.
+
+La pantalla funciona con el inventario de Supabase y permite:
+- buscar por código, descripción, fabricante o ubicación;
+- filtrar por propietario, familia, estado y ubicación;
+- ver separación Paramio / clientes;
+- asignar valor orientativo por familia;
+- calcular valor TMP y valor total gestionado;
+- distinguir valor por familia de valor específico por equipo.
+
+NOTA DE SEGURIDAD
+-----------------
+Las políticas RLS incluidas permiten edición desde el cliente web anon actual porque
+la aplicación todavía no usa autenticación/roles para este módulo. Cuando se implante
+Auth, conviene restringir INSERT/UPDATE a administradores o Calidad.

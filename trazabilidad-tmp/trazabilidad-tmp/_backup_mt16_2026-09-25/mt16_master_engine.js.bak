@@ -310,7 +310,7 @@ export async function resolveMT16Core({ equipment = {}, supabase = null, reading
   let readings = null, uncertainty = null, decision = null;
   if (readingsByPoint && (isMetricIso || isBsppIso228 || isUnified)) {
     readings = evaluateReadings({ trimos, traceability, readingsByPoint });
-    uncertainty = calculateThreadUncertainty({ readingResults: readings.results || [], patterns: { selected_bank: traceability.selected_bank, selected_rollers: traceability.selected_rollers, selected_master: traceability.selected_master }, model: { u_rollers_mm: 0, u_master_mm: 0, resolution_mm: 0.001, k: 2 } });
+    uncertainty = calculateThreadUncertainty({ readingResults: readings.results || [], patterns: { selected_bank: traceability.selected_bank, selected_rollers: traceability.selected_rollers, selected_master: traceability.selected_master }, model: { u_rollers_mm: 0.0003, u_master_mm: 0, resolution_mm: 0.001, k: 2 } });
     decision = decideThreadCalibration({ readingResults: readings.results || [], uncertainty });
   }
 
@@ -319,20 +319,9 @@ export async function resolveMT16Core({ equipment = {}, supabase = null, reading
   const procedure = getThreadProcedure(parsed);
   const canEvaluate = Boolean((isMetricIso || isBsppIso228 || isUnified) && parsed.ok && iso724.ok && iso965.ok && iso1502.ok && trimos.ok);
   const officialCertificateFamily = Boolean(isMetricIso || isBsppIso228);
-  const evaluationComplete = Boolean(readings?.ok && uncertainty?.ok && ["OK","NOK","INDETERMINADO"].includes(decision?.global_decision));
-  const canEmitTechnicalResult = Boolean(canEvaluate && traceability.ok && evaluationComplete);
-  // Un resultado tecnico puede evaluarse, pero un certificado oficial no se emite con limites marcados BETA/PENDING.
-  const normativeValidated = !/BETA|PENDING|VALIDATION/i.test(String(iso1502?.status || "")) && !/pendiente|validar contra tabla oficial/i.test(String(iso1502?.warning || ""));
-  const canEmitFullCertificate = Boolean(canEvaluate && officialCertificateFamily && normativeValidated && traceability.ok_full_traceability && evaluationComplete && ["OK","NOK"].includes(decision?.global_decision));
-  const status = !canEvaluate
-    ? (parsed?.ok ? "MT16_CORE_OPERATIVO_SEGURO_LIMITES_PENDIENTES" : "MT16_CORE_INCOMPLETE")
-    : !normativeValidated
-      ? "MT16_CORE_TECNICO_VALIDACION_NORMATIVA"
-      : !evaluationComplete
-        ? "MT16_CORE_LISTO_PARA_MEDIR"
-        : canEmitFullCertificate
-          ? "MT16_CORE_CERTIFICABLE"
-          : "MT16_CORE_RESULTADO_TECNICO";
+  const canEmitTechnicalResult = Boolean(canEvaluate && traceability.ok);
+  const canEmitFullCertificate = Boolean(canEvaluate && officialCertificateFamily && traceability.ok_full_traceability && (!readingsByPoint || decision?.global_decision));
+  const status = officialCertificateFamily && canEvaluate ? "MT16_CORE_CERTIFICABLE" : (canEvaluate ? "MT16_CORE_OPERATIVO_EN_VALIDACION" : (parsed?.ok ? "MT16_CORE_OPERATIVO_SEGURO_LIMITES_PENDIENTES" : "MT16_CORE_INCOMPLETE"));
 
   return {
     ok: canEvaluate,
@@ -368,11 +357,6 @@ export async function resolveMT16Core({ equipment = {}, supabase = null, reading
       trimos_correction_mm: trimos.correction?.correction_mm,
       pass_target_trimos_mm: trimos.plan?.points?.[0]?.target_trimos_mm,
       no_pass_target_trimos_mm: trimos.plan?.points?.[1]?.target_trimos_mm,
-      trimos_target_pasa: trimos.plan?.points?.[0]?.target_trimos_mm,
-      trimos_target_no_pasa: trimos.plan?.points?.[1]?.target_trimos_mm,
-      objective_pass_trimos: trimos.plan?.points?.[0]?.target_trimos_mm,
-      objective_nopass_trimos: trimos.plan?.points?.[1]?.target_trimos_mm,
-      U_mm: uncertainty?.global_U_max_mm ?? uncertainty?.U_mm ?? null,
       bank: traceability.selected_bank?.codigo || null,
       rollers: traceability.selected_rollers?.codigo || null,
       master: traceability.selected_master?.codigo || null,
@@ -385,7 +369,6 @@ export async function resolveMT16Core({ equipment = {}, supabase = null, reading
       procedure_steps: procedure.operator?.steps || [],
       certification_state: familyRoute.state,
       certification_message: familyRoute.message,
-      normative_validated: normativeValidated,
       procedure_standard: parsed.thread_system === 'BSPP_ISO228' ? 'ISO 228-2: GO debe pasar a mano sin fuerza excesiva; NOT GO no debe superar el criterio de vueltas indicado por la norma.' : parsed.thread_system === 'BSPT_ISO7' ? 'ISO 7-2: verificacion con calibre conico de forma completa; la cara de la pieza debe quedar entre las caras del escalon +/-.' : parsed.thread_system === 'UN_ASME_B1_1' ? 'ASME B1.2 pendiente de validacion oficial: motor operativo para ensayo interno con limites cargados cuando existan.' : 'ISO 1502: verificacion PASA / NO PASA y calculo por diametro medio sobre rodillos.',
     },
     warnings: [ ...(parsed.warnings || []), ...(iso965.warning ? [iso965.warning] : []), ...(iso1502.warning ? [iso1502.warning] : []), ...(trimos.wire?.warning ? [trimos.wire.warning] : []), ...(traceability.warnings || []) ]

@@ -1,0 +1,56 @@
+PARCHE MT16 TMP - 25/09/2026
+
+IMPORTANTE: este paquete NO sustituye el proyecto completo.
+Copiar/sobrescribir UNICAMENTE estos archivos conservando las rutas:
+
+1) home.html
+   - Es EXACTAMENTE el home bueno entregado por el usuario. No se ha modificado.
+
+2) calibraciones_mt15 copy/core/metrology_core/thread/core/trimos_engine.js
+   - Para rosca METRIC_ISO usa la tabla de rodillos validada TMP por PASO.
+   - Ya NO elige el rodillo por proximidad matematica.
+   - Si el paso no existe en la tabla TMP devuelve NO_SOPORTADO.
+
+3) calibraciones_mt15 copy/core/metrology_core/thread/core/thread_traceability_engine.js
+   - Trimos certificado = patron trazable principal.
+   - Rodillos/hilos = utiles de medicion, no bloquean por certificado individual.
+   - Patron de rosca adicional = no requerido para este metodo.
+   - Solo la correccion del Trimos entra como correccion certificada.
+
+4) calibraciones_mt15 copy/core/metrology_core/thread/core/thread_uncertainty_engine_core.js
+   - Rodillos y patron de rosca no se meten como contribuciones certificadas independientes.
+
+5) calibraciones_mt15 copy/core/metrology_core/thread/core/mt16_master_engine.js
+   - Alineado con el modelo anterior y mantiene los motores ISO/parser existentes.
+
+6) calibraciones_mt15 copy/core/metrology_core/procedure_rules/tampon_roscado.js
+   - Mismo criterio de tabla TMP para que el procedimiento experto general no calcule otro rodillo distinto.
+
+TABLA TMP IMPLEMENTADA:
+Paso 0.25 / 0.30 -> rodillo 0.170 mm
+Paso 0.35        -> rodillo 0.220 mm
+Paso 0.40        -> rodillo 0.250 mm
+Paso 0.45 / 0.50 -> rodillo 0.290 mm
+Paso 0.60        -> rodillo 0.335 mm
+Paso 0.70 / 0.80 -> rodillo 0.455 mm
+Paso 0.90        -> rodillo 0.530 mm
+Paso 1.00        -> rodillo 0.620 mm
+Paso 1.25        -> rodillo 0.725 mm
+Paso 1.50        -> rodillo 0.895 mm
+Paso 1.75        -> rodillo 1.100 mm
+Paso 2.00        -> rodillo 1.350 mm
+Paso 2.50        -> rodillo 1.650 mm
+Paso 3.00 / 3.50 -> rodillo 2.050 mm
+Paso 4.00 / 4.50 -> rodillo 2.550 mm
+Paso 5.00 / 5.50 -> rodillo 3.200 mm
+
+PRUEBAS REALIZADAS:
+- Todas las entradas de la tabla TMP devuelven exactamente el rodillo esperado.
+- M12 x 1.25 6H -> rodillo 0.725 mm.
+- M12 x 1.25 6H -> objetivo PASA 12.292468245 mm.
+- M12 x 1.25 6H -> objetivo NO PASA 12.460468245 mm.
+- Con banco Trimos vigente + incertidumbre y SIN rodillos certificados / SIN patron rosca adicional:
+  traceability.ok = true
+  traceability.ok_full_traceability = true
+  can_emit_full_certificate = true
+- Paso metrico no incluido (ej. 1.10) -> NO_SOPORTADO; no inventa un rodillo por proximidad.

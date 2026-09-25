@@ -1,0 +1,114 @@
+{
+  "ok": true,
+  "status": "MT16_CORE_TECNICO_VALIDACION_NORMATIVA",
+  "wire": 0.725,
+  "passTarget": 12.292468245,
+  "noPassTarget": 12.460468245,
+  "traceOk": true,
+  "traceFull": true,
+  "bank": "1288",
+  "uBank": 0.000740534,
+  "uncertainty": {
+    "ok": true,
+    "source": "TMP_THREAD_UNCERTAINTY_CORE_V31_20260925_TRIMOS_PRIMARY",
+    "points": [
+      {
+        "point_id": "PASA",
+        "lado": "PASA",
+        "ok": true,
+        "source": "TMP_THREAD_UNCERTAINTY_CORE_V31_20260925_TRIMOS_PRIMARY",
+        "n": 5,
+        "s_repeatability_mm": 0.001516575,
+        "u_repeatability_mm": 0.000678233,
+        "u_bank_mm": 0.000740534,
+        "u_rollers_mm": 0,
+        "u_master_mm": 0,
+        "resolution_mm": 0.001,
+        "u_resolution_mm": 0.000288675,
+        "u_temperature_mm": 0,
+        "uc_mm": 0.001044856,
+        "k": 2,
+        "U_mm": 0.002089712
+      },
+      {
+        "point_id": "NO_PASA",
+        "lado": "NO_PASA",
+        "ok": true,
+        "source": "TMP_THREAD_UNCERTAINTY_CORE_V31_20260925_TRIMOS_PRIMARY",
+        "n": 5,
+        "s_repeatability_mm": 0.000547723,
+        "u_repeatability_mm": 0.000244949,
+        "u_bank_mm": 0.000740534,
+        "u_rollers_mm": 0,
+        "u_master_mm": 0,
+        "resolution_mm": 0.001,
+        "u_resolution_mm": 0.000288675,
+        "u_temperature_mm": 0,
+        "uc_mm": 0.000831699,
+        "k": 2,
+        "U_mm": 0.001663399
+      }
+    ],
+    "global_U_max_mm": 0.002089712,
+    "U_mm": 0.002089712,
+    "u_bank_mm": 0.000740534,
+    "u_banco_mm": 0.000740534,
+    "u_repeatability_mm": 0.000678233,
+    "u_resolution_mm": 0.000288675,
+    "u_temperature_mm": 0,
+    "u_c_mm": 0.001044856,
+    "k": 2
+  },
+  "decision": {
+    "ok": true,
+    "source": "TMP_THREAD_DECISION_CORE_V30_20260630",
+    "global_decision": "OK",
+    "decisions": [
+      {
+        "point_id": "PASA",
+        "lado": "PASA",
+        "meanD2_mm": 11.198931755,
+        "limits": {
+          "min": 11.1945,
+          "max": 11.2055,
+          "wear_max": 11.1705
+        },
+        "U_mm": 0.002089712,
+        "ok": true,
+        "decision": "OK",
+        "rule": "ILAC_G8_GUARD_BAND_CONSERVATIVE",
+        "interval_mm": {
+          "low": 11.196842043,
+          "high": 11.201021467
+        },
+        "message": "OK: el intervalo medido +/- U queda dentro de los limites."
+      },
+      {
+        "point_id": "NO_PASA",
+        "lado": "NO_PASA",
+        "meanD2_mm": 11.367131755,
+        "limits": {
+          "min": 11.3625,
+          "max": 11.3735,
+          "wear_max": 11.3565
+        },
+        "U_mm": 0.001663399,
+        "ok": true,
+        "decision": "OK",
+        "rule": "ILAC_G8_GUARD_BAND_CONSERVATIVE",
+        "interval_mm": {
+          "low": 11.365468356,
+          "high": 11.368795154
+        },
+        "message": "OK: el intervalo medido +/- U queda dentro de los limites."
+      }
+    ],
+    "message": "Calibracion OK segun ILAC-G8 conservadora."
+  },
+  "technical": true,
+  "certificate": false,
+  "normativeValidated": false,
+  "warnings": [
+    "Limites ISO1502 V30 pendientes de validacion final contra tabla completa y clausula aplicable."
+  ]
+}

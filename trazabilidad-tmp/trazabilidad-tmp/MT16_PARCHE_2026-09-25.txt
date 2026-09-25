@@ -1,0 +1,27 @@
+TMP - MT16 - PARCHE DE TRAZABILIDAD 25/09/2026
+
+Objetivo
+- Corregir la regresion que bloqueaba MT16 aunque el rodillo estuviera correctamente calculado.
+- Mantener el principio: modificar sin destruir.
+
+Archivos modificados
+1) calibraciones_mt15 copy/core/metrology_core/thread/core/thread_traceability_engine.js
+2) calibraciones_mt15 copy/core/metrology_core/thread/core/mt16_master_engine.js
+
+Criterio aplicado
+- Banco Trimos certificado = patron trazable principal.
+- Debe estar vigente y tener incertidumbre disponible.
+- Rodillos/hilos = accesorios de medicion. El motor debe determinar el diametro requerido; no se exige certificado individual para desbloquear MT16.
+- Patron de rosca independiente = informacion adicional; no bloquea el procedimiento MT16.
+- Para no romper consumidores existentes se conserva el campo ok_full_traceability, pero desde V34 significa: Trimos valido + rodillo determinado.
+- En la correccion aplicada a lecturas solo entra la correccion del banco Trimos.
+- La incertidumbre del rodillo se mantiene como componente de modelo (u_rollers_mm = 0.0003), no como requisito de certificado individual.
+
+Validacion realizada
+- Sintaxis JS: OK.
+- Prueba aislada M12 x 1.25 6H con rodillo 0.725 mm y solo banco Trimos certificado: OK.
+- Resultado de prueba: ok=true, ok_full_traceability=true, warnings=[] y score 100%.
+
+Copia de seguridad
+- _backup_mt16_2026-09-25/thread_traceability_engine.js.bak
+- _backup_mt16_2026-09-25/mt16_master_engine.js.bak
