@@ -1,0 +1,20 @@
+MT16 V93 - Certificado inicial ISO17025
+
+Instalacion:
+1. Copiar el contenido del ZIP sobre la carpeta: calibraciones_mt15 copy/
+2. Sustituir archivos.
+3. Abrir MT16 y pulsar Ctrl+F5.
+
+Cambios:
+- Nueva carpeta core/metrology_core/certificates/
+- Nuevo motor certificate_engine.js
+- El boton Generar certificado PDF abre una vista imprimible del certificado.
+- Si el navegador bloquea la ventana, descarga un HTML del certificado.
+- El certificado se genera con los datos del motor MT16: equipo, rosca, procedimiento, trazabilidad, lecturas, medias, errores, regla de decision y avisos.
+- Si no es certificable, el documento sale como borrador tecnico/no certificable, sin ocultar los avisos.
+- Guardar calibracion sigue generando respaldo JSON de la calibracion.
+
+Pendiente siguiente fase:
+- Guardado real en Supabase en tablas calibraciones/calibracion_puntos/calibracion_lecturas.
+- Numeracion oficial correlativa de certificado.
+- Firma/sello y QR.

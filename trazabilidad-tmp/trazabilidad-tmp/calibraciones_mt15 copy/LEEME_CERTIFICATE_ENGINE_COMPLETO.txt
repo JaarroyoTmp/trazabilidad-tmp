@@ -1,0 +1,17 @@
+TMP Certificate Engine completo
+
+Instalacion:
+1. Cerrar la pestaña MT16.
+2. Copiar el contenido de este ZIP sobre: calibraciones_mt15 copy/
+3. Sustituir archivos.
+4. Abrir MT16 y pulsar Ctrl + F5.
+
+Incluye:
+- Motor documental comun para certificados TMP.
+- Certificado modular en 2 paginas.
+- Cabecera, identificacion, ambiente, trazabilidad, resultados, decision, firmas, QR/hash y anexo tecnico.
+- Bloque tecnico MT16 para tampon roscado.
+- Payload defensivo: si faltan datos, el certificado no se rompe.
+
+Objetivo:
+Un unico certificado profesional para todo el laboratorio TMP. Cada motor metrologico aportara solamente su bloque tecnico especifico.

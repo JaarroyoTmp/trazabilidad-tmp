@@ -1,0 +1,20 @@
+PARCHE PRE-MT16
+
+Archivos modificados:
+- alta_instrumento.html
+- inventario_valoracion.html
+- reposiciones.html
+
+Archivo nuevo:
+- SQL_FIX_NECESIDADES_FUERA_USO.sql
+
+ORDEN:
+1. Ejecutar SQL_FIX_NECESIDADES_FUERA_USO.sql en Supabase.
+2. Subir/reemplazar SOLO los tres HTML en trazabilidad-tmp/.
+3. Forzar Ctrl+F5.
+
+Cambios:
+- Necesidades laboratorio incluye equipos con estado operativo Fuera de uso (sin confundir con vencimiento de calibración).
+- Alta/Edición usa desplegable real de propietarios/clientes y permite crear cliente nuevo. Paramio queda como propietario real, no null.
+- Alta/Edición carga todas las ubicaciones activas desde Supabase y elimina duplicados visuales por nombre.
+- Inventario aclara y separa Estado operativo / Estado metrológico; resuelve ubicación por ubicacion_id y propietario por propietario_id.

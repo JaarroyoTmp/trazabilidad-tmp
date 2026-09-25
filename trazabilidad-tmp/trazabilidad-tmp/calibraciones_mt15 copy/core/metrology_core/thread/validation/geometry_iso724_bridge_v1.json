@@ -1,0 +1,22 @@
+{
+  "id": "geometry_iso724_bridge_v1",
+  "source": "ISO724 bridge",
+  "cases": [
+    {
+      "designation": "M14x2-6H",
+      "expected_D2_table_mm": 12.701,
+      "expected_D1_table_mm": 11.835
+    },
+    {
+      "designation": "M16x1.5-6H",
+      "expected_D2_table_mm": 15.026,
+      "expected_D1_table_mm": 14.376
+    },
+    {
+      "designation": "M33x2 H6",
+      "expected_D2_table_mm": 31.701,
+      "expected_D1_table_mm": 30.835
+    }
+  ],
+  "note": "El motor geometry V2 debe tomar dimensiones métricas desde thread_iso724_database.js."
+}

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TMP - Historico de calibraciones</title>
+  <style>
+    :root{--bg:#07111f;--card:#0d1b2e;--card2:#10243a;--line:#24425f;--txt:#e7f2fb;--muted:#9eb7cc;--ok:#2bd47c;--warn:#ffd15c;--bad:#ff6b6b;--accent:#3d9cff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--txt);background:radial-gradient(900px 600px at 10% 0%,#16314e 0%,var(--bg) 55%),var(--bg)}
+    .wrap{max-width:1280px;margin:24px auto;padding:0 16px}
+    header{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
+    h1{font-size:20px;margin:0}.right{margin-left:auto}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#143252;color:#cfe6fa;font-size:12px;font-weight:700;white-space:nowrap}
+    .pill.ok{background:#0e4027;color:#baf1d2}.pill.warn{background:#493b15;color:#ffe6ad}.pill.bad{background:#4a1b1b;color:#ffc7c7}.pill.info{background:#123b60;color:#cfe6fa}
+    .card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 10px 30px #0004}
+    .grid{display:grid;gap:10px}.g-6{grid-template-columns:1.2fr 1.4fr 1fr 1fr 1fr 1fr}.g-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+    input,select,button{font-family:inherit}
+    input,select{width:100%;padding:9px 10px;border-radius:10px;border:1px solid #2d5578;background:#071426;color:var(--txt);outline:none}
+    button{border:0;border-radius:10px;padding:10px 13px;color:white;background:var(--accent);font-weight:700;cursor:pointer}
+    button.secondary{background:#234763}button.ghost{background:transparent;border:1px solid #2d5578}
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .table-box{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:520px}
+    table{width:100%;border-collapse:collapse;min-width:980px}
+    th,td{border-bottom:1px solid #25476088;padding:9px 8px;font-size:13px;vertical-align:top;text-align:left}
+    th{position:sticky;top:0;background:#10243a;color:#d7ebfb;z-index:2}
+    tr:hover td{background:#10243a99}
+    .mini{font-size:12px;color:var(--muted);line-height:1.35}.hidden{display:none!important}.empty{color:var(--muted);padding:18px;text-align:center}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;white-space:pre-wrap;word-break:break-word}
+    .action-cell{white-space:nowrap}
+    @media(max-width:900px){.g-6,.g-4{grid-template-columns:1fr}table{min-width:760px}header{align-items:flex-start;flex-direction:column}.right{margin-left:0}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="pill info">TMP</span>
+    <h1>Historico de calibraciones</h1>
+    <span id="onlineBadge" class="pill warn right">Offline</span>
+  </header>
+
+  <section class="card">
+    <h3>Filtros</h3>
+    <div class="grid g-6">
+      <div><label>Codigo equipo</label><input id="fCodigo" placeholder="11217"></div>
+      <div><label>Descripcion / rango</label><input id="fTexto" placeholder="tampon, H8, micrometro..."></div>
+      <div><label>Resultado</label><select id="fResultado"><option value="">Todos</option><option value="APTO">APTO</option><option value="NO_APTO">NO APTO</option><option value="NO EVALUABLE">NO EVALUABLE</option><option value="INDETERMINADO">INDETERMINADO</option></select></div>
+      <div><label>Desde</label><input id="fDesde" type="date"></div>
+      <div><label>Hasta</label><input id="fHasta" type="date"></div>
+      <div><label>Informe</label><select id="fInforme"><option value="">Todos</option><option value="disponible">PDF disponible</option><option value="pendiente">PDF pendiente</option></select></div>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:flex-end">
+      <button id="btnBuscar">Buscar</button>
+      <button id="btnLimpiar" class="secondary">Limpiar</button>
+      <button id="btnVolver" class="ghost">Volver</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <h3 style="margin:0">Calibraciones</h3>
+      <span id="countBadge" class="pill info">0 registros</span>
+      <span class="mini right">Ordenado por fecha de creacion descendente</span>
+    </div>
+    <div class="table-box" style="margin-top:12px">
+      <table>
+        <thead><tr><th>Fecha</th><th>Equipo</th><th>Descripcion</th><th>Resultado</th><th>Operario</th><th>Proxima cal.</th><th>Procedimiento</th><th>Informe</th><th>Accion</th></tr></thead>
+        <tbody id="calRows"><tr><td colspan="9" class="empty">Pulsa Buscar.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="detailSection" class="card hidden">
+    <div class="row">
+      <h3 id="detailTitle">Detalle calibracion</h3>
+      <span id="detailResult" class="pill">-</span>
+      <span id="detailPdf" class="pill warn">Informe pendiente</span>
+      <button id="btnCerrarDetalle" class="secondary right">Cerrar detalle</button>
+    </div>
+    <div id="detailHeader" class="grid g-4" style="margin-top:12px"></div>
+
+    <div class="card" style="background:#071426;margin-top:12px">
+      <h3>Puntos</h3>
+      <div class="table-box"><table><thead><tr><th>#</th><th>Funcion</th><th>Etiqueta</th><th>Nominal</th><th>Media</th><th>Error</th><th>U</th><th>Decision</th><th>Patron</th></tr></thead><tbody id="pointRows"></tbody></table></div>
+    </div>
+
+    <div class="card" style="background:#071426">
+      <h3>Lecturas</h3>
+      <div class="table-box"><table><thead><tr><th>Punto</th><th>Lectura</th><th>Valor</th><th>Unidad</th><th>Registrado por</th></tr></thead><tbody id="readingRows"></tbody></table></div>
+    </div>
+
+    <div class="card" style="background:#071426">
+      <h3>Patrones utilizados</h3>
+      <div class="table-box"><table><thead><tr><th>Codigo</th><th>Descripcion</th><th>Motivo / factor aplicacion</th></tr></thead><tbody id="patternRows"></tbody></table></div>
+    </div>
+
+    <div class="card" style="background:#071426">
+      <h3>Datos motor</h3>
+      <div id="motorJson" class="mono"></div>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import { ensureSupabase as conectarSupabase } from "../supabase_client.js";
+
+const $ = q => document.querySelector(q);
+const $$ = q => Array.from(document.querySelectorAll(q));
+
+let supabase = null;
+let lastCalibrations = [];
+
+function setBadge(ok) {
+  const b = $("#onlineBadge");
+  b.textContent = ok ? "Online (Supabase)" : "Offline";
+  b.className = ok ? "pill ok right" : "pill warn right";
+}
+
+async function ensureSupabase() {
+  supabase = await conectarSupabase(setBadge);
+  return supabase;
+}
+
+function fmtDate(value) {
+  if (!value) return "-";
+  try {
+    const d = new Date(value);
+    if (!Number.isNaN(d.getTime())) return new Intl.DateTimeFormat("es-ES").format(d);
+  } catch {}
+  return String(value);
+}
+
+function fmtNum(value, decimals = 6) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "-";
+  return n.toFixed(decimals);
+}
+
+function statusClass(value) {
+  const s = String(value || "").toUpperCase();
+  if (s === "APTO" || s === "OK") return "ok";
+  if (s.includes("NO_APTO") || s.includes("NO APTO") || s.includes("NOK")) return "bad";
+  if (s.includes("NO EVALUABLE") || s.includes("INDETERMINADO")) return "warn";
+  return "info";
+}
+
+function pdfBadge(url) {
+  return url ? '<span class="pill ok">PDF disponible</span>' : '<span class="pill warn">PDF pendiente</span>';
+}
+
+function cleanSearch(value) {
+  return String(value || "").replace(/[%_]/g, "").replace(/[,()]/g, " ").trim();
+}
+
+function getCalDate(cal = {}) {
+  return cal.fecha_ultima || cal.fecha_calibracion || cal.creado_en || null;
+}
+
+function getNextDate(cal = {}) {
+  return cal.fecha_proxima || cal.datos_motor?.fecha_proxima_calibracion || null;
+}
+
+async function buscarCalibraciones() {
+  await ensureSupabase();
+
+  if (!supabase) {
+    alert("No hay conexion con Supabase.");
+    return;
+  }
+
+  const rows = $("#calRows");
+  rows.innerHTML = '<tr><td colspan="9" class="empty">Buscando...</td></tr>';
+
+  const codigo = cleanSearch($("#fCodigo").value);
+  const texto = cleanSearch($("#fTexto").value);
+  const resultado = $("#fResultado").value;
+  const desde = $("#fDesde").value;
+  const hasta = $("#fHasta").value;
+  const informe = $("#fInforme").value;
+
+  let query = supabase
+    .from("calibraciones")
+    .select("*, instrumentos:instrumento_id (id,codigo,descripcion,rango,estado,fecha_calibracion,fecha_proxima_calibracion,proxima_calibracion,informe_calibracion_url)")
+    .order("creado_en", { ascending: false })
+    .limit(200);
+
+  if (resultado) {
+    query = query.or(`resultado.eq.${resultado},estado_final.eq.${resultado},decision_global.eq.${resultado}`);
+  }
+
+  if (desde) query = query.gte("fecha_ultima", desde);
+  if (hasta) query = query.lte("fecha_ultima", hasta);
+  if (informe === "disponible") query = query.not("certificado_url", "is", null);
+  if (informe === "pendiente") query = query.is("certificado_url", null);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("TMP error historico calibraciones:", error);
+    rows.innerHTML = '<tr><td colspan="9" class="empty">Error consultando Supabase. Revisa consola.</td></tr>';
+    return;
+  }
+
+  let list = data || [];
+
+  if (codigo) {
+    list = list.filter(c => String(c.instrumentos?.codigo || "").toLowerCase().includes(codigo.toLowerCase()));
+  }
+
+  if (texto) {
+    const t = texto.toLowerCase();
+    list = list.filter(c => {
+      const i = c.instrumentos || {};
+      return [i.descripcion,i.rango,c.familia_equipo,c.procedimiento_codigo,c.norma_aplicada,c.observaciones].filter(Boolean).join(" ").toLowerCase().includes(t);
+    });
+  }
+
+  lastCalibrations = list;
+  renderCalibrations(list);
+}
+
+function renderCalibrations(list = []) {
+  $("#countBadge").textContent = `${list.length} registros`;
+
+  if (!list.length) {
+    $("#calRows").innerHTML = '<tr><td colspan="9" class="empty">No se encontraron calibraciones.</td></tr>';
+    return;
+  }
+
+  $("#calRows").innerHTML = list.map(cal => {
+    const i = cal.instrumentos || {};
+    const result = cal.resultado || cal.estado_final || cal.decision_global || "-";
+    const pdf = cal.certificado_url || i.informe_calibracion_url || null;
+
+    return `
+      <tr>
+        <td>${fmtDate(getCalDate(cal))}</td>
+        <td><strong>${i.codigo || "-"}</strong><br><span class="mini">${cal.codigo || ""}</span></td>
+        <td>${i.descripcion || "-"}<br><span class="mini">${i.rango || "-"}</span></td>
+        <td><span class="pill ${statusClass(result)}">${result}</span></td>
+        <td>${cal.operador || "-"}</td>
+        <td>${fmtDate(getNextDate(cal))}</td>
+        <td>${cal.procedimiento_codigo || "-"}<br><span class="mini">${cal.familia_equipo || ""}</span></td>
+        <td>${pdfBadge(pdf)}${pdf ? `<br><a href="${pdf}" target="_blank" class="mini">Abrir PDF</a>` : ""}</td>
+        <td class="action-cell"><button class="secondary btn-detail" data-id="${cal.id}">Ver detalle</button></td>
+      </tr>
+    `;
+  }).join("");
+
+  $$(".btn-detail").forEach(btn => btn.addEventListener("click", () => abrirDetalle(btn.dataset.id)));
+}
+
+async function abrirDetalle(calibracionId) {
+  const cal = lastCalibrations.find(c => c.id === calibracionId);
+  if (!cal) return;
+
+  $("#detailSection").classList.remove("hidden");
+  $("#detailSection").scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const i = cal.instrumentos || {};
+  const result = cal.resultado || cal.estado_final || cal.decision_global || "-";
+  const pdf = cal.certificado_url || i.informe_calibracion_url || null;
+
+  $("#detailTitle").textContent = `Detalle calibracion ${cal.codigo || cal.id}`;
+  $("#detailResult").textContent = result;
+  $("#detailResult").className = `pill ${statusClass(result)}`;
+
+  const pdfEl = $("#detailPdf");
+  if (pdf) {
+    pdfEl.outerHTML = `<a id="detailPdf" class="pill ok" target="_blank" href="${pdf}">Abrir PDF</a>`;
+  } else {
+    pdfEl.outerHTML = '<span id="detailPdf" class="pill warn">Informe pendiente</span>';
+  }
+
+  $("#detailHeader").innerHTML = `
+    ${headerItem("Equipo", `${i.codigo || "-"} · ${i.descripcion || "-"}`)}
+    ${headerItem("Rango", i.rango || "-")}
+    ${headerItem("Fecha calibracion", fmtDate(getCalDate(cal)))}
+    ${headerItem("Proxima calibracion", fmtDate(getNextDate(cal)))}
+    ${headerItem("Operario", cal.operador || "-")}
+    ${headerItem("Procedimiento", cal.procedimiento_codigo || "-")}
+    ${headerItem("Norma aplicada", cal.norma_aplicada || "-")}
+    ${headerItem("Estado guardado", cal.estado_guardado || "-")}
+  `;
+
+  await cargarDetalle(calibracionId, cal);
+}
+
+function headerItem(k, v) {
+  return `<div class="card" style="background:#071426;margin:0"><label>${k}</label><div>${v}</div></div>`;
+}
+
+async function cargarDetalle(calibracionId, cal = {}) {
+  $("#pointRows").innerHTML = '<tr><td colspan="9" class="empty">Cargando puntos...</td></tr>';
+  $("#readingRows").innerHTML = '<tr><td colspan="5" class="empty">Cargando lecturas...</td></tr>';
+  $("#patternRows").innerHTML = '<tr><td colspan="3" class="empty">Cargando patrones...</td></tr>';
+
+  const { data: puntos, error: pError } = await supabase
+    .from("calibracion_puntos")
+    .select("*")
+    .eq("calibracion_id", calibracionId)
+    .order("punto_ordinal", { ascending: true });
+
+  if (pError) {
+    console.error(pError);
+    $("#pointRows").innerHTML = '<tr><td colspan="9" class="empty">Error cargando puntos.</td></tr>';
+  } else {
+    renderPuntos(puntos || []);
+    await cargarLecturas(puntos || []);
+  }
+
+  await cargarPatrones(calibracionId);
+  $("#motorJson").textContent = JSON.stringify(cal.datos_motor || cal.payload_completo || {}, null, 2);
+}
+
+function renderPuntos(puntos = []) {
+  if (!puntos.length) {
+    $("#pointRows").innerHTML = '<tr><td colspan="9" class="empty">Sin puntos guardados.</td></tr>';
+    return;
+  }
+
+  $("#pointRows").innerHTML = puntos.map(p => `
+    <tr>
+      <td>${p.punto_ordinal ?? "-"}</td>
+      <td>${p.funcion || "-"}</td>
+      <td>${p.etiqueta || "-"}</td>
+      <td>${fmtNum(p.nominal, 6)} ${p.unidad || ""}</td>
+      <td>${fmtNum(p.media, 6)}</td>
+      <td>${fmtNum(p.error, 6)}</td>
+      <td>${fmtNum(p.incertidumbre_expandida, 6)}</td>
+      <td><span class="pill ${statusClass(p.decision)}">${p.decision || (p.conforme ? "APTO" : "-")}</span></td>
+      <td>${p.patron_codigo || "-"}</td>
+    </tr>
+  `).join("");
+}
+
+async function cargarLecturas(puntos = []) {
+  if (!puntos.length) {
+    $("#readingRows").innerHTML = '<tr><td colspan="5" class="empty">Sin lecturas.</td></tr>';
+    return;
+  }
+
+  const pointIds = puntos.map(p => p.id);
+  const pointById = new Map(puntos.map(p => [p.id, p]));
+
+  const { data, error } = await supabase
+    .from("calibracion_lecturas")
+    .select("*")
+    .in("punto_id", pointIds)
+    .order("lectura_ordinal", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    $("#readingRows").innerHTML = '<tr><td colspan="5" class="empty">Error cargando lecturas.</td></tr>';
+    return;
+  }
+
+  const list = data || [];
+  if (!list.length) {
+    $("#readingRows").innerHTML = '<tr><td colspan="5" class="empty">Sin lecturas guardadas.</td></tr>';
+    return;
+  }
+
+  list.sort((a,b) => {
+    const pa = pointById.get(a.punto_id)?.punto_ordinal || 0;
+    const pb = pointById.get(b.punto_id)?.punto_ordinal || 0;
+    return pa - pb || (a.lectura_ordinal || 0) - (b.lectura_ordinal || 0);
+  });
+
+  $("#readingRows").innerHTML = list.map(l => {
+    const p = pointById.get(l.punto_id);
+    return `<tr><td>${p?.punto_ordinal ?? "-"} · ${l.etiqueta_punto || p?.etiqueta || "-"}</td><td>${l.lectura_ordinal}</td><td>${fmtNum(l.valor, 6)}</td><td>${l.unidad || p?.unidad || "-"}</td><td>${l.registrado_por || "-"}</td></tr>`;
+  }).join("");
+}
+
+async function cargarPatrones(calibracionId) {
+  const { data, error } = await supabase
+    .from("calibracion_patrones")
+    .select("*, patrones:patron_id (codigo, descripcion)")
+    .eq("calibracion_id", calibracionId);
+
+  if (error) {
+    console.error(error);
+    $("#patternRows").innerHTML = '<tr><td colspan="3" class="empty">Error cargando patrones.</td></tr>';
+    return;
+  }
+
+  const list = data || [];
+  if (!list.length) {
+    $("#patternRows").innerHTML = '<tr><td colspan="3" class="empty">Sin patrones asociados.</td></tr>';
+    return;
+  }
+
+  $("#patternRows").innerHTML = list.map(p => `<tr><td>${p.patrones?.codigo || "-"}</td><td>${p.patrones?.descripcion || "-"}</td><td>${p.factor_aplicacion || "-"}</td></tr>`).join("");
+}
+
+function limpiarFiltros() {
+  $("#fCodigo").value = "";
+  $("#fTexto").value = "";
+  $("#fResultado").value = "";
+  $("#fDesde").value = "";
+  $("#fHasta").value = "";
+  $("#fInforme").value = "";
+  $("#detailSection").classList.add("hidden");
+}
+
+$("#btnBuscar").addEventListener("click", buscarCalibraciones);
+$("#btnLimpiar").addEventListener("click", () => { limpiarFiltros(); buscarCalibraciones(); });
+$("#btnCerrarDetalle").addEventListener("click", () => $("#detailSection").classList.add("hidden"));
+$("#btnVolver").addEventListener("click", () => { window.location.href = "./TMP_Calibraciones_MT15_guiada.html"; });
+$("#fCodigo").addEventListener("keydown", ev => { if (ev.key === "Enter") buscarCalibraciones(); });
+$("#fTexto").addEventListener("keydown", ev => { if (ev.key === "Enter") buscarCalibraciones(); });
+
+setBadge(false);
+ensureSupabase().then(() => buscarCalibraciones());
+</script>
+</body>
+</html>

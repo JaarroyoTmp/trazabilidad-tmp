@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TMP · Alta / Edición / Baja de Instrumentos · Familias v3</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <style>
+    :root{--bg:#0f1b2d;--panel:#12233b;--muted:#a9b4c3;--txt:#e8f0ff;--primary:#1e88e5;--primary-600:#1565c0;--accent:#ff8f00;--danger:#e53935;--chip:#20324b;--input:#0b1627;--border:#1c2a44}
+    *{box-sizing:border-box}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu;background:var(--bg);color:var(--txt)}
+    header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;background:linear-gradient(180deg,#0f1b2d 0,#0f1b2df0 100%);position:sticky;top:0;z-index:10}
+    .brand-wrap{display:flex;align-items:center;gap:10px}.brand-logo{height:42px;width:auto}.brand-titles{display:flex;flex-direction:column}.brand-titles h1{margin:0;font-size:1.15rem}.brand-titles span{font-size:.8rem;color:var(--muted)}
+    .btn-header{border-radius:999px;border:1px solid var(--border);background:transparent;color:#cfe1ff;padding:8px 14px;font-size:.85rem;cursor:pointer}.btn-header:hover{background:#14233a}
+    main{max-width:1000px;margin:20px auto 40px;padding:0 16px}.tabs{display:flex;gap:8px;margin:10px 0 18px;flex-wrap:wrap}
+    .tab{background:var(--chip);border:1px solid var(--border);color:#cfe1ff;padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600;font-size:.9rem}.tab.active{background:var(--primary);border-color:transparent;color:#fff}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;display:none}.panel.active{display:block}h2{margin:0 0 12px;font-size:1.1rem}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .row{display:flex;gap:10px;flex-wrap:wrap}label{display:block;font-size:.85rem;color:#cfe1ff;margin-bottom:4px}
+    input,select,textarea{width:100%;background:var(--input);color:var(--txt);border-radius:10px;border:1px solid var(--border);padding:9px 11px;font-size:.95rem}textarea{min-height:80px;resize:vertical}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.btn{border-radius:10px;padding:9px 13px;font-size:.9rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:none}
+    .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-600)}.btn-accent{background:var(--accent);color:#132235}.btn-warn{background:var(--danger);color:#fff}.btn-ghost{background:transparent;border:1px solid var(--border);color:#cfe1ff}.btn-ghost:hover{background:#14233a}
+    .alert{margin-top:14px;padding:10px 12px;border-radius:10px;border:1px solid transparent}.alert.ok{background:#17351d;color:#baf3c1;border-color:#214d28}.alert.err{background:#3a1414;color:#ffb3b2;border-color:#572222}.alert.info{background:#102941;color:#b3d6ff;border-color:#1d3b60}.hidden{display:none}
+    .qr-box{background:#0c1a2c;border:1px dashed var(--border);border-radius:12px;height:320px;display:flex;align-items:center;justify-content:center;font-size:.9rem;text-align:center;color:var(--muted)}
+    .btn-float{position:fixed;right:20px;bottom:20px;background:#1e88e5;color:#fff;border:none;border-radius:999px;padding:9px 18px;cursor:pointer;font-size:.9rem;box-shadow:0 0 10px rgba(0,0,0,.4);z-index:20}.btn-float:hover{background:#1565c0}
+    .hint{font-size:.75rem;color:var(--muted);margin-top:4px}
+    .retire-card{margin-top:14px;border:1px solid #29405f;border-radius:14px;background:#0d1d31;padding:14px}
+    .retire-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .retire-item{background:#0b1627;border:1px solid var(--border);border-radius:10px;padding:9px 10px}
+    .retire-item span{display:block;color:var(--muted);font-size:.72rem;margin-bottom:3px}.retire-item strong{font-size:.9rem}
+    .retire-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.btn-repair{background:#f59e0b;color:#132235}.btn-danger{background:#dc2626;color:#fff}.btn-history{background:#334155;color:#fff}
+    @media(max-width:700px){.retire-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand-wrap">
+    <img src="img/tmp-quality.png" alt="TMP" class="brand-logo">
+    <div class="brand-titles"><h1>TMP · Control Metrológico</h1><span>Alta, edición y baja de instrumentos</span></div>
+  </div>
+  <button class="btn-header" onclick="window.location.href='home.html'">🏠 Volver al panel</button>
+</header>
+
+<main>
+  <div class="tabs">
+    <button id="tabAlta" class="tab active">Alta / Edición</button>
+    <button id="tabBaja" class="tab">Baja por QR / Código</button>
+  </div>
+
+  <section id="panelAlta" class="panel active">
+    <h2>Ficha del instrumento</h2>
+    <div id="msgAlta" class="alert info hidden"></div>
+    <div class="grid">
+      <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
+      <div><label>Descripción *</label><input id="descripcion" placeholder="Ej. Tampón liso P/NP"></div>
+      <div>
+        <label>Familia del instrumento *</label>
+        <select id="familia_id"><option value="">Cargando familias...</option></select>
+        <div class="hint">Selecciona qué tipo de instrumento es. Esta familia determina automáticamente su familia/motor de calibración.</div>
+      </div>
+      <div>
+        <label>Calibración asignada</label>
+        <div id="familia_calibracion_info" style="width:100%;background:var(--input);color:var(--txt);border-radius:10px;border:1px solid var(--border);padding:9px 11px;min-height:40px">Pendiente de seleccionar familia</div>
+        <div class="hint">Asignación automática desde Supabase. No se edita manualmente.</div>
+      </div>
+      <div>
+        <label>Propietario / Cliente</label>
+        <div class="row">
+          <select id="propietario_id"><option value="">Cargando propietarios...</option></select>
+          <button class="btn btn-ghost" type="button" id="btnNuevoPropietario">+ Cliente</button>
+        </div>
+        <div class="hint">Lista real de propietarios/clientes de Supabase. Paramio se selecciona por defecto.</div>
+      </div>
+      <div><label>Fabricante *</label><input id="fabricante" placeholder="Ej. Mitutoyo"></div>
+      <div><label>Rango / Especificación</label><input id="rango" placeholder="Ej. Ø8 H7"></div>
+      <div><label>Precisión</label><input id="precision" placeholder="Ej. 0.01 mm / Atributo"></div>
+      <div><label>Tipo de calibración</label><select id="tipo_calibracion"><option value="Interna">Interna</option><option value="Externa">Externa</option><option value="No aplica">No aplica</option></select></div>
+      <div><label>Ubicación actual / Destino *</label><select id="ubicacion_id"><option value="">Cargando ubicaciones...</option></select><div class="hint" id="ubicaciones_info">Se guarda también como texto en ubicación actual.</div></div>
+      <div><label>Última calibración</label><input id="fecha_calibracion" type="date"></div>
+      <div><label>Próxima calibración</label><input id="fecha_proxima_calibracion" type="date"></div>
+      <div style="grid-column:1/-1"><label>Observaciones</label><textarea id="observaciones" placeholder="Notas internas, incidencia, cliente, etc."></textarea></div>
+    </div>
+    <div class="actions"><button class="btn btn-primary" id="btnGuardar">💾 Guardar / Actualizar</button><button class="btn btn-accent" id="btnLimpiar">🧽 Limpiar</button></div>
+  </section>
+
+  <section id="panelBaja" class="panel">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div><h2>Retirada / baja de instrumento</h2><div class="hint">El instrumento nunca se elimina de la base de datos: se retira del uso activo y conserva toda su trazabilidad.</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-history" type="button" onclick="window.location.href='bajas_instrumentos.html'">📚 Historial de bajas</button>
+        <button class="btn btn-history" type="button" onclick="window.location.href='reposiciones.html'">🛒 Necesidades laboratorio</button>
+      </div>
+    </div>
+    <div id="msgBaja" class="alert info hidden"></div>
+    <div class="grid" style="margin-top:14px">
+      <div>
+        <div id="qrReader" class="qr-box">Enfoca el código QR del instrumento.</div>
+        <div class="actions" style="margin-top:10px"><button class="btn btn-primary" id="btnIniciarEscaneo">📷 Iniciar escaneo</button><button class="btn btn-ghost" id="btnDetenerEscaneo">✋ Detener</button></div>
+      </div>
+      <div>
+        <label>Buscar equipo por código</label>
+        <div class="row"><input id="codigoBaja" placeholder="Código del instrumento"><button class="btn btn-primary" id="btnBuscarBaja">🔎 Buscar</button></div>
+        <div class="hint">Primero se muestra el equipo. Después eliges reparación o baja definitiva.</div>
+
+        <div id="fichaBaja" class="retire-card hidden">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><strong id="bajaTitulo">Equipo</strong><span id="bajaEstado" style="font-size:.78rem;color:#cfe1ff"></span></div>
+          <div class="retire-grid">
+            <div class="retire-item"><span>Código</span><strong id="bajaCodigo">—</strong></div>
+            <div class="retire-item"><span>Descripción</span><strong id="bajaDescripcion">—</strong></div>
+            <div class="retire-item"><span>Ubicación actual</span><strong id="bajaUbicacion">—</strong></div>
+            <div class="retire-item"><span>Próxima calibración</span><strong id="bajaProxima">—</strong></div>
+          </div>
+          <div style="margin-top:12px">
+            <label>Motivo *</label>
+            <select id="motivoBaja">
+              <option value="">Selecciona motivo...</option>
+              <option>Golpe / rotura</option><option>Desgaste</option><option>Irreparable</option><option>Obsoleto</option><option>Pérdida</option><option>Otro</option>
+            </select>
+          </div>
+          <div style="margin-top:10px"><label>Responsable *</label><select id="responsableBaja"><option value="">Selecciona responsable...</option><option>David</option><option>Guillermo</option><option>Israel</option><option>José Antonio</option></select></div>
+          <div style="margin-top:10px"><label>Observaciones</label><textarea id="observacionesBaja" placeholder="Daño observado, decisión tomada, referencia de reparación, etc."></textarea></div>
+          <div style="margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.05)">
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input id="anadirReposicion" type="checkbox" checked style="width:auto"> Añadir como necesidad de reposición</label>
+            <div class="row" style="margin-top:9px">
+              <div style="flex:0 0 120px"><label>Cantidad</label><input id="cantidadReposicion" type="number" min="1" step="1" value="1"></div>
+              <div style="flex:1"><label>Prioridad</label><select id="prioridadReposicion"><option>Normal</option><option>Alta</option><option>Urgente</option></select></div>
+            </div>
+            <div class="hint">La baja conserva el historial. Si esta opción está marcada, además crea una necesidad de tipo Reposición en el módulo Necesidades del laboratorio.</div>
+          </div>
+          <div class="retire-actions">
+            <button class="btn btn-repair" id="btnReparacion" type="button">🛠 Enviar a revisión / reparación</button>
+            <button class="btn btn-danger" id="btnBajaDefinitiva" type="button">🗑 Baja definitiva</button>
+          </div>
+          <div class="hint">La baja definitiva bloquea el equipo para nuevas salidas, pero conserva código, movimientos, calibraciones y certificados. El código no se reutiliza.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="btn-float" onclick="window.location.href='home.html'">🏠 Inicio</button>
+<script type="module" src="config.mjs"></script>
+
+<script type="module">
+  const supabase = window.supabase;
+  const $ = id => document.getElementById(id);
+  const msgAlta = $("msgAlta");
+  const msgBaja = $("msgBaja");
+
+  const f = {
+    codigo: $("codigo"),
+    descripcion: $("descripcion"),
+    familia_id: $("familia_id"),
+    familia_calibracion_info: $("familia_calibracion_info"),
+    propietario_id: $("propietario_id"),
+    fabricante: $("fabricante"),
+    rango: $("rango"),
+    precision: $("precision"),
+    tipo_calibracion: $("tipo_calibracion"),
+    ubicacion_id: $("ubicacion_id"),
+    fecha_calibracion: $("fecha_calibracion"),
+    fecha_proxima_calibracion: $("fecha_proxima_calibracion"),
+    observaciones: $("observaciones"),
+  };
+
+  let familiasInstrumento = [];
+  let familiasCalibracion = [];
+  let familiasCalibracionById = new Map();
+  let propietarioParamioId = null;
+
+  function actualizarCalibracionAsignada(){
+    const familiaId = f.familia_id.value || null;
+    const familia = familiasInstrumento.find(x => String(x.id) === String(familiaId));
+
+    if(!familia){
+      f.familia_calibracion_info.textContent = "Pendiente de seleccionar familia";
+      f.familia_calibracion_info.style.borderColor = "var(--border)";
+      return;
+    }
+
+    if(!familia.familia_calibracion_id){
+      f.familia_calibracion_info.textContent = "Sin motor/familia de calibración asignada todavía";
+      f.familia_calibracion_info.style.borderColor = "#ff8f00";
+      return;
+    }
+
+    const cal = familiasCalibracionById.get(String(familia.familia_calibracion_id));
+    if(!cal){
+      f.familia_calibracion_info.textContent = "Asignación configurada, pero no se pudo leer su detalle";
+      f.familia_calibracion_info.style.borderColor = "#ff8f00";
+      return;
+    }
+
+    const codigo = cal.codigo ? ` · ${cal.codigo}` : "";
+    f.familia_calibracion_info.textContent = `${cal.nombre || "Familia de calibración"}${codigo}`;
+    f.familia_calibracion_info.style.borderColor = "#1e88e5";
+  }
+
+  function showMsg(el, text, type="info") {
+    el.className = "alert " + type;
+    el.textContent = text;
+    el.classList.remove("hidden");
+  }
+  function hideMsg(el){ el.classList.add("hidden"); }
+
+  function optionHTML(value, label, selectedValue="") {
+    const selected = String(value || "") === String(selectedValue || "") ? "selected" : "";
+    return `<option value="${value}" ${selected}>${label}</option>`;
+  }
+
+  function getSelectedText(selectEl) {
+    const opt = selectEl.options[selectEl.selectedIndex];
+    return opt ? opt.textContent.trim() : "";
+  }
+
+  async function cargarCatalogos() {
+    if (!supabase) {
+      showMsg(msgAlta, "Supabase no está disponible. Revisa config.mjs.", "err");
+      return;
+    }
+
+    // Catálogo maestro de tipos de instrumento + catálogo técnico de calibración.
+    // El usuario elige familias_instrumentos; Supabase sincroniza familia_calibracion_id mediante trigger.
+    const [familiasInstRes, familiasCalRes] = await Promise.all([
+      supabase
+        .from("familias_instrumentos")
+        .select("id,nombre,activo,familia_calibracion_id")
+        .eq("activo", true)
+        .order("nombre", { ascending:true }),
+      supabase
+        .from("familias_calibracion")
+        .select("id,nombre,codigo,activo")
+        .eq("activo", true)
+        .order("nombre", { ascending:true })
+    ]);
+
+    if (familiasInstRes.error) {
+      console.error("Error familias_instrumentos:", familiasInstRes.error);
+    }
+    if (familiasCalRes.error) {
+      console.error("Error familias_calibracion:", familiasCalRes.error);
+    }
+
+    familiasInstrumento = familiasInstRes.data || [];
+    familiasCalibracion = familiasCalRes.data || [];
+    familiasCalibracionById = new Map(
+      familiasCalibracion.map(x => [String(x.id), x])
+    );
+
+    const [propietariosRes, ubicacionesRes] = await Promise.all([
+      supabase.from("propietarios_equipos").select("*").order("nombre"),
+      supabase.from("ubicaciones").select("*").order("nombre")
+    ]);
+
+    if (propietariosRes.error) console.error("Error propietarios_equipos:", propietariosRes.error);
+    if (ubicacionesRes.error) console.error("Error ubicaciones:", ubicacionesRes.error);
+
+    f.familia_id.innerHTML = `<option value="">Selecciona familia de instrumento...</option>` +
+      familiasInstrumento.map(x => optionHTML(x.id, x.nombre || "Familia sin nombre")).join("");
+
+    if (!familiasInstrumento.length) {
+      f.familia_id.innerHTML = `<option value="">No hay familias disponibles</option>`;
+      const detalle = familiasInstRes.error?.message ? ` (${familiasInstRes.error.message})` : "";
+      showMsg(msgAlta, "No se han podido cargar las familias de instrumentos desde Supabase" + detalle, "err");
+    }
+
+    actualizarCalibracionAsignada();
+
+    const propietariosActivos = (propietariosRes.data || [])
+      .filter(x => x && (x.activo === undefined || x.activo === true));
+
+    propietarioParamioId = propietariosActivos.find(x =>
+      /^paramio$/i.test(String(x.nombre || "").trim()) ||
+      /^propiedad\s+tmp$/i.test(String(x.nombre || "").trim())
+    )?.id || null;
+
+    f.propietario_id.innerHTML =
+      `<option value="">Selecciona propietario / cliente...</option>` +
+      propietariosActivos.map(x => optionHTML(x.id, x.nombre || "Sin nombre")).join("");
+
+    if (propietarioParamioId && !f.propietario_id.value) {
+      f.propietario_id.value = propietarioParamioId;
+    }
+
+    // Ubicaciones: cargar TODAS las activas desde Supabase y evitar nombres duplicados
+    // heredados. Las nuevas máquinas aparecen automáticamente sin tocar el HTML.
+    const ubicacionesActivas = (ubicacionesRes.data || [])
+      .filter(x => x && (x.activo === undefined || x.activo === true));
+    const vistas = new Set();
+    const ubicacionesUnicas = ubicacionesActivas.filter(x => {
+      const clave = String(x.nombre || "").trim().toLocaleLowerCase("es");
+      if (!clave || vistas.has(clave)) return false;
+      vistas.add(clave);
+      return true;
+    });
+
+    f.ubicacion_id.innerHTML =
+      `<option value="">Selecciona ubicación / máquina...</option>` +
+      ubicacionesUnicas.map(x => optionHTML(x.id, x.nombre)).join("");
+
+    const infoUbic = document.getElementById("ubicaciones_info");
+    if (infoUbic) infoUbic.textContent = `${ubicacionesUnicas.length} ubicaciones/máquinas activas cargadas desde Supabase.`;
+  }
+
+  async function crearNuevoPropietario(){
+    const nombre = window.prompt("Nombre del nuevo cliente / propietario:");
+    if (!nombre || !nombre.trim()) return;
+    const limpio = nombre.trim();
+
+    const { data: existente } = await supabase
+      .from("propietarios_equipos")
+      .select("id,nombre")
+      .ilike("nombre", limpio)
+      .limit(1);
+    if (existente?.length) {
+      await cargarCatalogos();
+      f.propietario_id.value = existente[0].id;
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("propietarios_equipos")
+      .insert({ nombre: limpio, tipo: "cliente", activo: true })
+      .select("id")
+      .single();
+    if (error) {
+      showMsg(msgAlta, "No se pudo crear el cliente: " + error.message, "err");
+      return;
+    }
+    await cargarCatalogos();
+    if (data?.id) f.propietario_id.value = data.id;
+  }
+
+  $("btnNuevoPropietario").onclick = crearNuevoPropietario;
+
+  function seleccionarValor(selectEl, valor) {
+    selectEl.value = valor || "";
+  }
+
+  const tabAlta = $("tabAlta");
+  const tabBaja = $("tabBaja");
+  const panelAlta = $("panelAlta");
+  const panelBaja = $("panelBaja");
+
+  tabAlta.onclick = () => {
+    tabAlta.classList.add("active");
+    tabBaja.classList.remove("active");
+    panelAlta.classList.add("active");
+    panelBaja.classList.remove("active");
+  };
+
+  tabBaja.onclick = () => {
+    tabBaja.classList.add("active");
+    tabAlta.classList.remove("active");
+    panelBaja.classList.add("active");
+    panelAlta.classList.remove("active");
+  };
+
+  function limpiarFormulario(){
+    f.codigo.value = "";
+    f.descripcion.value = "";
+    f.familia_id.value = "";
+    f.propietario_id.value = propietarioParamioId || "";
+    f.fabricante.value = "";
+    f.rango.value = "";
+    f.precision.value = "";
+    f.tipo_calibracion.value = "Interna";
+    f.ubicacion_id.value = "";
+    f.fecha_calibracion.value = "";
+    f.fecha_proxima_calibracion.value = "";
+    f.observaciones.value = "";
+    actualizarCalibracionAsignada();
+    hideMsg(msgAlta);
+  }
+
+  $("btnLimpiar").onclick = limpiarFormulario;
+
+  async function buscarPorCodigo(){
+    hideMsg(msgAlta);
+
+    const codigo = f.codigo.value.trim();
+    if(!codigo){
+      showMsg(msgAlta,"Introduce un código.","err");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("instrumentos")
+      .select("*")
+      .eq("codigo", codigo)
+      .maybeSingle();
+
+    if(error){
+      console.error(error);
+      showMsg(msgAlta,"Error al buscar: " + error.message,"err");
+      return;
+    }
+
+    if(!data){
+      showMsg(msgAlta,`No existe el código ${codigo}. Se creará al guardar.`,"info");
+      limpiarFormulario();
+      f.codigo.value = codigo;
+      return;
+    }
+
+    f.descripcion.value = data.descripcion ?? "";
+    seleccionarValor(f.familia_id, data.familia_id);
+    actualizarCalibracionAsignada();
+    seleccionarValor(f.propietario_id, data.propietario_id || propietarioParamioId);
+    f.fabricante.value = data.fabricante ?? "";
+    f.rango.value = data.rango ?? "";
+    f.precision.value = data.precision ?? "";
+    f.tipo_calibracion.value = data.tipo_calibracion ?? "Interna";
+    seleccionarValor(f.ubicacion_id, data.ubicacion_id);
+    f.fecha_calibracion.value = (data.fecha_calibracion ?? "").substring(0,10);
+    f.fecha_proxima_calibracion.value = (data.fecha_proxima_calibracion ?? "").substring(0,10);
+    f.observaciones.value = data.observaciones ?? "";
+
+    showMsg(msgAlta,`Instrumento ${codigo} cargado.`,"ok");
+  }
+
+  $("btnBuscarCodigo").onclick = buscarPorCodigo;
+
+  f.codigo.addEventListener("keydown", e => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      buscarPorCodigo();
+    }
+  });
+
+  async function guardarInstrumento(){
+    hideMsg(msgAlta);
+
+    const codigo = f.codigo.value.trim();
+    const descripcion = f.descripcion.value.trim();
+    const fabricante = f.fabricante.value.trim();
+    const familiaId = f.familia_id.value || null;
+    const propietarioId = f.propietario_id.value || propietarioParamioId || null;
+    const ubicacionId = f.ubicacion_id.value || null;
+    const ubicacionActual = ubicacionId ? getSelectedText(f.ubicacion_id) : null;
+
+    if(!codigo || !descripcion || !fabricante){
+      showMsg(msgAlta,"Código, descripción y fabricante son obligatorios.","err");
+      return;
+    }
+    if(!familiaId){
+      showMsg(msgAlta,"Selecciona la familia del instrumento.","err");
+      return;
+    }
+    if(!ubicacionId){
+      showMsg(msgAlta,"Selecciona la ubicación actual.","err");
+      return;
+    }
+
+    if(!propietarioId){
+      showMsg(msgAlta,"Selecciona un propietario / cliente.","err");
+      return;
+    }
+
+    const baseUrl =
+      window.location.origin && window.location.origin !== "null"
+        ? window.location.origin + "/qr/"
+        : "https://trazabilidad-tmp.vercel.app/qr/";
+
+    const qr_link = baseUrl + encodeURIComponent(codigo);
+    const qr_url =
+      "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" +
+      encodeURIComponent(qr_link);
+
+    const payload = {
+      codigo,
+      descripcion,
+      fabricante,
+      rango: f.rango.value || null,
+      precision: f.precision.value || null,
+      tipo_calibracion: f.tipo_calibracion.value || "Interna",
+      familia_id: familiaId,
+      propietario_id: propietarioId,
+      ubicacion_id: ubicacionId,
+      ubicacion_actual: ubicacionActual,
+      fecha_calibracion: f.fecha_calibracion.value || null,
+      fecha_proxima_calibracion: f.fecha_proxima_calibracion.value || null,
+      observaciones: f.observaciones.value || null,
+      qr_url,
+      qr_link
+    };
+
+    const { error } = await supabase
+      .from("instrumentos")
+      .upsert(payload, { onConflict: "codigo" });
+
+    if(error){
+      console.error(error);
+      showMsg(msgAlta,"Error al guardar: " + error.message,"err");
+      return;
+    }
+
+    showMsg(msgAlta,`Instrumento ${codigo} guardado correctamente.`,"ok");
+  }
+
+  f.familia_id.addEventListener("change", actualizarCalibracionAsignada);
+
+  $("btnGuardar").onclick = guardarInstrumento;
+
+  let html5Qr = null;
+  let instrumentoBajaActual = null;
+
+  function fmtFechaBaja(v){
+    if(!v) return "—";
+    const d = new Date(v);
+    if(Number.isNaN(d.getTime())) return String(v);
+    return d.toLocaleDateString("es-ES");
+  }
+
+  function limpiarFichaBaja(){
+    instrumentoBajaActual = null;
+    $("fichaBaja").classList.add("hidden");
+    $("motivoBaja").value = "";
+    $("responsableBaja").value = "";
+    $("observacionesBaja").value = "";
+  }
+
+  function pintarFichaBaja(inst){
+    instrumentoBajaActual = inst;
+    $("bajaTitulo").textContent = `${inst.codigo || ""} · ${inst.descripcion || "Instrumento"}`;
+    $("bajaCodigo").textContent = inst.codigo || "—";
+    $("bajaDescripcion").textContent = inst.descripcion || "—";
+    $("bajaUbicacion").textContent = inst.ubicacion_actual || inst.ubicacion || "—";
+    $("bajaProxima").textContent = fmtFechaBaja(inst.fecha_proxima_calibracion || inst.proxima_calibracion);
+    $("bajaEstado").textContent = inst.estado ? `Estado actual: ${inst.estado}` : "";
+    $("fichaBaja").classList.remove("hidden");
+  }
+
+  async function buscarEquipoBaja(codigo){
+    hideMsg(msgBaja);
+    limpiarFichaBaja();
+    const code = String(codigo || "").trim();
+    if(!code){ showMsg(msgBaja,"Introduce un código.","err"); return; }
+
+    const { data, error } = await supabase.from("instrumentos").select("*").eq("codigo", code).maybeSingle();
+    if(error){ console.error(error); showMsg(msgBaja,"Error consultando el equipo: " + error.message,"err"); return; }
+    if(!data){ showMsg(msgBaja,`No existe ningún instrumento con código ${code}.`,"err"); return; }
+    pintarFichaBaja(data);
+
+    const est = String(data.estado || "").toUpperCase();
+    if(est.includes("BAJA") || est === "RETIRADO"){
+      showMsg(msgBaja,`El instrumento ${code} ya consta como retirado. Puedes consultar su historial de bajas.`,"info");
+    } else {
+      showMsg(msgBaja,`Instrumento ${code} localizado. Revisa los datos y selecciona la acción.`,"ok");
+    }
+  }
+
+  async function registrarMovimientoBaja(tipo, destino, responsable, observaciones){
+    const datos = {
+      codigo_instrumento: instrumentoBajaActual.codigo,
+      fecha: new Date().toISOString(),
+      tipo_movimiento: tipo,
+      responsable,
+      destino,
+      observaciones,
+      operario1: null,
+      operario2: null
+    };
+    const { error } = await supabase.from("movimientos").insert(datos);
+    if(error) throw error;
+  }
+
+  async function enviarReparacion(){
+    if(!instrumentoBajaActual){ showMsg(msgBaja,"Busca primero el instrumento.","err"); return; }
+    const motivo = $("motivoBaja").value;
+    const responsable = $("responsableBaja").value;
+    const obs = $("observacionesBaja").value.trim();
+    if(!motivo || !responsable){ showMsg(msgBaja,"Selecciona motivo y responsable.","err"); return; }
+    if(!confirm(`¿Enviar ${instrumentoBajaActual.codigo} a revisión / reparación?`)) return;
+
+    const ubicacionAnterior = instrumentoBajaActual.ubicacion_actual || "";
+    const detalle = `Motivo: ${motivo}\nUbicación anterior: ${ubicacionAnterior || "—"}${obs ? `\nObservaciones: ${obs}` : ""}`;
+    const { error } = await supabase.from("instrumentos").update({estado:"Revisión / reparación",ubicacion_actual:"Revisión / reparación"}).eq("codigo",instrumentoBajaActual.codigo);
+    if(error){ showMsg(msgBaja,"Error actualizando el equipo: " + error.message,"err"); return; }
+    try{ await registrarMovimientoBaja("Revisión / reparación","Revisión / reparación",responsable,detalle); }
+    catch(e){ console.error(e); showMsg(msgBaja,"El equipo pasó a reparación, pero no se pudo registrar el movimiento: " + e.message,"err"); return; }
+    showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} enviado a revisión / reparación.`,"ok");
+    await buscarEquipoBaja(instrumentoBajaActual.codigo);
+  }
+
+  async function crearReposicionDesdeBaja(inst, motivo, responsable, observaciones){
+    if(!$(`anadirReposicion`)?.checked) return {ok:true, omitida:true};
+    const cantidad = Math.max(1, Number($("cantidadReposicion")?.value || 1));
+    const prioridad = $("prioridadReposicion")?.value || "Normal";
+    const payload = {
+      instrumento_codigo: inst.codigo,
+      descripcion: inst.descripcion || null,
+      familia_id: inst.familia_id || null,
+      motivo_baja: motivo || null,
+      responsable_baja: responsable || null,
+      observaciones: observaciones || null,
+      cantidad,
+      prioridad,
+      estado: "Pendiente",
+      fecha_baja: new Date().toISOString(),
+      notificacion_estado: "Pendiente",
+      origen: "Baja definitiva",
+      tipo_necesidad: "Reposición",
+      solicitado_por: responsable || null,
+      justificacion: motivo || null
+    };
+    const existente = await supabase.from("reposiciones").select("id").eq("instrumento_codigo",inst.codigo).eq("origen","Baja definitiva").maybeSingle();
+    if(existente.error) return {ok:false,error:existente.error};
+    const result = existente.data?.id
+      ? await supabase.from("reposiciones").update({...payload,actualizado_en:new Date().toISOString()}).eq("id",existente.data.id)
+      : await supabase.from("reposiciones").insert(payload);
+    if(result.error) return {ok:false,error:result.error};
+    return {ok:true};
+  }
+
+  async function bajaDefinitiva(){
+    if(!instrumentoBajaActual){ showMsg(msgBaja,"Busca primero el instrumento.","err"); return; }
+    const motivo = $("motivoBaja").value;
+    const responsable = $("responsableBaja").value;
+    const obs = $("observacionesBaja").value.trim();
+    if(!motivo || !responsable){ showMsg(msgBaja,"Selecciona motivo y responsable.","err"); return; }
+    if(!confirm(`BAJA DEFINITIVA de ${instrumentoBajaActual.codigo}.\n\nEl equipo dejará de estar disponible para taller, pero NO se borrará su historial. ¿Continuar?`)) return;
+
+    const ubicacionAnterior = instrumentoBajaActual.ubicacion_actual || "";
+    const estadoAnterior = instrumentoBajaActual.estado || "";
+    const detalle = `Motivo baja: ${motivo}\nEstado anterior: ${estadoAnterior || "—"}\nUbicación anterior: ${ubicacionAnterior || "—"}${obs ? `\nObservaciones: ${obs}` : ""}`;
+
+    const { error } = await supabase.from("instrumentos").update({estado:"Baja definitiva",ubicacion_actual:"Retirado",ubicacion_id:null}).eq("codigo",instrumentoBajaActual.codigo);
+    if(error){ showMsg(msgBaja,"Error al dar de baja: " + error.message,"err"); return; }
+    try{ await registrarMovimientoBaja("Baja definitiva","Retirado",responsable,detalle); }
+    catch(e){ console.error(e); showMsg(msgBaja,"El equipo quedó retirado, pero no se pudo registrar el movimiento de baja: " + e.message,"err"); return; }
+
+    const repo = await crearReposicionDesdeBaja(instrumentoBajaActual,motivo,responsable,obs);
+    if(!repo.ok){
+      console.error(repo.error);
+      showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado y trazabilidad guardada. No se pudo añadir a reposición: ${repo.error.message}`,"err");
+    } else {
+      const extra = repo.omitida ? "" : " Añadido también a Necesidades del laboratorio como reposición.";
+      showMsg(msgBaja,`Instrumento ${instrumentoBajaActual.codigo} retirado definitivamente. Su trazabilidad permanece disponible.${extra}`,"ok");
+    }
+    await buscarEquipoBaja(instrumentoBajaActual.codigo);
+  }
+
+  async function iniciarEscaneo(){
+    hideMsg(msgBaja);
+    try{
+      if(!html5Qr) html5Qr = new Html5Qrcode("qrReader");
+      await html5Qr.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        async decodedText => {
+          await detenerEscaneo();
+          let code = decodedText;
+          if(decodedText.startsWith("http")){
+            try{
+              const u = new URL(decodedText);
+              code = u.searchParams.get("codigo") || decodeURIComponent(u.pathname.split("/").filter(Boolean).pop() || "");
+            }catch(e){ code = decodedText.split("/").filter(Boolean).pop() || decodedText; }
+          }
+          $("codigoBaja").value = code;
+          buscarEquipoBaja(code);
+        }
+      );
+      showMsg(msgBaja,"Escaneando...","info");
+    }catch(e){ console.error(e); showMsg(msgBaja,"No se pudo iniciar la cámara.","err"); }
+  }
+
+  async function detenerEscaneo(){
+    try{
+      if(html5Qr && html5Qr.isScanning) await html5Qr.stop();
+      if(html5Qr) await html5Qr.clear();
+    }catch(e){ console.error(e); }
+  }
+
+  $("btnIniciarEscaneo").onclick = iniciarEscaneo;
+  $("btnDetenerEscaneo").onclick = detenerEscaneo;
+  $("btnBuscarBaja").onclick = () => buscarEquipoBaja($("codigoBaja").value);
+  $("codigoBaja").addEventListener("keydown", e => { if(e.key === "Enter") buscarEquipoBaja($("codigoBaja").value); });
+  $("btnReparacion").onclick = enviarReparacion;
+  $("btnBajaDefinitiva").onclick = bajaDefinitiva;
+
+  cargarCatalogos();
+</script>
+
+</body>
+</html>

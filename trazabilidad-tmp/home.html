@@ -244,7 +244,7 @@
       gap:16px;
     }
 
-    .kpi-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+    .kpi-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
     .kpi-card{
       background:#fff;
       border:1px solid var(--line);
@@ -610,10 +610,13 @@
             <div><div class="kpi-label">En laboratorio</div><div class="kpi-value" id="kpi-lab">–</div><div class="kpi-extra" id="kpi-lab-extra"></div></div>
           </div>
         </a>
-        <div class="kpi-card" id="kpi-card-uso">
-          <div class="kpi-icon i-blue">🏭</div>
-          <div><div class="kpi-label">En taller / producción</div><div class="kpi-value" id="kpi-uso">–</div><div class="kpi-extra" id="kpi-uso-extra"></div></div>
-        </div>
+        <a href="listado_instrumentos.html?filtro=uso" class="kpi-link" style="display:none;">
+          <div class="kpi-card" id="kpi-card-uso">
+            <div class="kpi-label">En uso fuera de laboratorio</div>
+            <div class="kpi-value" id="kpi-uso">–</div>
+            <div class="kpi-extra" id="kpi-uso-extra"></div>
+          </div>
+        </a>
       </section>
 
       <section class="alerts-section panel">
@@ -930,42 +933,15 @@
       return;
     }
 
-    const [instrumentosRes, ubicacionesRes] = await Promise.all([
-      supabase
-        .from("instrumentos")
-        // usamos las dos columnas de fecha para compatibilidad y ubicacion_id como fuente principal
-        .select("codigo, descripcion, estado, ubicacion_id, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion"),
-      supabase
-        .from("ubicaciones")
-        .select("id, nombre, tipo, activo")
-    ]);
-
-    const instrumentos = instrumentosRes.data || [];
-    const error = instrumentosRes.error;
-    const ubicaciones = ubicacionesRes.data || [];
-    const errorUbicaciones = ubicacionesRes.error;
+    const { data: instrumentos, error } = await supabase
+      .from("instrumentos")
+      // usamos las dos columnas para compatibilidad
+      .select("codigo, descripcion, estado, ubicacion_actual, fecha_proxima_calibracion, proxima_calibracion");
 
     if (error) {
       console.error("Error cargando instrumentos en home:", error);
       return;
     }
-    if (errorUbicaciones) {
-      console.warn("No se pudieron cargar ubicaciones para KPI de taller:", errorUbicaciones);
-    }
-
-    // Las ubicaciones con tipo Taller definen el KPI En taller / producción.
-    // Se conserva un respaldo por nombre para equipos antiguos sin ubicacion_id.
-    const tallerIds = new Set(
-      ubicaciones
-        .filter(u => u?.activo !== false && String(u?.tipo || "").trim().toUpperCase() === "TALLER")
-        .map(u => String(u.id))
-    );
-    const tallerNombres = new Set(
-      ubicaciones
-        .filter(u => u?.activo !== false && String(u?.tipo || "").trim().toUpperCase() === "TALLER")
-        .map(u => String(u.nombre || "").trim().toUpperCase())
-        .filter(Boolean)
-    );
 
     const esBajaDefinitiva = inst => {
       const estado = String(inst?.estado || "").trim().toUpperCase();
@@ -987,21 +963,17 @@
     const mas30 = new Date(hoy.getTime() + 30*86400000);
 
     let enLab = 0;
-    let enTaller = 0;
+    let enUso = 0;
 
     let calibrados = 0;  // equipos EN VIGOR (no vencidos)
     const fueraLista = [];
     const proxLista  = [];
 
     instrumentosActivos.forEach(inst => {
-      // Ubicación: laboratorio mantiene el criterio actual.
-      // Taller/producción se calcula contra la tabla ubicaciones (tipo = Taller).
+      // Ubicación
       const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
       if (ubic === "laboratorio") enLab++;
-
-      const ubicId = String(inst.ubicacion_id || "");
-      const ubicNombre = String(inst.ubicacion_actual || "").trim().toUpperCase();
-      if (tallerIds.has(ubicId) || tallerNombres.has(ubicNombre)) enTaller++;
+      else enUso++;
 
       // Fecha próxima (nueva + vieja columna)
       const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
@@ -1024,14 +996,14 @@
 
     // KPIs
     kpi_total.textContent      = total;
-    kpi_uso.textContent        = enTaller;
+    kpi_uso.textContent        = enUso;
     kpi_lab.textContent        = enLab;
     kpi_calibrados.textContent = calibrados;
     kpi_proximos.textContent   = proxLista.length;
     kpi_fuera.textContent      = fueraLista.length;
 
     kpi_total_extra.textContent      = totalBajas ? `${totalBajas} retirado${totalBajas === 1 ? "" : "s"} en histórico` : "Sin equipos retirados";
-    kpi_uso_extra.textContent        = total ? `${pct(enTaller,total)} del total activo` : "";
+    kpi_uso_extra.textContent        = total ? `${pct(enUso,total)} del total` : "";
     kpi_lab_extra.textContent        = total ? `${pct(enLab,total)} del total` : "";
     kpi_calibrados_extra.textContent = total ? `${pct(calibrados,total)} en vigor` : "";
     kpi_proximos_extra.textContent   = total ? `${pct(proxLista.length,total)} del total` : "";

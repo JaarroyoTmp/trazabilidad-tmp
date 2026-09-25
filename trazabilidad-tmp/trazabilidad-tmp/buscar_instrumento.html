@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMP · Buscar Instrumento</title>
+
+  <style>
+    :root{
+      --bg:#0d1117;
+      --panel:#161b22;
+      --panel2:#0f172a;
+      --border:#30363d;
+      --border2:#21262d;
+      --text:#f0f6fc;
+      --muted:#8b949e;
+      --blue:#58a6ff;
+      --ok:#238636;
+      --warn:#d29922;
+      --bad:#e53935;
+      --info:#3b82f6;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    header{
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:var(--panel);
+      border-bottom:1px solid var(--border);
+      gap:14px;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px;min-width:240px}
+    .brand img{height:40px}
+    .brand h1{font-size:18px;margin:0;line-height:1.2;}
+    .brand span{font-size:12px;color:var(--muted);}
+
+    .btn-back{
+      border-radius:10px;
+      padding:8px 14px;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn-back:hover{background:#1f2937;}
+
+    .wrap{
+      max-width:1180px;
+      margin:22px auto;
+      padding:0 16px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+
+    @media(min-width: 980px){
+      .grid{grid-template-columns: 390px 1fr; align-items:start;}
+    }
+
+    .card{
+      background:var(--panel);
+      padding:18px;
+      border-radius:16px;
+      border:1px solid var(--border);
+    }
+
+    h2{margin:0 0 10px;font-size:17px;color:var(--blue)}
+
+    input, select{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--bg);
+      color:var(--text);
+      font-size:14px;
+      outline:none;
+    }
+
+    input:focus, select:focus{border-color:var(--blue);}
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px;}
+
+    .row{display:flex;gap:10px;align-items:center}
+    .row > *{flex:1}
+
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
+
+    .btn{
+      border-radius:10px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn:hover{background:#1f2937;}
+    .btn.primary{border-color:rgba(88,166,255,.55)}
+
+    .resultsCard{padding:0;overflow:hidden}
+    .resultsHeader{
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .meta{font-size:12px;color:var(--muted)}
+
+    .result{
+      padding:15px 16px;
+      border-bottom:1px solid var(--border2);
+      cursor:pointer;
+    }
+    .result:hover{background:var(--panel2);}
+
+    .topline{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .r-code{font-size:16px;font-weight:800;letter-spacing:.2px}
+    .r-desc{font-size:13px;color:var(--muted);margin-top:4px}
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 9px;
+      border-radius:999px;
+      font-size:11px;
+      color:white;
+      white-space:nowrap;
+      min-height:22px;
+      font-weight:700;
+    }
+    .ok{background:var(--ok);}
+    .warn{background:var(--warn);}
+    .bad{background:var(--bad);}
+    .info{background:var(--info);}
+
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{
+      font-size:11px;
+      color:var(--text);
+      padding:4px 8px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:rgba(15,23,42,.7);
+    }
+    .chip.strong{
+      border-color:rgba(88,166,255,.45);
+      color:#cfe7ff;
+    }
+
+    .empty{
+      padding:16px;
+      font-size:14px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .loading{
+      padding:16px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .spinner{
+      width:14px;
+      height:14px;
+      border:2px solid rgba(255,255,255,.18);
+      border-top-color:rgba(88,166,255,.9);
+      border-radius:999px;
+      animation:spin .9s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .pager{
+      padding:12px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .pager .btn{min-width:120px}
+    .pager .btn:disabled{opacity:.45;cursor:not-allowed}
+
+    .quick{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    .quick .btn{
+      font-size:12px;
+      padding:9px 8px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" alt="TMP" />
+    <div>
+      <h1>Buscar instrumento</h1>
+      <span>Consulta avanzada · Base de datos TMP</span>
+    </div>
+  </div>
+  <button class="btn-back" onclick="window.location.href='home.html'">← Volver</button>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <div class="card">
+      <h2>Filtros</h2>
+
+      <div class="hint" style="margin-top:-2px;">
+        Buscador actualizado para trazabilidad: ubicación real, propiedad, estado operativo y calibración.
+      </div>
+
+      <label for="q">Búsqueda global</label>
+      <input id="q" type="text" placeholder="Código, descripción, rango, ubicación..." autocomplete="off" />
+
+      <label for="codigo">Código</label>
+      <input id="codigo" type="text" placeholder="Ej: 11217, METMP001..." autocomplete="off" />
+
+      <label for="descripcion">Descripción</label>
+      <input id="descripcion" type="text" placeholder="Ej: Tampón, pie de rey..." autocomplete="off" />
+
+      <label for="rango">Rango</label>
+      <input id="rango" type="text" placeholder="Ej: M12, Ø8.5, 6H..." autocomplete="off" />
+
+      <label for="ubicacion">Ubicación / Máquina / Destino</label>
+      <select id="ubicacion">
+        <option value="">Todas</option>
+      </select>
+
+      <label for="propietario">Propiedad</label>
+      <select id="propietario">
+        <option value="">Todos</option>
+        <option value="PARAMIO">PARAMIO</option>
+      </select>
+
+      <label for="estadoOperativo">Estado operativo</label>
+      <select id="estadoOperativo">
+        <option value="">Todos</option>
+      </select>
+
+      <label for="estado">Estado calibración</label>
+      <select id="estado">
+        <option value="">Todos</option>
+        <option value="ok">En regla</option>
+        <option value="warn">Próxima ≤ 30 días</option>
+        <option value="bad">Fuera de calibración</option>
+        <option value="nodata">Sin fecha</option>
+      </select>
+
+      <label for="tipoCal">Tipo calibración</label>
+      <select id="tipoCal">
+        <option value="">Todos</option>
+        <option value="Interna">Interna</option>
+        <option value="Externa">Externa</option>
+        <option value="No aplica">No aplica</option>
+      </select>
+
+      <label for="orden">Orden</label>
+      <select id="orden">
+        <option value="codigo_asc">Código A→Z</option>
+        <option value="codigo_desc">Código Z→A</option>
+        <option value="rango_asc">Rango A→Z</option>
+        <option value="rango_desc">Rango Z→A</option>
+        <option value="prox_asc">Próxima calibración antes</option>
+        <option value="prox_desc">Próxima calibración después</option>
+      </select>
+
+      <label for="limit">Resultados por página</label>
+      <select id="limit">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+
+      <div class="quick">
+        <button class="btn" id="btnSoloLaboratorio" type="button">Laboratorio</button>
+        <button class="btn" id="btnSoloFuera" type="button">Fuera calibración</button>
+        <button class="btn" id="btnSoloParamio" type="button">Propiedad TMP</button>
+        <button class="btn" id="btnSoloTaller" type="button">En taller</button>
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <button class="btn primary" id="btnBuscar" type="button">Buscar</button>
+        <button class="btn" id="btnReset" type="button">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="card resultsCard">
+      <div class="resultsHeader">
+        <div style="flex:1;">
+          <div style="font-weight:700;">Resultados</div>
+          <div class="meta" id="meta">Iniciando…</div>
+        </div>
+        <div class="row" style="max-width:320px;">
+          <button class="btn" id="btnCopy" type="button">Copiar CSV</button>
+        </div>
+      </div>
+
+      <div id="resultados"></div>
+
+      <div class="pager" id="pager" style="display:none;">
+        <button class="btn" id="prev" disabled type="button">← Anterior</button>
+        <div class="meta" id="pageInfo">Página 1</div>
+        <button class="btn" id="next" disabled type="button">Siguiente →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="./config.mjs"></script>
+
+<script type="module">
+  const supabase = window.supabase;
+
+  const el = (id) => document.getElementById(id);
+
+  const q = el('q');
+  const codigo = el('codigo');
+  const descripcion = el('descripcion');
+  const rango = el('rango');
+  const ubicacion = el('ubicacion');
+  const propietario = el('propietario');
+  const estadoOperativo = el('estadoOperativo');
+  const estado = el('estado');
+  const tipoCal = el('tipoCal');
+  const orden = el('orden');
+  const limit = el('limit');
+
+  const box = el('resultados');
+  const meta = el('meta');
+  const pager = el('pager');
+  const prevBtn = el('prev');
+  const nextBtn = el('next');
+  const pageInfo = el('pageInfo');
+
+  const btnBuscar = el('btnBuscar');
+  const btnReset = el('btnReset');
+  const btnCopy = el('btnCopy');
+
+  let page = 0;
+  let total = 0;
+  let lastData = [];
+  let debounceTimer = null;
+
+  let catalogos = {
+    propietarios: [],
+    ubicaciones: []
+  };
+
+  function empty(msg){
+    box.innerHTML = '<div class="empty">' + msg + '</div>';
+  }
+
+  function loading(){
+    box.innerHTML = '<div class="loading"><span class="spinner"></span> Buscando…</div>';
+  }
+
+  function escapeHTML(str){
+    return (str ?? '').toString()
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#039;');
+  }
+
+  function formatDate(d){
+    if(!d) return '-';
+    const dt = new Date(d);
+    if(Number.isNaN(dt.getTime())) return '-';
+    return dt.toLocaleDateString('es-ES');
+  }
+
+  function fechaProxima(inst){
+    return inst.fecha_proxima_calibracion || null;
+  }
+
+  function estadoKey(inst){
+    const prox = fechaProxima(inst);
+    if(!prox) return 'nodata';
+
+    const hoy = new Date();
+    const d = new Date(prox);
+    if(Number.isNaN(d.getTime())) return 'nodata';
+
+    const diff = (d - hoy) / (1000*60*60*24);
+    if(diff < 0) return 'bad';
+    if(diff <= 30) return 'warn';
+    return 'ok';
+  }
+
+  function estadoTag(inst){
+    const k = estadoKey(inst);
+    if(k === 'nodata') return "<span class='tag info'>Sin fecha</span>";
+    if(k === 'bad') return "<span class='tag bad'>Fuera calibración</span>";
+    if(k === 'warn') return "<span class='tag warn'>Próxima</span>";
+    return "<span class='tag ok'>En regla</span>";
+  }
+
+  function propietarioNombre(inst){
+    if(!inst.propietario_id) return 'PARAMIO';
+
+    const p = catalogos.propietarios.find(x => String(x.id) === String(inst.propietario_id));
+    return p?.nombre || 'PARAMIO';
+  }
+
+  function ubicacionNombre(inst){
+    if(inst.ubicacion_actual) return inst.ubicacion_actual;
+
+    const u = catalogos.ubicaciones.find(x => String(x.id) === String(inst.ubicacion_id));
+    return u?.nombre || '-';
+  }
+
+  function operativo(inst){
+    return inst.estado || '-';
+  }
+
+  function getOrder(){
+    const v = orden.value;
+    if(v === 'codigo_desc') return {col:'codigo', asc:false};
+    if(v === 'rango_asc') return {col:'rango', asc:true};
+    if(v === 'rango_desc') return {col:'rango', asc:false};
+    if(v === 'prox_asc') return {col:'fecha_proxima_calibracion', asc:true};
+    if(v === 'prox_desc') return {col:'fecha_proxima_calibracion', asc:false};
+    return {col:'codigo', asc:true};
+  }
+
+  function updatePager(){
+    const perPage = Number(limit.value);
+    const totalPages = Math.max(1, Math.ceil(total / perPage));
+    pager.style.display = total > 0 ? 'flex' : 'none';
+    prevBtn.disabled = page <= 0;
+    nextBtn.disabled = page >= totalPages - 1;
+    pageInfo.textContent = 'Página ' + (page + 1) + ' de ' + totalPages;
+  }
+
+  function updateMeta(){
+    if(total === 0){
+      meta.textContent = '0 instrumentos';
+      return;
+    }
+
+    const perPage = Number(limit.value);
+    const start = page * perPage + 1;
+    const end = Math.min(total, (page + 1) * perPage);
+    meta.textContent = total + ' instrumentos · mostrando ' + start + '-' + end;
+  }
+
+  function render(data){
+    if(!data || !data.length){
+      empty("No se encontraron instrumentos");
+      return;
+    }
+
+    box.innerHTML = data.map(inst => {
+      const url = 'qr/qr_info_instrumentos.html?codigo=' + encodeURIComponent(inst.codigo);
+      const prop = propietarioNombre(inst);
+      const ubi = ubicacionNombre(inst);
+      const estOp = operativo(inst);
+      const prox = fechaProxima(inst);
+
+      return `
+        <div class="result" onclick="window.location.href='${url}'">
+          <div class="topline">
+            <div>
+              <div class="r-code">${escapeHTML(inst.codigo)}</div>
+              <div class="r-desc">${escapeHTML(inst.descripcion || '-')}</div>
+            </div>
+            ${estadoTag(inst)}
+          </div>
+
+          <div class="chips">
+            <span class="chip strong">🏢 ${escapeHTML(prop)}</span>
+            <span class="chip strong">📍 ${escapeHTML(ubi)}</span>
+            <span class="chip">🔧 ${escapeHTML(estOp)}</span>
+            <span class="chip">Rango: ${escapeHTML(inst.rango || '-')}</span>
+            <span class="chip">Tipo: ${escapeHTML(inst.tipo_calibracion || '-')}</span>
+            <span class="chip">Próx.: ${formatDate(prox)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function applyLocalFilters(data){
+    let out = data || [];
+
+    const s = estado.value;
+    if(s) out = out.filter(inst => estadoKey(inst) === s);
+
+    const prop = propietario.value;
+    if(prop){
+      if(prop === 'PARAMIO'){
+        out = out.filter(inst => propietarioNombre(inst).toUpperCase() === 'PARAMIO');
+      } else {
+        out = out.filter(inst => String(inst.propietario_id) === String(prop));
+      }
+    }
+
+    const ubi = ubicacion.value;
+    if(ubi){
+      out = out.filter(inst => String(inst.ubicacion_id) === String(ubi) || ubicacionNombre(inst) === ubi);
+    }
+
+    const estOp = estadoOperativo.value;
+    if(estOp){
+      out = out.filter(inst => operativo(inst) === estOp);
+    }
+
+    const tc = tipoCal.value;
+    if(tc){
+      out = out.filter(inst => (inst.tipo_calibracion || '') === tc);
+    }
+
+    return out;
+  }
+
+  async function cargarCatalogos(){
+    if(!supabase) return;
+
+    const [propRes, ubiRes] = await Promise.all([
+      supabase.from("propietarios_equipos").select("id,nombre,tipo,activo").order("nombre"),
+      supabase.from("ubicaciones").select("id,nombre,tipo,activo").order("nombre")
+    ]);
+
+    catalogos.propietarios = propRes.data || [];
+    catalogos.ubicaciones = ubiRes.data || [];
+
+    propietario.innerHTML =
+      '<option value="">Todos</option>' +
+      '<option value="PARAMIO">PARAMIO</option>' +
+      catalogos.propietarios
+        .filter(p => p.activo === undefined || p.activo === true)
+        .map(p => `<option value="${p.id}">${escapeHTML(p.nombre)}</option>`)
+        .join('');
+
+    ubicacion.innerHTML =
+      '<option value="">Todas</option>' +
+      catalogos.ubicaciones
+        .filter(u => u.activo === undefined || u.activo === true)
+        .map(u => `<option value="${u.id}">${escapeHTML(u.nombre)}</option>`)
+        .join('');
+
+    propietario.value = "";
+    ubicacion.value = "";
+  }
+
+  async function cargarEstadosOperativos(){
+    if(!supabase) return;
+
+    const { data } = await supabase
+      .from("instrumentos")
+      .select("estado")
+      .limit(1000);
+
+    const vals = new Set();
+
+    (data || []).forEach(x => {
+      if(x.estado) vals.add(x.estado);
+    });
+
+    estadoOperativo.innerHTML =
+      '<option value="">Todos</option>' +
+      Array.from(vals).sort()
+        .map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`)
+        .join('');
+
+    estadoOperativo.value = "";
+  }
+
+  async function testSupabase(){
+    if(!supabase){
+      empty("❌ Supabase no está cargado. Revisa config.mjs");
+      meta.textContent = "❌ Supabase no cargado";
+      return false;
+    }
+
+    meta.textContent = "✅ Supabase cargado. Preparando catálogos…";
+    await cargarCatalogos();
+    await cargarEstadosOperativos();
+
+    meta.textContent = "✅ Conexión OK. Cargando listado…";
+    return true;
+  }
+
+  async function buscar({resetPage=false}={}){
+    if(resetPage) page = 0;
+
+    const perPage = Number(limit.value);
+    const from = page * perPage;
+    const to = from + perPage - 1;
+
+    loading();
+
+    let req = supabase
+      .from("instrumentos")
+      .select(`
+        codigo,
+        descripcion,
+        fabricante,
+        rango,
+        precision,
+        ubicacion_id,
+        ubicacion_actual,
+        propietario_id,
+        estado,
+        tipo_calibracion,
+        fecha_proxima_calibracion
+      `, { count: "exact" });
+
+    const gt = q.value.trim();
+    if(gt){
+      const like = "%" + gt + "%";
+      req = req.or(
+        "codigo.ilike." + like +
+        ",descripcion.ilike." + like +
+        ",rango.ilike." + like +
+        ",ubicacion_actual.ilike." + like +
+        ",estado.ilike." + like
+      );
+    }
+
+    const c = codigo.value.trim();
+    const d = descripcion.value.trim();
+    const r = rango.value.trim();
+
+    if(c) req = req.ilike("codigo", "%" + c + "%");
+    if(d) req = req.ilike("descripcion", "%" + d + "%");
+    if(r) req = req.ilike("rango", "%" + r + "%");
+
+    const { col, asc } = getOrder();
+    req = req.order(col, { ascending: asc, nullsFirst: false });
+    req = req.range(from, to);
+
+    const { data, error, count } = await req;
+
+    if(error){
+      console.error("Error query buscar:", error);
+      empty("❌ Error en la búsqueda: " + (error.message || JSON.stringify(error)));
+      meta.textContent = "❌ Error en búsqueda";
+      pager.style.display = "none";
+      return;
+    }
+
+    total = count ?? 0;
+
+    const filtered = applyLocalFilters(data || []);
+    lastData = filtered;
+
+    updateMeta();
+
+    if(!filtered.length){
+      empty("No se encontraron instrumentos con los filtros actuales");
+      updatePager();
+      return;
+    }
+
+    render(filtered);
+    updatePager();
+  }
+
+  function debouncedBuscar(resetPage=false){
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => buscar({resetPage}), 250);
+  }
+
+  function reset(){
+    q.value = "";
+    codigo.value = "";
+    descripcion.value = "";
+    rango.value = "";
+    ubicacion.value = "";
+    propietario.value = "";
+    estadoOperativo.value = "";
+    estado.value = "";
+    tipoCal.value = "";
+    orden.value = "codigo_asc";
+    limit.value = "50";
+
+    page = 0;
+    total = 0;
+    lastData = [];
+
+    buscar({resetPage:true});
+  }
+
+  function toCSV(data){
+    const headers = [
+      "codigo",
+      "descripcion",
+      "rango",
+      "propiedad",
+      "ubicacion",
+      "estado_operativo",
+      "tipo_calibracion",
+      "fecha_proxima_calibracion"
+    ];
+
+    const esc = (v) => {
+      const s = (v ?? "").toString().replaceAll('"','""');
+      return '"' + s + '"';
+    };
+
+    const lines = [headers.join(",")];
+
+    (data || []).forEach(r => {
+      lines.push([
+        r.codigo,
+        r.descripcion,
+        r.rango,
+        propietarioNombre(r),
+        ubicacionNombre(r),
+        operativo(r),
+        r.tipo_calibracion,
+        fechaProxima(r)
+      ].map(esc).join(","));
+    });
+
+    return lines.join("\n");
+  }
+
+  async function copyCSV(){
+    if(!lastData || !lastData.length){
+      alert("No hay resultados para copiar.");
+      return;
+    }
+
+    const csv = toCSV(lastData);
+    await navigator.clipboard.writeText(csv);
+    alert("Copiado al portapapeles (CSV).");
+  }
+
+  btnBuscar.addEventListener("click", () => buscar({resetPage:true}));
+  btnReset.addEventListener("click", reset);
+  btnCopy.addEventListener("click", copyCSV);
+
+  [q, codigo, descripcion, rango].forEach(inp => {
+    inp.addEventListener("input", () => debouncedBuscar(true));
+  });
+
+  [ubicacion, propietario, estadoOperativo, estado, tipoCal, orden, limit].forEach(sel => {
+    sel.addEventListener("change", () => buscar({resetPage:true}));
+  });
+
+  prevBtn.addEventListener("click", () => {
+    page = Math.max(0, page - 1);
+    buscar({resetPage:false});
+  });
+
+  nextBtn.addEventListener("click", () => {
+    page = page + 1;
+    buscar({resetPage:false});
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") buscar({resetPage:true});
+  });
+
+  el("btnSoloLaboratorio").onclick = () => {
+    const lab = catalogos.ubicaciones.find(u => (u.nombre || "").toLowerCase() === "laboratorio");
+    ubicacion.value = lab ? lab.id : "";
+    buscar({resetPage:true});
+  };
+
+  el("btnSoloFuera").onclick = () => {
+    estado.value = "bad";
+    buscar({resetPage:true});
+  };
+
+  el("btnSoloParamio").onclick = () => {
+    propietario.value = "PARAMIO";
+    buscar({resetPage:true});
+  };
+
+  el("btnSoloTaller").onclick = () => {
+    const taller = catalogos.ubicaciones.find(u => (u.tipo || "").toLowerCase() === "taller");
+    ubicacion.value = taller ? taller.id : "";
+    buscar({resetPage:true});
+  };
+
+  const ok = await testSupabase();
+  if(ok) buscar({resetPage:true});
+</script>
+
+</body>
+</html>

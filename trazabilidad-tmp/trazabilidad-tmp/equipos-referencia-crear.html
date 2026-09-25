@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>TMP · Crear/Editar Tabla de Equipos</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <link rel="icon" href="img/tmp-quality.png" />
+
+  <style>
+    :root{
+      --bg0:#050b16;
+      --bg1:#071324;
+      --card:#0f1f33;
+      --border:#203552;
+      --txt:#f2f6fb;
+      --muted:#9fb3ca;
+      --accent:#3ea8ff;
+      --bad:#ff6b6b;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body {
+      font-family:"Inter",sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%,#182f55 0,transparent 55%),
+        radial-gradient(circle at 100% 0%,#1a3b64 0,transparent 55%),
+        linear-gradient(180deg,var(--bg1),var(--bg0));
+      color:var(--txt);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .app{max-width:1100px;margin:16px auto 32px;padding:0 14px 40px;}
+
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .brand{display:flex;align-items:center;gap:10px;}
+    .brand-logo{height:34px;width:auto;}
+    .brand-text-title{font-size:17px;font-weight:700;}
+    .brand-text-sub{font-size:12px;color:var(--muted);}
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 16px;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+      background:var(--accent);
+      color:#031321;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      transition:.12s;
+    }
+
+    .btn:hover{transform:translateY(-1px);}
+    .btn.secondary{
+      background:transparent;
+      color:var(--muted);
+      border:1px solid var(--border);
+    }
+
+    .card{
+      border-radius:16px;
+      background:linear-gradient(135deg,#0f1f33,#0a1625);
+      border:1px solid rgba(62,168,255,.45);
+      box-shadow:0 18px 40px rgba(0,0,0,.5);
+      padding:16px;
+      margin-bottom:20px;
+    }
+
+    .card-header{display:flex;justify-content:space-between;margin-bottom:8px;}
+    .card-title{font-size:15px;font-weight:600;}
+    .card-sub{font-size:12px;color:var(--muted);}
+
+    label{
+      font-size:11px;
+      color:var(--muted);
+      margin-bottom:4px;
+      display:block;
+    }
+
+    input,textarea{
+      background:#050d1a;
+      border:1px solid #253954;
+      border-radius:10px;
+      padding:9px 11px;
+      color:var(--txt);
+      width:100%;
+      font-size:13px;
+      outline:none;
+    }
+    textarea{min-height:70px;resize:vertical;}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    @media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:600px){.grid{grid-template-columns:1fr;}}
+
+    .alert{
+      padding:8px 10px;
+      border-radius:10px;
+      margin-top:10px;
+      display:none;
+    }
+    .alert.ok{
+      display:block;
+      background:rgba(22,101,52,.5);
+      border:1px solid #4ade80;
+      color:#dcfce7;
+    }
+    .alert.error{
+      display:block;
+      background:rgba(127,29,29,.4);
+      border:1px solid #ff6b6b;
+      color:#fecaca;
+    }
+
+    .table-wrap{
+      border-radius:12px;
+      overflow:auto;
+      border:1px solid var(--border);
+      max-height:300px;
+    }
+
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th,td{
+      padding:6px;
+      border-bottom:1px solid #1f3046;
+      white-space:nowrap;
+    }
+    th{
+      background:#0c1929;
+      text-transform:uppercase;
+      font-size:11px;
+      color:var(--muted);
+      position:sticky;top:0;
+    }
+
+    .btn-row{
+      background:var(--bad);
+      padding:3px 8px;
+      border:none;
+      border-radius:6px;
+      color:white;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div class="brand">
+    <img src="img/tmp-quality.png" class="brand-logo">
+    <div>
+      <div class="brand-text-title">TMP · Crear / Editar Tabla de Equipos</div>
+      <div class="brand-text-sub">Gestión de equipos por referencia</div>
+    </div>
+  </div>
+  <button class="btn secondary" onclick="location.href='home.html'">← Volver</button>
+</header>
+
+<main>
+
+  <!-- DATOS GENERALES -->
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Datos de la referencia</div>
+        <div class="card-sub">Crear o editar una tabla de equipos</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Referencia</label>
+        <input id="referencia">
+      </div>
+      <div>
+        <label>Pieza</label>
+        <input id="pieza">
+      </div>
+      <div>
+        <label>Cliente</label>
+        <input id="cliente">
+      </div>
+      <div>
+        <label>Responsable</label>
+        <input id="responsable">
+      </div>
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+      <div>
+        <label>Versión</label>
+        <input id="version">
+      </div>
+    </div>
+
+    <label style="margin-top:12px;">Observaciones</label>
+    <textarea id="observaciones"></textarea>
+
+    <div id="alertBox" class="alert"></div>
+  </section>
+
+  <!-- TABLA DE EQUIPOS -->
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Equipos necesarios</div>
+        <div class="card-sub">Añadir equipos para esta referencia</div>
+      </div>
+      <button class="btn" id="btnAddEquipo">+ Añadir equipo</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tablaEquipos">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Código equipo</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Tipo medida</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+  <!-- BOTONES DE GUARDADO -->
+  <section class="card">
+    <div class="card-header">
+      <div class="card-title">Acciones de guardado</div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+      <button class="btn" id="btnGuardar">💾 Guardar cambios</button>
+      <button class="btn secondary" id="btnGuardarNueva">📘 Guardar como nueva versión</button>
+    </div>
+
+    <p class="helper-text" style="margin-top:10px;">
+      • <b>Guardar cambios:</b> sobrescribe esta versión.<br>
+      • <b>Guardar como nueva versión:</b> duplica la tabla creando una versión nueva (V2, V3…).
+    </p>
+
+  </section>
+
+</main>
+</div>
+
+<!-- SUPABASE -->
+<script type="module" src="config.mjs"></script>
+
+<script type="module">
+const sb = window.supabase;
+const $ = s => document.querySelector(s);
+
+const tablaBody = $("#tablaEquipos tbody");
+const alertBox = $("#alertBox");
+
+/* ===========================================================
+   FUNCIONES UTILIDAD
+   =========================================================== */
+function msg(text, type="error") {
+  alertBox.textContent = text;
+  alertBox.className = "alert " + type;
+  alertBox.style.display = "block";
+}
+
+function clearMsg() {
+  alertBox.textContent = "";
+  alertBox.className = "alert";
+  alertBox.style.display = "none";
+}
+
+/* ===========================================================
+   TABLA DINÁMICA DE EQUIPOS
+   =========================================================== */
+function addRow(data = {}) {
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td class="idx"></td>
+    <td><input value="${data.codigo_equipo || ""}"></td>
+    <td><input value="${data.descripcion_equipo || ""}"></td>
+    <td><input type="number" min="1" value="${data.cantidad || 1}"></td>
+    <td><input value="${data.tipo_medida || ""}"></td>
+    <td><button class="btn-row">X</button></td>
+  `;
+
+  tr.querySelector(".btn-row").onclick = () => {
+    tr.remove();
+    reorder();
+  };
+
+  tablaBody.appendChild(tr);
+  reorder();
+}
+
+function reorder() {
+  [...tablaBody.querySelectorAll("tr")].forEach((tr, i) => {
+    tr.querySelector(".idx").textContent = i + 1;
+  });
+}
+
+// Fila inicial
+addRow();
+$("#btnAddEquipo").onclick = () => addRow();
+
+/* ===========================================================
+   MODO EDICIÓN: CARGAR DATOS DESDE CONSULTA
+   =========================================================== */
+
+let modoEdicion = false;
+let idRegistroEditar = null;
+
+function cargarModoEdicion() {
+  const params = new URLSearchParams(window.location.search);
+  const modo = params.get("modo");
+
+  if (modo !== "editar") return;
+
+  const data = localStorage.getItem("editarReferencia");
+  if (!data) return;
+
+  modoEdicion = true;
+
+  const rec = JSON.parse(data);
+
+  // Guardamos ID para UPDATE
+  idRegistroEditar = rec.id;
+
+  // Cargar datos generales
+  $("#referencia").value = rec.referencia || "";
+  $("#pieza").value = rec.pieza || "";
+  $("#cliente").value = rec.cliente || "";
+  $("#responsable").value = rec.responsable || "";
+  $("#fecha").value = rec.fecha || "";
+  $("#version").value = rec.version || "";
+  $("#observaciones").value = rec.observaciones || "";
+
+  // Cargar equipos
+  tablaBody.innerHTML = "";
+  (rec.equipos || []).forEach(eq => addRow(eq));
+
+  msg("Modo edición: estás editando la versión " + (rec.version || ""), "ok");
+}
+
+cargarModoEdicion();
+
+/* ===========================================================
+   RECOPILAR DATOS DEL FORMULARIO
+   =========================================================== */
+
+function recogerPayload() {
+  const referencia = $("#referencia").value.trim();
+  if (!referencia) {
+    msg("La referencia es obligatoria.");
+    return null;
+  }
+
+  const equipos = [];
+
+  [...tablaBody.querySelectorAll("tr")].forEach(tr => {
+    const inputs = tr.querySelectorAll("input");
+    const [codigo, desc, cant, tipo] = inputs;
+
+    if (!codigo.value.trim() && !desc.value.trim()) return;
+
+    equipos.push({
+      codigo_equipo: codigo.value.trim(),
+      descripcion_equipo: desc.value.trim(),
+      cantidad: parseInt(cant.value || "1"),
+      tipo_medida: tipo.value.trim()
+    });
+  });
+
+  if (equipos.length === 0) {
+    msg("Debes añadir al menos un equipo.");
+    return null;
+  }
+
+  return {
+    referencia,
+    pieza: $("#pieza").value.trim() || null,
+    cliente: $("#cliente").value.trim() || null,
+    responsable: $("#responsable").value.trim() || null,
+    fecha: $("#fecha").value || null,
+    version: $("#version").value.trim() || null,
+    observaciones: $("#observaciones").value.trim() || null,
+    equipos
+  };
+}
+
+/* ===========================================================
+   GUARDAR CAMBIOS (UPDATE)
+   =========================================================== */
+async function guardarCambios() {
+  if (!modoEdicion || !idRegistroEditar) {
+    msg("No estás en modo edición.");
+    return;
+  }
+
+  const payload = recogerPayload();
+  if (!payload) return;
+
+  try {
+    const { error } = await sb
+      .from("control_metrologico")
+      .update(payload)
+      .eq("id", idRegistroEditar);
+
+    if (error) {
+      msg("Error al guardar cambios: " + error.message);
+      return;
+    }
+
+    msg("Versión actualizada correctamente.", "ok");
+
+  } catch (e) {
+    msg("Error inesperado: " + e.message);
+  }
+}
+
+/* ===========================================================
+   GUARDAR NUEVA VERSIÓN (INSERT)
+   =========================================================== */
+async function guardarNuevaVersion() {
+  const payload = recogerPayload();
+  if (!payload) return;
+
+  // QUITAMOS versión si está vacía para que el trigger genere V2/V3
+  if (!payload.version || payload.version === "") {
+    delete payload.version;
+  }
+
+  try {
+    const { error } = await sb
+      .from("control_metrologico")
+      .insert(payload);
+
+    if (error) {
+      msg("Error al crear nueva versión: " + error.message);
+      return;
+    }
+
+    msg("Nueva versión creada correctamente.", "ok");
+
+  } catch (e) {
+    msg("Error inesperado: " + e.message);
+  }
+}
+
+/* ===========================================================
+   EVENTOS DE BOTONES
+   =========================================================== */
+$("#btnGuardar").onclick = guardarCambios;
+$("#btnGuardarNueva").onclick = guardarNuevaVersion;
+
+</script>
+
+</body>
+</html>

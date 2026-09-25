@@ -1,0 +1,90 @@
+{
+  "version": "TMP_THREAD_NORMATIVE_MATRIX_V1",
+  "purpose": "Mapa maestro de normas aplicables por familia de rosca en TMP MT16.",
+  "policy": {
+    "normative_authority_first": true,
+    "historical_certificates": "REFERENCE_ONLY",
+    "operator_must_not_select_standard_manually": true
+  },
+  "families": {
+    "METRIC_ISO_INTERNAL": {
+      "description_es": "Rosca metrica ISO interna. Ejemplo: M16x1.5-6H.",
+      "examples": [
+        "M14x1.5-6H",
+        "M16x2-6H",
+        "M33x2-H6"
+      ],
+      "profile_standard": "ISO68",
+      "geometry_standard": "ISO724",
+      "tolerance_standard": "ISO965",
+      "gauge_standard": "ISO1502",
+      "decision_standard": "ISO14253",
+      "status": "ACTIVE"
+    },
+    "METRIC_ISO_EXTERNAL": {
+      "description_es": "Rosca metrica ISO externa. Ejemplo: M24x3-6g.",
+      "examples": [
+        "M24x3-6g",
+        "M20x2-6g"
+      ],
+      "profile_standard": "ISO68",
+      "geometry_standard": "ISO724",
+      "tolerance_standard": "ISO965",
+      "gauge_standard": "ISO1502",
+      "decision_standard": "ISO14253",
+      "status": "ACTIVE"
+    },
+    "UNC_UNF_UNEF_INTERNAL": {
+      "description_es": "Roscas Unified internas UNC/UNF/UNEF. Ejemplo: 5/8-11 UNC-2B.",
+      "examples": [
+        "5/8-11 UNC-2B",
+        "3/4-16 UNF-2B"
+      ],
+      "profile_standard": "ASME_B1_1",
+      "geometry_standard": "ASME_B1_1",
+      "tolerance_standard": "ASME_B1_1",
+      "gauge_standard": "ASME_B1_2",
+      "decision_standard": "ISO14253",
+      "status": "PENDING"
+    },
+    "BSP_PARALLEL_G": {
+      "description_es": "Rosca paralela de tuberia tipo G/BSPP.",
+      "examples": [
+        "G1/4-19",
+        "G1/8-28"
+      ],
+      "profile_standard": "ISO228",
+      "geometry_standard": "ISO228",
+      "tolerance_standard": "ISO228",
+      "gauge_standard": "ISO228",
+      "decision_standard": "ISO14253",
+      "status": "PENDING"
+    },
+    "BSP_TAPER_R": {
+      "description_es": "Rosca conica de tuberia R/Rc/Rp.",
+      "examples": [
+        "R3/4-14",
+        "Rc1/2"
+      ],
+      "profile_standard": "ISO7",
+      "geometry_standard": "ISO7",
+      "tolerance_standard": "ISO7",
+      "gauge_standard": "ISO7",
+      "decision_standard": "ISO14253",
+      "status": "PENDING"
+    },
+    "NPT_NPTF": {
+      "description_es": "Roscas americanas conicas NPT/NPTF.",
+      "examples": [
+        "1/8-27 NPTF",
+        "1/4-18 NPT"
+      ],
+      "profile_standard": "ASME_B1_20",
+      "geometry_standard": "ASME_B1_20",
+      "tolerance_standard": "ASME_B1_20",
+      "gauge_standard": "ASME_B1_20",
+      "decision_standard": "ISO14253",
+      "status": "PENDING"
+    }
+  }
+}

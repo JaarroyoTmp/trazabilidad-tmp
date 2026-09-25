@@ -1,0 +1,21 @@
+MT16 V42 MULTIROSCA SEGURO
+
+Sustituir estos archivos dentro de:
+calibraciones_mt15 copy/core/metrology_core/thread/
+
+- thread_mt16_workflow_test.html
+- core/mt16_master_engine.js
+- core/iso965_engine.js
+- core/iso1502_engine.js
+- core/thread_parser.js
+- data/thread_iso965_database.js
+- data/thread_iso1502_tables.js
+
+Que hace V42:
+1) Mantiene metrica ISO funcionando con objetivos Trimos para M12x1.25, M14x1.5, M16x2 y combinaciones cargadas.
+2) Detecta familias no metricas: G/BSPP, R/Rc/Rp/BSPT, NPT/NPTF, UN/UNC/UNF/UNEF/UNJ, Tr.
+3) Para no metricas calcula identificacion, paso, TPI, angulo y rodillo informativo.
+4) Bloquea objetivos PASA/NO PASA cuando no existe motor normativo especifico cargado. Esto es intencionado: no inventa limites para emitir calibracion.
+
+Siguiente paso para calibrar completamente todo tipo de roscas:
+Cargar tablas oficiales o motores especificos: ISO 228 para G, ISO 7 para R/Rc/Rp, ASME B1.20 para NPT, ASME B1.1 para UN, ISO 2901/2903/2904 para Tr.

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MC-01 · Simulador metrológico</title>
+<style>
+body{margin:0;font-family:Segoe UI,Arial;background:#eef5ff;color:#071847}.wrap{max-width:1100px;margin:30px auto;padding:0 18px}.card{background:#fff;border:1px solid #c9dcff;border-radius:16px;padding:20px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}label{font-size:12px;font-weight:800;color:#355083}input,select{width:100%;padding:11px;border:1px solid #c9dcff;border-radius:9px;box-sizing:border-box}button{padding:12px 18px;border:0;border-radius:9px;background:#4f52f7;color:#fff;font-weight:800;cursor:pointer}.status{padding:13px;border-radius:10px;background:#f3f8ff;border:1px solid #c9dcff}.ok{background:#ecfdf3;border-color:#9be2ad}.bad{background:#fff1f1;border-color:#fca5a5}.warn{background:#fff7ed;border-color:#fdba74}pre{white-space:pre-wrap;word-break:break-word;background:#081a46;color:#fff;padding:16px;border-radius:12px}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="card"><h1>MC-01 · Simulador de uso del patrón</h1><p>Comprueba qué corrección e incertidumbre devuelve MC-01 para un patrón y nominal concretos antes de conectarlo a MT15/MT16/MT17.</p></div>
+<div class="card"><div id="status" class="status">Inicializando...</div><div class="grid" style="margin-top:14px">
+<div><label>Patrón</label><select id="patron"></select></div>
+<div><label>Nominal</label><input id="nominal" value="75"></div>
+<div><label>Función</label><input id="funcion" value="Longitud"></div>
+<div><label>Fecha de uso</label><input id="fecha" type="date"></div>
+<div><label>Orientación (opcional)</label><input id="orientacion" placeholder="Axial X, V.1..."></div>
+<div><label>Ensayo (opcional)</label><input id="ensayo" placeholder="E0, E150..."></div>
+<div style="align-self:end"><button id="resolver">Resolver</button></div>
+</div></div>
+<div class="card"><h2>Resultado</h2><pre id="output">Sin resolver.</pre></div>
+</div>
+<script type="module">
+import { ensureSupabase } from './core/metrology_core/supabase_client.js';
+import { resolvePatternMetrology } from './core/metrology_core/engines/pattern_metrology_resolver.js';
+const $=id=>document.getElementById(id); let sb;
+const setStatus=(t,k='')=>{$('status').className='status '+k;$('status').textContent=t};
+async function init(){
+  $('fecha').value=new Date().toISOString().slice(0,10);
+  sb=await ensureSupabase();
+  const {data,error}=await sb.from('mc_patrones').select('id,codigo,descripcion,activo,estado').eq('activo',true).order('codigo');
+  if(error){setStatus(error.message,'bad');return}
+  $('patron').innerHTML=(data||[]).map(p=>`<option value="${p.id}">${p.codigo} · ${p.descripcion}</option>`).join('');
+  setStatus(`${data?.length||0} patrones disponibles.`,'ok');
+}
+$('resolver').onclick=async()=>{
+  setStatus('Resolviendo...');
+  try{
+    const result=await resolvePatternMetrology(sb,{patronId:$('patron').value,nominal:$('nominal').value,funcion:$('funcion').value||null,fechaUso:$('fecha').value,orientacion:$('orientacion').value||null,ensayo:$('ensayo').value||null});
+    $('output').textContent=JSON.stringify(result,null,2);
+    setStatus(result.status==='OK'?'Resolución correcta.':result.message||result.status,result.status==='OK'?'ok':result.status==='REVISION_TECNICA'?'warn':'bad');
+  }catch(e){setStatus(e.message,'bad');$('output').textContent=e.stack||e.message}
+};
+init().catch(e=>setStatus(e.message,'bad'));
+</script></body></html>

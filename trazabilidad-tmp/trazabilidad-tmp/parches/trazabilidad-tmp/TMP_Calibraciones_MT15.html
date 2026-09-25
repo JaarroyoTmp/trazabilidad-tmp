@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>TMP · MT15 Lisos P/NP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{
+      --tmp-navy:#0d274a;--tmp-navy-2:#102f5e;--tmp-blue:#3f63f1;--tmp-blue-2:#2f8ee8;
+      --tmp-bg:#eef6ff;--tmp-card:#ffffff;--tmp-line:#d8e6f5;--tmp-soft:#f6faff;
+      --tmp-text:#092044;--tmp-muted:#58708f;--tmp-green:#22c55e;--tmp-green-bg:#eafff1;
+      --tmp-red:#ef4444;--tmp-red-bg:#fff0f0;--tmp-amber:#f59e0b;--tmp-amber-bg:#fff7e8;
+      --shadow:0 18px 50px rgba(13,39,74,.12);--radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(120deg,#f7fbff 0%,#eaf6ff 55%,#dff5ff 100%);color:var(--tmp-text);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;font-weight:650}
+    .app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+    .sidebar{background:#102b4f;color:#fff;padding:18px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px}
+    .brand{display:flex;align-items:center;gap:12px;padding:6px 2px 18px;border-bottom:1px solid rgba(255,255,255,.15)}
+    .mark{width:44px;height:44px;border-radius:13px;background:#fff;display:grid;place-items:center;color:#2f58e8;font-weight:900;box-shadow:0 8px 18px rgba(0,0,0,.16)}
+    .brand strong{display:block;font-size:20px;letter-spacing:.4px}.brand span{font-size:11px;color:#bdd3ef}
+    .nav{display:flex;flex-direction:column;gap:7px}.nav a{color:#fff;text-decoration:none;padding:13px 14px;border-radius:13px;font-size:14px;display:flex;gap:10px;align-items:center;opacity:.92}.nav a.active{background:#4155f3;box-shadow:0 10px 24px rgba(65,85,243,.28)}.nav a:hover{background:rgba(255,255,255,.09)}
+    .side-status{margin-top:auto;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);border-radius:17px;padding:14px;font-size:12px;color:#dcecff;line-height:1.45}.side-status b{color:#fff}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#22c55e;margin-right:8px;box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+    .content{padding:28px 34px 34px;min-width:0}.topbar{display:flex;align-items:center;gap:16px;margin-bottom:24px}.hamb{width:36px;height:36px;border:0;border-radius:12px;background:#fff;color:#28476d;box-shadow:var(--shadow);font-size:19px}.title h1{margin:0;font-size:30px;letter-spacing:-.7px}.title p{margin:3px 0 0;color:var(--tmp-muted);font-size:13px}.user{margin-left:auto;display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:8px 14px;box-shadow:var(--shadow);font-size:12px}.avatar{width:34px;height:34px;border-radius:50%;background:#4155f3;color:#fff;display:grid;place-items:center;font-weight:900}
+    .hero{background:linear-gradient(120deg,#3b87d4 0%,#244797 100%);border-radius:24px;padding:30px 34px;color:#fff;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr 330px;gap:18px;margin-bottom:18px;overflow:hidden;position:relative}.hero:after{content:"";position:absolute;right:-65px;top:-80px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.12)}.hero h2{margin:0;font-size:29px}.hero p{margin:9px 0 16px;color:#d8eaff;font-size:14px}.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);padding:7px 12px;font-size:12px;font-weight:850}.hero-note{display:grid;gap:10px;z-index:1}.note-tile{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.12);border-radius:15px;padding:13px}.note-tile span{display:block;font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:#c8dcff}.note-tile strong{font-size:15px}
+    .work{background:rgba(255,255,255,.78);border:1px solid #d6e8f8;border-radius:28px;padding:18px;box-shadow:var(--shadow);display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}.operator{background:linear-gradient(180deg,#203b93 0%,#3aa4e9 100%);border-radius:22px;color:#fff;padding:23px;min-height:610px;display:flex;flex-direction:column}.icon-box{width:72px;height:72px;border-radius:23px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center;font-size:34px;margin-bottom:18px}.operator h3{font-size:26px;margin:0 0 8px}.operator p{font-size:13px;color:#e5f2ff;line-height:1.45;margin:0 0 18px}.checklist{display:grid;gap:9px;margin-bottom:22px}.check{display:flex;align-items:center;gap:10px;padding:11px;border-radius:14px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);font-size:13px}.check:before{content:"✓";width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center}
+    .steps{display:grid;gap:8px;margin-top:auto}.step{display:flex;align-items:center;gap:11px;border-radius:12px;padding:7px 8px;color:#eaf6ff;font-size:13px;opacity:.8}.step .num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.18);font-size:12px}.step.active{opacity:1;font-weight:900}.step.active .num{background:#35d75b;color:#fff}.step.done .num{background:rgba(255,255,255,.26)}
+    .stage{min-width:0}.section{display:none}.section.active{display:block}.panel{background:#fff;border:1px solid var(--tmp-line);border-radius:22px;padding:22px;box-shadow:0 12px 30px rgba(13,39,74,.07)}.section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.section-title h2{margin:0;font-size:24px;letter-spacing:-.5px}.section-title p{margin:6px 0 0;color:var(--tmp-muted);font-size:13px}.status-chip{border-radius:999px;padding:7px 12px;font-size:12px;border:1px solid var(--tmp-line);background:#f7fbff}.status-chip.ok,.pill.success{background:var(--tmp-green-bg);border-color:#a8efbf;color:#11873c}.status-chip.warn,.pill.warn{background:var(--tmp-amber-bg);border-color:#ffd590;color:#b26300}.pill.danger{background:var(--tmp-red-bg);border-color:#ffb6b6;color:#b91c1c}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}
+    .hint{border:1px solid #bcd8ff;background:#f4f9ff;color:#254be8;border-radius:15px;padding:13px 15px;font-size:14px;margin:12px 0 16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.field-card,.banner,.option-card{border:1px solid var(--tmp-line);background:#f8fbff;border-radius:15px;padding:14px}.field-card label,label{display:block;font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:#607899;margin-bottom:7px;font-weight:900}.field-card strong{font-size:18px}.mini{color:var(--tmp-muted);font-size:12px;line-height:1.45}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.mt{margin-top:14px}.right{margin-left:auto}.hidden{display:none!important}
+    input,select,textarea{width:100%;background:#fff;border:1px solid #ccdef0;color:var(--tmp-text);border-radius:13px;padding:12px 13px;outline:none;font:inherit;font-weight:750}input:focus,select:focus,textarea:focus{border-color:#5f8df5;box-shadow:0 0 0 4px rgba(95,141,245,.14)}button,.btn{border:0;border-radius:13px;padding:12px 16px;cursor:pointer;background:#435cf3;color:#fff;font-weight:900;box-shadow:0 10px 22px rgba(67,92,243,.18)}button.secondary,.btn.secondary,.btn.ghost{background:#fff;color:#11315a;border:1px solid #cbdff2;box-shadow:none}button.success,.btn.success{background:#22c55e;color:#fff}button:disabled{opacity:.5;cursor:not-allowed}.banner{color:#24486f}.banner.ok{background:var(--tmp-green-bg);border-color:#a8efbf;color:#0c7a31}.banner.warn{background:var(--tmp-amber-bg);border-color:#ffd590;color:#995400}.banner.bad{background:var(--tmp-red-bg);border-color:#ffb6b6;color:#b91c1c}
+    .table-box{overflow:auto;border:1px solid var(--tmp-line);border-radius:16px;background:#fff}table{width:100%;border-collapse:collapse;min-width:760px}th,td{border-bottom:1px solid #e1edf8;padding:10px 11px;font-size:13px;text-align:left;vertical-align:top}th{color:#496686;background:#f2f7fc;position:sticky;top:0}.option-card{margin:9px 0}.option-card.selected{border-color:#8de8aa;background:#effff4}.reading-input{min-width:92px;text-align:center}pre{white-space:pre-wrap;background:#102744;color:#e9f4ff;border:1px solid #2f5072;border-radius:16px;padding:14px;max-height:360px;overflow:auto;font-size:12px}
+    .footer{text-align:center;color:#6c84a4;font-size:11px;margin:20px 0 0}
+    @media(max-width:1100px){.hero{grid-template-columns:1fr}.work{grid-template-columns:1fr}.operator{min-height:auto}.grid,.grid-3{grid-template-columns:1fr}.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.content{padding:18px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="mark">P</div><div><strong>PARAMIO</strong><span>TALLERES MECÁNICOS</span></div></div>
+    <nav class="nav">
+      <a href="./home.html">⌂ Inicio</a>
+      <a href="./calibraciones.html" class="active">◎ Centro calibración</a>
+      <a href="./TMP_Calibraciones_MT15.html" class="active">▣ MT15 lisos</a>
+      <a href="./core/metrology_core/thread/thread_mt16_workflow.html">⦿ MT16 roscados</a>
+      <a href="./App_Patrones_TMP.html">▤ Patrones</a>
+      <a href="./calibraciones_historico.html">▥ Historial</a>
+    </nav>
+    <div class="side-status">
+      <div><span class="dot"></span><b>MT15</b><br>Motor conservado</div><br>
+      <div><span class="dot"></span><b>CT-001</b><br>Certificado común TMP</div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <button class="hamb" type="button">≡</button>
+      <div class="title"><h1>MT15</h1><p>Lisos P/NP · interfaz unificada TMP</p></div>
+      <div class="user"><div class="avatar">JA</div><div><strong>J. Arroyo</strong><br><span class="mini">Administrador</span></div></div>
+    </div>
+
+    <section class="hero">
+      <div>
+        <h2>Calibración guiada MT15</h2>
+        <p>Tampones lisos PASA / NO PASA con motor existente conservado, patrones válidos, lecturas guiadas, decisión ILAC-G8 y certificado CT-001.</p>
+        <div class="badges"><span class="badge">ISO 286</span><span class="badge">ISO 1938</span><span class="badge">ILAC-G8</span><span class="badge">CT-001</span></div>
+      </div>
+      <div class="hero-note">
+        <div class="note-tile"><span>Regla</span><strong>La pantalla cambia, el motor MT15 se conserva</strong></div>
+        <div class="note-tile"><span>Operario</span><strong>Selecciona patrón, toma lecturas y calcula</strong></div>
+      </div>
+    </section>
+
+    <section class="work">
+      <aside class="operator">
+        <div class="icon-box">⌖</div>
+        <h3>Modo operario</h3>
+        <p>La interfaz guía el proceso. Los cálculos y decisiones siguen saliendo del motor MT15 existente.</p>
+        <div class="checklist">
+          <div class="check">Motor metrológico MT15 conservado</div>
+          <div class="check">Patrones válidos antes de medir</div>
+          <div class="check">Lecturas y resultado auditables</div>
+        </div>
+        <div class="steps">
+          <div class="step active" data-step-label="1"><span class="num">1</span>Equipo</div>
+          <div class="step" data-step-label="2"><span class="num">2</span>Preguntas</div>
+          <div class="step" data-step-label="3"><span class="num">3</span>Pauta</div>
+          <div class="step" data-step-label="4"><span class="num">4</span>Patrones</div>
+          <div class="step" data-step-label="5"><span class="num">5</span>Lecturas</div>
+          <div class="step" data-step-label="6"><span class="num">6</span>Resultados</div>
+          <div class="step" data-step-label="7"><span class="num">7</span>Guardar</div>
+        </div>
+      </aside>
+
+      <div class="stage">
+        <div class="section active" data-step="1">
+          <div class="panel">
+            <div class="section-title"><div><h2>1 · Equipo</h2><p>Busca el tampón liso P/NP real en Supabase.</p></div><span id="onlineBadge" class="status-chip warn">Offline</span></div>
+            <div class="hint">Introduce el código del equipo o usa el selector. MT15 no continúa hasta cargar un instrumento válido.</div>
+            <div class="grid">
+              <div><label>Código de instrumento</label><input id="insCodigo" placeholder="Ejemplo: 40205"></div>
+              <div style="align-self:end" class="row"><button id="btnCargarInstrumento" type="button">Cargar equipo</button><button id="btnVolverVieja" class="secondary" type="button">Abrir calibración clásica</button></div>
+            </div>
+            <div id="instrumentoBox" class="mt banner">No hay equipo cargado.</div>
+            <div class="row mt"><button id="goStep2" type="button" disabled>Continuar a preguntas</button></div>
+          </div>
+        </div>
+
+        <div class="section" data-step="2"><div class="panel"><div class="section-title"><div><h2>2 · Preguntas MT15</h2><p>El motor pregunta solo lo necesario según la familia detectada.</p></div><span class="status-chip">Procedimiento</span></div><div id="questionsBox" class="mt"></div><div class="row mt"><button class="secondary" data-prev="1" type="button">Atrás</button><button id="btnGenerarPauta" type="button">Generar pauta automática</button></div></div></div>
+
+        <div class="section" data-step="3"><div class="panel"><div class="section-title"><div><h2>3 · Pauta automática</h2><p>Plan de puntos generado por el motor MT15.</p></div><span class="status-chip">Pauta</span></div><div id="pautaBox" class="mt banner">Pendiente de generar pauta.</div><div class="row mt"><button class="secondary" data-prev="2" type="button">Atrás</button><button id="goStep4" type="button" disabled>Continuar a patrones válidos</button></div></div></div>
+
+        <div class="section" data-step="4"><div class="panel"><div class="section-title"><div><h2>4 · Patrones válidos</h2><p>El operario elige entre opciones técnicamente permitidas.</p></div><span class="status-chip">Trazabilidad</span></div><div class="hint">El motor filtra patrones no válidos. No se selecciona un patrón fuera de rango o no vigente.</div><div id="patternOptionsBox" class="mt"></div><div class="row mt"><button class="secondary" data-prev="3" type="button">Atrás</button><button id="goStep5" type="button" disabled>Continuar a lecturas</button></div></div></div>
+
+        <div class="section" data-step="5"><div class="panel"><div class="section-title"><div><h2>5 · Lecturas guiadas</h2><p>Introduce 5 lecturas por punto directamente en cada casilla.</p></div><span class="status-chip">Medición</span></div><div id="readingsBox" class="mt"></div><div class="row mt"><button class="secondary" data-prev="4" type="button">Atrás</button><button id="btnCalcularResultados" type="button">Calcular con motor MT15</button></div></div></div>
+
+        <div class="section" data-step="6"><div class="panel"><div class="section-title"><div><h2>6 · Resultados técnicos</h2><p>Media, error, incertidumbre y decisión.</p></div><span class="status-chip">ILAC-G8</span></div><div id="resultsBox" class="mt"></div><div class="row mt"><button class="secondary" data-prev="5" type="button">Atrás</button><button id="goStep7" type="button" disabled>Continuar a guardar</button></div></div></div>
+
+        <div class="section" data-step="7"><div class="panel"><div class="section-title"><div><h2>7 · Auditoría y guardado</h2><p>Guarda calibración, lecturas, resultado y payload técnico.</p></div><span class="status-chip">Final</span></div><div id="auditBox" class="mt"></div><div class="grid mt"><div><label>Operario / firmante</label><input id="firmanteNombre" placeholder="Nombre"></div><div><label>Próxima calibración</label><input id="firmanteProxima" type="date"></div></div><div class="row mt"><button class="secondary" data-prev="6" type="button">Atrás</button><button id="btnGuardarSupabase" class="success" type="button">Guardar calibración</button><button id="btnVerJSON" class="secondary" type="button">Generar informe / certificado</button></div><pre id="jsonPreview" class="hidden mt" style="display:none"></pre></div></div>
+      </div>
+    </section>
+    <div class="footer">Talleres Mecánicos Paramio · MT15 integrado en TMP Calibration Platform · 2026</div>
+  </main>
+</div>
+<script type="module" src="./calibraciones_mt15 copy/core/metrology_core/app_mt15.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TMP MT16 Metric Trimos Test</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#07111f;color:#e7f2fb;margin:0;padding:24px}
+    .card{background:#10243a;border:1px solid #24425f;border-radius:14px;padding:16px;margin-bottom:14px}
+    input{background:#071426;color:white;border:1px solid #24425f;border-radius:10px;padding:10px;min-width:260px}
+    button{background:#3d9cff;color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border-bottom:1px solid #24425f;padding:8px;text-align:left;font-size:13px}
+    th{background:#183b60}
+    .ok{color:#2bd47c;font-weight:bold}.bad{color:#ff6b6b;font-weight:bold}.warn{color:#ffd15c;font-weight:bold}
+    pre{background:#050b14;border:1px solid #24425f;border-radius:10px;padding:12px;overflow:auto}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  </style>
+</head>
+<body>
+  <h1>TMP MT16 Metric Trimos Engine V1</h1>
+
+  <div class="card">
+    <h3>Plan automático</h3>
+    <input id="txt" value="M33 x 2 H6">
+    <button id="btnPlan">Generar plan</button>
+    <button id="btnM85">Probar M85x1.5 H6</button>
+  </div>
+
+  <div class="card">
+    <h3>Plan Trimos</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Rosca</th>
+          <th>Paso</th>
+          <th>Rodillo</th>
+          <th>C</th>
+          <th>Lado</th>
+          <th>D2 nominal</th>
+          <th>Objetivo Trimos</th>
+          <th>Límites D2</th>
+        </tr>
+      </thead>
+      <tbody id="planRows"></tbody>
+    </table>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Lecturas PASA</h3>
+      <input id="pasaReadings" value="34.236,34.235,34.235,34.236,34.235">
+    </div>
+    <div class="card">
+      <h3>Lecturas NO PASA</h3>
+      <input id="nopasaReadings" value="34.000,34.002,34.001,34.000,34.002">
+    </div>
+  </div>
+
+  <div class="card">
+    <button id="btnEval">Evaluar lecturas</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Lado</th>
+          <th>Media Trimos</th>
+          <th>Media D2</th>
+          <th>Objetivo</th>
+          <th>Decisión</th>
+          <th>Motivo</th>
+        </tr>
+      </thead>
+      <tbody id="evalRows"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>JSON</h3>
+    <pre id="json">{}</pre>
+  </div>
+
+<script type="module">
+import {
+  buildTrimosPlanForMetricThread,
+  evaluateMetricThreadCalibration
+} from "./thread_metric_trimos_engine.js";
+
+let currentPlan = null;
+
+function parseList(value) {
+  return String(value || "")
+    .split(/[;, ]+/)
+    .map(x => x.trim())
+    .filter(Boolean)
+    .map(Number)
+    .filter(Number.isFinite);
+}
+
+function renderPlan(plan) {
+  currentPlan = plan;
+  document.querySelector("#json").textContent = JSON.stringify(plan, null, 2);
+
+  if (!plan.ok) {
+    document.querySelector("#planRows").innerHTML = `<tr><td colspan="8" class="bad">${plan.message || plan.error}</td></tr>`;
+    return;
+  }
+
+  document.querySelector("#planRows").innerHTML = (plan.points || []).map(p => `
+    <tr>
+      <td>${plan.parsed.normalized}</td>
+      <td>${plan.setup.pitch_mm}</td>
+      <td>Ø${plan.setup.wire_mm}</td>
+      <td>${plan.setup.correction_mm}</td>
+      <td>${p.lado}</td>
+      <td>${p.d2_nominal_mm ?? "-"}</td>
+      <td>${p.target_trimos_mm ?? "-"}</td>
+      <td>${p.limits_d2_mm ? `${p.limits_d2_mm.min} / ${p.limits_d2_mm.max} / desgaste ${p.limits_d2_mm.wear_max}` : "Pendiente"}</td>
+    </tr>
+  `).join("");
+}
+
+function evaluar() {
+  if (!currentPlan?.ok) return;
+
+  const result = evaluateMetricThreadCalibration({
+    plan: currentPlan,
+    readingsByPoint: {
+      PASA: parseList(document.querySelector("#pasaReadings").value),
+      NO_PASA: parseList(document.querySelector("#nopasaReadings").value)
+    }
+  });
+
+  document.querySelector("#json").textContent = JSON.stringify(result, null, 2);
+  document.querySelector("#evalRows").innerHTML = result.results.map(r => `
+    <tr>
+      <td>${r.lado}</td>
+      <td>${r.media_trimos_mm ?? "-"}</td>
+      <td>${r.media_d2_mm ?? "-"}</td>
+      <td>${r.target_trimos_mm ?? "-"}</td>
+      <td class="${r.decision === "APTO" ? "ok" : "bad"}">${r.decision}</td>
+      <td>${r.motivo || r.error}</td>
+    </tr>
+  `).join("");
+}
+
+document.querySelector("#btnPlan").addEventListener("click", () => {
+  renderPlan(buildTrimosPlanForMetricThread({ rango: document.querySelector("#txt").value }));
+});
+
+document.querySelector("#btnM85").addEventListener("click", () => {
+  document.querySelector("#txt").value = "M85 x 1.5 H6";
+  document.querySelector("#pasaReadings").value = "85.426,85.431,85.431,85.431,85.430";
+  document.querySelector("#nopasaReadings").value = "85.632,85.628,85.632,85.633,85.629";
+  renderPlan(buildTrimosPlanForMetricThread({ rango: document.querySelector("#txt").value }));
+});
+
+document.querySelector("#btnEval").addEventListener("click", evaluar);
+
+renderPlan(buildTrimosPlanForMetricThread({ rango: document.querySelector("#txt").value }));
+</script>
+</body>
+</html>

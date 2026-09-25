@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TMP MT16 Thread Geometry Test</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#07111f;color:#e7f2fb;margin:0;padding:24px}
+    .card{background:#10243a;border:1px solid #24425f;border-radius:14px;padding:16px;margin-bottom:14px}
+    input{background:#071426;color:white;border:1px solid #24425f;border-radius:10px;padding:10px;min-width:320px}
+    button{background:#3d9cff;color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border-bottom:1px solid #24425f;padding:8px;text-align:left;font-size:13px}
+    th{background:#183b60}
+    .ok{color:#2bd47c;font-weight:bold}.bad{color:#ff6b6b;font-weight:bold}
+    pre{background:#050b14;border:1px solid #24425f;border-radius:10px;padding:12px;overflow:auto}
+  </style>
+</head>
+<body>
+  <h1>TMP MT16 Thread Geometry Engine V1</h1>
+
+  <div class="card">
+    <input id="txt" value="M33 x 2 H6">
+    <button id="btn">Calcular geometría</button>
+    <button id="batch">Batería básica</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Estado</th><th>Entrada</th><th>Familia</th><th>D</th><th>P</th>
+          <th>Ángulo</th><th>H</th><th>D2 básico</th><th>D1 básico</th><th>Clase</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>JSON último resultado</h3>
+    <pre id="json">{}</pre>
+  </div>
+
+<script type="module">
+import { calculateThreadGeometry } from "./thread_geometry_engine.js";
+
+const examples = [
+  "M33 x 2 H6",
+  "M85 x 1.5 H6",
+  "M18 - 6H",
+  "M14 x 1.5 - 6H",
+  "M82X2 6H",
+  "M144X1.5",
+  "5/8 - 11 UNC - 2B",
+  "3/4-16 UNF-2B",
+  "G1/4-19",
+  "R3/4-14",
+  "1/8 - 27 NPTF"
+];
+
+function render(input) {
+  const result = calculateThreadGeometry({ rango: input });
+  document.querySelector("#json").textContent = JSON.stringify(result, null, 2);
+
+  const g = result.geometry || {};
+  const b = g.basic_mm || {};
+  const d2 = b.pitch_diameter ?? b.pitch_diameter_theoretical ?? "-";
+  const d1 = b.minor_diameter ?? "-";
+
+  document.querySelector("#rows").insertAdjacentHTML("afterbegin", `
+    <tr>
+      <td class="${result.ok ? "ok" : "bad"}">${result.ok ? "OK" : "ERROR"}</td>
+      <td>${input}</td>
+      <td>${g.family || result.parsed?.family || "-"}</td>
+      <td>${g.nominal_mm ?? "-"}</td>
+      <td>${g.pitch_mm ?? "-"}</td>
+      <td>${g.angle_deg ?? "-"}</td>
+      <td>${g.H_mm ?? "-"}</td>
+      <td>${d2}</td>
+      <td>${d1}</td>
+      <td>${result.parsed?.tolerance_class || "-"}</td>
+    </tr>
+  `);
+}
+
+document.querySelector("#btn").addEventListener("click", () => {
+  render(document.querySelector("#txt").value);
+});
+
+document.querySelector("#batch").addEventListener("click", () => {
+  document.querySelector("#rows").innerHTML = "";
+  for (const input of examples) render(input);
+});
+
+render(document.querySelector("#txt").value);
+</script>
+</body>
+</html>

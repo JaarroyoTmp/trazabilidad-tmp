@@ -1,0 +1,11 @@
+FIX MC-02 - RUTA SUPABASE
+
+1. Copia la carpeta trazabilidad-tmp sobre la carpeta trazabilidad-tmp de tu proyecto.
+2. Debe quedar este archivo:
+   trazabilidad-tmp/core/metrology_core/supabase_client.js
+3. No borres la carpeta calibraciones_mt15 copy todavía.
+4. Abre con Live Server desde:
+   trazabilidad-tmp/App_MC02_Actualizar_Calibracion_Patron.html
+5. Pulsa Ctrl+F5.
+
+Este parche corrige el error MIME text/html causado porque el navegador no encontraba supabase_client.js en la ruta esperada.

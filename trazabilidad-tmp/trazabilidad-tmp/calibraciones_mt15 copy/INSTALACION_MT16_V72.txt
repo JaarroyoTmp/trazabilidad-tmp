@@ -1,0 +1,20 @@
+MT16 V72 - Procedure Rules
+
+Copiar el contenido de este ZIP sobre la carpeta:
+calibraciones_mt15 copy/
+
+Sustituye archivos existentes y añade la nueva carpeta:
+core/metrology_core/thread/procedure_rules/
+
+Pruebas recomendadas:
+03-03
+01186311
+R 1/2
+5/16-18 UNC - 2B
+7/16-14 UNF - 2B
+1/4-18 NPT
+1/4-20 BSW
+
+Objetivo de V72:
+No cambiar el cálculo ya validado.
+Separar el conocimiento procedural por familia de rosca y dejar el auditor mostrando el procedimiento activo, el estado certificable/operativo y las capacidades.

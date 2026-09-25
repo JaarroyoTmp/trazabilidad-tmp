@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TMP · Familias de instrumentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#0e2235; --bg1:#122b43; --bg2:#1a3b57; --card:#183049;
+    --muted:#8ea6bb; --txt:#e7f2fb; --accent:#47a3ff; --accent-2:#1f8fff;
+    --chip:#203a57; --border:#20466866; --danger:#ff6b6b; --ok:#32d29b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--txt);
+    background: radial-gradient(1200px 800px at 10% 0%, var(--bg2) 0%, var(--bg1) 50%, var(--bg0) 100%);
+  }
+  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+  header{
+    display:flex;align-items:center;gap:16px;
+    padding:12px 0 18px;border-bottom:1px solid #21436040;
+    flex-wrap:wrap;
+  }
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  .badge{font-size:12px;background:var(--chip);padding:6px 10px;border-radius:999px;color:#b9d3ea}
+  .online{background:#103c26;color:#aaf2cd}
+  .offline{background:#3a1b1b;color:#ffc0c0}
+  .stamp{display:inline-flex;align-items:center;gap:8px;background:#0c3a24;border:1px solid #1f7b53;color:#bbf3d3;padding:6px 10px;border-radius:999px;font-weight:700;margin-left:auto}
+  .logo-mini{height:18px;width:18px;border-radius:4px;background:linear-gradient(135deg,#3dd2ff,#1bb3ff);display:inline-block}
+  .card{
+    background:linear-gradient(180deg,#1a3551aa,#163049aa);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    margin-top:16px;
+  }
+  .card h3{margin:0 0 10px;font-size:14px;font-weight:700;color:#d8e9f8}
+  label{display:block;font-size:12px;color:#a7c0d6;margin-bottom:4px}
+  input,select,textarea,button{font-family:inherit;color:inherit}
+  input[type="text"],input[type="number"],textarea,select{
+    width:100%;background:#102030;border:1px solid #2a537a;border-radius:10px;
+    padding:9px 11px;color:#e9f4ff;outline:none;font-size:13px;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+  .grid{display:grid;gap:12px}
+  .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media(max-width:768px){ .g-2{grid-template-columns:1fr} }
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .right{margin-left:auto}
+  .btn{
+    background:var(--accent-2);border:none;border-radius:10px;padding:9px 14px;
+    color:#fff;font-weight:600;cursor:pointer;font-size:13px;transition:.15s transform, .15s background;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn.secondary{background:#214360}
+  .btn.danger{background:#5b1d1d}
+  .btn.sm{padding:6px 10px;font-size:12px}
+  .mini{font-size:11px;color:#9eb9cf}
+  table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;font-size:13px}
+  th,td{border-bottom:1px solid #244b6a66;padding:8px 6px;text-align:left}
+  thead th{background:#112338;color:#cfe6fa;font-weight:600;font-size:12px}
+  tbody tr:nth-child(odd){background:#11263f80}
+  tbody tr:hover{background:#163552;cursor:pointer}
+  .pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:11px;border:1px solid #2d4e74;color:#b9d3ea;background:#203a57}
+  .status-dot{width:8px;height:8px;border-radius:999px;margin-right:5px;display:inline-block}
+  .dot-ok{background:#32d29b}
+  .dot-inactive{background:#ffb84d}
+  .search-box input{max-width:260px}
+  .toast{
+    position:fixed;bottom:18px;right:18px;background:#102027;border:1px solid #1f7b53;color:#c8f5dd;
+    padding:10px 14px;border-radius:10px;font-size:12px;box-shadow:0 8px 25px rgba(0,0,0,.45);z-index:50;display:none;
+  }
+  .toast.error{border-color:#ff6b6b;color:#ffdede}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">TMP · Admin</div>
+    <h1>Gestión de familias de instrumentos</h1>
+    <div class="stamp"><span class="logo-mini"></span> TMP · Metrología · QA</div>
+    <span id="onlineBadge" class="badge offline">Offline</span>
+  </header>
+
+  <!-- LISTADO -->
+  <div class="card">
+    <div class="row">
+      <h3>Listado de familias</h3>
+      <div class="row right search-box">
+        <input id="searchFamilia" type="text" placeholder="Buscar por nombre o unidad..." />
+        <button id="btnRefrescar" class="btn secondary sm">Refrescar</button>
+      </div>
+    </div>
+    <div style="margin-top:8px;max-height:360px;overflow:auto;border-radius:12px;border:1px solid #2a537a">
+      <table>
+        <thead>
+          <tr>
+            <th>Familia</th>
+            <th>Unidad</th>
+            <th>Periodicidad (meses)</th>
+            <th>Estado</th>
+            <th>Nota</th>
+          </tr>
+        </thead>
+        <tbody id="familiasRows"></tbody>
+      </table>
+    </div>
+    <p class="mini" style="margin-top:6px">Pulsa sobre una fila para editarla. Las familias se usan para asignar unidad base y periodicidad a los instrumentos nuevos.</p>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="card">
+    <div class="row">
+      <h3>Ficha de familia</h3>
+      <span class="mini right" id="formMode">Modo: alta</span>
+    </div>
+    <div class="grid g-2" style="margin-top:8px">
+      <div>
+        <label>Nombre de familia *</label>
+        <input id="famNombre" type="text" placeholder="Ej.: Calibres, Micrómetros, Comparadores..." />
+      </div>
+      <div>
+        <label>Unidad base *</label>
+        <input id="famUnidad" type="text" placeholder="Ej.: mm, N·m, °C, g..." />
+      </div>
+      <div>
+        <label>Periodicidad (meses) *</label>
+        <input id="famPeriod" type="number" min="1" step="1" placeholder="12" />
+      </div>
+      <div>
+        <label>Estado</label>
+        <select id="famEstado">
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1">
+        <label>Nota interna</label>
+        <textarea id="famNota" rows="2" placeholder="Comentarios sobre el uso de esta familia, tolerancias típicas, etc."></textarea>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:flex-end">
+      <button id="btnNuevo" class="btn secondary">Nuevo</button>
+      <button id="btnEliminar" class="btn danger">Eliminar</button>
+      <button id="btnGuardar" class="btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+/* ========= CONFIG SUPABASE ========= */
+const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw"; // pon aquí tu anon key completa
+
+/* ========= ESTADO ========= */
+const state = {
+  online:false,
+  familias:[],
+  selectedId:null
+};
+
+/* ========= UTIL ========= */
+const $ = q => document.querySelector(q);
+const $$ = q => Array.from(document.querySelectorAll(q));
+
+const setBadge = ok => {
+  const b = $("#onlineBadge");
+  b.textContent = ok ? "Online (Supabase)" : "Offline";
+  b.classList.toggle("online", ok);
+  b.classList.toggle("offline", !ok);
+  state.online = ok;
+};
+function showToast(msg, isError=false){
+  const t=$("#toast");
+  t.textContent = msg;
+  t.classList.toggle("error", !!isError);
+  t.style.display="block";
+  setTimeout(()=>{t.style.display="none";},2500);
+}
+
+/* ========= SUPABASE CLIENT ========= */
+let supabase = null;
+async function ensureSupabase(){
+  if (!SUPABASE_URL.startsWith("http")) { setBadge(false); return null; }
+  if (!supabase){
+    try{
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.5");
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }catch(e){
+      console.error(e);
+      supabase = null;
+    }
+  }
+  setBadge(!!supabase);
+  return supabase;
+}
+
+/* ========= CARGA FAMILIAS ========= */
+async function cargarFamilias(){
+  await ensureSupabase();
+  if (!supabase){
+    state.familias = [];
+    renderTabla();
+    return;
+  }
+  const { data, error } = await supabase
+    .from("familias")
+    .select("*")
+    .order("familia",{ascending:true});
+  if (error){
+    console.error(error);
+    showToast("Error al cargar familias", true);
+  }
+  state.familias = data || [];
+  renderTabla();
+}
+function renderTabla(){
+  const tbody=$("#familiasRows");
+  const filtro = ($("#searchFamilia").value || "").toLowerCase();
+  tbody.innerHTML = state.familias
+    .filter(f=>{
+      if (!filtro) return true;
+      return (f.familia || "").toLowerCase().includes(filtro) ||
+             (f.unidad || "").toLowerCase().includes(filtro);
+    })
+    .map(f=>{
+      const estado = f.estado || "activo";
+      const dotClass = estado==="activo" ? "dot-ok" : "dot-inactive";
+      return `
+        <tr data-id="${f.id||""}">
+          <td>${f.familia||"—"}</td>
+          <td>${f.unidad||"—"}</td>
+          <td>${f.periodicidad_meses ?? "—"}</td>
+          <td><span class="pill"><span class="status-dot ${dotClass}"></span>${estado}</span></td>
+          <td>${f.nota||"—"}</td>
+        </tr>`;
+    }).join('');
+}
+
+/* ========= FORMULARIO ========= */
+function limpiarForm(){
+  state.selectedId = null;
+  $("#famNombre").value="";
+  $("#famUnidad").value="";
+  $("#famPeriod").value="";
+  $("#famEstado").value="activo";
+  $("#famNota").value="";
+  $("#formMode").textContent = "Modo: alta";
+}
+function cargarEnForm(f){
+  state.selectedId = f.id;
+  $("#famNombre").value = f.familia || "";
+  $("#famUnidad").value = f.unidad || "";
+  $("#famPeriod").value = f.periodicidad_meses ?? "";
+  $("#famEstado").value = f.estado || "activo";
+  $("#famNota").value = f.nota || "";
+  $("#formMode").textContent = "Modo: edición";
+}
+async function guardarFamilia(){
+  const familia = $("#famNombre").value.trim();
+  const unidad  = $("#famUnidad").value.trim();
+  const period  = parseInt($("#famPeriod").value,10);
+  const estado  = $("#famEstado").value;
+  const nota    = $("#famNota").value.trim();
+
+  if (!familia || !unidad || !period || period<=0){
+    showToast("Rellena nombre, unidad y periodicidad (meses).", true);
+    return;
+  }
+  await ensureSupabase();
+  if (!supabase){
+    showToast("Sin conexión a Supabase.", true);
+    return;
+  }
+
+  const payload = {
+    familia,
+    unidad,
+    periodicidad_meses: period,
+    estado,
+    nota
+  };
+
+  let error;
+  if (state.selectedId){
+    const resp = await supabase
+      .from("familias")
+      .update(payload)
+      .eq("id", state.selectedId);
+    error = resp.error;
+  }else{
+    const resp = await supabase
+      .from("familias")
+      .insert(payload);
+    error = resp.error;
+  }
+
+  if (error){
+    console.error(error);
+    showToast("Error al guardar familia.", true);
+  }else{
+    showToast("Familia guardada correctamente.");
+    await cargarFamilias();
+    limpiarForm();
+  }
+}
+async function eliminarFamilia(){
+  if (!state.selectedId){
+    showToast("Selecciona una familia primero.", true);
+    return;
+  }
+  if (!confirm("¿Eliminar esta familia? No se recomienda si hay instrumentos asociados.")) return;
+  await ensureSupabase();
+  if (!supabase) return;
+  const { error } = await supabase
+    .from("familias")
+    .delete()
+    .eq("id", state.selectedId);
+  if (error){
+    console.error(error);
+    showToast("Error al eliminar familia.", true);
+  }else{
+    showToast("Familia eliminada.");
+    await cargarFamilias();
+    limpiarForm();
+  }
+}
+
+/* ========= EVENTOS ========= */
+$("#btnRefrescar").addEventListener("click", cargarFamilias);
+$("#searchFamilia").addEventListener("input", renderTabla);
+$("#btnNuevo").addEventListener("click", limpiarForm);
+$("#btnGuardar").addEventListener("click", guardarFamilia);
+$("#btnEliminar").addEventListener("click", eliminarFamilia);
+
+$("#familiasRows").addEventListener("click", ev=>{
+  const tr = ev.target.closest("tr");
+  if (!tr) return;
+  const id = tr.dataset.id;
+  const fam = state.familias.find(f=> String(f.id)===String(id));
+  if (fam) cargarEnForm(fam);
+});
+
+/* ========= ARRANQUE ========= */
+(async ()=>{
+  await ensureSupabase();
+  await cargarFamilias();
+})();
+</script>
+</body>
+</html>

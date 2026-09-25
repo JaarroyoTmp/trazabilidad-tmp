@@ -1,0 +1,12 @@
+MT16 V81 UX Laboratorio profesional
+
+Instalacion:
+1. Copiar el contenido de este ZIP sobre la carpeta calibraciones_mt15 copy/.
+2. Sustituir archivos cuando Windows lo pregunte.
+3. Recargar navegador con Ctrl+F5.
+
+Cambios:
+- Trazabilidad más clara para banco, rodillos y patrón.
+- Sustituye Pendiente genérico por requisitos técnicos.
+- Pantalla de resultado con acciones preparadas: guardar, certificado PDF e informe NOK.
+- Mantiene lecturas en casillas L1-L5.

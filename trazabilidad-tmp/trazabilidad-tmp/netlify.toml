@@ -1,0 +1,31 @@
+[build]
+  publish = "."
+
+# Redirigir la raíz al login
+[[redirects]]
+  from = "/"
+  to = "/login.html"
+  status = 200
+
+# Redirigir /qr y /qr/ al generador de QR
+[[redirects]]
+  from = "/qr"
+  to = "/qr/qr.index.html"
+  status = 200
+
+[[redirects]]
+  from = "/qr/"
+  to = "/qr/qr.index.html"
+  status = 200
+
+# Ruta limpia /qr/11217 → ficha del instrumento
+[[redirects]]
+  from = "/qr/:codigo"
+  to = "/qr/qr.info_instrumentos.html?codigo=:codigo"
+  status = 200
+
+# Alias opcional /instrumento/11217 → ficha del instrumento
+[[redirects]]
+  from = "/instrumento/:codigo"
+  to = "/qr/qr.info_instrumentos.html?codigo=:codigo"
+  status = 200

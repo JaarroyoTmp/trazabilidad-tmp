@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TMP MT16 · Calibración normativa</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#eef6ff;
+  --bg2:#f7fbff;
+  --ink:#0d2340;
+  --muted:#66809a;
+  --panel:#ffffff;
+  --line:#dbe7f2;
+  --line2:#cbddeb;
+  --nav:#08284a;
+  --nav2:#0b3c72;
+  --blue:#2563eb;
+  --blue2:#0ea5e9;
+  --green:#22c55e;
+  --orange:#f59e0b;
+  --red:#ef4444;
+  --purple:#8b5cf6;
+  --shadow:0 14px 36px rgba(15,45,75,.10);
+  --shadow2:0 8px 20px rgba(15,45,75,.08);
+  --radius:20px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 18% -10%, rgba(37,99,235,.16), transparent 30%),
+    radial-gradient(circle at 90% 4%, rgba(14,165,233,.18), transparent 34%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+.app{min-height:100vh;display:grid;grid-template-columns:248px minmax(0,1fr)}
+.sidebar{
+  position:sticky;top:0;height:100vh;padding:20px 16px;
+  background:linear-gradient(180deg,#07274a 0%,#082544 55%,#061f3a 100%);
+  color:white;box-shadow:12px 0 34px rgba(8,39,74,.18);
+  display:flex;flex-direction:column;gap:18px;z-index:20;
+}
+.logo-block{display:flex;align-items:center;gap:10px;padding:4px 4px 14px;border-bottom:1px solid rgba(255,255,255,.12)}
+.logo-block img{width:44px;height:44px;border-radius:12px;background:white;object-fit:contain;padding:4px}
+.logo-title{font-size:18px;line-height:1;font-weight:900;letter-spacing:.03em}
+.logo-sub{font-size:10px;opacity:.75;margin-top:3px}
+.nav-list{display:flex;flex-direction:column;gap:5px;overflow:auto;padding-right:2px}
+.nav-item{
+  display:flex;align-items:center;gap:12px;color:#eaf6ff;text-decoration:none;
+  padding:10px 11px;border-radius:12px;border:1px solid transparent;
+  font-weight:760;font-size:14px;transition:background .18s ease, transform .18s ease, border-color .18s ease;
+}
+.nav-item:hover,.nav-item.active{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-color:rgba(255,255,255,.14);transform:translateX(2px);box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.nav-ico{width:24px;height:24px;display:grid;place-items:center;font-size:17px;opacity:.95;flex:0 0 auto}
+.sidebar-status{margin-top:auto;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:rgba(255,255,255,.07);padding:13px;display:grid;gap:10px}
+.sys-row{display:flex;align-items:center;gap:9px;font-size:12px;color:#d9ecff}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.16)}
+.version-side{color:#b9d4ec;font-size:12px;display:flex;justify-content:space-between;padding:0 4px}
+.main{min-width:0;padding:22px 26px 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+.top-left{display:flex;align-items:center;gap:18px}
+.hamb{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:#17446e;font-weight:900;box-shadow:var(--shadow2)}
+.title-line h1{margin:0;font-size:29px;letter-spacing:-.04em;color:#0d2b50}
+.title-line span{color:var(--muted);font-size:13px;font-weight:700}
+.top-actions{display:flex;align-items:center;gap:12px}
+.global-search{width:min(460px,35vw);min-width:280px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow2)}
+.global-search input{border:0;outline:0;background:transparent;width:100%;color:var(--ink);font-size:13px}
+.kbd{font-size:10px;border:1px solid var(--line2);border-radius:8px;padding:3px 6px;color:var(--muted);font-weight:800}
+.user-pill{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 11px 6px 6px;box-shadow:var(--shadow2)}
+.avatar{width:34px;height:34px;border-radius:50%;background:#1d4ed8;color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px}
+.user-pill strong{display:block;font-size:12px}.user-pill span{display:block;font-size:11px;color:var(--muted)}
+.top-icon{width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow2);font-size:18px;color:#0d2b50}
+
+.dashboard{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.hero-mt16{
+  grid-column:1/-1;background:linear-gradient(135deg,#1e88d6,#083c8c);
+  color:#fff;border-radius:22px;box-shadow:var(--shadow);padding:22px;position:relative;overflow:hidden;
+  display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:center;
+}
+.hero-mt16:after{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.1)}
+.hero-mt16 h2{margin:0;font-size:28px;letter-spacing:-.04em}
+.hero-mt16 p{margin:7px 0 0;color:rgba(255,255,255,.82);font-size:14px}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hero-badge{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:850}
+.hero-status-box{position:relative;z-index:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:18px;padding:14px}
+.hero-status-box strong{display:block;font-size:15px}.hero-status-box span{display:block;font-size:12px;color:rgba(255,255,255,.78);margin-top:4px}
+
+.panel,.card{
+  background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:18px;min-width:0;margin:0;
+}
+.card h3{margin:0 0 12px;font-size:18px;font-weight:900;color:#0d2b50;letter-spacing:-.02em}
+.card p,.muted{color:#667f97;font-size:13px;line-height:1.35}
+.version{display:none}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+label{display:block;font-size:12px;color:#55708a;font-weight:850;margin-bottom:6px}
+input,select{
+  width:100%;border:1px solid var(--line2);border-radius:12px;background:#fff;
+  padding:11px 12px;color:#0d2b50;outline:0;font-size:14px;font-weight:800;
+}
+input:focus,select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+button,.btn{
+  border:1px solid var(--line2);background:#fff;color:#0d2b50;border-radius:12px;
+  padding:9px 14px;font-size:12px;font-weight:900;text-decoration:none;display:inline-flex;
+  align-items:center;justify-content:center;gap:6px;cursor:pointer;margin:4px 4px 4px 0;
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+button:hover,.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow2);background:#f7fbff}
+button.secondary{background:#eef6ff;color:#0d2b50}
+#btnStart,#btnLoadPatterns,#btnCalc{background:#2563eb;border-color:#2563eb;color:#fff}
+#btnStart:hover,#btnLoadPatterns:hover,#btnCalc:hover{background:#1d4ed8}
+
+#technicalCard{grid-column:1/span 6}
+#patternCard{grid-column:7/span 6}
+#prepCard{grid-column:1/span 5}
+#readingsCard{grid-column:6/span 7}
+#resultCard{grid-column:1/span 7}
+#jsonCard{grid-column:8/span 5}
+.card:first-of-type{grid-column:1/-1}
+
+table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border:1px solid #e6eef6;border-radius:12px;overflow:hidden;margin-top:10px}
+th,td{padding:8px 9px;border-bottom:1px solid #eaf1f7;text-align:left;vertical-align:top}
+th{background:#f5f9fd;color:#3d5873;width:250px}
+tr:last-child th,tr:last-child td{border-bottom:0}
+pre{background:#09213d;color:#eaf6ff;border:1px solid #17446e;border-radius:14px;padding:13px;overflow:auto;white-space:pre-wrap;max-height:560px;font-size:12px}
+.ok{color:var(--green);font-weight:900}.bad{color:var(--red);font-weight:900}.warn{color:var(--orange);font-weight:900}
+.box-ok,.box-warn,.box-bad{
+  border-radius:15px;padding:12px;margin-top:10px;font-size:13px;font-weight:780;
+}
+.box-ok{border:1px solid #bbf7d0;background:#ecfdf3;color:#15803d}
+.box-warn{border:1px solid #fed7aa;background:#fff8eb;color:#b45309}
+.box-bad{border:1px solid #fecaca;background:#fff2f2;color:#dc2626}
+.reference{background:#f7fbff;border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;color:#0d2b50}
+.reference strong{color:#1d4ed8}
+.hidden{display:none!important}
+
+.wizard-panel{grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.wizard-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.wizard-title h3{margin:0;font-size:18px;font-weight:900;color:#0d2b50}
+.wizard-track{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.wizard-step{border:1px solid var(--line);border-radius:16px;background:#f8fbff;padding:10px;min-height:88px}
+.wizard-step b{display:block;color:#0d2b50;font-size:12px;margin-bottom:4px}
+.wizard-step span{display:block;color:#667f97;font-size:11px;line-height:1.25}
+.wizard-dot{width:28px;height:28px;border-radius:10px;background:#e8f1ff;color:#2563eb;display:grid;place-items:center;font-weight:900;margin-bottom:7px}
+
+footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6px 0}
+
+@media(max-width:1250px){
+  #technicalCard,#patternCard,#prepCard,#readingsCard,#resultCard,#jsonCard,.alerts-section,.mov-section{grid-column:1/-1}
+  .hero-mt16{grid-template-columns:1fr}
+  .wizard-track{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:relative;height:auto;flex-direction:row;overflow:auto;padding:10px}
+  .logo-block{border:0;padding:0;min-width:60px}.logo-block div{display:none}
+  .nav-list{flex-direction:row;overflow:visible}.nav-item{min-width:70px;flex-direction:column;font-size:10px;gap:4px;padding:8px}
+  .sidebar-status,.version-side{display:none}
+  .main{padding:14px}.topbar{flex-direction:column;align-items:stretch}.top-actions{justify-content:space-between}.global-search{width:100%;min-width:0}.user-pill{display:none}
+  .grid3,.grid2,.grid5{grid-template-columns:1fr}
+  .wizard-track{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo-block">
+      <img src="../../img/tmp-quality.png" alt="TMP" onerror="this.src='../../../img/tmp-quality.png'">
+      <div><div class="logo-title">PARAMIO</div><div class="logo-sub">TALLERES MECÁNICOS</div></div>
+    </div>
+    <nav class="nav-list">
+      <a class="nav-item" href="../../home.html"><span class="nav-ico">⌂</span>Inicio</a>
+      <a class="nav-item" href="../../alta_instrumento.html"><span class="nav-ico">✎</span>Alta / Edición</a>
+      <a class="nav-item" href="../../movimiento.html"><span class="nav-ico">↔</span>Movimientos</a>
+      <a class="nav-item active" href="../../TMP_Calibraciones_Lab.html"><span class="nav-ico">⚗</span>Calibraciones Lab</a>
+      <a class="nav-item" href="../../App_Patrones_TMP.html"><span class="nav-ico">▤</span>Patrones</a>
+      <a class="nav-item" href="../../buscar_instrumento.html"><span class="nav-ico">⌕</span>Buscar</a>
+      <a class="nav-item" href="../../certificados.html"><span class="nav-ico">▧</span>Informes</a>
+      <a class="nav-item" href="../../alcance_kpi.html"><span class="nav-ico">▥</span>KPIs</a>
+    </nav>
+    <div class="sidebar-status">
+      <div class="sys-row"><span class="dot"></span><div><strong>MT16</strong><br>Sistema normativo</div></div>
+      <div class="sys-row"><span class="dot"></span><div><strong>Supabase</strong><br>Banco Trimos</div></div>
+    </div>
+    <div class="version-side"><span>MT16</span><span>2026</span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="top-left">
+        <div class="hamb">☰</div>
+        <div class="title-line"><h1>MT16</h1><span>Calibración técnica normativa · Tampón roscado P/NP</span></div>
+      </div>
+      <div class="top-actions">
+        <div class="global-search"><span>⌕</span><input id="topSearch" placeholder="Buscar código, designación..."><span class="kbd">CTRL</span><span class="kbd">K</span></div>
+        <div class="top-icon">?</div>
+        <div class="user-pill"><div class="avatar">JA</div><div><strong>J. Arroyo</strong><span>Administrador</span></div></div>
+      </div>
+    </div>
+
+    <main class="dashboard">
+      <section class="hero-mt16">
+        <div>
+          <h2>Calibración guiada MT16</h2>
+          <p>Resolver rosca → aplicar norma → seleccionar banco Trimos certificado → introducir lecturas → decisión ILAC-G8.</p>
+          <div class="hero-badges">
+            <span class="hero-badge">ISO 1502</span>
+            <span class="hero-badge">ISO 965</span>
+            <span class="hero-badge">Banco Trimos</span>
+            <span class="hero-badge">Rodillos normativos</span>
+            <span class="hero-badge">ILAC-G8</span>
+          </div>
+        </div>
+        <div class="hero-status-box">
+          <strong>Patrón principal: Banco Trimos certificado</strong>
+          <span>Los rodillos/hilos son útiles calculados por norma. El operario no decide OK/NOK.</span>
+        </div>
+      </section>
+
+      <section class="wizard-panel">
+        <div class="wizard-title">
+          <h3>Flujo de trabajo</h3>
+          <span class="badge">Sistema experto TMP</span>
+        </div>
+        <div class="wizard-track">
+          <div class="wizard-step"><div class="wizard-dot">1</div><b>Equipo</b><span>Confirmar código y designación de rosca.</span></div>
+          <div class="wizard-step"><div class="wizard-dot">2</div><b>Norma</b><span>Aplicar ISO 965 / ISO 1502 / DIN.</span></div>
+          <div class="wizard-step"><div class="wizard-dot">3</div><b>Banco</b><span>Buscar banco Trimos real en Supabase.</span></div>
+          <div class="wizard-step"><div class="wizard-dot">4</div><b>Preparación</b><span>Montar rodillo calculado por norma.</span></div>
+          <div class="wizard-step"><div class="wizard-dot">5</div><b>PASA</b><span>Tomar 5 lecturas.</span></div>
+          <div class="wizard-step"><div class="wizard-dot">6</div><b>NO PASA</b><span>Tomar 5 lecturas.</span></div>
+          <div class="wizard-step"><div class="wizard-dot">7</div><b>Decisión</b><span>Cálculo con incertidumbre y regla ILAC-G8.</span></div>
+        </div>
+      </section>
+
+      <div class="card"><h3>1 · Equipo</h3><div class="grid3"><div><label>Código</label><input id="codigo" value="75148"></div><div><label>Descripción</label><input id="descripcion" value="Tampón de Rosca P/NP"></div><div><label>Rango / designación</label><input id="rango" value="M12 x 1.25 - 6H"></div></div><button id="btnStart">Resolver MT16</button><div id="status" class="box-warn">Pendiente.</div></div>
+      <div id="technicalCard" class="card hidden"><h3>2 · Cálculo normativo automático</h3><table><tbody id="technicalRows"></tbody></table></div>
+      <div id="patternCard" class="card hidden"><h3>3 · Banco Trimos real + datos normativos</h3><p class="muted">Supabase sólo aporta banco/certificado/incertidumbre. Rodillos, grados, D2 y límites salen del motor normativo.</p><button id="btnLoadPatterns">Buscar banco Trimos en Supabase</button><div id="patternStatus" class="box-warn">Pendiente.</div><div class="grid3"><div><label>Banco Trimos certificado</label><select id="selBanco"></select></div><div><label>Rodillo normativo calculado</label><input id="wireNorm" readonly></div><div><label>Norma / clase</label><input id="normInfo" readonly></div></div><button id="btnUseSelection" class="secondary">Usar banco y continuar</button><table><tbody id="selectedRows"></tbody></table></div>
+      <div id="prepCard" class="card hidden"><h3>4 · Preparación banco Trimos</h3><table><tbody id="prepRows"></tbody></table></div>
+      <div id="readingsCard" class="grid2 hidden"><div class="card"><h3>5 · Lecturas PASA</h3><div id="passRef" class="reference"></div><div class="grid5"><input class="passReading" placeholder="L1"><input class="passReading" placeholder="L2"><input class="passReading" placeholder="L3"><input class="passReading" placeholder="L4"><input class="passReading" placeholder="L5"></div><div id="passStatus" class="box-warn">Esperando lecturas.</div></div><div class="card"><h3>5 · Lecturas NO PASA</h3><div id="noPassRef" class="reference"></div><div class="grid5"><input class="noPassReading" placeholder="L1"><input class="noPassReading" placeholder="L2"><input class="noPassReading" placeholder="L3"><input class="noPassReading" placeholder="L4"><input class="noPassReading" placeholder="L5"></div><div id="noPassStatus" class="box-warn">Esperando lecturas.</div></div></div>
+      <div id="resultCard" class="card hidden"><h3>6 · Resultado</h3><button id="btnCalc">Calcular resultado MT16</button><div id="decisionBox" class="box-warn">Pendiente.</div><table><tbody id="resultRows"></tbody></table></div>
+      <div id="jsonCard" class="card hidden"><h3>JSON técnico</h3><pre id="json">{}</pre></div>
+      <footer>Talleres Mecánicos Paramio · MT16 · Sistema de Trazabilidad Metrológica · 2026</footer>
+    </main>
+  </div>
+</div>
+
+<script type="module">
+import { buildMT16Workflow } from "./thread_mt16_workflow.js";
+import { evaluateMetricThreadCalibration } from "./engines/thread_trimos_engine.js";
+import { calculateThreadCalibrationUncertainty } from "./engines/thread_uncertainty_engine.js";
+import { evaluateThreadCalibrationDecision } from "./engines/thread_decision_engine.js";
+import { getSupabaseClient, TMP_MT16_SUPABASE_BRIDGE_VERSION } from "./engines/thread_supabase_client_bridge.js";
+import { TMP_MT16_PATTERN_SELECTOR_VERSION, fetchPatternRows, filterTrimosCandidates, buildNormativeTraceability } from "./engines/thread_mt16_pattern_selector.js";
+
+const HTML_REVISION = "TMP_MT16_WORKFLOW_HTML_V23_20260629_NORMATIVO_SIN_RODILLOS_SUPABASE";
+const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+let sb=null, workflow=null, equipment=null, allPatternRows=[], candidates={banco:[]}, traceability=null, readingResult=null, uncertainty=null, decision=null;
+const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+const show = id => document.querySelector("#"+id).classList.remove("hidden");
+const parseNum = v => { if(v===null||v===undefined||v==="")return null; const n=Number(String(v).replace(",",".").trim()); return Number.isFinite(n)?n:null; };
+const round = (v,d=6) => { const n=parseNum(v); if(!Number.isFinite(n))return null; const f=Math.pow(10,d); return Math.round(n*f)/f; };
+const mean = a => { const n=a.filter(Number.isFinite); return n.length?n.reduce((x,y)=>x+y,0)/n.length:null; };
+const getReadings = sel => $$(sel).map(i=>parseNum(i.value)).filter(Number.isFinite);
+function box(sel,type,html){ const b=$(sel); b.className=type==="ok"?"box-ok":type==="bad"?"box-bad":"box-warn"; b.innerHTML=html; }
+async function resolveSupabase(){ const r = await getSupabaseClient(); sb = r.ok ? r.client : null; return r; }
+
+function renderTechnical(){
+  const p=workflow?.parsed||{}, g=workflow?.geometry?.geometry||{}, setup=workflow?.trimos?.setup||{}, iso965=workflow?.iso965||{}, iso1502=workflow?.iso1502||{};
+  $("#technicalRows").innerHTML = `<tr><th>Equipo</th><td>${esc(equipment.codigo)} · ${esc(equipment.descripcion)}</td></tr><tr><th>Designación</th><td>${esc(equipment.rango)}</td></tr><tr><th>Tipo rosca</th><td>${esc(p.thread_type)}</td></tr><tr><th>Nominal</th><td>${esc(p.nominal_mm)} mm</td></tr><tr><th>Paso</th><td>${esc(p.pitch_mm)} mm</td></tr><tr><th>Clase</th><td>${esc(p.tolerance_class)}</td></tr><tr><th>D2 básico</th><td>${esc(g.basic?.pitch_diameter || g.basic?.pitch_diameter_mm || "")} mm</td></tr><tr><th>D1 básico</th><td>${esc(g.basic?.minor_diameter || g.basic?.minor_diameter_mm || "")} mm</td></tr><tr><th>ISO965</th><td class="${iso965.ok?"ok":"warn"}">${esc(iso965.message||iso965.status||iso965.error)}</td></tr><tr><th>ISO1502</th><td class="${iso1502.ok?"ok":"warn"}">${esc(iso1502.status||iso1502.message||iso1502.error)}</td></tr><tr><th>Rodillo normativo calculado</th><td class="ok">Ø ${esc(setup.wire_mm)} mm</td></tr><tr><th>Corrección Trimos teórica/normativa</th><td>${esc(setup.correction_mm)} mm</td></tr>`;
+  $("#wireNorm").value = `Ø ${setup.wire_mm || ""} mm`; $("#normInfo").value = `${p.standard || p.thread_type || ""} · ${p.tolerance_class || ""}`; show("technicalCard");
+}
+async function start(){
+  equipment={codigo:$("#codigo").value.trim(),descripcion:$("#descripcion").value.trim(),rango:$("#rango").value.trim(),raw_equipment:{codigo:$("#codigo").value.trim(),descripcion:$("#descripcion").value.trim(),rango:$("#rango").value.trim()}};
+  workflow = buildMT16Workflow(equipment); renderTechnical(); show("patternCard"); show("jsonCard");
+  const supa = await resolveSupabase();
+  box("#status",supa.ok?"ok":"warn",supa.ok?`MT16 resuelto. Norma cargada. Supabase banco: ${esc(supa.source)}.`:`MT16 resuelto con norma, pero sin Supabase: ${esc(supa.error)}.`);
+  $("#json").textContent=JSON.stringify({html:HTML_REVISION, selector:TMP_MT16_PATTERN_SELECTOR_VERSION, bridge:TMP_MT16_SUPABASE_BRIDGE_VERSION, supabase:supa.ok?{ok:true,source:supa.source}:supa, equipment, workflow},null,2);
+}
+function optionText(g){ return g ? `${g.codigo} · ${g.descripcion} · ${g.certificado} · ${g.vigente?"VIGENTE":"NO VIGENTE"}` : "Sin datos"; }
+function fillSelect(select,rows,placeholder){ select.innerHTML=`<option value="">${placeholder}</option>`; rows.forEach((g,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=optionText(g);select.appendChild(o)}); if(rows.length)select.value="0"; }
+async function loadPatterns(){
+  if(!workflow){ box("#patternStatus","bad","Primero resuelve MT16."); return; }
+  const supa = await resolveSupabase();
+  if(!supa.ok || !sb){ box("#patternStatus","bad",`No se pudo usar Supabase para banco: ${esc(supa.error)}.`); return; }
+  box("#patternStatus","warn","Buscando banco Trimos certificado...");
+  const response = await fetchPatternRows(sb); allPatternRows = response.rows || [];
+  if(!response.ok){ box("#patternStatus","bad",`No se pudo leer v_patron_valores_activos: ${esc(response.error)}`); return; }
+  candidates.banco = filterTrimosCandidates(allPatternRows); fillSelect($("#selBanco"), candidates.banco, "Seleccione banco Trimos");
+  box("#patternStatus", candidates.banco.length ? "ok" : "warn", `Patrones leídos: ${allPatternRows.length}. Banco Trimos: ${candidates.banco.length}. Rodillo y limites: NORMATIVOS.`);
+  $("#json").textContent=JSON.stringify({html:HTML_REVISION, equipment, workflow, candidates, note:"rodillos y patron rosca no se buscan en Supabase; salen de norma"},null,2);
+}
+function selectedFrom(sel,list){ const i=parseInt(sel.value,10); return Number.isFinite(i)?list[i]||null:null; }
+function patternSummary(p){ return p ? `${esc(p.codigo)} · ${esc(p.descripcion)} · Cert: ${esc(p.certificado)} · Vence: ${esc(p.vencimiento)} · U=${esc(p.u_expandida_mm)} mm · u=${esc(p.u_standard_mm)} mm · c=${esc(p.correccion_mm)} mm` : `<span class="warn">No seleccionado</span>`; }
+function renderSelection(){
+  traceability = buildNormativeTraceability({workflow,banco:selectedFrom($("#selBanco"),candidates.banco)});
+  const n = traceability.normative || {};
+  $("#selectedRows").innerHTML = `<tr><th>Estado trazabilidad</th><td class="${traceability.ok?"ok":"warn"}">${esc(traceability.status)}</td></tr><tr><th>Banco real Supabase</th><td>${patternSummary(traceability.banco)}</td></tr><tr><th>Rodillo/hilo</th><td class="ok">Normativo calculado Ø ${esc(n.wire_mm)} mm</td></tr><tr><th>Norma aplicada</th><td>${esc(n.designation)} · ISO965/ISO1502 · ángulo ${esc(n.angle_deg)}°</td></tr><tr><th>Corrección banco</th><td class="ok">${esc(traceability.corrections.total_correction_mm)} mm</td></tr><tr><th>Certificado final</th><td class="${traceability.can_emit_certificate?"ok":"warn"}">${traceability.can_emit_certificate?"Permitido técnicamente":"Bloqueado si falta banco/incertidumbre real"}</td></tr><tr><th>Avisos</th><td class="warn">${esc(traceability.warnings.join("\n"))}</td></tr>`;
+  renderPreparation(); renderReadingRefs(); show("prepCard"); show("readingsCard"); show("resultCard"); $("#json").textContent=JSON.stringify({equipment,workflow,traceability},null,2);
+}
+function renderPreparation(){
+  const setup=workflow?.trimos?.setup||{};
+  $("#prepRows").innerHTML=`<tr><th>Banco</th><td>${patternSummary(traceability?.banco)}</td></tr><tr><th>Rodillos a montar</th><td class="ok">Ø ${esc(setup.wire_mm)} mm calculado por norma/motor MT16</td></tr><tr><th>Corrección Trimos normativa</th><td>${esc(setup.correction_mm)} mm</td></tr><tr><th>Corrección real banco certificado</th><td>${esc(traceability?.corrections?.banco_correction_mm??0)} mm</td></tr><tr><th>Instrucción</th><td>Montar el rodillo calculado por MT16. No elegir rodillos manualmente. Poner a cero y tomar 5 lecturas por lado.</td></tr>`;
+}
+function renderReadingRefs(){
+  const pts=workflow?.trimos?.points||[], pass=pts.find(p=>p.id==="PASA"||p.lado==="PASA")||{}, nop=pts.find(p=>p.id==="NO_PASA"||p.lado==="NO_PASA")||{};
+  $("#passRef").innerHTML=`<strong>Referencia PASA</strong><br>D2 objetivo: <strong>${esc(pass.d2_nominal_mm)} mm</strong><br>Lectura Trimos esperada: <strong>${esc(pass.target_trimos_mm)} mm</strong>`;
+  $("#noPassRef").innerHTML=`<strong>Referencia NO PASA</strong><br>D2 objetivo: <strong>${esc(nop.d2_nominal_mm)} mm</strong><br>Lectura Trimos esperada: <strong>${esc(nop.target_trimos_mm)} mm</strong>`;
+  renderMountStatus();
+}
+function renderOneMount(sel,ref,boxSel){
+  const r=getReadings(sel), target=parseNum(ref?.target_trimos_mm);
+  if(!r.length||!Number.isFinite(target)){ box(boxSel,"warn","Esperando lecturas."); return; }
+  const m=round(mean(r),6), diff=round(m-target,6);
+  box(boxSel,Math.abs(diff)<=0.05?"ok":"bad",`${Math.abs(diff)<=0.05?"Montaje orientativamente correcto":"Revisar montaje/cero"}. Media ${m} mm. Diferencia ${diff} mm.`);
+}
+function renderMountStatus(){ const pts=workflow?.trimos?.points||[]; renderOneMount(".passReading",pts.find(p=>p.id==="PASA"||p.lado==="PASA")||{},"#passStatus"); renderOneMount(".noPassReading",pts.find(p=>p.id==="NO_PASA"||p.lado==="NO_PASA")||{},"#noPassStatus"); }
+function calculate(){
+  if(!traceability){ alert("Primero selecciona banco Trimos."); return; }
+  readingResult=evaluateMetricThreadCalibration({plan:workflow.trimos,readingsByPoint:{PASA:getReadings(".passReading"),NO_PASA:getReadings(".noPassReading")}});
+  uncertainty=calculateThreadCalibrationUncertainty({results:readingResult.results||[],uncertainty_model:traceability.uncertainty_model});
+  decision=evaluateThreadCalibrationDecision({reading_results:readingResult.results||[],uncertainty_results:uncertainty.points||[]});
+  box("#decisionBox",decision.global_decision==="OK"?"ok":decision.global_decision==="NOK"?"bad":"warn",`Decisión: <strong>${esc(decision.global_decision)}</strong><br>${esc(decision.message||"")}`);
+  const rows=[]; rows.push(`<tr><th>Decisión preliminar</th><td>${esc(readingResult.global_decision)}</td></tr><tr><th>Decisión con incertidumbre</th><td class="${decision.global_decision==="OK"?"ok":decision.global_decision==="NOK"?"bad":"warn"}">${esc(decision.global_decision)}</td></tr><tr><th>Modo rodillos</th><td class="ok">Normativo calculado por MT16, no Supabase</td></tr><tr><th>Certificado final</th><td class="${traceability.can_emit_certificate?"ok":"warn"}">${traceability.can_emit_certificate?"Permitido técnicamente":"Bloqueado hasta banco/incertidumbre real"}</td></tr><tr><th>Corrección banco</th><td>${esc(traceability.corrections.total_correction_mm)} mm</td></tr>`);
+  for(const r of readingResult.results||[]){ const u=(uncertainty.points||[]).find(x=>x.point_id===r.point_id||x.lado===r.lado), d=(decision.decisions||[]).find(x=>x.point_id===r.point_id||x.lado===r.lado); rows.push(`<tr><th colspan="2">${esc(r.lado||r.point_id)}</th></tr><tr><th>Lecturas M</th><td>${esc((r.readings_trimos_mm||[]).join(" / "))}</td></tr><tr><th>Media D2</th><td>${esc(r.media_d2_mm)} mm</td></tr><tr><th>Límites ISO1502</th><td>${esc(r.limits_d2_mm?.min)} / ${esc(r.limits_d2_mm?.max)} mm</td></tr><tr><th>Resultado técnico</th><td class="warn">${esc(r.decision)} · ${esc(r.motivo)}</td></tr>`); if(u?.ok) rows.push(`<tr><th>U expandida</th><td>${esc(u.u_expanded)} mm</td></tr>`); if(d) rows.push(`<tr><th>Intervalo D2 ± U</th><td>${esc(d.interval_mm?.low)} / ${esc(d.interval_mm?.high)} mm</td></tr><tr><th>Decisión punto</th><td class="${d.decision==="OK"?"ok":d.decision==="NOK"?"bad":"warn"}">${esc(d.decision)} · ${esc(d.message)}</td></tr>`); }
+  $("#resultRows").innerHTML=rows.join(""); $("#json").textContent=JSON.stringify({equipment,workflow,traceability,readingResult,uncertainty,decision},null,2);
+}
+$("#btnStart").addEventListener("click",start); $("#btnLoadPatterns").addEventListener("click",loadPatterns); $("#btnUseSelection").addEventListener("click",renderSelection); $("#btnCalc").addEventListener("click",calculate); $$(".passReading").forEach(i=>i.addEventListener("input",renderMountStatus)); $$(".noPassReading").forEach(i=>i.addEventListener("input",renderMountStatus));
+</script>
+</body>
+</html>

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TMP · Certificado de calibración</title>
+
+  <!-- Cliente Supabase común del sistema -->
+  <script type="module" src="config.mjs"></script>
+
+  <style>
+    :root{
+      --bg:#020617;
+      --bg2:#050b18;
+      --sheet-bg:#ffffff;
+      --txt:#0f172a;
+      --muted:#6b7280;
+      --accent:#22c55e;
+      --accent-dark:#16a34a;
+      --border:#e5e7eb;
+      --danger:#ef4444;
+      --warn:#f97316;
+      --ok:#16a34a;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:radial-gradient(circle at 0 0,#0b1120 0,transparent 55%),
+                 radial-gradient(circle at 100% 0,#020617 0,transparent 55%),
+                 var(--bg);
+      color:#e5e7eb;
+      min-height:100vh;
+    }
+
+    .app-shell{
+      max-width:1050px;
+      margin:20px auto 32px;
+      padding:0 16px 24px;
+    }
+
+    .top-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+      font-size:13px;
+    }
+
+    .top-bar-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .tag{
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.6);
+      font-size:11px;
+      color:#cbd5f5;
+      background:rgba(15,23,42,0.8);
+    }
+
+    .btn{
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.5);
+      background:rgba(15,23,42,0.9);
+      color:#e5e7eb;
+      font-size:12px;
+      padding:6px 12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      text-decoration:none;
+    }
+    .btn:hover{
+      background:#0f172a;
+    }
+    .btn-primary{
+      border-color:var(--accent);
+      background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+      color:#ecfdf5;
+    }
+    .btn-primary:hover{
+      filter:brightness(1.05);
+    }
+
+    /* Hoja "A4" */
+    .sheet-wrapper{
+      display:flex;
+      justify-content:center;
+    }
+    .sheet{
+      width:100%;
+      max-width:900px;
+      background:var(--sheet-bg);
+      color:var(--txt);
+      border-radius:18px;
+      padding:26px 30px 30px;
+      box-shadow:0 22px 60px rgba(15,23,42,0.85);
+      border:1px solid rgba(15,23,42,0.18);
+    }
+
+    /* Cabecera del certificado */
+    .cert-header{
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      border-bottom:2px solid #e5e7eb;
+      padding-bottom:12px;
+      margin-bottom:14px;
+    }
+
+    .cert-header-left{
+      display:flex;
+      gap:12px;
+    }
+    .cert-logo{
+      height:52px;
+    }
+    .cert-lab-title{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:4px;
+    }
+    .cert-lab-title-main{
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:.03em;
+      text-transform:uppercase;
+      color:#111827;
+    }
+    .cert-lab-sub{
+      font-size:12px;
+      color:#6b7280;
+    }
+
+    .cert-header-right{
+      text-align:right;
+      font-size:12px;
+      color:#4b5563;
+    }
+    .cert-title{
+      font-size:16px;
+      font-weight:700;
+      color:#111827;
+      margin-bottom:4px;
+    }
+    .cert-id{
+      font-family:monospace;
+      font-weight:600;
+      color:#111827;
+    }
+
+    .cert-badge-ilac{
+      margin-top:6px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid #d1d5db;
+      font-size:11px;
+      background:#f9fafb;
+    }
+    .cert-badge-ilac span{
+      font-weight:600;
+      color:#16a34a;
+    }
+
+    /* Bloques numerados */
+    .section{
+      margin-top:10px;
+      padding-top:8px;
+    }
+    .section-title{
+      font-size:13px;
+      font-weight:700;
+      color:#111827;
+      margin:0 0 4px;
+    }
+    .section-title span.num{
+      font-weight:800;
+      margin-right:4px;
+    }
+    .section-body{
+      font-size:12px;
+      color:#111827;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:6px 16px;
+    }
+
+    .field-row{
+      font-size:12px;
+      margin-bottom:2px;
+    }
+    .field-label{
+      font-weight:600;
+      color:#374151;
+      display:inline-block;
+      min-width:120px;
+    }
+    .field-value{
+      color:#111827;
+    }
+
+    .mono{
+      font-family:monospace;
+    }
+
+    /* tabla simple para resultados si algún día la usamos */
+    table.simple{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:4px;
+      font-size:11px;
+    }
+    table.simple thead th{
+      border-bottom:1px solid #d1d5db;
+      padding:4px 4px;
+      text-align:center;
+      background:#f3f4f6;
+      color:#374151;
+    }
+    table.simple tbody td{
+      border-bottom:1px solid #e5e7eb;
+      padding:3px 4px;
+      text-align:center;
+    }
+    table.simple tbody tr:nth-child(even){
+      background:#f9fafb;
+    }
+
+    .muted{
+      color:#6b7280;
+    }
+
+    .decision-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:600;
+    }
+    .decision-apto{
+      background:#ecfdf5;
+      color:#166534;
+      border:1px solid #bbf7d0;
+    }
+    .decision-noapto{
+      background:#fef2f2;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+    .decision-indet{
+      background:#fffbeb;
+      color:#92400e;
+      border:1px solid #fed7aa;
+    }
+
+    .signature-blocks{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:12px 30px;
+      margin-top:6px;
+    }
+
+    .firm-box{
+      border-top:1px solid #d1d5db;
+      padding-top:6px;
+      font-size:11px;
+    }
+    .firm-role{
+      font-weight:600;
+      color:#374151;
+      margin-bottom:2px;
+    }
+    .firm-name{
+      color:#111827;
+    }
+    .firm-date{
+      color:#6b7280;
+    }
+
+    .firm-sign-img{
+      display:block;
+      margin:4px 0 2px;
+      max-width:220px;
+      max-height:100px;
+      border:1px solid #e5e7eb;
+      border-radius:6px;
+      object-fit:contain;
+      background:#f9fafb;
+    }
+
+    .footer-small{
+      margin-top:12px;
+      padding-top:6px;
+      border-top:1px solid #e5e7eb;
+      font-size:10px;
+      color:#6b7280;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .badge-dec{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid #d1d5db;
+      font-size:10px;
+      background:#f3f4f6;
+    }
+
+    .error-box{
+      margin-top:40px;
+      text-align:center;
+      font-size:13px;
+      color:#e5e7eb;
+    }
+
+    /* ======= MODO IMPRESIÓN ========= */
+    @media print {
+      body{
+        background:#ffffff !important;
+      }
+      .app-shell{
+        margin:0;
+        padding:0;
+      }
+      .top-bar{
+        display:none !important;
+      }
+      .sheet{
+        max-width:100%;
+        border-radius:0;
+        box-shadow:none;
+        border:none;
+        padding:18px 18px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Barra superior (solo pantalla) -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tag">TMP · Sistema profesional de trazabilidad metrológica</span>
+      <span id="statusOnline" class="tag">Modo lectura (buscando certificado...)</span>
+    </div>
+    <div class="top-bar-right">
+      <button id="btnVolver" class="btn" type="button">⟵ Volver a TMP</button>
+      <button id="btnHistorial" class="btn" type="button" style="display:none;">📜 Historial del instrumento</button>
+      <button id="btnImprimir" class="btn btn-primary" type="button">🖨 Imprimir / Guardar PDF</button>
+    </div>
+  </div>
+
+  <!-- Contenedor de la hoja / o mensaje de error -->
+  <div id="sheetContainer" class="sheet-wrapper">
+    <div class="sheet" id="sheet" style="display:none;">
+      <header class="cert-header">
+        <div class="cert-header-left">
+          <img src="img/tmp-quality.png" alt="TMP" class="cert-logo">
+          <div class="cert-lab-title">
+            <div class="cert-lab-title-main">Talleres Mecánicos Paramio</div>
+            <div class="cert-lab-sub">Sistema profesional de trazabilidad metrológica</div>
+          </div>
+        </div>
+        <div class="cert-header-right">
+          <div class="cert-title">CERTIFICADO DE CALIBRACIÓN</div>
+          <div>ID certificado: <span id="lblIdCert" class="cert-id">—</span></div>
+          <div>Nº interno: <span id="lblNumeroCert">—</span></div>
+          <div>Fecha de emisión: <span id="lblFechaEmision">—</span></div>
+          <span class="cert-badge-ilac">
+            <span>TMP · ISO/IEC 17025</span> · criterio ILAC-G8
+          </span>
+        </div>
+      </header>
+
+      <!-- 1. Datos del instrumento -->
+      <section class="section">
+        <h2 class="section-title"><span class="num">1.</span>Datos del instrumento</h2>
+        <div class="section-body grid-2">
+          <div>
+            <div class="field-row">
+              <span class="field-label">Código:</span>
+              <span class="field-value mono" id="instCodigo">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Descripción:</span>
+              <span class="field-value" id="instDesc">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Fabricante / Tipo:</span>
+              <span class="field-value" id="instFabTipo">—</span>
+            </div>
+          </div>
+          <div>
+            <div class="field-row">
+              <span class="field-label">Rango de medida:</span>
+              <span class="field-value" id="instRango">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Unidad base:</span>
+              <span class="field-value" id="instUnidad">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Última calibración:</span>
+              <span class="field-value" id="instFechaCal">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Próxima calibración:</span>
+              <span class="field-value" id="instFechaProx">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Condiciones / trazabilidad -->
+      <section class="section">
+        <h2 class="section-title"><span class="num">2.</span>Trazabilidad e información metrológica</h2>
+        <div class="section-body">
+          <div class="grid-2">
+            <div>
+              <div class="field-row">
+                <span class="field-label">Temperatura:</span>
+                <span class="field-value" id="condTemp">—</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Humedad relativa:</span>
+                <span class="field-value" id="condHum">—</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Fecha de calibración:</span>
+                <span class="field-value" id="condFecha">—</span>
+              </div>
+            </div>
+            <div>
+              <div class="field-row">
+                <span class="field-label">Patrones utilizados:</span>
+                <span class="field-value" id="patronesLista">—</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Regla de decisión:</span>
+                <span class="field-value" id="reglaDecision">ILAC-G8 (|E|+U ≤ T / |E|−U &gt; T)</span>
+              </div>
+            </div>
+          </div>
+          <p class="muted" id="condObsTxt" style="margin-top:4px;"></p>
+        </div>
+      </section>
+
+      <!-- 3. Resultados -->
+      <section class="section">
+        <h2 class="section-title"><span class="num">3.</span>Resultados de la calibración</h2>
+        <div class="section-body" id="resultadosResumen">
+          <p class="muted">
+            Esta versión del certificado muestra un resumen global basado en la decisión registrada.
+            Los detalles numéricos completos (errores punto a punto, incertidumbres, etc.) se mantienen
+            en el sistema interno TMP · Calibraciones.
+          </p>
+        </div>
+      </section>
+
+      <!-- 4. Observaciones -->
+      <section class="section">
+        <h2 class="section-title"><span class="num">4.</span>Observaciones</h2>
+        <div class="section-body" id="obsGenerales">
+          <p class="muted">Sin observaciones adicionales.</p>
+        </div>
+      </section>
+
+      <!-- 5. Firmas -->
+      <section class="section">
+        <h2 class="section-title"><span class="num">5.</span>Firmas y aprobación</h2>
+        <div class="section-body signature-blocks">
+          <div class="firm-box">
+            <div class="firm-role">Técnico responsable de la calibración</div>
+            <img id="imgFirma" class="firm-sign-img" alt="Firma digital" />
+            <div class="firm-name" id="firmNombre">—</div>
+            <div class="firm-date">
+              Próxima calibración: <span id="firmProxima">—</span>
+            </div>
+            <div class="muted" style="margin-top:3px;">
+              Firma manuscrita registrada digitalmente en el sistema TMP.
+            </div>
+          </div>
+          <div class="firm-box">
+            <div class="firm-role">Responsable del sistema TMP</div>
+            <div class="muted">Validación conforme a los procedimientos internos basados en ISO/IEC 17025.</div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer-small">
+        <div>
+          TMP · Sistema profesional de trazabilidad metrológica v1.0  
+          Documento válido únicamente en formato digital o PDF generado desde el sistema.
+        </div>
+        <div>
+          <span class="badge-dec">Decisión: <span id="lblDecisionShort">—</span></span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Mensaje si no se encuentra nada -->
+  <div id="errorMsg" class="error-box" style="display:none;">
+    No se ha encontrado el certificado indicado.<br>
+    Comprueba el identificador en la URL o que el certificado exista en el sistema.
+  </div>
+
+</div>
+
+<script type="module">
+  const supabase = window.supabase || null;
+  const qs = new URLSearchParams(location.search);
+  const certId = qs.get("id") || "";
+
+  const $ = (id) => document.getElementById(id);
+
+  const statusOnline = $("statusOnline");
+  const sheet = $("sheet");
+  const sheetContainer = $("sheetContainer");
+  const errorMsg = $("errorMsg");
+
+  function formatDate(dStr){
+    if (!dStr) return "—";
+    const d = new Date(dStr);
+    if (isNaN(+d)) return dStr;
+    return d.toLocaleDateString("es-ES");
+  }
+
+  function setDecisionPill(decision){
+    const box = $("resultadosResumen");
+    const short = $("lblDecisionShort");
+    let cls = "decision-pill decision-indet";
+    let txt = "INDETERMINADO";
+
+    if (!decision) decision = "INDETERMINADO";
+
+    const decUpper = String(decision).toUpperCase();
+
+    if (decUpper.includes("APTO") && !decUpper.includes("NO")){
+      cls = "decision-pill decision-apto";
+      txt = "APTO";
+    } else if (decUpper.includes("NO APTO") || decUpper.includes("NO_APTO")){
+      cls = "decision-pill decision-noapto";
+      txt = "NO APTO";
+    }
+
+    short.textContent = txt;
+
+    box.innerHTML = `
+      <p>
+        Resultado global de la calibración según criterio ILAC-G8:
+        <span class="${cls}">${txt}</span>
+      </p>
+      <p class="muted">
+        El criterio aplicado es: |E| + U ≤ T → APTO · |E| − U &gt; T → NO APTO · resto → INDETERMINADO.
+        Los detalles numéricos se conservan en el sistema TMP · Calibraciones.
+      </p>
+    `;
+  }
+
+  function renderCertificado(row){
+    const datos = row?.datos || row || {};
+    const inst = datos.instrumento || {};
+    const cond = datos.condiciones || {};
+    const oper = datos.operario || {};
+    const plan = datos.plan || [];
+    const obsTexto = cond.obs || "";
+
+    document.title = `TMP · Certificado ${datos.id || row.id || "sin ID"}`;
+
+    $("lblIdCert").textContent = datos.id || row.id || "—";
+    $("lblNumeroCert").textContent = (row.numero != null) ? row.numero : (datos.numero ?? "—");
+    $("lblFechaEmision").textContent = formatDate(datos.generado_en || row.fecha_creado);
+
+    // Instrumento
+    $("instCodigo").textContent    = inst.codigo || "—";
+    $("instDesc").textContent      = inst.descripcion || "—";
+    $("instFabTipo").textContent   = inst.fabricante_tipo || inst.fabricante || "—";
+    $("instRango").textContent     = inst.rango || "—";
+    $("instUnidad").textContent    = inst.unidad_base || "mm";
+    $("instFechaCal").textContent  = inst.fecha_calibracion || inst.fecha_ultima_cal || "—";
+    $("instFechaProx").textContent = inst.proxima_cal || inst.proxima_calibracion || "—";
+
+    // Condiciones
+    $("condTemp").textContent  = cond.temperatura ? `${cond.temperatura} °C` : "—";
+    $("condHum").textContent   = cond.humedad ? `${cond.humedad} %` : "—";
+    $("condFecha").textContent = cond.fecha_calibracion ? formatDate(cond.fecha_calibracion) : "—";
+
+    $("condObsTxt").textContent = obsTexto
+      ? `Observaciones durante la calibración: ${obsTexto}`
+      : "La calibración se ha realizado siguiendo los procedimientos internos del laboratorio TMP basados en ISO/IEC 17025. No se han registrado incidencias destacables.";
+
+    // Patrones usados (a partir del plan)
+    const patronesSet = new Set();
+    (plan || []).forEach(b => {
+      if (b?.patron) {
+        const code = b.patron.codigo || b.patron.id || "";
+        const desc = b.patron.descripcion || "";
+        patronesSet.add(`${code}${desc ? " · " + desc : ""}`);
+      }
+    });
+    $("patronesLista").textContent = patronesSet.size
+      ? Array.from(patronesSet).join("; ")
+      : "No informado (revisar registro de calibración).";
+
+    // Regla de decisión
+    $("reglaDecision").innerHTML = row.regla_decision
+      ? row.regla_decision
+      : "ILAC-G8 (|E|+U ≤ T → APTO · |E|−U &gt; T → NO APTO · resto → INDETERMINADO).";
+
+    // Observaciones generales (opcional en JSON)
+    const obsGlobal = datos.observaciones || "";
+    if (obsGlobal) {
+      $("obsGenerales").innerHTML = `<p>${obsGlobal}</p>`;
+    }
+
+    // Firmas
+    $("firmNombre").textContent  = oper.nombre || "—";
+    $("firmProxima").textContent = oper.proxima_calibracion
+      ? formatDate(oper.proxima_calibracion)
+      : "—";
+
+    const imgFirma = $("imgFirma");
+    if (oper.firma_base64) {
+      imgFirma.src = oper.firma_base64;
+      imgFirma.style.display = "block";
+    } else {
+      imgFirma.style.display = "none";
+    }
+
+    // Decisión global / resumen
+    setDecisionPill(row.decision_global || datos.decision_global);
+
+    // Botón historial
+    if (inst.codigo){
+      $("btnHistorial").style.display = "inline-flex";
+      $("btnHistorial").onclick = () => {
+        window.location.href = `calibraciones.historial.html?codigo=${encodeURIComponent(inst.codigo)}`;
+      };
+    } else {
+      $("btnHistorial").style.display = "none";
+    }
+
+    sheet.style.display = "block";
+    errorMsg.style.display = "none";
+  }
+
+  async function cargarCertificado(){
+    if (!certId){
+      statusOnline.textContent = "Sin ID de certificado en la URL.";
+      sheet.style.display = "none";
+      errorMsg.style.display = "block";
+      return;
+    }
+
+    statusOnline.textContent = "Buscando certificado en Supabase...";
+    statusOnline.style.borderColor = "rgba(34,197,94,0.6)";
+
+    // 1) Intento Supabase
+    if (supabase){
+      try{
+        const { data, error } = await supabase
+          .from("certificados")
+          .select("id, numero, anio, regla_decision, decision_global, certificado_pdf_url, datos, fecha_creado")
+          .eq("id", certId)
+          .maybeSingle();
+
+        if (!error && data){
+          statusOnline.textContent = "Certificado cargado desde Supabase.";
+          renderCertificado(data);
+          return;
+        }
+      } catch(e){
+        console.warn("Error consultando Supabase:", e);
+      }
+    }
+
+    // 2) Fallback localStorage
+    statusOnline.textContent = "No se pudo leer de Supabase. Probando copia local...";
+    statusOnline.style.borderColor = "rgba(248,250,252,0.4)";
+
+    try{
+      const raw = localStorage.getItem(`certificado:${certId}`);
+      if (raw){
+        const cert = JSON.parse(raw);
+        renderCertificado(cert);
+        statusOnline.textContent = "Certificado cargado desde copia local del navegador.";
+        return;
+      }
+    } catch(e){
+      console.warn("Error leyendo localStorage:", e);
+    }
+
+    // 3) Nada encontrado
+    sheet.style.display = "none";
+    errorMsg.style.display = "block";
+    statusOnline.textContent = "No se ha encontrado el certificado.";
+    statusOnline.style.borderColor = "rgba(239,68,68,0.7)";
+  }
+
+  // Botones
+  $("btnImprimir").addEventListener("click", () => {
+    window.print();
+  });
+
+  $("btnVolver").addEventListener("click", () => {
+    // Ajusta el destino si quieres que vuelva a otra página
+    window.location.href = "home.html";
+  });
+
+  // Cargar al iniciar
+  cargarCertificado();
+</script>
+</body>
+</html>

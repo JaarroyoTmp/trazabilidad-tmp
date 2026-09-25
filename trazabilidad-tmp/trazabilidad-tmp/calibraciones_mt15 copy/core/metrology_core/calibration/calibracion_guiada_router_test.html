@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TMP Calibración Guiada Router V2</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#07111f;color:#e7f2fb;margin:0;padding:24px}
+    .card{background:#10243a;border:1px solid #24425f;border-radius:14px;padding:16px;margin-bottom:14px}
+    input{background:#071426;color:white;border:1px solid #24425f;border-radius:10px;padding:10px;width:100%;box-sizing:border-box}
+    button{background:#3d9cff;color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:bold;cursor:pointer;margin-top:10px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border-bottom:1px solid #24425f;padding:8px;text-align:left;font-size:13px;vertical-align:top}
+    th{background:#183b60;width:260px}
+    .ok{color:#2bd47c;font-weight:bold}
+    .bad{color:#ff6b6b;font-weight:bold}
+    .warn{color:#ffd15c;font-weight:bold}
+    pre{background:#050b14;border:1px solid #24425f;border-radius:10px;padding:12px;overflow:auto}
+    .grid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
+    .muted{color:#91a7bd}
+    .pill{display:inline-block;border:1px solid #24425f;border-radius:999px;padding:4px 8px;margin:2px}
+    .hidden{display:none}
+  </style>
+</head>
+
+<body>
+  <h1>TMP Calibración Guiada - Router V2</h1>
+  <p class="muted">Prueba real: busca equipo en Supabase, clasifica familia y resuelve procedimiento.</p>
+
+  <div class="card">
+    <h3>Buscar equipo</h3>
+    <div class="grid">
+      <div>
+        <label>Código del equipo</label>
+        <input id="codigoInput" value="11217" autocomplete="off">
+      </div>
+      <button id="btnBuscar">Buscar y resolver</button>
+    </div>
+    <div id="status" class="muted" style="margin-top:10px">Esperando búsqueda...</div>
+  </div>
+
+  <div class="card">
+    <h3>Equipo encontrado</h3>
+    <table>
+      <tbody id="equipoRows">
+        <tr><td class="muted">Sin equipo cargado</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Ruta de calibración</h3>
+    <table>
+      <tbody id="routeRows">
+        <tr><td class="muted">Sin ruta resuelta</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card hidden" id="matchesCard">
+    <h3>Coincidencias encontradas</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Rango</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="matchesRows"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>JSON técnico</h3>
+    <pre id="json">{}</pre>
+  </div>
+
+<script type="module">
+import { ensureSupabase } from "../../supabase_client.js";
+
+import {
+  loadEquipmentByCode,
+  buildEquipmentSummary,
+  isCalibrationCurrent
+} from "./calibration_equipment_loader.js";
+
+import {
+  resolveCalibrationProcedure,
+  canStartCalibration
+} from "./calibration_router.js";
+
+const $ = (sel) => document.querySelector(sel);
+
+function esc(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function renderStatus(message, type = "muted") {
+  $("#status").className = type;
+  $("#status").textContent = message;
+}
+
+function renderEquipo(instrumento) {
+  if (!instrumento) {
+    $("#equipoRows").innerHTML = `<tr><td class="muted">Sin equipo cargado</td></tr>`;
+    return;
+  }
+
+  const s = buildEquipmentSummary(instrumento);
+  const vigencia = isCalibrationCurrent(instrumento);
+
+  $("#equipoRows").innerHTML = `
+    <tr><th>Código</th><td>${esc(s.codigo)}</td></tr>
+    <tr><th>Descripción</th><td>${esc(s.descripcion)}</td></tr>
+    <tr><th>Rango</th><td>${esc(s.rango)}</td></tr>
+    <tr><th>Precisión</th><td>${esc(s.precision)}</td></tr>
+    <tr><th>Estado</th><td>${esc(s.estado)}</td></tr>
+    <tr><th>Ubicación actual</th><td>${esc(s.ubicacion_actual)}</td></tr>
+    <tr><th>Última calibración</th><td>${esc(s.fecha_calibracion)}</td></tr>
+    <tr><th>Próxima calibración</th><td>${esc(s.fecha_proxima_calibracion)}</td></tr>
+    <tr>
+      <th>Vigencia</th>
+      <td class="${vigencia.current ? "warn" : "ok"}">${esc(vigencia.message)}</td>
+    </tr>
+  `;
+}
+
+function renderRoute(route) {
+  if (!route) {
+    $("#routeRows").innerHTML = `<tr><td class="muted">Sin ruta resuelta</td></tr>`;
+    return;
+  }
+
+  const canStart = canStartCalibration(route);
+
+  $("#routeRows").innerHTML = `
+    <tr><th>Estado ruta</th><td class="${route.ok ? "ok" : "bad"}">${route.ok ? "OK" : "ERROR"}</td></tr>
+    <tr><th>Familia detectada</th><td>${esc(route.classification?.family || "-")}</td></tr>
+    <tr><th>Confianza</th><td>${esc(route.classification?.confidence ?? "-")}</td></tr>
+    <tr><th>Procedimiento</th><td>${esc(route.procedure?.code || "-")} - ${esc(route.procedure?.name || "-")}</td></tr>
+    <tr><th>Estado procedimiento</th><td>${esc(route.procedure?.status || "-")}</td></tr>
+    <tr><th>Puede iniciar</th><td class="${canStart.ok ? "ok" : "warn"}">${esc(canStart.message)}</td></tr>
+    <tr>
+      <th>Módulos</th>
+      <td>${(route.procedure?.modules || []).map(m => `<span class="pill">${esc(m)}</span>`).join(" ") || "-"}</td>
+    </tr>
+    <tr><th>Avisos</th><td>${(route.warnings || []).map(esc).join("<br>") || "-"}</td></tr>
+  `;
+}
+
+function renderMatches(matches = []) {
+  if (!matches.length) {
+    $("#matchesCard").classList.add("hidden");
+    $("#matchesRows").innerHTML = "";
+    return;
+  }
+
+  $("#matchesCard").classList.remove("hidden");
+
+  $("#matchesRows").innerHTML = matches.map((m, index) => `
+    <tr>
+      <td>${esc(m.codigo)}</td>
+      <td>${esc(m.descripcion)}</td>
+      <td>${esc(m.rango)}</td>
+      <td>${esc(m.estado)}</td>
+      <td><button data-index="${index}" class="btnSelectMatch">Seleccionar</button></td>
+    </tr>
+  `).join("");
+
+  document.querySelectorAll(".btnSelectMatch").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const i = Number(btn.dataset.index);
+      resolveLoadedInstrument(matches[i], {
+        ok: true,
+        source: "seleccion_manual",
+        instrumento: matches[i],
+        matches
+      });
+    });
+  });
+}
+
+function renderJson(obj) {
+  $("#json").textContent = JSON.stringify(obj, null, 2);
+}
+
+function resolveLoadedInstrument(instrumento, loadResult) {
+  const route = resolveCalibrationProcedure(instrumento);
+  const vigencia = isCalibrationCurrent(instrumento);
+  const canStart = canStartCalibration(route);
+
+  const result = {
+    loadResult,
+    instrumento,
+    vigencia,
+    route,
+    canStart
+  };
+
+  renderEquipo(instrumento);
+  renderRoute(route);
+  renderMatches([]);
+  renderJson(result);
+
+  renderStatus(
+    route.ok
+      ? `Equipo ${instrumento.codigo} resuelto como ${route.procedure?.code || "sin procedimiento"}.`
+      : `Equipo encontrado, pero sin procedimiento: ${route.error}`,
+    route.ok ? "ok" : "bad"
+  );
+}
+
+async function buscar() {
+  const code = $("#codigoInput").value.trim();
+
+  renderStatus("Conectando con Supabase...", "muted");
+  renderEquipo(null);
+  renderRoute(null);
+  renderMatches([]);
+  renderJson({ searching: code });
+
+  const supabase = await ensureSupabase();
+
+  if (!supabase) {
+    renderStatus("No se ha podido conectar con Supabase.", "bad");
+    renderJson({
+      ok: false,
+      error: "SUPABASE_NO_CONECTADO"
+    });
+    return;
+  }
+
+  renderStatus("Buscando equipo en Supabase...", "muted");
+
+  const loadResult = await loadEquipmentByCode(supabase, code);
+
+  if (!loadResult.ok) {
+    renderStatus(loadResult.message || loadResult.error, "bad");
+    renderJson(loadResult);
+
+    if (loadResult.matches?.length) {
+      renderMatches(loadResult.matches);
+    }
+
+    return;
+  }
+
+  resolveLoadedInstrument(loadResult.instrumento, loadResult);
+}
+
+$("#btnBuscar").addEventListener("click", buscar);
+
+$("#codigoInput").addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter") buscar();
+});
+
+buscar();
+</script>
+</body>
+</html>
