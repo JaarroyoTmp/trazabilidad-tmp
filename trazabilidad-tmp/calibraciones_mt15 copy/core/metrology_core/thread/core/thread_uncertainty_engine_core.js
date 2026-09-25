@@ -1,6 +1,6 @@
 /* TMP THREAD CORE V30 - thread_uncertainty_engine_core.js */
 import { parseNum } from "./thread_parser.js";
-export const TMP_THREAD_UNCERTAINTY_CORE_VERSION = "TMP_THREAD_UNCERTAINTY_CORE_V30_20260630";
+export const TMP_THREAD_UNCERTAINTY_CORE_VERSION = "TMP_THREAD_UNCERTAINTY_CORE_V31_20260925_TRIMOS_MODEL";
 export function round(v, d = 9) { const n = parseNum(v, null); if (!Number.isFinite(n)) return null; const f = Math.pow(10, d); return Math.round(n * f) / f; }
 export function mean(values = []) { const nums = values.map(v => parseNum(v, null)).filter(Number.isFinite); if (!nums.length) return null; return nums.reduce((a,b) => a+b, 0) / nums.length; }
 export function sampleStd(values = []) { const nums = values.map(v => parseNum(v, null)).filter(Number.isFinite); if (nums.length < 2) return 0; const m = mean(nums); return Math.sqrt(nums.reduce((acc, v) => acc + Math.pow(v - m, 2), 0) / (nums.length - 1)); }
@@ -9,8 +9,10 @@ export function calculatePointUncertainty({ readings = [], patterns = null, mode
   const s = sampleStd(readings);
   const uRepeat = n > 1 ? s / Math.sqrt(n) : 0;
   const uBank = parseNum(patterns?.selected_bank?.u_standard_mm, null) ?? parseNum(model.u_bank_mm, 0);
-  const uRollers = parseNum(patterns?.selected_rollers?.u_standard_mm, null) ?? parseNum(model.u_rollers_mm, 0.0003);
-  const uMaster = parseNum(patterns?.selected_master?.u_standard_mm, null) ?? parseNum(model.u_master_mm, 0);
+  // TMP MT16: rodillos/hilos son utiles de medicion y no se incorporan como patron
+  // certificado independiente. Tampoco se exige un patron de rosca adicional.
+  const uRollers = 0;
+  const uMaster = 0;
   const resolution = parseNum(model.resolution_mm, 0.001);
   const uResolution = resolution / Math.sqrt(12);
   const uTemperature = parseNum(model.u_temperature_mm, 0);

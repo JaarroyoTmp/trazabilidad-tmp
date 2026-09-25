@@ -10,7 +10,7 @@ import { resolveTraceability, TMP_THREAD_TRACEABILITY_ENGINE_VERSION } from "./t
 import { TMP_THREAD_PATTERN_CLASSIFIER_VERSION } from "./thread_pattern_classifier.js";
 import { getThreadProcedure, TMP_MT16_PROCEDURE_ROUTER_VERSION } from "../procedure_rules/index.js";
 
-export const TMP_MT16_MASTER_ENGINE_VERSION = "TMP_MT16_EXPERT_CORE_V73_20260702_PROCEDURE_MODEL";
+export const TMP_MT16_MASTER_ENGINE_VERSION = "TMP_MT16_EXPERT_CORE_V74_20260925_TMP_WIRES_TRIMOS_TRACE";
 
 export function round(v, d = 9) {
   const n = parseNum(v, null);
@@ -310,10 +310,7 @@ export async function resolveMT16Core({ equipment = {}, supabase = null, reading
   let readings = null, uncertainty = null, decision = null;
   if (readingsByPoint && (isMetricIso || isBsppIso228 || isUnified)) {
     readings = evaluateReadings({ trimos, traceability, readingsByPoint });
-    // MT16 TMP: la incertidumbre trazable procede del Trimos. Los rodillos/hilos
-    // se modelan como accesorio mediante u_rollers_mm y no exigen certificado individual.
-    // El patron de rosca independiente no forma parte de la cadena de incertidumbre del metodo.
-    uncertainty = calculateThreadUncertainty({ readingResults: readings.results || [], patterns: { selected_bank: traceability.selected_bank, selected_rollers: null, selected_master: null }, model: { u_rollers_mm: 0.0003, u_master_mm: 0, resolution_mm: 0.001, k: 2 } });
+    uncertainty = calculateThreadUncertainty({ readingResults: readings.results || [], patterns: { selected_bank: traceability.selected_bank, selected_rollers: traceability.selected_rollers, selected_master: traceability.selected_master }, model: { u_rollers_mm: 0, u_master_mm: 0, resolution_mm: 0.001, k: 2 } });
     decision = decideThreadCalibration({ readingResults: readings.results || [], uncertainty });
   }
 
