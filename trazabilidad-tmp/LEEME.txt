@@ -1,0 +1,14 @@
+PARCHE UI MT16 - 25/09/2026
+
+NO toca home.html, Supabase, ISO 724, ISO 965, ISO 1502, Trimos ni los calculos.
+Solo sustituye la pantalla activa:
+calibraciones_mt15 copy/core/metrology_core/thread/thread_mt16_workflow_test.html
+
+Motivo: mt16.html redirige exactamente a ese archivo. La UI seguia mostrando textos heredados V60/V61 y "Rodillo normativo" aunque el motor ya estuviera corregido.
+
+Cambios:
+- Rodillo TMP en vez de Rodillo normativo.
+- Muestra DETERMINADO junto al diametro devuelto por el motor.
+- Elimina referencias visuales V60/V61 obsoletas.
+- Aclara que el diametro procede de la tabla comercial validada TMP.
+- No altera calculos ni flujo.

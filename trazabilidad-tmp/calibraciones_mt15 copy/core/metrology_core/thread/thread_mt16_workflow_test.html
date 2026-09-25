@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>TMP MT16 · V92 UX Laboratorio</title>
+<title>TMP MT16 · V93 UX Laboratorio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{
@@ -102,7 +102,7 @@ footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6
       <div class="sys-row"><span class="dot"></span><div><strong>MT16</strong><br>Procedimiento guiado</div></div>
       <div class="sys-row"><span class="dot"></span><div><strong>Rodillos</strong><br>Selección automática</div></div>
     </div>
-    <div class="version-side"><span>MT16 V92 UI</span><span>2026</span></div>
+    <div class="version-side"><span>MT16 V93 UI</span><span>2026</span></div>
   </aside>
 
   <div class="main">
@@ -120,13 +120,13 @@ footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6
       <section class="hero">
         <div>
           <h2>Calibración guiada MT16</h2>
-          <p>Procedimiento guiado: rodillo normativo, objetivo Trimos, banco Trimos como patrón metrológico y trazabilidad.</p>
+          <p>Procedimiento guiado: selección de rodillo comercial TMP, objetivos Trimos y banco Trimos como patrón metrológico trazable.</p>
           <div class="hero-badges">
             <span class="hero-badge">ISO 1502</span><span class="hero-badge">ISO 965</span><span class="hero-badge">Motor MT16</span><span class="hero-badge">Patrón Trimos</span><span class="hero-badge">ILAC-G8</span>
           </div>
         </div>
         <div class="hero-info">
-          <div class="hero-info-card"><small>Regla</small><strong>La pantalla sólo muestra lo que calcula V60</strong></div>
+          <div class="hero-info-card"><small>Regla</small><strong>La pantalla muestra el resultado del motor MT16 vigente</strong></div>
           <div class="hero-info-card"><small>Operario</small><strong>Rodillos + objetivo antes de medir</strong></div>
         </div>
       </section>
@@ -138,7 +138,7 @@ footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6
             <h2>Modo operario</h2>
             <p>La pantalla guía al operario; los cálculos se realizan automáticamente según el procedimiento.</p>
             <div class="bullets">
-              <div class="bullet"><i>✓</i><span>Rodillo normativo desde V60</span></div>
+              <div class="bullet"><i>✓</i><span>Rodillo comercial TMP determinado por paso</span></div>
               <div class="bullet"><i>✓</i><span>Objetivo Trimos PASA / NO PASA</span></div>
               <div class="bullet"><i>✓</i><span>Trazabilidad con clasificador</span></div>
             </div>
@@ -167,7 +167,7 @@ footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6
 
           <div class="critical">
             <div class="tile"><span>Equipo</span><strong id="stripEquipo">Pendiente</strong></div>
-            <div class="tile rod"><span>Rodillo normativo</span><strong id="stripRodillo">Pendiente</strong></div>
+            <div class="tile rod"><span>Rodillo TMP</span><strong id="stripRodillo">Pendiente</strong></div>
             <div class="tile nom"><span>Objetivo PASA Trimos</span><strong id="stripPass">Pendiente</strong></div>
             <div class="tile nom"><span>Objetivo NO PASA Trimos</span><strong id="stripNoPass">Pendiente</strong></div>
           </div>
@@ -193,9 +193,9 @@ footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6
 
             <div class="stage" data-stage="1">
               <h3>2 · Rodillo y objetivos Trimos</h3>
-              <p>Estos valores salen del motor V61.</p>
+              <p>Estos valores salen del motor MT16 vigente y de la tabla comercial validada por TMP.</p>
               <div class="theory">
-                <div><span>Rodillo normativo</span><strong id="rodillo">Pendiente</strong></div>
+                <div><span>Rodillo TMP determinado</span><strong id="rodillo">Pendiente</strong></div>
                 <div><span>Objetivo PASA Trimos</span><strong id="passTarget">Pendiente</strong></div>
                 <div><span>Objetivo NO PASA Trimos</span><strong id="noPassTarget">Pendiente</strong></div>
               </div>
@@ -209,7 +209,7 @@ footer{grid-column:1/-1;text-align:center;color:#66809a;font-size:12px;padding:6
                 <div class="data"><span id="d2PassLabel">Límite PASA normativo</span><strong id="d2Pass">Pendiente</strong></div>
                 <div class="data"><span id="d2NoPassLabel">Límite NO PASA normativo</span><strong id="d2NoPass">Pendiente</strong></div>
               </div>
-              <div class="help" id="objectiveHelp"><strong>Importante:</strong> si aquí no aparece rodillo u objetivo, el motor V60 no está cargando sus dependencias o la designación no se ha resuelto.</div>
+              <div class="help" id="objectiveHelp"><strong>Importante:</strong> el rodillo debe coincidir con la tabla comercial TMP para el paso interpretado. Si no existe combinación validada, MT16 debe indicarlo y no aproximar otro diámetro.</div>
             </div>
 
             <div class="stage" data-stage="2">
@@ -633,11 +633,11 @@ function sync(){
   const t = core?.traceability || {};
   const labels = normativeLabels();
   setTxt("stripEquipo", $("#codigo").value || "-");
-  setTxt("stripRodillo", v.rodillo ? `Ø ${v.rodillo} mm` : "Pendiente");
+  setTxt("stripRodillo", v.rodillo ? `Ø ${v.rodillo} mm · DETERMINADO` : "Pendiente");
   setTxt("stripPass", mm(v.passTarget));
   setTxt("stripNoPass", mm(v.noPassTarget));
 
-  setTxt("rodillo", v.rodillo ? `Ø ${v.rodillo} mm` : "Pendiente");
+  setTxt("rodillo", v.rodillo ? `Ø ${v.rodillo} mm · DETERMINADO` : "Pendiente");
   setTxt("passTarget", mm(v.passTarget));
   setTxt("noPassTarget", mm(v.noPassTarget));
   setTxt("rosca", s.designation || (s.nominal_mm && s.pitch_mm ? `${s.nominal_label || "M"+s.nominal_mm} x ${s.pitch_mm}` : "Pendiente"));
@@ -652,7 +652,7 @@ function sync(){
   setTxt("objectiveHelp", (v.passTarget && v.noPassTarget) ? "Objetivos Trimos disponibles. Ya se pueden tomar lecturas." : "Objetivos Trimos no disponibles para certificado: la familia esta en modo geometria/procedimiento seguro o falta completar tabla normativa oficial.");
 
   setTxt("bank", itemMain(t.selected_bank, "Banco Trimos no seleccionado"));
-  setTxt("rollers", v.rodillo ? `Rodillos / hilos requeridos Ø ${v.rodillo} mm` : "Rodillos / hilos pendientes");
+  setTxt("rollers", v.rodillo ? `Rodillo TMP validado Ø ${v.rodillo} mm` : "Rodillo TMP pendiente");
   const bankMeta=$("#bankMeta"), rollersMeta=$("#rollersMeta");
   if(bankMeta) bankMeta.innerHTML = itemMeta(t.selected_bank, traceRequirementHtml("Banco Trimos", "Seleccionar banco Trimos certificado y vigente. Es el único patrón trazable del procedimiento MT16."));
   if(rollersMeta) rollersMeta.innerHTML = `<div><b>Diámetro requerido:</b> ${esc(v.rodillo ? "Ø "+v.rodillo+" mm" : "Pendiente")}</div><div><b>Tipo:</b> útil de medición / accesorio de montaje</div><div><b>Incertidumbre:</b> no se considera fuente independiente en el modelo TMP MT16</div><div class="trace-action">Registrar juego o identificación si existe para reproducibilidad del montaje.</div>`;
