@@ -2,407 +2,159 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>TMP · Consulta Tablas de Equipos</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
+  <title>TMP · Equipos / Buscar</title>
   <link rel="icon" href="img/tmp-quality.png" />
-
   <style>
-    :root {
-      --bg0:#050b16;
-      --bg1:#071324;
-      --card:#0f1f33;
-      --border:#203552;
-      --txt:#f2f6fb;
-      --muted:#9fb3ca;
-      --accent:#3ea8ff;
+    :root{
+      --bg:#eef6ff;--bg2:#f7fbff;--panel:#fff;--ink:#0d2b50;--muted:#67809a;
+      --line:#d9e6f2;--line2:#c6d8e8;--blue:#2563eb;--blue2:#0ea5e9;
+      --green:#16a34a;--orange:#f59e0b;--red:#dc2626;--purple:#7c3aed;
+      --shadow:0 14px 34px rgba(15,45,75,.09);--radius:18px;
     }
-
-    * { margin:0; padding:0; box-sizing:border-box; }
-
-    body {
-      font-family:"Inter",sans-serif;
-      background:
-        radial-gradient(circle at 0% 0%, #182f55 0, transparent 55%),
-        radial-gradient(circle at 100% 0%, #1a3b64 0, transparent 55%),
-        linear-gradient(180deg,var(--bg1),var(--bg0));
-      color:var(--txt);
-      -webkit-font-smoothing:antialiased;
-      padding-bottom:40px;
-    }
-
-    .app { max-width:1100px; margin:16px auto 32px; padding:0 14px; }
-
-    header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:18px;
-    }
-
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    .brand-logo { height:34px; }
-    .brand-title { font-size:17px; font-weight:700; }
-    .brand-sub { font-size:12px; color:var(--muted); }
-
-    .btn {
-      padding:10px 16px;
-      border:none;
-      border-radius:999px;
-      font-size:13px;
-      font-weight:600;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      background:var(--accent);
-      color:#031321;
-    }
-
-    .btn.secondary {
-      background:transparent;
-      color:var(--muted);
-      border:1px solid var(--border);
-    }
-
-    .card {
-      border-radius:16px;
-      background:linear-gradient(135deg,#0f1f33,#0a1625);
-      border:1px solid rgba(62,168,255,.4);
-      box-shadow:0 18px 40px rgba(0,0,0,.5);
-      padding:16px;
-      margin-bottom:20px;
-    }
-
-    .card-title { font-size:15px; font-weight:700; }
-    .card-sub { font-size:12px; color:var(--muted); margin-top:2px; }
-
-    label {
-      font-size:11px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.07em;
-      margin-bottom:4px;
-      display:block;
-    }
-
-    input, select, textarea {
-      width:100%;
-      background:#050d1a;
-      border:1px solid #253954;
-      border-radius:10px;
-      padding:9px 11px;
-      color:var(--txt);
-      font-size:13px;
-    }
-
-    textarea { min-height:70px; resize:vertical; }
-
-    .grid {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-    }
-    @media(max-width:900px) { .grid { grid-template-columns:repeat(2,1fr); } }
-    @media(max-width:600px) { .grid { grid-template-columns:1fr; } }
-
-    .table-wrap {
-      border-radius:12px;
-      overflow:auto;
-      border:1px solid var(--border);
-      max-height:350px;
-    }
-
-    table { width:100%; border-collapse:collapse; font-size:12px; }
-    th,td { padding:6px; border-bottom:1px solid #1f3046; }
-    th {
-      background:#0c1929;
-      text-transform:uppercase;
-      color:var(--muted);
-      font-size:11px;
-      position:sticky;
-      top:0;
-    }
-
-    #msg {
-      margin-top:8px;
-      color:#ff7b7b;
-      font-size:12px;
-      display:none;
-    }
-
-    /* ---------- MODO IMPRESIÓN ---------- */
-    @media print {
-      body {
-        background:white !important;
-        color:black !important;
-      }
-
-      header,
-      .no-print,
-      #versionWrapper,
-      .card-sub {
-        display:none !important;
-      }
-
-      .card {
-        background:white !important;
-        border:1px solid #777 !important;
-        box-shadow:none !important;
-        color:black !important;
-      }
-
-      input, textarea {
-        background:white !important;
-        border:1px solid #999 !important;
-        color:black !important;
-      }
-
-      table, th, td {
-        border:1px solid black !important;
-        color:black !important;
-      }
-    }
-
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 15% -10%,rgba(37,99,235,.15),transparent 28%),linear-gradient(180deg,var(--bg),var(--bg2));min-height:100vh}
+    .app{max-width:1500px;margin:0 auto;padding:18px 22px 34px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:11px}.brand img{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:11px;padding:3px;border:1px solid var(--line)}
+    .brand-title{font-size:22px;font-weight:950;letter-spacing:-.03em}.brand-sub{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px}
+    .btn{border:1px solid var(--line2);background:#fff;color:var(--ink);border-radius:11px;padding:9px 13px;font-size:12px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .btn:hover{box-shadow:0 6px 16px rgba(20,60,100,.10);transform:translateY(-1px)}.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn-soft{background:#edf5ff;border-color:#bfdbfe;color:#1d4ed8}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px;min-width:0}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 15px;font-weight:900;font-size:12px;color:#4b6580;cursor:pointer}.tab.active{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border-color:#2563eb}
+    .view{display:none}.view.active{display:block}
+    .section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}.section-title{font-size:18px;font-weight:950}.section-sub{font-size:12px;color:var(--muted);margin-top:3px}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}.kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:linear-gradient(180deg,#fff,#fbfdff)}.kpi-label{font-size:10px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em}.kpi-value{font-size:25px;font-weight:950;margin-top:3px}.kpi-extra{font-size:10px;color:var(--muted);margin-top:2px}
+    .searchbar{display:grid;grid-template-columns:minmax(260px,2fr) 1fr 1fr auto;gap:8px;align-items:end}.field label{display:block;font-size:10px;font-weight:850;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line2);border-radius:10px;background:#fff;padding:9px 11px;color:var(--ink);outline:none;font-size:12px}.field input:focus,.field select:focus,.field textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.10)}
+    .table-wrap{border:1px solid var(--line);border-radius:13px;overflow:auto;max-height:430px;background:#fff}table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:8px 9px;border-bottom:1px solid #e8f0f7;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#f4f8fc;color:#49627b;text-transform:uppercase;font-size:9.5px;letter-spacing:.03em;z-index:1}tr:hover td{background:#fbfdff}
+    .chip{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;border:1px solid;font-size:9px;font-weight:900}.ok{color:#15803d;background:#ecfdf3;border-color:#bbf7d0}.warn{color:#b45309;background:#fff7ed;border-color:#fed7aa}.bad{color:#b91c1c;background:#fff1f2;border-color:#fecdd3}.neutral{color:#475569;background:#f1f5f9;border-color:#cbd5e1}.blue{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}
+    .detail{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:12px}.detail-card{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fbfdff}.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.detail-item{background:#fff;border:1px solid #e5edf5;border-radius:10px;padding:9px}.detail-label{font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:900}.detail-value{font-size:12px;font-weight:850;margin-top:3px;word-break:break-word}.empty{padding:18px;text-align:center;color:var(--muted);font-size:12px;border:1px dashed var(--line2);border-radius:12px;background:#f9fcff}
+    .ref-search{display:grid;grid-template-columns:minmax(260px,2fr) auto;gap:8px}.ref-info{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.msg{display:none;margin-top:8px;font-size:11px;font-weight:800}.msg.badmsg{display:block;color:#b91c1c}.msg.okmsg{display:block;color:#15803d}
+    .footer-note{font-size:10px;color:var(--muted);text-align:center;margin-top:8px}
+    @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.searchbar{grid-template-columns:1fr 1fr}.detail{grid-template-columns:1fr}.ref-info{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:700px){.app{padding:10px}.kpis{grid-template-columns:1fr 1fr}.searchbar,.ref-search{grid-template-columns:1fr}.ref-info,.detail-grid{grid-template-columns:1fr}.brand-title{font-size:18px}}
+    @media print{header,.tabs,.no-print,#view-equipos{display:none!important}body{background:#fff}.panel{box-shadow:none;border:1px solid #aaa}.table-wrap{max-height:none;overflow:visible}th{position:static}}
   </style>
 </head>
-
 <body>
 <div class="app">
+  <header>
+    <div class="brand"><img src="img/tmp-quality.png" alt="TMP"><div><div class="brand-title">TMP · Equipos / Buscar</div><div class="brand-sub">Consulta operativa de equipos activos y tablas metrológicas por referencia</div></div></div>
+    <a class="btn" href="home.html">← Volver al Home</a>
+  </header>
 
-<header>
-  <div class="brand">
-    <img src="img/tmp-quality.png" class="brand-logo">
-    <div>
-      <div class="brand-title">TMP · Consultar Tablas de Equipos</div>
-      <div class="brand-sub">Ver, imprimir y editar versiones</div>
+  <section class="panel no-print">
+    <div class="tabs">
+      <button class="tab active" data-view="equipos">Equipos activos</button>
+      <button class="tab" data-view="referencias">Tablas por referencia</button>
     </div>
+  </section>
+
+  <div id="view-equipos" class="view active">
+    <section class="panel">
+      <div class="section-head"><div><div class="section-title">Inventario operativo</div><div class="section-sub">Una única vista para localizar equipos activos por código, descripción, estado o ubicación.</div></div><span class="chip blue" id="last-update">Cargando...</span></div>
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">Activos</div><div class="kpi-value" id="kpi-activos">–</div><div class="kpi-extra">Excluye bajas y retirados</div></div>
+        <div class="kpi"><div class="kpi-label">Laboratorio</div><div class="kpi-value" id="kpi-lab">–</div><div class="kpi-extra">Ubicación tipo Laboratorio</div></div>
+        <div class="kpi"><div class="kpi-label">Taller / producción</div><div class="kpi-value" id="kpi-taller">–</div><div class="kpi-extra">Ubicación tipo Taller</div></div>
+        <div class="kpi"><div class="kpi-label">Fuera calibración</div><div class="kpi-value" id="kpi-fuera">–</div><div class="kpi-extra">Fecha vencida</div></div>
+        <div class="kpi"><div class="kpi-label">Sin fecha</div><div class="kpi-value" id="kpi-sinfecha">–</div><div class="kpi-extra">Requiere revisión</div></div>
+      </div>
+
+      <div class="searchbar no-print">
+        <div class="field"><label>Buscar equipo activo</label><input id="equipment-search" list="equipment-options" placeholder="Código o descripción..."><datalist id="equipment-options"></datalist></div>
+        <div class="field"><label>Ubicación</label><select id="filter-location"><option value="">Todas</option></select></div>
+        <div class="field"><label>Estado calibración</label><select id="filter-cal"><option value="">Todos</option><option value="OK">OK</option><option value="PROXIMA">Próxima &lt;30 días</option><option value="FUERA">Fuera</option><option value="SIN_FECHA">Sin fecha</option></select></div>
+        <button class="btn btn-soft" id="clear-filters">Limpiar</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-head"><div><div class="section-title">Resultados</div><div class="section-sub" id="results-info">Cargando inventario...</div></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Código</th><th>Descripción</th><th>Estado</th><th>Ubicación</th><th>Tipo</th><th>Calibración</th><th>Próxima</th><th>Acción</th></tr></thead><tbody id="equipment-body"><tr><td colspan="8">Cargando...</td></tr></tbody></table></div>
+      <div id="equipment-detail" class="detail" style="display:none"></div>
+    </section>
   </div>
 
-  <button class="btn secondary" onclick="location.href='home.html'">← Volver</button>
-</header>
+  <div id="view-referencias" class="view">
+    <section class="panel no-print">
+      <div class="section-head"><div><div class="section-title">Buscar tabla por referencia</div><div class="section-sub">Conserva el histórico de versiones existente en control_metrologico.</div></div></div>
+      <div class="ref-search"><div class="field"><label>Referencia</label><input id="refInput" placeholder="Ej: REF-001"></div><button class="btn btn-primary" id="btnBuscar">Buscar referencia</button></div>
+      <div id="msg" class="msg"></div>
+      <div id="versionWrapper" class="field" style="margin-top:10px;display:none;max-width:320px"><label>Versión</label><select id="versionSelect"></select></div>
+    </section>
 
-<!-- BÚSQUEDA -->
-<section class="card no-print">
-  <div class="card-title">Buscar referencia</div>
-  <div class="card-sub">Introduce una referencia para cargar su tabla de equipos</div>
+    <section class="panel">
+      <div class="section-head"><div><div class="section-title">Datos de la referencia</div><div class="section-sub">Información guardada de la versión seleccionada.</div></div><span class="chip neutral" id="ref-status">Sin referencia cargada</span></div>
+      <div class="ref-info">
+        <div class="field"><label>Referencia</label><input id="refDetalle" readonly></div><div class="field"><label>Pieza</label><input id="piezaDetalle" readonly></div><div class="field"><label>Cliente</label><input id="clienteDetalle" readonly></div><div class="field"><label>Responsable</label><input id="responsableDetalle" readonly></div><div class="field"><label>Fecha</label><input id="fechaDetalle" readonly></div><div class="field"><label>Versión</label><input id="versionDetalle" readonly></div>
+      </div>
+      <div class="field" style="margin-top:9px"><label>Observaciones</label><textarea id="observacionesDetalle" readonly></textarea></div>
+    </section>
 
-  <label>Referencia</label>
-  <div style="display:flex; gap:8px;">
-    <input id="refInput" placeholder="Ej: REF-001">
-    <button class="btn" id="btnBuscar">Buscar</button>
+    <section class="panel">
+      <div class="section-head"><div><div class="section-title">Equipos necesarios</div><div class="section-sub" id="ref-equipment-info">Sin tabla cargada.</div></div></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Código</th><th>Descripción</th><th>Cantidad</th><th>Tipo medida</th></tr></thead><tbody id="tablaEquipos"><tr><td colspan="5">Sin datos</td></tr></tbody></table></div>
+      <div class="actions no-print"><button class="btn btn-primary" id="btnEditarVersion">✎ Editar esta versión</button><button class="btn" onclick="window.print()">Imprimir tabla</button><a class="btn btn-soft" href="equipos-referencia-crear.html">＋ Crear nueva referencia</a></div>
+    </section>
   </div>
 
-  <p id="msg"></p>
-
-  <div id="versionWrapper" style="margin-top:12px; display:none;">
-    <label>Versión</label>
-    <select id="versionSelect"></select>
-  </div>
-</section>
-
-<!-- INFORMACIÓN -->
-<section class="card">
-  <div class="card-title">Datos de la referencia</div>
-
-  <div class="grid">
-    <div>
-      <label>Referencia</label>
-      <input id="refDetalle" readonly>
-    </div>
-    <div>
-      <label>Pieza</label>
-      <input id="piezaDetalle" readonly>
-    </div>
-    <div>
-      <label>Cliente</label>
-      <input id="clienteDetalle" readonly>
-    </div>
-    <div>
-      <label>Responsable</label>
-      <input id="responsableDetalle" readonly>
-    </div>
-    <div>
-      <label>Fecha</label>
-      <input id="fechaDetalle" readonly>
-    </div>
-    <div>
-      <label>Versión</label>
-      <input id="versionDetalle" readonly>
-    </div>
-  </div>
-
-  <label style="margin-top:12px;">Observaciones</label>
-  <textarea id="observacionesDetalle" readonly></textarea>
-</section>
-
-<!-- TABLA EQUIPOS -->
-<section class="card">
-  <div class="card-title">Equipos necesarios</div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Código</th>
-          <th>Descripción</th>
-          <th>Cantidad</th>
-          <th>Tipo medida</th>
-        </tr>
-      </thead>
-      <tbody id="tablaEquipos">
-        <tr><td colspan="5">Sin datos</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- BOTONES -->
-  <div class="no-print" style="margin-top:16px; display:flex; gap:10px;">
-    <button class="btn" id="btnEditarVersion">✏️ Editar esta versión</button>
-    <button class="btn" onclick="window.print()">🖨 Imprimir tabla</button>
-  </div>
-</section>
-
+  <div class="footer-note">TMP · Trazabilidad Metrológica · consulta unificada sin modificar motores ni criterios metrológicos</div>
 </div>
-
-<!-- SUPABASE -->
 <script type="module" src="config.mjs"></script>
-
 <script type="module">
 const sb = window.supabase;
-const $ = sel => document.querySelector(sel);
+const $ = s => document.querySelector(s);
+let activos = [], ubicMap = new Map(), registros = [], idx = 0;
 
-let registros = [];
-let idx = 0;
+function norm(v){return String(v ?? '').trim().toLowerCase()}
+function esc(v){return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
+function parseDate(v){if(!v)return null;const d=new Date(String(v).replace(/_/g,'-'));return isNaN(d)?null:d}
+function fmtDate(v){const d=parseDate(v);return d?d.toLocaleDateString('es-ES'):'—'}
+function esBaja(i){const e=String(i?.estado||'').trim().toUpperCase(),u=String(i?.ubicacion_actual||'').trim().toUpperCase();return ['BAJA DEFINITIVA','BAJA TÉCNICA','RETIRADO'].includes(e)||u==='RETIRADO'}
+function ubicInfo(i){const u=ubicMap.get(i.ubicacion_id);return {nombre:String(u?.nombre||i.ubicacion_actual||i.ubicacion||'').trim()||'—',tipo:String(u?.tipo||'').trim()||'—'} }
+function calStatus(i){const prox=parseDate(i.fecha_proxima_calibracion)||parseDate(i.proxima_calibracion);if(!prox)return {key:'SIN_FECHA',txt:'SIN FECHA',cls:'neutral'};const hoy=new Date();hoy.setHours(0,0,0,0);prox.setHours(0,0,0,0);if(prox<hoy)return {key:'FUERA',txt:'FUERA',cls:'bad'};const d=(prox-hoy)/86400000;if(d<=30)return {key:'PROXIMA',txt:'PRÓXIMA',cls:'warn'};return {key:'OK',txt:'OK',cls:'ok'}}
 
-/* ============================
-   UTILIDADES
-============================ */
-function msj(t) {
-  const box = $("#msg");
-  box.textContent = t;
-  box.style.display = "block";
+// Tabs
+$('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${b.dataset.view}`));});
+
+async function cargarEquipos(){
+  if(!sb){$('#equipment-body').innerHTML='<tr><td colspan="8">Supabase no disponible.</td></tr>';return}
+  const [{data:inst,error},{data:ubs,error:eu}] = await Promise.all([
+    sb.from('instrumentos').select('id,codigo,descripcion,estado,ubicacion_id,ubicacion_actual,ubicacion,fecha_proxima_calibracion,proxima_calibracion,familia_id,tipo_calibracion,fecha_calibracion'),
+    sb.from('ubicaciones').select('id,nombre,tipo,activo')
+  ]);
+  if(error){$('#equipment-body').innerHTML='<tr><td colspan="8">Error cargando instrumentos.</td></tr>';return}
+  ubicMap=new Map((ubs||[]).map(u=>[u.id,u]));
+  activos=(inst||[]).filter(i=>!esBaja(i));
+  const locs=[...new Set(activos.map(i=>ubicInfo(i).nombre).filter(x=>x&&x!=='—'))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
+  $('#filter-location').innerHTML='<option value="">Todas</option>'+locs.map(x=>`<option>${esc(x)}</option>`).join('');
+  $('#equipment-options').innerHTML=activos.slice().sort((a,b)=>String(a.codigo||'').localeCompare(String(b.codigo||''),'es',{numeric:true})).map(i=>`<option value="${esc(i.codigo||'')}">${esc(i.descripcion||'')}</option>`).join('');
+  let lab=0,taller=0,fuera=0,sin=0;
+  activos.forEach(i=>{const ui=ubicInfo(i);if(norm(ui.tipo)==='laboratorio')lab++;else if(norm(ui.tipo)==='taller')taller++;const c=calStatus(i);if(c.key==='FUERA')fuera++;if(c.key==='SIN_FECHA')sin++;});
+  $('#kpi-activos').textContent=activos.length;$('#kpi-lab').textContent=lab;$('#kpi-taller').textContent=taller;$('#kpi-fuera').textContent=fuera;$('#kpi-sinfecha').textContent=sin;
+  $('#last-update').textContent=`Actualizado ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
+  renderEquipos();
 }
 
-function limpiarDatos() {
-  $("#refDetalle").value = "";
-  $("#piezaDetalle").value = "";
-  $("#clienteDetalle").value = "";
-  $("#responsableDetalle").value = "";
-  $("#fechaDetalle").value = "";
-  $("#versionDetalle").value = "";
-  $("#observacionesDetalle").value = "";
-  $("#tablaEquipos").innerHTML = "<tr><td colspan='5'>Sin datos</td></tr>";
+function filtrados(){const q=norm($('#equipment-search').value),loc=$('#filter-location').value,cf=$('#filter-cal').value;return activos.filter(i=>{const ui=ubicInfo(i),c=calStatus(i);if(loc&&ui.nombre!==loc)return false;if(cf&&c.key!==cf)return false;if(q&&!norm(`${i.codigo} ${i.descripcion} ${i.estado} ${ui.nombre} ${ui.tipo}`).includes(q))return false;return true})}
+function renderEquipos(){const rows=filtrados();$('#results-info').textContent=`${rows.length} de ${activos.length} equipos activos`;const body=$('#equipment-body');if(!rows.length){body.innerHTML='<tr><td colspan="8">No hay equipos que coincidan con los filtros.</td></tr>';$('#equipment-detail').style.display='none';return}
+  body.innerHTML=rows.slice(0,250).map(i=>{const ui=ubicInfo(i),c=calStatus(i),prox=i.fecha_proxima_calibracion||i.proxima_calibracion;return `<tr data-code="${esc(i.codigo)}"><td><strong>${esc(i.codigo)}</strong></td><td>${esc(i.descripcion||'—')}</td><td>${esc(i.estado||'—')}</td><td>${esc(ui.nombre)}</td><td>${esc(ui.tipo)}</td><td><span class="chip ${c.cls}">${c.txt}</span></td><td>${fmtDate(prox)}</td><td><button class="btn btn-soft" data-detail="${esc(i.codigo)}">Detalle</button> <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ficha</a></td></tr>`}).join('');
+  body.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>mostrarDetalle(b.dataset.detail)));
+  const exact=rows.find(i=>norm(i.codigo)===norm($('#equipment-search').value));if(exact)mostrarDetalle(exact.codigo);
 }
+function mostrarDetalle(codigo){const i=activos.find(x=>String(x.codigo)===String(codigo));if(!i)return;const ui=ubicInfo(i),c=calStatus(i),prox=i.fecha_proxima_calibracion||i.proxima_calibracion,d=$('#equipment-detail');d.style.display='grid';d.innerHTML=`<div class="detail-card"><div class="section-title">${esc(i.codigo)} · ${esc(i.descripcion||'')}</div><div class="detail-grid"><div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value">${esc(i.estado||'—')}</div></div><div class="detail-item"><div class="detail-label">Ubicación</div><div class="detail-value">${esc(ui.nombre)}</div></div><div class="detail-item"><div class="detail-label">Tipo ubicación</div><div class="detail-value">${esc(ui.tipo)}</div></div><div class="detail-item"><div class="detail-label">Calibración</div><div class="detail-value"><span class="chip ${c.cls}">${c.txt}</span></div></div><div class="detail-item"><div class="detail-label">Última calibración</div><div class="detail-value">${fmtDate(i.fecha_calibracion)}</div></div><div class="detail-item"><div class="detail-label">Próxima</div><div class="detail-value">${fmtDate(prox)}</div></div></div></div><div class="detail-card"><div class="section-title">Acciones</div><div class="section-sub">Accesos sin duplicar pantallas.</div><div class="actions"><a class="btn btn-primary" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ver ficha completa</a><a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(i.codigo||'')}">Alta / Edición</a><a class="btn" href="movimiento.html?codigo=${encodeURIComponent(i.codigo||'')}">Registrar movimiento</a></div></div>`}
+['equipment-search','filter-location','filter-cal'].forEach(id=>$('#'+id).addEventListener(id==='equipment-search'?'input':'change',renderEquipos));
+$('#equipment-search').addEventListener('change',renderEquipos);$('#clear-filters').addEventListener('click',()=>{$('#equipment-search').value='';$('#filter-location').value='';$('#filter-cal').value='';$('#equipment-detail').style.display='none';renderEquipos()});
 
-/* ============================
-   CARGAR REGISTRO
-============================ */
-function mostrarRegistro(rec) {
-  $("#refDetalle").value = rec.referencia || "";
-  $("#piezaDetalle").value = rec.pieza || "";
-  $("#clienteDetalle").value = rec.cliente || "";
-  $("#responsableDetalle").value = rec.responsable || "";
-  $("#fechaDetalle").value = rec.fecha || "";
-  $("#versionDetalle").value = rec.version || "";
-  $("#observacionesDetalle").value = rec.observaciones || "";
+// Referencias: conserva la lógica existente
+function msg(t,ok=false){const b=$('#msg');b.textContent=t;b.className='msg '+(ok?'okmsg':'badmsg')}
+function limpiarDatos(){['refDetalle','piezaDetalle','clienteDetalle','responsableDetalle','fechaDetalle','versionDetalle','observacionesDetalle'].forEach(id=>$('#'+id).value='');$('#tablaEquipos').innerHTML='<tr><td colspan="5">Sin datos</td></tr>';$('#ref-status').textContent='Sin referencia cargada';$('#ref-equipment-info').textContent='Sin tabla cargada.'}
+function mostrarRegistro(rec){$('#refDetalle').value=rec.referencia||'';$('#piezaDetalle').value=rec.pieza||'';$('#clienteDetalle').value=rec.cliente||'';$('#responsableDetalle').value=rec.responsable||'';$('#fechaDetalle').value=rec.fecha||'';$('#versionDetalle').value=rec.version||'';$('#observacionesDetalle').value=rec.observaciones||'';const eqs=Array.isArray(rec.equipos)?rec.equipos:[];$('#ref-status').textContent=`${rec.version||'Versión'} · ${rec.fecha||'sin fecha'}`;$('#ref-equipment-info').textContent=`${eqs.length} línea${eqs.length===1?'':'s'} de equipo`;$('#tablaEquipos').innerHTML=eqs.length?eqs.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.codigo_equipo||'')}</td><td>${esc(e.descripcion_equipo||'')}</td><td>${esc(e.cantidad||'')}</td><td>${esc(e.tipo_medida||'')}</td></tr>`).join(''):'<tr><td colspan="5">No hay equipos</td></tr>'}
+async function buscarRef(){const ref=$('#refInput').value.trim();if(!ref)return msg('Introduce una referencia.');limpiarDatos();const {data,error}=await sb.from('control_metrologico').select('*').eq('referencia',ref).order('fecha',{ascending:false});if(error)return msg('Error consultando Supabase.');if(!data?.length)return msg(`No existe ninguna tabla para "${ref}".`);registros=data;idx=0;const w=$('#versionWrapper'),s=$('#versionSelect');if(registros.length>1){w.style.display='block';s.innerHTML=registros.map((r,i)=>`<option value="${i}">${esc(r.version||('Versión '+(i+1)))}</option>`).join('')}else{w.style.display='none';s.innerHTML=''}mostrarRegistro(registros[0]);msg(`${registros.length} versión${registros.length===1?'':'es'} encontrada${registros.length===1?'':'s'}.`,true)}
+$('#btnBuscar').addEventListener('click',buscarRef);$('#refInput').addEventListener('keydown',e=>{if(e.key==='Enter')buscarRef()});$('#versionSelect').addEventListener('change',e=>{idx=parseInt(e.target.value)||0;if(registros[idx])mostrarRegistro(registros[idx])});$('#btnEditarVersion').addEventListener('click',()=>{if(!registros[idx])return alert('Primero busca una referencia.');localStorage.setItem('editarReferencia',JSON.stringify(registros[idx]));location.href='equipos-referencia-crear.html?modo=editar'});
 
-  const eqs = Array.isArray(rec.equipos) ? rec.equipos : [];
-  const tbody = $("#tablaEquipos");
-
-  if (eqs.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='5'>No hay equipos</td></tr>";
-    return;
-  }
-
-  tbody.innerHTML = eqs.map((e,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td>${e.codigo_equipo||""}</td>
-      <td>${e.descripcion_equipo||""}</td>
-      <td>${e.cantidad||""}</td>
-      <td>${e.tipo_medida||""}</td>
-    </tr>
-  `).join("");
-}
-
-/* ============================
-   BUSQUEDA PRINCIPAL
-============================ */
-async function buscar() {
-  const ref = $("#refInput").value.trim();
-  if (!ref) return msj("Introduce una referencia.");
-
-  limpiarDatos();
-
-  const { data, error } = await sb
-    .from("control_metrologico")
-    .select("*")
-    .eq("referencia", ref)
-    .order("fecha", { ascending:false });
-
-  if (error) return msj("Error consultando Supabase.");
-  if (!data || data.length === 0)
-    return msj(`No existe ninguna tabla para "${ref}".`);
-
-  registros = data;
-  idx = 0;
-
-  // Mostrar versiones si hay varias
-  const wrapper = $("#versionWrapper");
-  const sel = $("#versionSelect");
-
-  if (registros.length > 1) {
-    wrapper.style.display = "block";
-    sel.innerHTML = registros.map((r,i)=>
-      `<option value="${i}">${r.version || ("Versión "+(i+1))}</option>`
-    ).join("");
-  } else {
-    wrapper.style.display = "none";
-    sel.innerHTML = "";
-  }
-
-  mostrarRegistro(registros[idx]);
-  $("#msg").style.display = "none";
-}
-
-$("#btnBuscar").onclick = buscar;
-$("#refInput").onkeydown = e => {
-  if (e.key === "Enter") buscar();
-};
-
-/* ============================
-   CAMBIO DE VERSIÓN
-============================ */
-$("#versionSelect").onchange = e => {
-  const i = parseInt(e.target.value);
-  if (!registros[i]) return;
-  idx = i;
-  mostrarRegistro(registros[idx]);
-};
-
-/* ============================
-   EDITAR
-============================ */
-$("#btnEditarVersion").onclick = () => {
-  if (!registros[idx]) {
-    alert("Primero busca una referencia.");
-    return;
-  }
-
-  localStorage.setItem("editarReferencia", JSON.stringify(registros[idx]));
-  window.location.href = "equipos-referencia-crear.html?modo=editar";
-};
-
+cargarEquipos();
 </script>
-
 </body>
 </html>
-
