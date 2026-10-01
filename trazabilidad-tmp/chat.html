@@ -777,6 +777,53 @@
     .consult-filter-active{outline:2px solid rgba(34,197,94,.35);background:#052e16!important}
     @media(max-width:800px){.consult-kpis{grid-template-columns:repeat(2,1fr)}}
 
+
+
+    /* CHAT TMP V3 PREMIUM - integrado con el aspecto del sistema */
+    :root{
+      --bg:#eef6ff;--bg-alt:#f7fbff;--panel:#ffffff;--panel-alt:#f8fbff;
+      --border:#dbe7f2;--txt:#0d2340;--muted:#66809a;--accent:#2563eb;
+      --accent-soft:#eef5ff;--danger:#ef4444;--warning:#f59e0b;
+      --bubble-mine:#2563eb;--bubble-mine-txt:#ffffff;--bubble-other:#f1f6fb;--bubble-other-txt:#16324f;
+    }
+    body{background:linear-gradient(180deg,#edf6ff,#f8fbff);color:var(--txt)}
+    .chat-shell{max-width:1500px;padding:12px 16px;gap:10px}
+    .chat-header-main{background:linear-gradient(135deg,#0b3c72,#0b2f59);border-color:#164d83;box-shadow:0 10px 26px rgba(15,56,93,.18);padding:10px 14px}
+    .chat-logo{background:#fff;color:#2563eb;border:1px solid rgba(255,255,255,.35)}
+    .chat-header-text h1{color:#fff}.chat-header-text p{color:#cfe6ff}
+    .chat-user-pill,.toggle-sidebar-btn{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20);color:#fff}
+    .consult-kpis{grid-template-columns:repeat(4,1fr);gap:10px}
+    .consult-kpi{background:#fff;border-color:var(--border);box-shadow:0 6px 16px rgba(15,56,93,.06)}
+    .consult-kpi-label,.consult-kpi-sub{color:var(--muted)}.consult-kpi-value{color:#0d2b50}
+    .audit-note{background:#f7fbff;border-color:#cfe0ef;color:#476780}.audit-note strong{color:#166534}
+    .consult-toolbar .btn-mini,.btn-mini{background:#fff;color:#244967;border-color:#cbddeb}
+    .consult-filter-active{outline:2px solid rgba(37,99,235,.22);background:#eaf3ff!important;color:#1d4ed8!important}
+    .chat-layout{border:1px solid var(--border);background:#fff;box-shadow:0 12px 30px rgba(15,56,93,.09)}
+    .sidebar{background:#f8fbff;border-color:var(--border)}
+    .sidebar-title,.chat-main-title{color:#0d2b50}.sidebar-sub,.chat-main-sub{color:var(--muted)}
+    .sidebar-search input,.chat-input-row textarea{background:#fff;border-color:#cbddeb;color:#0d2340}
+    .conv-item{border-color:transparent;color:#21415f}.conv-item:hover{background:#eef6ff}.conv-item.active{background:#e6f0ff;border-color:#b7d3f4}
+    .chat-main{background:#fff}.chat-main-header{background:#fff;border-color:var(--border)}
+    .chat-messages{background:linear-gradient(180deg,#f8fbff,#f2f7fc)}
+    .msg-bubble.other{background:#fff;color:#16324f;border:1px solid #dbe7f2;box-shadow:0 4px 12px rgba(15,56,93,.05)}
+    .msg-bubble.mine{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 6px 14px rgba(37,99,235,.18)}
+    .chat-input-area{background:#fff;border-color:var(--border)}
+    #btn-send{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
+    .badge-pill{background:#eef5ff;border-color:#c6dcf7;color:#28547a}
+    .overlay{background:rgba(13,35,64,.32)}.overlay .panel{background:#fff;color:#0d2340;border-color:#dbe7f2}
+    .panel-header,.panel-footer{border-color:#dbe7f2}.dest-item:hover{background:#f3f8fd}
+    .toast{background:#fff;color:#0d2340;border:1px solid #cbddeb;box-shadow:0 18px 40px rgba(15,56,93,.18)}
+    .toast-text-sub{color:#66809a}.toast-close{color:#66809a}
+    .notification-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .notification-btn{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.11);color:#fff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:850;cursor:pointer}
+    .notification-btn.on{background:#dcfce7;color:#166534;border-color:#86efac}
+    .notification-btn.off{background:#fff7ed;color:#9a3412;border-color:#fdba74}
+    .unread-pill{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:900;box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+    .unread-pill.zero{display:none}
+    .sound-indicator{font-size:10px;color:#dbeafe;white-space:nowrap}
+    .msg-ack-btn{background:#ecfdf3;color:#166534;border-color:#86efac}.msg-ack-list{color:#166534}
+    @media(max-width:900px){.consult-kpis{grid-template-columns:repeat(2,1fr)}.notification-tools{justify-content:flex-end}.sound-indicator{display:none}}
+
   </style>
 </head>
 <body>
@@ -787,10 +834,13 @@
       <div class="chat-logo">💬</div>
       <div class="chat-header-text">
         <h1>Consultas internas TMP</h1>
-        <p>Comunicación interna trazable · consultas importantes con acuse de consulta</p>
+        <p>Mensajería interna TMP · avisos inmediatos · seguimiento de consultas importantes</p>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;">
+    <div class="notification-tools">
+      <span class="unread-pill zero" id="unread-pill">0</span>
+      <button class="notification-btn off" id="btn-notifications" type="button">🔔 Activar alertas</button>
+      <span class="sound-indicator" id="notification-state">Alertas del navegador pendientes</span>
       <button class="toggle-sidebar-btn" id="btn-toggle-sidebar">Conversaciones</button>
       <div class="chat-user-pill" id="user-pill">Usuario: –</div>
     </div>
@@ -976,6 +1026,111 @@
   document.getElementById("toast-close").addEventListener("click", () => {
     document.getElementById("toast").classList.remove("show");
   });
+
+
+  // ======== ALERTAS LOCALES / NAVEGADOR ========
+  const unreadIds = new Set();
+  const baseDocumentTitle = "Consultas internas TMP";
+
+  function actualizarIndicadorAlertas(){
+    const pill = document.getElementById("unread-pill");
+    const count = unreadIds.size;
+    if (pill){
+      pill.textContent = String(count);
+      pill.classList.toggle("zero", count === 0);
+    }
+    document.title = count ? `(${count}) ${baseDocumentTitle}` : baseDocumentTitle;
+
+    const btn = document.getElementById("btn-notifications");
+    const state = document.getElementById("notification-state");
+    if (!("Notification" in window)){
+      if (btn){ btn.textContent = "🔕 Sin soporte"; btn.disabled = true; btn.classList.remove("on"); btn.classList.add("off"); }
+      if (state) state.textContent = "Este navegador no admite alertas del sistema";
+      return;
+    }
+    const p = Notification.permission;
+    if (btn){
+      btn.classList.toggle("on", p === "granted");
+      btn.classList.toggle("off", p !== "granted");
+      btn.textContent = p === "granted" ? "🔔 Alertas activadas" : (p === "denied" ? "🔕 Alertas bloqueadas" : "🔔 Activar alertas");
+    }
+    if (state) state.textContent = p === "granted" ? "Aviso visual + sonido activo" : (p === "denied" ? "Permiso bloqueado por el navegador" : "Pulsa para permitir avisos del sistema");
+  }
+
+  async function solicitarAlertas(){
+    if (!("Notification" in window)) return;
+    try{
+      const permiso = await Notification.requestPermission();
+      actualizarIndicadorAlertas();
+      if (permiso === "granted") showToast("Alertas activadas", "Recibirás un aviso cuando otro usuario escriba.", "🔔");
+      else if (permiso === "denied") showToast("Alertas bloqueadas", "Puedes habilitarlas desde los permisos del navegador para este sitio.", "🔕");
+    }catch(err){
+      console.warn("No se pudieron solicitar notificaciones:", err);
+    }
+  }
+
+  function reproducirSonido(importante=false){
+    try{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = importante ? 880 : 660;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(importante ? 0.12 : 0.07, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (importante ? 0.32 : 0.18));
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + (importante ? 0.34 : 0.2));
+      osc.onended = () => ctx.close().catch(()=>{});
+    }catch{}
+  }
+
+  function notificarMensajeEntrante(msg){
+    if (!msg || msg.autor === currentUsername) return;
+    const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor || "Usuario TMP";
+    const importante = !!msg.importante;
+    const convKey = getConversationKeyFromMsg(msg);
+    const mismaConversacion = selectedConvKey && convKey === selectedConvKey && !document.hidden;
+
+    // Si lo estoy viendo en primer plano, no lo acumulamos como no leído.
+    if (!mismaConversacion && msg.id) unreadIds.add(msg.id);
+    actualizarIndicadorAlertas();
+
+    showToast(
+      importante ? "Consulta IMPORTANTE" : "Nuevo mensaje TMP",
+      `${autorNombre}: ${(msg.mensaje || "").slice(0,110)}`,
+      importante ? "⚠️" : "💬"
+    );
+    reproducirSonido(importante);
+
+    if ("Notification" in window && Notification.permission === "granted"){
+      try{
+        const n = new Notification(importante ? "Consulta IMPORTANTE · TMP" : "Nuevo mensaje · TMP", {
+          body:`${autorNombre}: ${(msg.mensaje || "").slice(0,160)}`,
+          tag:`tmp-chat-${msg.id || Date.now()}`,
+          renotify:true,
+          requireInteraction:importante
+        });
+        n.onclick = () => {
+          window.focus();
+          if (convKey) seleccionarConversacion(convKey);
+          n.close();
+        };
+      }catch(err){ console.warn("Notificación del navegador no disponible:", err); }
+    }
+  }
+
+  function limpiarNoLeidosConversacion(convKey){
+    if (!convKey) return;
+    const ids = (conversations?.[convKey]?.messages || []).map(m => m.id).filter(Boolean);
+    ids.forEach(id => unreadIds.delete(id));
+    actualizarIndicadorAlertas();
+  }
+
+  document.getElementById("btn-notifications")?.addEventListener("click", solicitarAlertas);
+  actualizarIndicadorAlertas();
 
   // ======== ESTADO GLOBAL ========
 
@@ -1315,6 +1470,7 @@
     }
 
     selectedConvKey = key;
+    limpiarNoLeidosConversacion(key);
     const conv = conversations[key];
     selectedConvParticipants = (key === "GENERAL") ? [] : key.split("|");
 
@@ -1643,14 +1799,10 @@
             seleccionarConversacion(convKey);
           }
 
-          // pequeña notificación si el mensaje es importante y no es mío
-          if (msg.importante && msg.autor !== currentUsername){
-            const autorNombre = mapaOperarios[msg.autor]?.nombre || msg.autor;
-            showToast(
-              "Nuevo mensaje IMPORTANTE",
-              `${autorNombre}: ${msg.mensaje.slice(0,80)}`,
-              "⭐"
-            );
+          // Aviso para CUALQUIER mensaje recibido de otro usuario.
+          // Los importantes se muestran con aviso reforzado.
+          if (msg.autor !== currentUsername){
+            notificarMensajeEntrante(msg);
           }
         }
       )
@@ -1746,6 +1898,10 @@
   document.getElementById("consult-filter-pending")?.addEventListener("click",()=>setConsultFilter("pending"));
   document.getElementById("consult-filter-important")?.addEventListener("click",()=>setConsultFilter("important"));
   document.getElementById("consult-export")?.addEventListener("click",exportarSeguimientoCSV);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && selectedConvKey) limpiarNoLeidosConversacion(selectedConvKey);
+  });
 
   // ======== INIT ========
 
