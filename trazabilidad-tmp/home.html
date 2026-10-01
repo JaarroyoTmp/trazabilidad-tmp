@@ -530,7 +530,7 @@
 
 
     /* HOME V7 - Equipos por maquina: mosaico completo, sin desplazamiento lateral */
-    .machine-more-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;font-size:9px;color:#617b94}
+    .machine-more-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 5px;font-size:9px;color:#617b94;min-height:28px;flex:0 0 auto}
     .machine-more-row .btn{padding:4px 8px;font-size:9px}
     #machine-all-dialog{max-width:1180px;width:min(96vw,1180px)}
     #machine-all-dialog .dialog-table-wrap{max-height:66vh}
@@ -705,6 +705,10 @@
           <span class="machine-count" id="machine-count">Selecciona una máquina</span>
           <span class="badge badge-soft" id="machine-status">Ubicación actual de instrumentos</span>
         </div>
+        <div id="machine-more-row" class="machine-more-row" style="display:none;">
+          <span id="machine-more-info"></span>
+          <button type="button" class="btn btn-primary" id="machine-view-all">Ver todos</button>
+        </div>
         <div id="machine-empty" class="machine-empty">Selecciona una máquina para ver los equipos que tiene actualmente.</div>
         <table class="mini-table" id="table-machine-equipment" style="display:none;">
           <thead>
@@ -712,10 +716,6 @@
           </thead>
           <tbody id="tbody-machine-equipment"></tbody>
         </table>
-        <div id="machine-more-row" class="machine-more-row" style="display:none;">
-          <span id="machine-more-info"></span>
-          <button type="button" class="btn" id="machine-view-all">Ver todos</button>
-        </div>
               </section>
 
       <dialog id="machine-all-dialog">
