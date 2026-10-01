@@ -827,6 +827,24 @@
   </style>
 </head>
 <body>
+<script>
+  // Acceso simple solicitado para Consultas. Es una barrera de interfaz, no sustituye autenticación de servidor.
+  (function(){
+    const AUTH_KEY = "tmp_consultas_auth";
+    const LAST_SEEN_KEY = "tmp_chat_last_seen";
+    if (sessionStorage.getItem(AUTH_KEY) !== "1") {
+      const clave = window.prompt("Contraseña de Consultas:");
+      if (clave !== "cecotec") {
+        if (clave !== null) window.alert("Contraseña incorrecta.");
+        window.location.replace("home.html");
+        return;
+      }
+      sessionStorage.setItem(AUTH_KEY,"1");
+    }
+    localStorage.setItem(LAST_SEEN_KEY,new Date().toISOString());
+  })();
+</script>
+
 
 <div class="chat-shell">
   <header class="chat-header-main">
@@ -1031,6 +1049,12 @@
   // ======== ALERTAS LOCALES / NAVEGADOR ========
   const unreadIds = new Set();
   const baseDocumentTitle = "Consultas internas TMP";
+  const CHAT_LAST_SEEN_KEY = "tmp_chat_last_seen";
+  function marcarChatVistoAhora(){
+    localStorage.setItem(CHAT_LAST_SEEN_KEY,new Date().toISOString());
+  }
+  window.addEventListener("focus",marcarChatVistoAhora);
+  document.addEventListener("visibilitychange",()=>{ if (!document.hidden) marcarChatVistoAhora(); });
 
   function actualizarIndicadorAlertas(){
     const pill = document.getElementById("unread-pill");
@@ -1803,6 +1827,7 @@
           // Los importantes se muestran con aviso reforzado.
           if (msg.autor !== currentUsername){
             notificarMensajeEntrante(msg);
+            if (!document.hidden) marcarChatVistoAhora();
           }
         }
       )

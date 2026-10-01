@@ -596,6 +596,26 @@
     @media(max-width:1450px){#machine-overview-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}}
     @media(max-width:1200px){#machine-overview-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
     @media(max-width:760px){#machine-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+  
+    /* Consultas: acceso protegido + avisos en Home */
+    .consultas-card{position:relative}
+    .consultas-alert-badge{
+      position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 6px;
+      border-radius:999px;background:#ef4444;color:#fff;font-size:10px;font-weight:950;
+      display:none;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff,0 6px 16px rgba(239,68,68,.28);z-index:3
+    }
+    .consultas-alert-badge.show{display:flex}
+    .consultas-card.has-new{border-color:#fca5a5!important;background:linear-gradient(135deg,#fff1f2,#fff)!important}
+    .chat-home-toast{
+      position:fixed;right:18px;bottom:18px;z-index:9999;width:min(390px,calc(100vw - 36px));
+      display:none;gap:10px;align-items:flex-start;background:#0d2b50;color:#fff;border:1px solid rgba(255,255,255,.16);
+      border-radius:14px;padding:12px 14px;box-shadow:0 18px 48px rgba(13,43,80,.28)
+    }
+    .chat-home-toast.show{display:flex}
+    .chat-home-toast strong{display:block;font-size:12px;margin-bottom:2px}
+    .chat-home-toast span{font-size:11px;color:#dbeafe;line-height:1.35}
+    .chat-home-toast button{margin-left:auto;border:0;background:transparent;color:#fff;font-size:16px;cursor:pointer}
+
   </style>
 </head>
 
@@ -649,7 +669,7 @@
         <a class="program-card" href="alcance_kpi.html"><span class="program-ico">▥</span><span>Alcance & KPIs</span></a>
         <a class="program-card" href="criterios.html"><span class="program-ico">◇</span><span>Criterios</span></a>
         <a class="program-card" href="equipos-referencia-crear.html"><span class="program-ico">＋</span><span>Referencias / Crear</span></a>
-        <a class="program-card" href="chat.html"><span class="program-ico">☏</span><span>Consultas</span></a>
+        <a class="program-card consultas-card" id="consultas-link" href="chat.html"><span class="program-ico">☏</span><span>Consultas</span><span class="consultas-alert-badge" id="consultas-alert-badge">0</span></a>
       </div>
     </section>
 
@@ -780,10 +800,104 @@
 </div>
 
 
+<div class="chat-home-toast" id="chat-home-toast" role="status" aria-live="polite">
+  <div>💬</div>
+  <div><strong id="chat-home-toast-title">Nueva consulta</strong><span id="chat-home-toast-text"></span></div>
+  <button type="button" id="chat-home-toast-close" aria-label="Cerrar">×</button>
+</div>
+
 <script type="module" src="config.mjs"></script>
 <!-- SCRIPT PRINCIPAL DASHBOARD (KPIs + MOVIMIENTOS) -->
 <script type="module">
   const supabase = window.supabase;
+
+
+  // ===== CONSULTAS: contraseña simple + avisos de nuevos mensajes =====
+  const consultasLink = document.getElementById("consultas-link");
+  const consultasBadge = document.getElementById("consultas-alert-badge");
+  const chatHomeToast = document.getElementById("chat-home-toast");
+  const chatHomeToastTitle = document.getElementById("chat-home-toast-title");
+  const chatHomeToastText = document.getElementById("chat-home-toast-text");
+  const chatHomeToastClose = document.getElementById("chat-home-toast-close");
+  const CHAT_LAST_SEEN_KEY = "tmp_chat_last_seen";
+  const CHAT_AUTH_KEY = "tmp_consultas_auth";
+  let consultasNoLeidas = 0;
+
+  function getCurrentChatUsername(){
+    try {
+      const op = JSON.parse(localStorage.getItem("operario") || "null");
+      return op?.username || "";
+    } catch { return ""; }
+  }
+
+  function pintarBadgeConsultas(){
+    if (!consultasBadge || !consultasLink) return;
+    consultasBadge.textContent = consultasNoLeidas > 99 ? "99+" : String(consultasNoLeidas);
+    consultasBadge.classList.toggle("show", consultasNoLeidas > 0);
+    consultasLink.classList.toggle("has-new", consultasNoLeidas > 0);
+  }
+
+  function mostrarAvisoConsulta(msg){
+    if (!chatHomeToast) return;
+    const autor = msg?.autor || "Usuario TMP";
+    const texto = String(msg?.mensaje || "Nuevo mensaje en Consultas").trim();
+    chatHomeToastTitle.textContent = msg?.importante ? `⭐ Consulta importante de ${autor}` : `Nueva consulta de ${autor}`;
+    chatHomeToastText.textContent = texto.length > 130 ? texto.slice(0,127) + "…" : texto;
+    chatHomeToast.classList.add("show");
+    clearTimeout(window.__tmpChatToastTimer);
+    window.__tmpChatToastTimer = setTimeout(()=>chatHomeToast.classList.remove("show"),7000);
+  }
+
+  chatHomeToastClose?.addEventListener("click",()=>chatHomeToast?.classList.remove("show"));
+
+  consultasLink?.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    const clave = window.prompt("Contraseña de Consultas:");
+    if (clave === null) return;
+    if (clave !== "cecotec") {
+      window.alert("Contraseña incorrecta.");
+      return;
+    }
+    sessionStorage.setItem(CHAT_AUTH_KEY,"1");
+    localStorage.setItem(CHAT_LAST_SEEN_KEY,new Date().toISOString());
+    consultasNoLeidas = 0;
+    pintarBadgeConsultas();
+    window.location.href = consultasLink.getAttribute("href") || "chat.html";
+  });
+
+  async function iniciarAvisosConsultasHome(){
+    if (!supabase) return;
+    const username = getCurrentChatUsername();
+    let lastSeen = localStorage.getItem(CHAT_LAST_SEEN_KEY);
+    if (!lastSeen){
+      lastSeen = new Date().toISOString();
+      localStorage.setItem(CHAT_LAST_SEEN_KEY,lastSeen);
+    }
+
+    try {
+      let q = supabase.from("chat_mensajes").select("id,autor,mensaje,importante,created_at").gt("created_at",lastSeen).order("created_at",{ascending:true}).limit(100);
+      if (username) q = q.neq("autor",username);
+      const {data,error} = await q;
+      if (!error){
+        consultasNoLeidas = (data || []).length;
+        pintarBadgeConsultas();
+      }
+    } catch(err){
+      console.warn("No se pudo consultar avisos de Consultas:",err);
+    }
+
+    supabase.channel("home_chat_alerts")
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"chat_mensajes"},payload=>{
+        const msg = payload.new || {};
+        if (username && msg.autor === username) return;
+        consultasNoLeidas += 1;
+        pintarBadgeConsultas();
+        mostrarAvisoConsulta(msg);
+      })
+      .subscribe();
+  }
+
+  iniciarAvisosConsultasHome();
 
   // Helpers DOM
   const kpi_total          = document.getElementById("kpi-total");
