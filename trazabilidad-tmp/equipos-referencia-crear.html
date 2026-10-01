@@ -2,467 +2,291 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>TMP · Crear/Editar Tabla de Equipos</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
+  <title>TMP · Referencias / Crear</title>
   <link rel="icon" href="img/tmp-quality.png" />
-
   <style>
     :root{
-      --bg0:#050b16;
-      --bg1:#071324;
-      --card:#0f1f33;
-      --border:#203552;
-      --txt:#f2f6fb;
-      --muted:#9fb3ca;
-      --accent:#3ea8ff;
-      --bad:#ff6b6b;
+      --bg:#07111f;--bg2:#0b1830;--panel:#0f2036;--panel2:#132944;
+      --line:#294564;--txt:#f5f8fc;--muted:#9eb3c8;--blue:#38a8ff;
+      --blue2:#6ec2ff;--green:#42d17c;--orange:#ffb84d;--red:#ff6b6b;
+      --shadow:0 18px 48px rgba(0,0,0,.34);--r:18px;
     }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--txt);
+      background:radial-gradient(circle at 8% -10%,#173d68 0,transparent 34%),radial-gradient(circle at 92% 0,#12365e 0,transparent 32%),linear-gradient(180deg,var(--bg2),var(--bg));min-height:100vh}
+    button,input,textarea,select{font:inherit}
+    .app{max-width:1450px;margin:auto;padding:16px 18px 42px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:11px}.brand img{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:11px;padding:4px}
+    .brand h1{margin:0;font-size:20px}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{border:1px solid transparent;border-radius:11px;padding:9px 13px;font-weight:800;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;transition:.16s;background:var(--blue);color:#031321}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+    .btn.secondary{background:transparent;color:#d9e8f7;border-color:var(--line)}
+    .btn.success{background:var(--green);color:#062315}.btn.danger{background:rgba(255,107,107,.12);color:#ffdada;border-color:rgba(255,107,107,.42)}
+    .btn.small{padding:6px 9px;font-size:11px;border-radius:9px}
+    .mode-chip{padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid #34658e;background:#102c48;color:#bfe2ff}
+    .mode-chip.edit{border-color:#d89233;background:#3a2b12;color:#ffdc9b}
 
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body {
-      font-family:"Inter",sans-serif;
-      background:
-        radial-gradient(circle at 0% 0%,#182f55 0,transparent 55%),
-        radial-gradient(circle at 100% 0%,#1a3b64 0,transparent 55%),
-        linear-gradient(180deg,var(--bg1),var(--bg0));
-      color:var(--txt);
-      -webkit-font-smoothing:antialiased;
-    }
+    .hero{display:grid;grid-template-columns:1.4fr repeat(4,minmax(120px,.45fr));gap:10px;margin-bottom:12px}
+    .hero-main,.metric,.card{background:linear-gradient(145deg,rgba(20,44,72,.96),rgba(10,26,45,.96));border:1px solid rgba(82,151,211,.35);box-shadow:var(--shadow);border-radius:var(--r)}
+    .hero-main{padding:16px}.hero-main h2{margin:0 0 5px;font-size:20px}.hero-main p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+    .metric{padding:13px 14px}.metric-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:900}.metric-value{font-size:25px;font-weight:950;margin-top:3px}.metric-sub{font-size:10px;color:var(--muted);margin-top:2px}
 
-    .app{max-width:1100px;margin:16px auto 32px;padding:0 14px 40px;}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;align-items:start}
+    .stack{display:grid;gap:12px}.card{padding:15px}.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.card-title{font-size:15px;font-weight:900}.card-sub{font-size:11px;color:var(--muted);margin-top:3px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.field.wide{grid-column:span 2}.field.full{grid-column:1/-1}
+    label{display:block;font-size:10px;color:var(--muted);font-weight:850;margin:0 0 4px}
+    input,textarea,select{width:100%;background:#06111f;color:var(--txt);border:1px solid #29435f;border-radius:10px;padding:9px 10px;outline:none;font-size:12px}
+    input:focus,textarea:focus,select:focus{border-color:#4daef7;box-shadow:0 0 0 3px rgba(56,168,255,.10)} textarea{min-height:78px;resize:vertical}
+    .req::after{content:" *";color:#ff9191}.hint{font-size:10px;color:#7893aa;margin-top:4px}
 
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-    .brand{display:flex;align-items:center;gap:10px;}
-    .brand-logo{height:34px;width:auto;}
-    .brand-text-title{font-size:17px;font-weight:700;}
-    .brand-text-sub{font-size:12px;color:var(--muted);}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar .grow{flex:1;min-width:220px}.counter{font-size:10px;color:var(--muted)}
+    .table-wrap{overflow:auto;border:1px solid #24415e;border-radius:13px;background:#081522}
+    table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:7px 8px;border-bottom:1px solid #19344f;text-align:left;vertical-align:middle}th{position:sticky;top:0;background:#10233a;color:#a9bfd4;text-transform:uppercase;letter-spacing:.04em;font-size:9px;z-index:2}tr:last-child td{border-bottom:0}
+    td input,td select{padding:7px 8px;font-size:11px}.idx{width:34px;color:#7690a8;font-weight:900}.row-actions{display:flex;gap:5px}.row-bad{background:rgba(255,107,107,.055)}
+    .state{display:inline-flex;align-items:center;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:900;white-space:nowrap;border:1px solid}.state.ok{color:#8df0af;border-color:#31754a;background:#0b2b1b}.state.manual{color:#ffd08a;border-color:#8d632c;background:#33240d}.state.dup{color:#ffc0c0;border-color:#884848;background:#371717}
+    .empty{padding:24px;text-align:center;color:#8199b0;font-size:12px}
 
-    .btn{
-      border:none;
-      border-radius:999px;
-      padding:10px 16px;
-      font-size:13px;
-      font-weight:600;
-      cursor:pointer;
-      background:var(--accent);
-      color:#031321;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      transition:.12s;
-    }
+    .side-list{display:grid;gap:8px}.side-box{padding:11px;border:1px solid #25425f;border-radius:12px;background:#0a1828}.side-box strong{font-size:11px}.side-box p{font-size:10px;color:var(--muted);line-height:1.45;margin:5px 0 0}.check-list{display:grid;gap:7px}.check{display:flex;justify-content:space-between;gap:10px;font-size:10px;padding:8px 9px;border-radius:10px;background:#091727;border:1px solid #213a54}.check span:first-child{color:#b7c9d9}.check strong.ok{color:#7be8a0}.check strong.warn{color:#ffd180}.check strong.bad{color:#ff9f9f}
+    .save-panel{position:sticky;top:10px}.save-actions{display:grid;gap:8px}.save-actions .btn{width:100%}.unsaved{font-size:10px;color:#ffcd82;margin-top:8px;display:none}
+    .alert{display:none;padding:10px 12px;border-radius:10px;margin-top:10px;font-size:11px;font-weight:800}.alert.ok{display:block;background:#0c321f;border:1px solid #3b8e59;color:#b9f7cf}.alert.error{display:block;background:#351717;border:1px solid #8b4545;color:#ffd3d3}.alert.info{display:block;background:#102b46;border:1px solid #376c96;color:#cbe9ff}
 
-    .btn:hover{transform:translateY(-1px);}
-    .btn.secondary{
-      background:transparent;
-      color:var(--muted);
-      border:1px solid var(--border);
-    }
+    dialog{border:1px solid #315777;border-radius:18px;background:#0d1e32;color:var(--txt);width:min(1000px,95vw);box-shadow:0 30px 80px rgba(0,0,0,.58);padding:0}dialog::backdrop{background:rgba(2,9,18,.72)}
+    .dlg-head{display:flex;justify-content:space-between;gap:10px;padding:14px;border-bottom:1px solid #27445f}.dlg-title{font-weight:900}.dlg-body{padding:14px}.picker-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;max-height:58vh;overflow:auto;margin-top:10px}.pick-card{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:9px;border:1px solid #23425f;border-radius:11px;background:#091726}.pick-card input{width:auto}.pick-code{font-size:11px;font-weight:900}.pick-desc{font-size:10px;color:var(--muted);margin-top:2px}.pick-loc{font-size:9px;color:#8eb8d9}.dlg-foot{padding:12px 14px;border-top:1px solid #27445f;display:flex;justify-content:flex-end;gap:8px}
 
-    .card{
-      border-radius:16px;
-      background:linear-gradient(135deg,#0f1f33,#0a1625);
-      border:1px solid rgba(62,168,255,.45);
-      box-shadow:0 18px 40px rgba(0,0,0,.5);
-      padding:16px;
-      margin-bottom:20px;
-    }
-
-    .card-header{display:flex;justify-content:space-between;margin-bottom:8px;}
-    .card-title{font-size:15px;font-weight:600;}
-    .card-sub{font-size:12px;color:var(--muted);}
-
-    label{
-      font-size:11px;
-      color:var(--muted);
-      margin-bottom:4px;
-      display:block;
-    }
-
-    input,textarea{
-      background:#050d1a;
-      border:1px solid #253954;
-      border-radius:10px;
-      padding:9px 11px;
-      color:var(--txt);
-      width:100%;
-      font-size:13px;
-      outline:none;
-    }
-    textarea{min-height:70px;resize:vertical;}
-
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-    @media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr);}}
-    @media(max-width:600px){.grid{grid-template-columns:1fr;}}
-
-    .alert{
-      padding:8px 10px;
-      border-radius:10px;
-      margin-top:10px;
-      display:none;
-    }
-    .alert.ok{
-      display:block;
-      background:rgba(22,101,52,.5);
-      border:1px solid #4ade80;
-      color:#dcfce7;
-    }
-    .alert.error{
-      display:block;
-      background:rgba(127,29,29,.4);
-      border:1px solid #ff6b6b;
-      color:#fecaca;
-    }
-
-    .table-wrap{
-      border-radius:12px;
-      overflow:auto;
-      border:1px solid var(--border);
-      max-height:300px;
-    }
-
-    table{width:100%;border-collapse:collapse;font-size:12px;}
-    th,td{
-      padding:6px;
-      border-bottom:1px solid #1f3046;
-      white-space:nowrap;
-    }
-    th{
-      background:#0c1929;
-      text-transform:uppercase;
-      font-size:11px;
-      color:var(--muted);
-      position:sticky;top:0;
-    }
-
-    .btn-row{
-      background:var(--bad);
-      padding:3px 8px;
-      border:none;
-      border-radius:6px;
-      color:white;
-      cursor:pointer;
-    }
+    @media(max-width:1100px){.layout{grid-template-columns:1fr}.save-panel{position:static}.hero{grid-template-columns:repeat(2,1fr)}.hero-main{grid-column:1/-1}}
+    @media(max-width:760px){.app{padding:10px}.grid{grid-template-columns:1fr}.field.wide,.field.full{grid-column:auto}.hero{grid-template-columns:1fr 1fr}.picker-grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}.header-actions{width:100%}}
   </style>
 </head>
-
 <body>
 <div class="app">
-
-<header>
-  <div class="brand">
-    <img src="img/tmp-quality.png" class="brand-logo">
-    <div>
-      <div class="brand-text-title">TMP · Crear / Editar Tabla de Equipos</div>
-      <div class="brand-text-sub">Gestión de equipos por referencia</div>
+  <header>
+    <div class="brand">
+      <img src="img/tmp-quality.png" alt="TMP">
+      <div><h1>TMP · Referencias / Crear</h1><p>Tabla de equipos necesaria por referencia · control de versiones y trazabilidad del inventario</p></div>
     </div>
+    <div class="header-actions">
+      <span class="mode-chip" id="modeChip">NUEVA REFERENCIA</span>
+      <a class="btn secondary" href="equipos-referencia-consulta.html">Consultar referencias</a>
+      <a class="btn secondary" href="home.html">← Inicio</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-main">
+      <h2 id="heroTitle">Nueva tabla de equipos</h2>
+      <p id="heroSub">Define qué equipos necesita una referencia. Puedes seleccionar instrumentos activos del inventario o mantener entradas manuales cuando sean necesarias.</p>
+    </div>
+    <div class="metric"><div class="metric-label">Líneas</div><div class="metric-value" id="mLineas">0</div><div class="metric-sub">tipos de equipo</div></div>
+    <div class="metric"><div class="metric-label">Unidades</div><div class="metric-value" id="mUnidades">0</div><div class="metric-sub">cantidad total</div></div>
+    <div class="metric"><div class="metric-label">Vinculados</div><div class="metric-value" id="mVinculados">0</div><div class="metric-sub">inventario activo</div></div>
+    <div class="metric"><div class="metric-label">Revisar</div><div class="metric-value" id="mRevisar">0</div><div class="metric-sub">manuales / duplicados</div></div>
+  </section>
+
+  <div class="layout">
+    <div class="stack">
+      <section class="card">
+        <div class="card-head"><div><div class="card-title">1 · Identificación de la referencia</div><div class="card-sub">Cabecera de la tabla y responsable de la definición.</div></div><span class="mode-chip" id="versionBadge">VERSIÓN NUEVA</span></div>
+        <div class="grid">
+          <div class="field"><label class="req">Referencia</label><input id="referencia" autocomplete="off" placeholder="Ej. CE38127"></div>
+          <div class="field"><label>Pieza / descripción</label><input id="pieza" autocomplete="off" placeholder="Descripción de pieza o conjunto"></div>
+          <div class="field"><label>Cliente</label><input id="cliente" list="clientesList" autocomplete="off" placeholder="Cliente / propietario"><datalist id="clientesList"></datalist></div>
+          <div class="field"><label>Responsable</label><input id="responsable" list="responsablesList" autocomplete="off" placeholder="Responsable TMP"><datalist id="responsablesList"></datalist></div>
+          <div class="field"><label>Fecha</label><input type="date" id="fecha"></div>
+          <div class="field"><label>Versión</label><input id="version" placeholder="V1"><div class="hint">Al crear una nueva versión se calcula automáticamente la siguiente si es posible.</div></div>
+          <div class="field full"><label>Observaciones</label><textarea id="observaciones" placeholder="Notas técnicas, condición de uso, aclaraciones de proceso..."></textarea></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div><div class="card-title">2 · Equipos necesarios</div><div class="card-sub">Selecciona equipos activos o añade una necesidad manual. Los datos guardados conservan el formato actual de control_metrologico.</div></div>
+          <div class="toolbar"><button class="btn secondary" id="btnPicker">☷ Seleccionar del inventario</button><button class="btn" id="btnAddEquipo">＋ Línea manual</button></div>
+        </div>
+        <div class="toolbar" style="margin-bottom:9px">
+          <input class="grow" id="rowSearch" placeholder="Filtrar líneas por código, descripción o tipo de medida...">
+          <span class="counter" id="rowCounter">0 líneas</span>
+        </div>
+        <div class="table-wrap">
+          <table id="tablaEquipos">
+            <thead><tr><th>#</th><th>Estado</th><th>Código equipo</th><th>Descripción</th><th>Cant.</th><th>Tipo medida / uso</th><th>Acciones</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div id="emptyRows" class="empty" style="display:none">No hay líneas visibles.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><div><div class="card-title">3 · Control antes de guardar</div><div class="card-sub">La pantalla no impide entradas manuales, pero deja visibles las líneas que no están vinculadas al inventario activo.</div></div></div>
+        <div class="check-list" id="validationList"></div>
+        <div id="alertBox" class="alert"></div>
+      </section>
+    </div>
+
+    <aside class="stack">
+      <section class="card save-panel">
+        <div class="card-head"><div><div class="card-title">Guardar referencia</div><div class="card-sub" id="saveSub">Nueva definición</div></div></div>
+        <div class="save-actions">
+          <button class="btn success" id="btnGuardarNueva">＋ Guardar como nueva versión</button>
+          <button class="btn" id="btnGuardar">💾 Guardar cambios</button>
+          <a class="btn secondary" href="equipos-referencia-consulta.html">Ver histórico / versiones</a>
+        </div>
+        <div id="unsaved" class="unsaved">● Hay cambios sin guardar</div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><div><div class="card-title">Criterio de uso</div><div class="card-sub">Qué representa esta tabla</div></div></div>
+        <div class="side-list">
+          <div class="side-box"><strong>Referencia ≠ instrumento</strong><p>La tabla define los equipos necesarios para controlar una referencia. No modifica el inventario ni el estado metrológico de los instrumentos.</p></div>
+          <div class="side-box"><strong>Inventario activo</strong><p>Cuando el código coincide con un instrumento activo, la línea queda marcada como vinculada y se autocompleta su descripción.</p></div>
+          <div class="side-box"><strong>Versionado</strong><p>“Guardar cambios” modifica la versión actual. “Nueva versión” crea un registro adicional y conserva el histórico anterior.</p></div>
+        </div>
+      </section>
+    </aside>
   </div>
-  <button class="btn secondary" onclick="location.href='home.html'">← Volver</button>
-</header>
-
-<main>
-
-  <!-- DATOS GENERALES -->
-  <section class="card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">Datos de la referencia</div>
-        <div class="card-sub">Crear o editar una tabla de equipos</div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div>
-        <label>Referencia</label>
-        <input id="referencia">
-      </div>
-      <div>
-        <label>Pieza</label>
-        <input id="pieza">
-      </div>
-      <div>
-        <label>Cliente</label>
-        <input id="cliente">
-      </div>
-      <div>
-        <label>Responsable</label>
-        <input id="responsable">
-      </div>
-      <div>
-        <label>Fecha</label>
-        <input type="date" id="fecha">
-      </div>
-      <div>
-        <label>Versión</label>
-        <input id="version">
-      </div>
-    </div>
-
-    <label style="margin-top:12px;">Observaciones</label>
-    <textarea id="observaciones"></textarea>
-
-    <div id="alertBox" class="alert"></div>
-  </section>
-
-  <!-- TABLA DE EQUIPOS -->
-  <section class="card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">Equipos necesarios</div>
-        <div class="card-sub">Añadir equipos para esta referencia</div>
-      </div>
-      <button class="btn" id="btnAddEquipo">+ Añadir equipo</button>
-    </div>
-
-    <div class="table-wrap">
-      <table id="tablaEquipos">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Código equipo</th>
-            <th>Descripción</th>
-            <th>Cantidad</th>
-            <th>Tipo medida</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-  <!-- BOTONES DE GUARDADO -->
-  <section class="card">
-    <div class="card-header">
-      <div class="card-title">Acciones de guardado</div>
-    </div>
-
-    <div style="display:flex; flex-wrap:wrap; gap:10px;">
-      <button class="btn" id="btnGuardar">💾 Guardar cambios</button>
-      <button class="btn secondary" id="btnGuardarNueva">📘 Guardar como nueva versión</button>
-    </div>
-
-    <p class="helper-text" style="margin-top:10px;">
-      • <b>Guardar cambios:</b> sobrescribe esta versión.<br>
-      • <b>Guardar como nueva versión:</b> duplica la tabla creando una versión nueva (V2, V3…).
-    </p>
-
-  </section>
-
-</main>
 </div>
 
-<!-- SUPABASE -->
-<script type="module" src="config.mjs"></script>
+<dialog id="pickerDialog">
+  <div class="dlg-head"><div><div class="dlg-title">Seleccionar equipos activos</div><div class="card-sub">Añade uno o varios instrumentos del inventario a la referencia.</div></div><button class="btn secondary small" id="pickerClose">Cerrar</button></div>
+  <div class="dlg-body">
+    <input id="pickerSearch" placeholder="Buscar por código, descripción o ubicación...">
+    <div class="picker-grid" id="pickerGrid"></div>
+  </div>
+  <div class="dlg-foot"><span class="counter" id="pickerCount" style="margin-right:auto">0 seleccionados</span><button class="btn secondary" id="pickerCancel">Cancelar</button><button class="btn" id="pickerAdd">Añadir seleccionados</button></div>
+</dialog>
 
+<script type="module" src="config.mjs"></script>
 <script type="module">
 const sb = window.supabase;
 const $ = s => document.querySelector(s);
-
+const $$ = s => [...document.querySelectorAll(s)];
 const tablaBody = $("#tablaEquipos tbody");
 const alertBox = $("#alertBox");
-
-/* ===========================================================
-   FUNCIONES UTILIDAD
-   =========================================================== */
-function msg(text, type="error") {
-  alertBox.textContent = text;
-  alertBox.className = "alert " + type;
-  alertBox.style.display = "block";
-}
-
-function clearMsg() {
-  alertBox.textContent = "";
-  alertBox.className = "alert";
-  alertBox.style.display = "none";
-}
-
-/* ===========================================================
-   TABLA DINÁMICA DE EQUIPOS
-   =========================================================== */
-function addRow(data = {}) {
-  const tr = document.createElement("tr");
-
-  tr.innerHTML = `
-    <td class="idx"></td>
-    <td><input value="${data.codigo_equipo || ""}"></td>
-    <td><input value="${data.descripcion_equipo || ""}"></td>
-    <td><input type="number" min="1" value="${data.cantidad || 1}"></td>
-    <td><input value="${data.tipo_medida || ""}"></td>
-    <td><button class="btn-row">X</button></td>
-  `;
-
-  tr.querySelector(".btn-row").onclick = () => {
-    tr.remove();
-    reorder();
-  };
-
-  tablaBody.appendChild(tr);
-  reorder();
-}
-
-function reorder() {
-  [...tablaBody.querySelectorAll("tr")].forEach((tr, i) => {
-    tr.querySelector(".idx").textContent = i + 1;
-  });
-}
-
-// Fila inicial
-addRow();
-$("#btnAddEquipo").onclick = () => addRow();
-
-/* ===========================================================
-   MODO EDICIÓN: CARGAR DATOS DESDE CONSULTA
-   =========================================================== */
-
+const pickerDialog = $("#pickerDialog");
 let modoEdicion = false;
 let idRegistroEditar = null;
+let dirty = false;
+let inventario = [];
+let inventarioMap = new Map();
+let pickerSelected = new Set();
 
-function cargarModoEdicion() {
-  const params = new URLSearchParams(window.location.search);
-  const modo = params.get("modo");
+function esc(v){return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"','&quot;')}
+function norm(v){return String(v ?? "").trim().toLowerCase()}
+function msg(text,type="error"){alertBox.textContent=text;alertBox.className="alert "+type;alertBox.style.display="block"}
+function clearMsg(){alertBox.textContent="";alertBox.className="alert";alertBox.style.display="none"}
+function setDirty(v=true){dirty=v;$("#unsaved").style.display=v?"block":"none"}
+function esBaja(inst){const e=String(inst?.estado||"").trim().toUpperCase();const u=String(inst?.ubicacion_actual||"").trim().toUpperCase();return ["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(e)||u==="RETIRADO"}
 
-  if (modo !== "editar") return;
-
-  const data = localStorage.getItem("editarReferencia");
-  if (!data) return;
-
-  modoEdicion = true;
-
-  const rec = JSON.parse(data);
-
-  // Guardamos ID para UPDATE
-  idRegistroEditar = rec.id;
-
-  // Cargar datos generales
-  $("#referencia").value = rec.referencia || "";
-  $("#pieza").value = rec.pieza || "";
-  $("#cliente").value = rec.cliente || "";
-  $("#responsable").value = rec.responsable || "";
-  $("#fecha").value = rec.fecha || "";
-  $("#version").value = rec.version || "";
-  $("#observaciones").value = rec.observaciones || "";
-
-  // Cargar equipos
-  tablaBody.innerHTML = "";
-  (rec.equipos || []).forEach(eq => addRow(eq));
-
-  msg("Modo edición: estás editando la versión " + (rec.version || ""), "ok");
+async function cargarCatalogos(){
+  if(!sb) return;
+  const [{data:insts,error:e1},{data:refs,error:e2}] = await Promise.all([
+    sb.from("instrumentos").select("codigo,descripcion,estado,ubicacion_actual,ubicacion").order("codigo",{ascending:true}),
+    sb.from("control_metrologico").select("cliente,responsable").limit(1500)
+  ]);
+  if(e1) console.warn("No se pudo cargar inventario:",e1);
+  inventario=(insts||[]).filter(x=>!esBaja(x));
+  inventarioMap=new Map(inventario.filter(x=>x.codigo).map(x=>[norm(x.codigo),x]));
+  if(!e2){
+    const clientes=[...new Set((refs||[]).map(x=>x.cliente).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+    const responsables=[...new Set((refs||[]).map(x=>x.responsable).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+    $("#clientesList").innerHTML=clientes.map(x=>`<option value="${esc(x)}">`).join("");
+    $("#responsablesList").innerHTML=responsables.map(x=>`<option value="${esc(x)}">`).join("");
+  }
+  actualizarTodasFilas(); renderPicker();
 }
 
-cargarModoEdicion();
-
-/* ===========================================================
-   RECOPILAR DATOS DEL FORMULARIO
-   =========================================================== */
-
-function recogerPayload() {
-  const referencia = $("#referencia").value.trim();
-  if (!referencia) {
-    msg("La referencia es obligatoria.");
-    return null;
-  }
-
-  const equipos = [];
-
-  [...tablaBody.querySelectorAll("tr")].forEach(tr => {
-    const inputs = tr.querySelectorAll("input");
-    const [codigo, desc, cant, tipo] = inputs;
-
-    if (!codigo.value.trim() && !desc.value.trim()) return;
-
-    equipos.push({
-      codigo_equipo: codigo.value.trim(),
-      descripcion_equipo: desc.value.trim(),
-      cantidad: parseInt(cant.value || "1"),
-      tipo_medida: tipo.value.trim()
-    });
+function rowData(tr){const [cod,desc,cant,tipo]=tr.querySelectorAll("input");return {codigo:cod.value.trim(),desc:desc.value.trim(),cantidad:Math.max(1,parseInt(cant.value||"1")||1),tipo:tipo.value.trim()}}
+function addRow(data={},focus=false){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td class="idx"></td><td class="row-state"></td>
+    <td><input class="eq-code" list="inventoryCodes" value="${esc(data.codigo_equipo||data.codigo||"")}" placeholder="Código"></td>
+    <td><input class="eq-desc" value="${esc(data.descripcion_equipo||data.descripcion||"")}" placeholder="Descripción"></td>
+    <td><input class="eq-qty" type="number" min="1" step="1" value="${esc(data.cantidad||1)}"></td>
+    <td><input class="eq-type" value="${esc(data.tipo_medida||"")}" placeholder="Ej. diámetro, rosca, rugosidad..."></td>
+    <td><div class="row-actions"><button type="button" class="btn secondary small dup-row">Duplicar</button><button type="button" class="btn danger small del-row">Quitar</button></div></td>`;
+  tr.querySelector(".del-row").onclick=()=>{tr.remove();reorder();setDirty();actualizarTodasFilas()};
+  tr.querySelector(".dup-row").onclick=()=>{const d=rowData(tr);addRow({codigo_equipo:d.codigo,descripcion_equipo:d.desc,cantidad:d.cantidad,tipo_medida:d.tipo},true);setDirty()};
+  tr.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",()=>{if(inp.classList.contains("eq-code"))resolverCodigo(tr);setDirty();actualizarTodasFilas()}));
+  tablaBody.appendChild(tr);reorder();resolverCodigo(tr);if(focus) tr.querySelector(".eq-code").focus();actualizarTodasFilas();
+}
+function reorder(){[...tablaBody.children].forEach((tr,i)=>tr.querySelector(".idx").textContent=i+1)}
+function resolverCodigo(tr){const cod=norm(tr.querySelector(".eq-code").value);const inst=inventarioMap.get(cod);if(inst&& !tr.querySelector(".eq-desc").value.trim()) tr.querySelector(".eq-desc").value=inst.descripcion||""}
+function actualizarTodasFilas(){
+  const rows=[...tablaBody.querySelectorAll("tr")];const seen=new Map();
+  rows.forEach(tr=>{const d=rowData(tr);const k=norm(d.codigo);if(k) seen.set(k,(seen.get(k)||0)+1)});
+  let vinc=0,revisar=0,unidades=0;
+  rows.forEach(tr=>{const d=rowData(tr);unidades+=d.cantidad;const k=norm(d.codigo);const inst=k?inventarioMap.get(k):null;const dup=k&&(seen.get(k)||0)>1;tr.classList.toggle("row-bad",!!dup);const cell=tr.querySelector(".row-state");
+    if(dup){cell.innerHTML='<span class="state dup">DUPLICADO</span>';revisar++}
+    else if(inst){cell.innerHTML='<span class="state ok">VINCULADO</span>';vinc++}
+    else{cell.innerHTML='<span class="state manual">MANUAL</span>';if(d.codigo||d.desc) revisar++}
   });
-
-  if (equipos.length === 0) {
-    msg("Debes añadir al menos un equipo.");
-    return null;
-  }
-
-  return {
-    referencia,
-    pieza: $("#pieza").value.trim() || null,
-    cliente: $("#cliente").value.trim() || null,
-    responsable: $("#responsable").value.trim() || null,
-    fecha: $("#fecha").value || null,
-    version: $("#version").value.trim() || null,
-    observaciones: $("#observaciones").value.trim() || null,
-    equipos
-  };
+  $("#mLineas").textContent=rows.length;$("#mUnidades").textContent=unidades;$("#mVinculados").textContent=vinc;$("#mRevisar").textContent=revisar;
+  renderValidacion();aplicarFiltroFilas();
+}
+function aplicarFiltroFilas(){const q=norm($("#rowSearch").value);let vis=0;[...tablaBody.querySelectorAll("tr")].forEach(tr=>{const d=rowData(tr);const show=!q||norm(d.codigo).includes(q)||norm(d.desc).includes(q)||norm(d.tipo).includes(q);tr.style.display=show?"":"none";if(show)vis++});$("#rowCounter").textContent=`${vis} de ${tablaBody.children.length} líneas`;$("#emptyRows").style.display=vis?"none":"block"}
+function renderValidacion(){
+  const ref=$("#referencia").value.trim();const rows=[...tablaBody.querySelectorAll("tr")];const datos=rows.map(rowData).filter(d=>d.codigo||d.desc);const cods=datos.map(d=>norm(d.codigo)).filter(Boolean);const dup=[...new Set(cods.filter((x,i,a)=>a.indexOf(x)!==i))];const manual=datos.filter(d=>d.codigo&&!inventarioMap.has(norm(d.codigo))).length;const sinCodigo=datos.filter(d=>!d.codigo&&d.desc).length;
+  const items=[
+    ["Referencia informada",ref?"OK":"FALTA",ref?"ok":"bad"],
+    ["Equipos definidos",datos.length?`${datos.length}`:"NINGUNO",datos.length?"ok":"bad"],
+    ["Códigos duplicados",dup.length?`${dup.length}`:"0",dup.length?"bad":"ok"],
+    ["Códigos no encontrados en inventario activo",manual?`${manual}`:"0",manual?"warn":"ok"],
+    ["Líneas solo descriptivas / sin código",sinCodigo?`${sinCodigo}`:"0",sinCodigo?"warn":"ok"]
+  ];
+  $("#validationList").innerHTML=items.map(([a,b,c])=>`<div class="check"><span>${a}</span><strong class="${c}">${b}</strong></div>`).join("");
 }
 
-/* ===========================================================
-   GUARDAR CAMBIOS (UPDATE)
-   =========================================================== */
-async function guardarCambios() {
-  if (!modoEdicion || !idRegistroEditar) {
-    msg("No estás en modo edición.");
-    return;
-  }
-
-  const payload = recogerPayload();
-  if (!payload) return;
-
-  try {
-    const { error } = await sb
-      .from("control_metrologico")
-      .update(payload)
-      .eq("id", idRegistroEditar);
-
-    if (error) {
-      msg("Error al guardar cambios: " + error.message);
-      return;
-    }
-
-    msg("Versión actualizada correctamente.", "ok");
-
-  } catch (e) {
-    msg("Error inesperado: " + e.message);
-  }
+function cargarModoEdicion(){
+  const params=new URLSearchParams(location.search);if(params.get("modo")!=="editar") return;
+  const data=localStorage.getItem("editarReferencia");if(!data){msg("No se han encontrado datos de edición en esta sesión.","error");return}
+  try{
+    const rec=JSON.parse(data);modoEdicion=true;idRegistroEditar=rec.id;$("#modeChip").textContent="MODO EDICIÓN";$("#modeChip").classList.add("edit");$("#heroTitle").textContent=`Editar ${rec.referencia||"referencia"}`;$("#heroSub").textContent=`Versión actual: ${rec.version||"sin versión"}. Puedes guardar sobre esta versión o crear una nueva sin perder el histórico.`;$("#saveSub").textContent=`Editando ${rec.version||"versión actual"}`;$("#versionBadge").textContent=rec.version||"VERSIÓN ACTUAL";
+    $("#referencia").value=rec.referencia||"";$("#pieza").value=rec.pieza||"";$("#cliente").value=rec.cliente||"";$("#responsable").value=rec.responsable||"";$("#fecha").value=rec.fecha||"";$("#version").value=rec.version||"";$("#observaciones").value=rec.observaciones||"";
+    tablaBody.innerHTML="";(rec.equipos||[]).forEach(eq=>addRow(eq));if(!(rec.equipos||[]).length)addRow();clearMsg();
+  }catch(e){msg("No se pudieron cargar los datos de edición: "+e.message,"error")}
 }
 
-/* ===========================================================
-   GUARDAR NUEVA VERSIÓN (INSERT)
-   =========================================================== */
-async function guardarNuevaVersion() {
-  const payload = recogerPayload();
-  if (!payload) return;
-
-  // QUITAMOS versión si está vacía para que el trigger genere V2/V3
-  if (!payload.version || payload.version === "") {
-    delete payload.version;
-  }
-
-  try {
-    const { error } = await sb
-      .from("control_metrologico")
-      .insert(payload);
-
-    if (error) {
-      msg("Error al crear nueva versión: " + error.message);
-      return;
-    }
-
-    msg("Nueva versión creada correctamente.", "ok");
-
-  } catch (e) {
-    msg("Error inesperado: " + e.message);
-  }
+function recogerPayload(){
+  const referencia=$("#referencia").value.trim();if(!referencia){msg("La referencia es obligatoria.");$("#referencia").focus();return null}
+  const rows=[...tablaBody.querySelectorAll("tr")].map(rowData).filter(d=>d.codigo||d.desc);if(!rows.length){msg("Debes añadir al menos un equipo.");return null}
+  const cods=rows.map(x=>norm(x.codigo)).filter(Boolean);const dups=[...new Set(cods.filter((x,i,a)=>a.indexOf(x)!==i))];if(dups.length){msg("Hay códigos duplicados en la tabla: "+dups.join(", ")+". Revísalos antes de guardar.");return null}
+  const equipos=rows.map(d=>({codigo_equipo:d.codigo,descripcion_equipo:d.desc,cantidad:d.cantidad,tipo_medida:d.tipo}));
+  return {referencia,pieza:$("#pieza").value.trim()||null,cliente:$("#cliente").value.trim()||null,responsable:$("#responsable").value.trim()||null,fecha:$("#fecha").value||null,version:$("#version").value.trim()||null,observaciones:$("#observaciones").value.trim()||null,equipos};
+}
+async function calcularNuevaVersion(referencia){
+  try{const {data,error}=await sb.from("control_metrologico").select("version").eq("referencia",referencia);if(error) throw error;let max=0;(data||[]).forEach(r=>{const m=String(r.version||"").match(/(\d+)/);if(m)max=Math.max(max,Number(m[1]))});return `V${max+1}`;}catch(e){console.warn("No se pudo calcular versión; se delega al trigger:",e);return null}
+}
+async function guardarCambios(){
+  clearMsg();if(!modoEdicion||!idRegistroEditar){msg("No estás en modo edición. Para una referencia nueva utiliza ‘Guardar como nueva versión’.");return}
+  const payload=recogerPayload();if(!payload)return;if(!confirm(`Vas a sobrescribir ${payload.referencia} · ${payload.version||"versión actual"}. ¿Continuar?`))return;
+  try{const {error}=await sb.from("control_metrologico").update(payload).eq("id",idRegistroEditar);if(error)throw error;setDirty(false);msg("Versión actualizada correctamente.","ok")}catch(e){msg("Error al guardar cambios: "+e.message)}
+}
+async function guardarNuevaVersion(){
+  clearMsg();const payload=recogerPayload();if(!payload)return;
+  const next=await calcularNuevaVersion(payload.referencia);if(next)payload.version=next;else delete payload.version;
+  if(!confirm(`Se creará una nueva versión de ${payload.referencia}${next?` como ${next}`:""}. La versión anterior no se modificará. ¿Continuar?`))return;
+  try{const {data,error}=await sb.from("control_metrologico").insert(payload).select("id,version").single();if(error)throw error;setDirty(false);$("#version").value=data?.version||payload.version||"";$("#versionBadge").textContent=data?.version||payload.version||"NUEVA";msg(`Nueva versión creada correctamente${data?.version?`: ${data.version}`:""}.`,"ok")}catch(e){msg("Error al crear nueva versión: "+e.message)}
 }
 
-/* ===========================================================
-   EVENTOS DE BOTONES
-   =========================================================== */
-$("#btnGuardar").onclick = guardarCambios;
-$("#btnGuardarNueva").onclick = guardarNuevaVersion;
+function renderPicker(){if(!$("#pickerGrid"))return;const q=norm($("#pickerSearch").value);const rows=inventario.filter(x=>!q||norm(x.codigo).includes(q)||norm(x.descripcion).includes(q)||norm(x.ubicacion_actual).includes(q)).slice(0,250);$("#pickerGrid").innerHTML=rows.map(x=>`<label class="pick-card"><input type="checkbox" data-code="${esc(x.codigo)}" ${pickerSelected.has(String(x.codigo))?"checked":""}><div><div class="pick-code">${esc(x.codigo)}</div><div class="pick-desc">${esc(x.descripcion||"Sin descripción")}</div></div><div class="pick-loc">${esc(x.ubicacion_actual||x.ubicacion||"")}</div></label>`).join("")||'<div class="empty" style="grid-column:1/-1">No hay equipos que coincidan.</div>';$("#pickerGrid").querySelectorAll("input[type=checkbox]").forEach(c=>c.addEventListener("change",()=>{if(c.checked)pickerSelected.add(c.dataset.code);else pickerSelected.delete(c.dataset.code);$("#pickerCount").textContent=`${pickerSelected.size} seleccionados`}));$("#pickerCount").textContent=`${pickerSelected.size} seleccionados`}
+function abrirPicker(){pickerSelected.clear();$("#pickerSearch").value="";renderPicker();pickerDialog.showModal()}
+function agregarSeleccionados(){const existentes=new Set([...tablaBody.querySelectorAll(".eq-code")].map(x=>norm(x.value)).filter(Boolean));let added=0;pickerSelected.forEach(code=>{const inst=inventarioMap.get(norm(code));if(inst&&!existentes.has(norm(code))){addRow({codigo_equipo:inst.codigo,descripcion_equipo:inst.descripcion,cantidad:1});existentes.add(norm(code));added++}});pickerDialog.close();setDirty();if(added)msg(`${added} equipo${added===1?"":"s"} añadido${added===1?"":"s"} desde inventario.`,"info")}
 
+// Datalist común para códigos activos
+const dl=document.createElement("datalist");dl.id="inventoryCodes";document.body.appendChild(dl);
+function refreshDatalist(){dl.innerHTML=inventario.slice(0,2000).map(x=>`<option value="${esc(x.codigo)}">${esc(x.descripcion||"")}</option>`).join("")}
+
+$("#btnAddEquipo").onclick=()=>{addRow({},true);setDirty()};$("#btnGuardar").onclick=guardarCambios;$("#btnGuardarNueva").onclick=guardarNuevaVersion;$("#rowSearch").addEventListener("input",aplicarFiltroFilas);$("#btnPicker").onclick=abrirPicker;$("#pickerSearch").addEventListener("input",renderPicker);$("#pickerClose").onclick=()=>pickerDialog.close();$("#pickerCancel").onclick=()=>pickerDialog.close();$("#pickerAdd").onclick=agregarSeleccionados;
+["referencia","pieza","cliente","responsable","fecha","version","observaciones"].forEach(id=>$("#"+id).addEventListener("input",()=>{setDirty();renderValidacion()}));
+window.addEventListener("beforeunload",e=>{if(!dirty)return;e.preventDefault();e.returnValue=""});
+
+(async function init(){
+  if(!$("#fecha").value) $("#fecha").value=new Date().toISOString().slice(0,10);
+  cargarModoEdicion();if(!tablaBody.children.length)addRow();
+  await cargarCatalogos();refreshDatalist();actualizarTodasFilas();setDirty(false);
+})();
 </script>
-
 </body>
 </html>
