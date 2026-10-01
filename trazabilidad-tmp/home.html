@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TMP · Trazabilidad Metrológica</title>
+  <!-- HOME_BUILD: 2026-10-01-V7-MAQUINAS-MOSAICO -->
 
   <style>
     :root{
@@ -516,8 +517,8 @@
       .chart-card{grid-column:1/span 4;grid-row:3;min-height:0}.chart-card2{grid-column:5/span 8;grid-row:3;min-height:0}
       footer{grid-column:1/-1;grid-row:4;font-size:8px;line-height:12px;padding:0}
       .machine-toolbar{gap:4px;flex-wrap:nowrap}.machine-toolbar select,.machine-toolbar input{padding:5px 7px;font-size:9px;border-radius:8px}.machine-toolbar select{min-width:145px}.machine-toolbar input{min-width:130px}
-      .machine-overview-grid{display:flex;gap:4px;margin:3px 0 5px;overflow-x:auto;overflow-y:hidden;flex:0 0 52px;padding-bottom:2px}
-      .machine-overview-card{flex:0 0 100px;padding:4px 7px;border-radius:8px}.machine-overview-name{font-size:9px}.machine-overview-count{font-size:16px;margin-top:0}.machine-overview-label{font-size:8px}
+      .machine-overview-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:3px 0 5px;overflow:visible;flex:0 0 auto;padding:0}
+      .machine-overview-card{min-width:0;padding:4px 7px;border-radius:8px}.machine-overview-name{font-size:9px}.machine-overview-count{font-size:16px;margin-top:0}.machine-overview-label{font-size:8px}
       .machine-summary{margin:0 0 4px;gap:4px}.machine-count{font-size:9px;padding:3px 6px}.machine-empty{padding:8px;font-size:9px;flex:1;display:grid;place-items:center}
       #table-machine-equipment{display:block;overflow:auto;max-height:120px;width:100%}#table-machine-equipment thead{position:sticky;top:0;z-index:1}#table-machine-equipment tbody,#table-machine-equipment thead{width:100%}
       .mini-table{font-size:9px}.mini-table th,.mini-table td{padding:4px 5px}
@@ -527,53 +528,74 @@
       .month-bars{height:105px;gap:4px;padding-top:2px}.month-bar-wrap{height:76px}.month-value,.month-label{font-size:8px}.month-bar{width:min(20px,72%)}
     }
 
-<<<<<<< HEAD
 
-    /* HOME V6 - Equipos por máquina visibles, sin carrusel horizontal */
-    .machine-more-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;font-size:10px;color:#617b94}
-    .machine-more-row .btn{padding:5px 9px;font-size:10px}
+    /* HOME V7 - Equipos por maquina: mosaico completo, sin desplazamiento lateral */
+    .machine-more-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;font-size:9px;color:#617b94}
+    .machine-more-row .btn{padding:4px 8px;font-size:9px}
     #machine-all-dialog{max-width:1180px;width:min(96vw,1180px)}
     #machine-all-dialog .dialog-table-wrap{max-height:66vh}
+
+    /* Una sola fuente de verdad para el mosaico de maquinas. */
+    #machine-overview-grid{
+      display:grid!important;
+      grid-template-columns:repeat(8,minmax(0,1fr))!important;
+      gap:4px!important;
+      margin:3px 0 5px!important;
+      overflow:visible!important;
+      width:100%!important;
+      padding:0!important;
+    }
+    #machine-overview-grid .machine-overview-card{
+      width:100%!important;
+      min-width:0!important;
+      max-width:none!important;
+      min-height:30px!important;
+      padding:3px 5px!important;
+      border-radius:8px!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) auto;
+      grid-template-rows:auto auto;
+      column-gap:4px;
+      align-items:center;
+    }
+    #machine-overview-grid .machine-overview-name{
+      font-size:8.5px!important;
+      line-height:1.05!important;
+      grid-column:1;
+      grid-row:1;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    #machine-overview-grid .machine-overview-count{
+      font-size:14px!important;
+      line-height:1!important;
+      margin:0!important;
+      grid-column:2;
+      grid-row:1/3;
+      align-self:center;
+    }
+    #machine-overview-grid .machine-overview-label{
+      font-size:7px!important;
+      line-height:1!important;
+      grid-column:1;
+      grid-row:2;
+    }
+
     @media (min-width:1500px) and (min-height:800px){
       .machine-section{overflow:hidden}
-      .machine-overview-grid{
-        display:grid!important;
-        grid-template-columns:repeat(6,minmax(0,1fr))!important;
-        gap:4px!important;
-        margin:3px 0 5px!important;
-        overflow:visible!important;
-        flex:0 0 auto!important;
-        padding:0!important;
-      }
-      .machine-overview-card{
-        min-width:0!important;
-        flex:none!important;
-        padding:4px 6px!important;
-        border-radius:8px!important;
-        min-height:34px!important;
-        display:grid;
-        grid-template-columns:minmax(0,1fr) auto;
-        grid-template-rows:auto auto;
-        column-gap:5px;
-        align-items:center;
-      }
-      .machine-overview-name{font-size:8.5px!important;grid-column:1;grid-row:1;min-width:0}
-      .machine-overview-count{font-size:15px!important;line-height:1!important;margin:0!important;grid-column:2;grid-row:1/3;align-self:center}
-      .machine-overview-label{font-size:7.5px!important;grid-column:1;grid-row:2}
       #table-machine-equipment{display:table!important;overflow:visible!important;max-height:none!important;width:100%;table-layout:fixed}
       #table-machine-equipment th:nth-child(1),#table-machine-equipment td:nth-child(1){width:12%}
       #table-machine-equipment th:nth-child(2),#table-machine-equipment td:nth-child(2){width:39%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       #table-machine-equipment th:nth-child(3),#table-machine-equipment td:nth-child(3){width:14%}
       #table-machine-equipment th:nth-child(4),#table-machine-equipment td:nth-child(4){width:18%}
       #table-machine-equipment th:nth-child(5),#table-machine-equipment td:nth-child(5){width:17%}
-      .machine-more-row{font-size:8.5px;margin-top:3px}.machine-more-row .btn{padding:3px 7px;font-size:8.5px}
     }
-    @media (min-width:1500px) and (min-height:800px) and (max-width:1750px){
-      .machine-overview-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
-    }
-
-=======
->>>>>>> 2413972e4494bb981e6be24d8ec0a89e09dd2809
+    @media(max-width:1700px){#machine-overview-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important}}
+    @media(max-width:1450px){#machine-overview-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}}
+    @media(max-width:1200px){#machine-overview-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+    @media(max-width:760px){#machine-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
   </style>
 </head>
 
@@ -663,7 +685,6 @@
             <div><div class="kpi-label">En taller / producción</div><div class="kpi-value" id="kpi-uso">–</div><div class="kpi-extra" id="kpi-uso-extra"></div></div>
           </div>
         </a>
-<<<<<<< HEAD
       </section>
 
       <section class="machine-section panel">
@@ -695,7 +716,7 @@
           <span id="machine-more-info"></span>
           <button type="button" class="btn" id="machine-view-all">Ver todos</button>
         </div>
-      </section>
+              </section>
 
       <dialog id="machine-all-dialog">
         <div class="dialog-header">
@@ -709,36 +730,6 @@
           </table>
         </div>
       </dialog>
-=======
-      </section>
-
-      <section class="machine-section panel">
-        <div class="panel-head">
-          <div>
-            <h2 class="section-title">Equipos por máquina</h2>
-            <p class="muted">Consulta qué equipos están asignados actualmente a cada máquina según su ubicación actual.</p>
-          </div>
-          <div class="machine-toolbar">
-            <select id="machine-select">
-              <option value="">Selecciona máquina...</option>
-            </select>
-            <input id="machine-search" type="text" placeholder="Filtrar por código o descripción..." disabled>
-          </div>
-        </div>
-        <div id="machine-overview-grid" class="machine-overview-grid"></div>
-        <div class="machine-summary">
-          <span class="machine-count" id="machine-count">Selecciona una máquina</span>
-          <span class="badge badge-soft" id="machine-status">Ubicación actual de instrumentos</span>
-        </div>
-        <div id="machine-empty" class="machine-empty">Selecciona una máquina para ver los equipos que tiene actualmente.</div>
-        <table class="mini-table" id="table-machine-equipment" style="display:none;">
-          <thead>
-            <tr><th>Código</th><th>Descripción</th><th>Calibración</th><th>Próxima calibración</th><th>Acciones</th></tr>
-          </thead>
-          <tbody id="tbody-machine-equipment"></tbody>
-        </table>
-      </section>
->>>>>>> 2413972e4494bb981e6be24d8ec0a89e09dd2809
 
       <section class="mov-section panel">
         <div class="mov-header">
@@ -838,7 +829,6 @@
   const tableMachineEquipment = document.getElementById("table-machine-equipment");
   const tbodyMachineEquipment = document.getElementById("tbody-machine-equipment");
   const machineOverviewGrid = document.getElementById("machine-overview-grid");
-<<<<<<< HEAD
   const machineMoreRow = document.getElementById("machine-more-row");
   const machineMoreInfo = document.getElementById("machine-more-info");
   const machineViewAll = document.getElementById("machine-view-all");
@@ -847,8 +837,6 @@
   const machineDialogSub = document.getElementById("machine-dialog-sub");
   const machineDialogBody = document.getElementById("machine-dialog-body");
   const machineDialogClose = document.getElementById("machine-dialog-close");
-=======
->>>>>>> 2413972e4494bb981e6be24d8ec0a89e09dd2809
   const statusStack = document.getElementById("status-stack");
   const statusTotal = document.getElementById("status-total");
   const legendSinFecha = document.getElementById("legend-sin-fecha");
@@ -1129,22 +1117,8 @@
     }
 
     machineSearch.disabled = false;
-<<<<<<< HEAD
     machineCount.textContent = `${maquina} · ${todos.length} equipo${todos.length === 1 ? "" : "s"}`;
     machineStatus.textContent = q ? `${filtrados.length} coinciden con el filtro` : "Resumen · primeros 5 equipos";
-=======
-
-    const equiposMaquina = (cacheInstrumentosHome || []).filter(inst => obtenerNombreMaquina(inst) === maquina);
-
-    const filtrados = equiposMaquina.filter(inst => {
-      if (!q) return true;
-      return String(inst.codigo || "").toLowerCase().includes(q) ||
-             String(inst.descripcion || "").toLowerCase().includes(q);
-    });
-
-    machineCount.textContent = `${maquina} · ${equiposMaquina.length} equipo${equiposMaquina.length === 1 ? "" : "s"}`;
-    machineStatus.textContent = q ? `${filtrados.length} coinciden con el filtro` : "Equipos actualmente asignados";
->>>>>>> 2413972e4494bb981e6be24d8ec0a89e09dd2809
 
     if (!filtrados.length){
       machineEmpty.style.display = "block";
