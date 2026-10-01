@@ -822,6 +822,7 @@
     .unread-pill.zero{display:none}
     .sound-indicator{font-size:10px;color:#dbeafe;white-space:nowrap}
     .msg-ack-btn{background:#ecfdf3;color:#166534;border-color:#86efac}.msg-ack-list{color:#166534}
+    .msg-delivery{font-size:10px;font-weight:800;color:#64748b;white-space:nowrap}.msg-delivery.read{color:#2563eb}
     @media(max-width:900px){.consult-kpis{grid-template-columns:repeat(2,1fr)}.notification-tools{justify-content:flex-end}.sound-indicator{display:none}}
 
   </style>
@@ -1481,7 +1482,7 @@
 
   // ======== SELECCIONAR CONVERSACIÓN ========
 
-  function seleccionarConversacion(key){
+  async function seleccionarConversacion(key){
     if (!conversations[key]){
       selectedConvKey = null;
       selectedConvParticipants = [];
@@ -1507,6 +1508,40 @@
 
     renderConversaciones(); // refrescar active
     renderMensajes();
+    await marcarConversacionComoLeida(key);
+  }
+
+  async function marcarConversacionComoLeida(key){
+    if (!supabase || !key || !conversations[key]) return;
+    const pendientes = conversations[key].messages.filter(m =>
+      m.autor !== currentUsername && !normalizeArray(m.leido_por).includes(currentUsername)
+    );
+    if (!pendientes.length) return;
+
+    const resultados = await Promise.all(pendientes.map(async m => {
+      const leidos = normalizeArray(m.leido_por);
+      if (!leidos.includes(currentUsername)) leidos.push(currentUsername);
+      const { data, error } = await supabase
+        .from("chat_mensajes")
+        .update({ leido_por: leidos })
+        .eq("id", m.id)
+        .select()
+        .single();
+      return { data, error, id:m.id };
+    }));
+
+    let cambio = false;
+    resultados.forEach(r => {
+      if (r.error || !r.data) return;
+      const idx = allMessages.findIndex(m => String(m.id) === String(r.data.id));
+      if (idx >= 0){ allMessages[idx] = r.data; cambio = true; }
+    });
+    if (cambio){
+      construirConversaciones();
+      renderConversaciones();
+      renderMensajes();
+      actualizarResumenConsultas();
+    }
   }
 
   // ======== RENDERIZAR MENSAJES DE LA CONVERSACIÓN ACTUAL ========
@@ -1613,7 +1648,20 @@
 
       const metaRight = document.createElement("div");
       metaRight.className = "msg-meta-right";
-      metaRight.textContent = formatTime(msg.created_at);
+      if (mine){
+        const leidosNombres = normalizeArray(msg.leido_por)
+          .filter(u => u !== currentUsername)
+          .map(u => mapaOperarios[u]?.nombre || u);
+        const entrega = document.createElement("span");
+        entrega.className = "msg-delivery" + (leidosNombres.length ? " read" : "");
+        entrega.textContent = leidosNombres.length
+          ? `✓✓ Leído por ${leidosNombres.join(", ")}`
+          : "✓ Entregado";
+        metaRight.appendChild(entrega);
+      }
+      const hora = document.createElement("span");
+      hora.textContent = formatTime(msg.created_at);
+      metaRight.appendChild(hora);
 
       metaDiv.appendChild(metaLeft);
       metaDiv.appendChild(metaRight);
@@ -1689,18 +1737,27 @@
       destinatarios
     };
 
-    const { error } = await supabase
+    const { data: enviado, error } = await supabase
       .from("chat_mensajes")
-      .insert(payload);
+      .insert(payload)
+      .select()
+      .single();
 
     if (error){
       console.error("Error enviando mensaje:", error);
       statusEl.textContent = "No se ha podido enviar el mensaje.";
     } else {
+      if (enviado && !allMessages.some(m => String(m.id) === String(enviado.id))){
+        allMessages.push(enviado);
+        construirConversaciones();
+        renderConversaciones();
+        if (selectedConvKey) renderMensajes();
+        actualizarResumenConsultas();
+      }
       txtArea.value = "";
       document.getElementById("chk-important").checked = false;
-      statusEl.textContent = "Mensaje enviado.";
-      setTimeout(() => statusEl.textContent = "", 1500);
+      statusEl.textContent = "✓ Entregado";
+      setTimeout(() => statusEl.textContent = "", 1800);
     }
 
     document.getElementById("btn-send").disabled = false;
@@ -1813,7 +1870,7 @@
         payload => {
           const msg = payload.new;
           if (!esParaMi(msg)) return;
-          allMessages.push(msg);
+          if (!allMessages.some(m => String(m.id) === String(msg.id))) allMessages.push(msg);
           construirConversaciones();
           renderConversaciones();
 
@@ -1827,7 +1884,7 @@
           // Los importantes se muestran con aviso reforzado.
           if (msg.autor !== currentUsername){
             notificarMensajeEntrante(msg);
-            if (!document.hidden) marcarChatVistoAhora();
+            if (!document.hidden && convKey === selectedConvKey) limpiarNoLeidosConversacion(convKey);
           }
         }
       )
