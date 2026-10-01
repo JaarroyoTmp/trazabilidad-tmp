@@ -2,777 +2,286 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>TMP · Criterios de aceptación y uso metrológico</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TMP · Criterios metrológicos y auditoría</title>
   <link rel="icon" href="img/tmp-quality.png" />
-
   <style>
     :root{
-      --bg:#020617;
-      --panel:#0b1120;
-      --panel-soft:#020617;
-      --border:#1f2937;
-      --txt:#e5e7eb;
-      --muted:#9ca3af;
-      --accent:#38bdf8;
-      --accent-soft:#0f172a;
-      --ok:#22c55e;
-      --warn:#facc15;
-      --bad:#f97373;
-      --info:#38bdf8;
+      --bg:#eef6ff;--bg2:#f8fbff;--panel:#fff;--ink:#0d2340;--muted:#657e97;
+      --line:#dbe7f2;--line2:#c8daea;--nav:#08284a;--blue:#2563eb;--blue2:#0ea5e9;
+      --green:#16a34a;--orange:#d97706;--red:#dc2626;--purple:#7c3aed;--slate:#475569;
+      --shadow:0 14px 34px rgba(15,45,75,.10);--radius:18px;
     }
-
-    *{box-sizing:border-box;}
-
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:
-        radial-gradient(circle at 0 0, rgba(56,189,248,.25) 0, transparent 55%),
-        radial-gradient(circle at 100% 0, rgba(52,211,153,.18) 0, transparent 50%),
-        linear-gradient(to bottom,#020617,#020617 220px,#020617);
-      color:var(--txt);
-    }
-
-    header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      padding:14px 18px;
-      background:rgba(15,23,42,.96);
-      border-bottom:1px solid var(--border);
-      backdrop-filter:blur(10px);
-      position:sticky;
-      top:0;
-      z-index:10;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .brand img{
-      height:42px;
-    }
-    .brand h1{
-      margin:0;
-      font-size:18px;
-      letter-spacing:.03em;
-    }
-    .brand span{
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .btn{
-      border-radius:999px;
-      border:1px solid #1d4ed8;
-      background:radial-gradient(circle at 0 0,#38bdf8 0,transparent 55%);
-      background-color:#0b1120;
-      color:#e5f2ff;
-      padding:8px 14px;
-      font-size:13px;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      box-shadow:0 0 0 1px rgba(37,99,235,.4),0 12px 25px rgba(15,23,42,.9);
-    }
-    .btn:hover{
-      filter:brightness(1.04);
-      transform:translateY(-1px);
-    }
-
-    main{
-      max-width:950px;
-      margin:20px auto 40px;
-      padding:0 16px 40px;
-      display:flex;
-      flex-direction:row;
-      gap:16px;
-    }
-
-    /* Índice lateral */
-    .toc{
-      flex:0 0 230px;
-      position:sticky;
-      top:78px;
-      align-self:flex-start;
-      background:rgba(15,23,42,.96);
-      border-radius:14px;
-      border:1px solid var(--border);
-      padding:12px 12px 10px;
-      font-size:13px;
-      box-shadow:0 16px 40px rgba(0,0,0,.7);
-    }
-    .toc-title{
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-    .toc ul{
-      list-style:none;
-      padding-left:0;
-      margin:0;
-    }
-    .toc li{
-      margin:3px 0;
-    }
-    .toc a{
-      color:var(--muted);
-      text-decoration:none;
-      font-size:13px;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      padding:3px 4px;
-      border-radius:8px;
-    }
-    .toc a:hover{
-      background:#020617;
-      color:var(--accent);
-    }
-    .toc a span.dot{
-      width:6px;height:6px;border-radius:999px;
-      background:#1f2937;
-    }
-
-    @media(max-width:860px){
-      main{flex-direction:column;}
-      .toc{position:static;max-width:100%;order:-1;}
-    }
-
-    /* Secciones */
-    .content{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
-
-    section{
-      background:rgba(15,23,42,.96);
-      border-radius:16px;
-      border:1px solid var(--border);
-      padding:18px 18px 14px;
-      box-shadow:0 16px 40px rgba(0,0,0,.65);
-    }
-
-    h2{
-      margin:0 0 8px;
-      font-size:17px;
-      color:var(--accent);
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    h2 span.idx{
-      font-size:11px;
-      padding:2px 8px;
-      border-radius:999px;
-      border:1px solid #1d4ed8;
-      background:#020617;
-      color:#bfdbfe;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-    }
-    h3{
-      margin:14px 0 6px;
-      font-size:15px;
-      color:#e5e7eb;
-    }
-    p{
-      margin:4px 0 8px;
-      font-size:14px;
-      color:#d1d5db;
-      line-height:1.45;
-    }
-    ul{
-      margin:4px 0 8px 20px;
-      font-size:14px;
-      color:#d1d5db;
-    }
-    li{margin-bottom:3px;}
-
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:3px 10px;
-      border-radius:999px;
-      border:1px solid #1f2937;
-      font-size:11px;
-      color:#9ca3af;
-      background:#020617;
-      white-space:nowrap;
-    }
-    .pill-ok{
-      border-color:var(--ok);
-      color:#bbf7d0;
-      background:rgba(22,163,74,.12);
-    }
-    .pill-warn{
-      border-color:var(--warn);
-      color:#fef9c3;
-      background:rgba(234,179,8,.12);
-    }
-    .pill-bad{
-      border-color:var(--bad);
-      color:#fee2e2;
-      background:rgba(248,113,113,.12);
-    }
-    .pill-info{
-      border-color:var(--info);
-      color:#bfdbfe;
-      background:rgba(56,189,248,.08);
-    }
-
-    .muted{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:6px;
-    }
-
-    .callout{
-      border-radius:12px;
-      padding:9px 10px;
-      border:1px solid #1e293b;
-      background:rgba(15,23,42,.9);
-      font-size:13px;
-      display:flex;
-      gap:8px;
-      align-items:flex-start;
-      margin:6px 0 4px;
-    }
-    .callout-icon{
-      font-size:15px;
-      margin-top:1px;
-    }
-
-    .callout.ok{
-      border-color:#15803d;
-      background:rgba(22,163,74,.12);
-      color:#bbf7d0;
-    }
-    .callout.warn{
-      border-color:#ca8a04;
-      background:rgba(234,179,8,.1);
-      color:#fef3c7;
-    }
-    .callout.bad{
-      border-color:#b91c1c;
-      background:rgba(248,113,113,.1);
-      color:#fee2e2;
-    }
-    .callout.info{
-      border-color:#0369a1;
-      background:rgba(37,99,235,.08);
-      color:#bfdbfe;
-    }
-
-    .pill-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin:4px 0 2px;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:13px;
-      margin:6px 0 4px;
-    }
-    th,td{
-      padding:6px 6px;
-      border-bottom:1px solid #1f2937;
-      text-align:left;
-      white-space:nowrap;
-    }
-    th{
-      background:#020617;
-      color:#9ca3af;
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-    }
-    tr:nth-child(even) td{
-      background:#020617;
-    }
-    code{
-      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New",monospace;
-      font-size:12px;
-      background:#020617;
-      padding:2px 4px;
-      border-radius:6px;
-      border:1px solid #1f2937;
-    }
-
-    .status-bad{color:#fecaca;}
-    .status-ok{color:#bbf7d0;}
-    .status-warn{color:#fef9c3;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);
+      background:radial-gradient(circle at 14% -10%,rgba(37,99,235,.14),transparent 30%),linear-gradient(180deg,var(--bg),var(--bg2));}
+    button,input,select{font:inherit}
+    .topbar{position:sticky;top:0;z-index:20;background:rgba(248,251,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .brand{display:flex;align-items:center;gap:11px}.brand img{width:42px;height:42px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px}
+    .brand h1{margin:0;font-size:20px;letter-spacing:-.02em}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px;font-weight:700}
+    .top-actions{display:flex;gap:8px;align-items:center}.btn{border:1px solid var(--line2);background:#fff;color:#153b62;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:850;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}.btn:hover{border-color:#9fc3ef;box-shadow:0 7px 18px rgba(15,45,75,.09)}
+    .btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .wrap{max-width:1650px;margin:0 auto;padding:16px 18px 36px}
+    .hero{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(330px,.8fr);gap:12px;margin-bottom:12px}
+    .hero-main,.audit-summary{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);font-weight:950}.hero h2{margin:5px 0 5px;font-size:24px;letter-spacing:-.03em}.hero p{margin:0;color:var(--muted);font-size:12px;line-height:1.5;max-width:950px}
+    .hero-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;border:1px solid var(--line);background:#f8fbff}.pill.ok{color:#15803d;background:#ecfdf3;border-color:#bbf7d0}.pill.warn{color:#b45309;background:#fff7ed;border-color:#fed7aa}.pill.bad{color:#b91c1c;background:#fff1f2;border-color:#fecdd3}.pill.info{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}.pill.gray{color:#475569;background:#f8fafc;border-color:#e2e8f0}
+    .audit-summary h3{margin:0 0 8px;font-size:13px}.audit-line{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #edf2f7;font-size:11px}.audit-line:last-child{border-bottom:0}.audit-line strong{font-size:12px}
+    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin-bottom:12px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:0 7px 18px rgba(15,45,75,.06)}.kpi span{font-size:10px;color:var(--muted);font-weight:800}.kpi strong{display:block;font-size:25px;margin-top:3px;letter-spacing:-.04em}.kpi small{display:block;margin-top:3px;color:var(--muted);font-size:9px}
+    .grid2{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(360px,.75fr);gap:12px;margin-bottom:12px}.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;min-width:0}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}.panel h3{margin:0;font-size:15px}.panel-sub{margin:3px 0 0;color:var(--muted);font-size:10px;line-height:1.4}
+    .toolbar{display:flex;gap:7px;flex-wrap:wrap}.toolbar input,.toolbar select{border:1px solid var(--line2);border-radius:9px;background:#fff;color:var(--ink);padding:7px 9px;font-size:11px;outline:none}.toolbar input{min-width:230px}.toolbar input:focus,.toolbar select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.10)}
+    .table-wrap{overflow:auto;border:1px solid #e7eef5;border-radius:12px;max-height:560px}.table{width:100%;border-collapse:collapse;font-size:10.5px}.table th,.table td{padding:7px 8px;border-bottom:1px solid #edf2f7;text-align:left;vertical-align:top}.table th{position:sticky;top:0;background:#f6f9fc;color:#526a82;font-size:9px;text-transform:uppercase;letter-spacing:.05em;z-index:2}.table tr:hover td{background:#fbfdff}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:9.5px}.td-main{font-weight:900;color:#173d63}.td-sub{font-size:9px;color:var(--muted);margin-top:2px}.chips{display:flex;gap:3px;flex-wrap:wrap}.chip{border:1px solid #dce8f4;background:#f8fbff;border-radius:999px;padding:2px 5px;font-size:8.5px;font-weight:800;color:#49647d}
+    .finding-list{display:grid;gap:7px}.finding{border:1px solid var(--line);border-left-width:4px;border-radius:11px;padding:9px 10px;background:#fff}.finding.bad{border-left-color:var(--red);background:#fffafa}.finding.warn{border-left-color:var(--orange);background:#fffdf8}.finding.ok{border-left-color:var(--green);background:#fbfffc}.finding.info{border-left-color:var(--blue);background:#fbfdff}.finding strong{font-size:11px}.finding p{margin:3px 0 0;font-size:9.5px;line-height:1.45;color:#58718a}
+    .decision-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.decision-card{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fbfdff}.decision-card strong{font-size:11px}.decision-card p{font-size:9px;color:var(--muted);line-height:1.4;margin:4px 0 0}.decision-card .big{font-size:17px;font-weight:950;margin-bottom:2px}
+    .standards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.standard-card{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}.standard-card h4{margin:0;font-size:11px}.standard-card p{margin:4px 0 0;color:var(--muted);font-size:9px;line-height:1.35}
+    details.policy{background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:10px;box-shadow:0 7px 18px rgba(15,45,75,.05)}details.policy summary{cursor:pointer;padding:12px 14px;font-size:12px;font-weight:900;color:#173d63}.policy-body{padding:0 14px 13px;color:#465f78;font-size:10px;line-height:1.5}.policy-body h4{color:#173d63;margin:10px 0 4px;font-size:11px}.policy-body ul{margin:4px 0 7px 18px;padding:0}
+    .empty{padding:18px;text-align:center;color:var(--muted);font-size:11px}.clickable{cursor:pointer}
+    dialog{border:1px solid var(--line);border-radius:18px;width:min(980px,95vw);max-height:88vh;padding:0;box-shadow:0 28px 80px rgba(10,35,64,.30);color:var(--ink)}dialog::backdrop{background:rgba(13,35,64,.36)}.dlg-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:flex-start;position:sticky;top:0;background:#fff;z-index:2}.dlg-body{padding:14px 16px;overflow:auto}.dlg-title{font-size:16px;font-weight:950}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.detail-box{border:1px solid var(--line);border-radius:11px;padding:9px}.detail-box span{font-size:8.5px;color:var(--muted);text-transform:uppercase;font-weight:900;letter-spacing:.05em}.detail-box strong{display:block;margin-top:3px;font-size:10.5px;word-break:break-word}.full{grid-column:1/-1}
+    .foot{margin-top:10px;text-align:center;color:#7b91a6;font-size:9px}
+    @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2,.hero{grid-template-columns:1fr}.decision-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:700px){.wrap{padding:10px}.topbar{padding:9px}.brand p{display:none}.kpis{grid-template-columns:repeat(2,1fr)}.standards,.decision-grid,.detail-grid{grid-template-columns:1fr}.toolbar input{min-width:0;width:100%}.table-wrap{max-height:none}.top-actions .btn:not(.btn-primary){display:none}}
   </style>
 </head>
 <body>
-
-<header>
-  <div class="brand">
-    <img src="img/tmp-quality.png" alt="TMP">
-    <div>
-      <h1>Sistema metrológico TMP · Criterios de aceptación</h1>
-      <span>Calibración, aptitud para uso y relación con tolerancias</span>
+  <header class="topbar">
+    <div class="brand">
+      <img src="img/tmp-quality.png" alt="TMP">
+      <div><h1>Criterios metrológicos TMP</h1><p>Vista auditable del núcleo · familia → procedimiento → patrón → incertidumbre → decisión</p></div>
     </div>
+    <div class="top-actions">
+      <button class="btn" id="btn-refresh">↻ Actualizar</button>
+      <a class="btn btn-primary" href="home.html">⌂ Volver al Home</a>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-main">
+        <div class="eyebrow">Control de configuración metrológica</div>
+        <h2>Lo que un auditor debe poder seguir sin interpretar el código</h2>
+        <p>Esta pantalla no sustituye los motores. Lee el catálogo real de familias y normas del núcleo metrológico y lo presenta de forma trazable. Los avisos señalan incoherencias o documentación pendiente; no cambian fórmulas ni decisiones.</p>
+        <div class="hero-pills">
+          <span class="pill info">Fuente: equipment_families.js</span>
+          <span class="pill info">Fuente: standards_catalog.js</span>
+          <span class="pill info">Fuente: calibration_strategy_rules.js</span>
+          <span class="pill info">Fuente: decision_engine.js</span>
+          <span class="pill gray" id="core-version">Core cargando…</span>
+        </div>
+      </div>
+      <div class="audit-summary">
+        <h3>Estado del sistema</h3>
+        <div class="audit-line"><span>Núcleo JS</span><strong id="audit-core">Comprobando…</strong></div>
+        <div class="audit-line"><span>Supabase</span><strong id="audit-db">Comprobando…</strong></div>
+        <div class="audit-line"><span>Última revisión visual</span><strong>01/10/2026</strong></div>
+        <div class="audit-line"><span>Objetivo operativo</span><strong>Blanco / negro</strong></div>
+      </div>
+    </section>
+
+    <section class="kpis">
+      <div class="kpi"><span>Familias en núcleo</span><strong id="kpi-families">–</strong><small>catálogo de equipos</small></div>
+      <div class="kpi"><span>Procedimientos específicos</span><strong id="kpi-specific">–</strong><small>sin pauta genérica</small></div>
+      <div class="kpi"><span>Dominios normativos</span><strong id="kpi-domains">–</strong><small>catálogo de normas</small></div>
+      <div class="kpi"><span>Documentación pendiente</span><strong id="kpi-pending">–</strong><small>dominios con PENDING</small></div>
+      <div class="kpi"><span>Patrones registrados</span><strong id="kpi-patterns">–</strong><small>Supabase</small></div>
+      <div class="kpi"><span>Trazabilidad incompleta</span><strong id="kpi-pattern-bad">–</strong><small>patrones sin U/fechas</small></div>
+    </section>
+
+    <section class="grid2">
+      <div class="panel">
+        <div class="panel-head">
+          <div><h3>Matriz de criterios por familia</h3><p class="panel-sub">Pulsa una fila para ver el detalle. Los datos proceden del núcleo actual, no de una tabla decorativa.</p></div>
+          <div class="toolbar">
+            <input id="search" placeholder="Buscar familia, motor, procedimiento, patrón…">
+            <select id="filter-group"><option value="">Todos los grupos</option></select>
+            <select id="filter-status"><option value="">Todos los estados</option><option value="OK">Configurado</option><option value="REVIEW">Revisar</option><option value="PENDING">Documentación pendiente</option><option value="GENERIC">Pauta genérica</option></select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Familia</th><th>Procedimiento</th><th>Motor / método</th><th>Patrones</th><th>Decisión</th><th>Estado</th></tr></thead>
+            <tbody id="family-rows"><tr><td colspan="6" class="empty">Cargando núcleo metrológico…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><h3>Hallazgos de configuración</h3><p class="panel-sub">Prioriza lo que puede afectar a trazabilidad, procedimiento o auditoría.</p></div></div>
+        <div id="findings" class="finding-list"><div class="finding info"><strong>Analizando…</strong><p>Comparando catálogos y reglas activas.</p></div></div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="panel">
+        <div class="panel-head"><div><h3>Modelo de decisión vigente</h3><p class="panel-sub">Separa la decisión de auditoría de la salida operativa para el operario.</p></div></div>
+        <div class="decision-grid">
+          <div class="decision-card"><div class="big" style="color:var(--green)">APTO</div><strong>Conforme</strong><p>El resultado cumple la regla de decisión aplicable.</p></div>
+          <div class="decision-card"><div class="big" style="color:var(--red)">NO APTO</div><strong>No conforme</strong><p>Un punto o función incumple los límites definidos.</p></div>
+          <div class="decision-card"><div class="big" style="color:var(--orange)">INDETERMINADO</div><strong>Solo auditoría</strong><p>Se conserva en el motor para trazabilidad cuando la incertidumbre solapa el límite.</p></div>
+          <div class="decision-card"><div class="big" style="color:var(--blue)">BINARIO</div><strong>Salida operativa TMP</strong><p>El operario recibe APTO / NO APTO / NO EVALUABLE; la decisión manual no sustituye al motor.</p></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><h3>Catálogo normativo</h3><p class="panel-sub">Muestra qué dominios están documentados y cuáles siguen declarados como pendientes en el código.</p></div></div>
+        <div id="standards" class="standards"><div class="empty">Cargando catálogo…</div></div>
+      </div>
+    </section>
+
+    <details class="policy">
+      <summary>Política general TMP de aceptación y uso · conservar como marco general</summary>
+      <div class="policy-body">
+        <h4>Calibración interna</h4>
+        <ul><li>Equipo identificado y patrón con trazabilidad vigente.</li><li>Resultados registrados por punto y procedimiento.</li><li>Un fallo en un punto obligatorio debe propagarse según la regla global de la familia.</li><li>Equipo NO APTO: bloquear uso, evaluar ajuste/reparación/baja y revisar impacto si procede.</li></ul>
+        <h4>Calibración externa</h4>
+        <ul><li>Revisar identificación, resultados, incertidumbre, factor de cobertura y trazabilidad declarada.</li><li>Un certificado técnicamente válido no implica que el equipo sea adecuado para cualquier tolerancia de producto.</li></ul>
+        <h4>Adecuación al uso</h4>
+        <p>La aptitud metrológica del equipo y su adecuación a la tolerancia de producto son decisiones relacionadas pero distintas. Las reglas 4:1 / 10:1 pueden utilizarse como criterio de capacidad de uso cuando el procedimiento correspondiente así lo establezca; no sustituyen a la regla de decisión de calibración.</p>
+        <h4>Principio de auditoría</h4>
+        <p>Las normas, patrones, puntos, repeticiones, incertidumbre y regla de decisión deben poder rastrearse hasta el motor/procedimiento vigente. Esta pantalla solo los expone: los cambios normativos deben hacerse en el núcleo versionado.</p>
+      </div>
+    </details>
+
+    <div class="foot">Talleres Mecánicos Paramio · Sistema de trazabilidad metrológica · Criterios auditables</div>
   </div>
-  <button class="btn" onclick="window.location.href='home.html'">
-    🏠 Volver al panel
-  </button>
-</header>
 
-<main>
+  <dialog id="detail-dialog">
+    <div class="dlg-head"><div><div class="dlg-title" id="dlg-title">Familia</div><div class="td-sub" id="dlg-sub"></div></div><button class="btn" id="dlg-close">Cerrar</button></div>
+    <div class="dlg-body"><div class="detail-grid" id="dlg-grid"></div><div id="dlg-notes" class="finding-list" style="margin-top:10px"></div></div>
+  </dialog>
 
-  <!-- ÍNDICE LATERAL -->
-  <aside class="toc">
-    <div class="toc-title">Índice rápido</div>
-    <ul>
-      <li><a href="#s1"><span class="dot"></span>1. Propósito y alcance</a></li>
-      <li><a href="#s2"><span class="dot"></span>2. Marco normativo y definiciones</a></li>
-      <li><a href="#s3"><span class="dot"></span>3. Calibración interna TMP</a></li>
-      <li><a href="#s4"><span class="dot"></span>4. Calibración externa</a></li>
-      <li><a href="#s5"><span class="dot"></span>5. Adecuación a la tolerancia (4:1 / 10:1)</a></li>
-      <li><a href="#s6"><span class="dot"></span>6. Criterios por tipo de instrumento</a></li>
-      <li><a href="#s7"><span class="dot"></span>7. Estados metrológicos TMP</a></li>
-      <li><a href="#s8"><span class="dot"></span>8. Equipos NO APTOS y trazabilidad</a></li>
-    </ul>
-  </aside>
+  <script type="module" src="config.mjs"></script>
+  <script type="module">
+    const CORE = "./calibraciones_mt15%20copy/core/metrology_core/";
+    const SPECIFIC_BUILDERS = new Set([
+      "PIE_DE_REY","MICROMETRO_EXTERIOR","MICROMETRO_INTERIOR_3_CONTACTOS","TAMPON_LISO_PNP","TAMPON_ROSCADO_PNP",
+      "RELOJ_COMPARADOR_CENTESIMAL","RELOJ_COMPARADOR_MILESIMAL","SONDA_ALTURA","GRAMIL","LLAVE_DINAMOMETRICA","BALANZA"
+    ]);
+    const DOMAIN_BY_GROUP = {TORQUE:"TORQUE",MASA:"MASS",DUREZA:"HARDNESS",SUPERFICIE:"ROUGHNESS"};
+    const state={families:[],standards:{},strategies:{},db:{patterns:[],physicalFamilies:[],instruments:[]}};
+    const $=s=>document.querySelector(s);
+    const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"','&quot;');
+    const arr=v=>Array.isArray(v)?v:(v?[v]:[]);
+    const nice=v=>String(v||"—").replaceAll("_"," ");
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <div class="content">
+    async function loadCore(){
+      try{
+        const [famMod,stdMod,stratMod,decisionMod] = await Promise.all([
+          import(CORE+"equipment_families.js"),
+          import(CORE+"standards_catalog.js"),
+          import(CORE+"calibration_strategy_rules.js"),
+          import(CORE+"decision_engine.js")
+        ]);
+        state.families = Object.entries(famMod.TMP_EQUIPMENT_FAMILIES||{}).map(([key,cfg])=>({key,...cfg}));
+        state.standards = stdMod.STANDARDS_CATALOG||{};
+        state.strategies = stratMod.CALIBRATION_STRATEGY_RULES||{};
+        $("#audit-core").textContent="OK · módulos cargados"; $("#audit-core").style.color="var(--green)";
+        $("#core-version").textContent="Decision Engine V3 · Procedure Builder V1";
+        $("#kpi-families").textContent=state.families.length;
+        $("#kpi-specific").textContent=state.families.filter(f=>SPECIFIC_BUILDERS.has(f.key)).length;
+        $("#kpi-domains").textContent=Object.keys(state.standards).length;
+        $("#kpi-pending").textContent=Object.values(state.standards).filter(s=>String(s.status||"").includes("PENDING")).length;
+        populateFilters();renderFamilies();renderStandards();renderFindings();
+      }catch(e){
+        console.error("Error cargando núcleo en criterios:",e);
+        $("#audit-core").textContent="ERROR de carga"; $("#audit-core").style.color="var(--red)";
+        $("#family-rows").innerHTML='<tr><td colspan="6" class="empty">No se pudo cargar el núcleo. Revise la ruta del proyecto.</td></tr>';
+      }
+    }
 
-    <!-- 1. Propósito y alcance -->
-    <section id="s1">
-      <h2><span class="idx">1</span> Propósito y alcance</h2>
-      <p>
-        Este documento define el <b>sistema metrológico de Talleres Mecánicos Paramio (TMP)</b>:
-        criterios de calibración, aceptación y uso de los instrumentos de medida, así como su relación
-        con las tolerancias de los productos fabricados.
-      </p>
-      <p>
-        Aplica a todos los equipos de medida y control utilizados para:
-      </p>
-      <ul>
-        <li>Verificación y aceptación de producto frente a plano / especificación.</li>
-        <li>Ajuste de procesos en taller de mecanizado.</li>
-        <li>Ensayos y medidas en el laboratorio interno TMP.</li>
-        <li>Patrones de trabajo y patrones de referencia.</li>
-      </ul>
+    async function waitForSupabase(){for(let i=0;i<40;i++){if(window.supabase)return window.supabase;await new Promise(r=>setTimeout(r,100));}return null;}
+    async function loadDb(){
+      const sb=await waitForSupabase();
+      if(!sb){$("#audit-db").textContent="No disponible";$("#audit-db").style.color="var(--orange)";return;}
+      try{
+        const [pats,fams,insts] = await Promise.all([
+          sb.from("patrones").select("*"),
+          sb.from("familias_instrumentos").select("*"),
+          sb.from("instrumentos").select("id,codigo,familia_id,estado,ubicacion_actual")
+        ]);
+        if(pats.error) throw pats.error;
+        state.db.patterns=pats.data||[];state.db.physicalFamilies=fams.data||[];state.db.instruments=insts.data||[];
+        $("#audit-db").textContent="Online · datos reales";$("#audit-db").style.color="var(--green)";
+        $("#kpi-patterns").textContent=state.db.patterns.length;
+        const incomplete=state.db.patterns.filter(p=>!(Number(p.u_k2)>0)||!p.fecha_calibracion||!p.proxima_calibracion).length;
+        $("#kpi-pattern-bad").textContent=incomplete;
+        renderFindings();
+      }catch(e){console.warn(e);$("#audit-db").textContent="Parcial / revisar";$("#audit-db").style.color="var(--orange)";}
+    }
 
-      <div class="callout info">
-        <div class="callout-icon">ℹ️</div>
-        <div>
-          <b>Idea clave:</b>  
-          <br>Primero se verifica que el equipo está <b>correctamente calibrado</b> (interna o externamente),
-          y <b>después</b> se decide si es <b>adecuado para la tolerancia</b> del producto donde se usará.
-        </div>
-      </div>
-    </section>
+    function familyStatus(f){
+      const issues=[];
+      if(!SPECIFIC_BUILDERS.has(f.key)) issues.push({code:"GENERIC",text:"No aparece con pauta específica en Procedure Builder V1; puede caer en pauta genérica."});
+      const domain=DOMAIN_BY_GROUP[f.grupo];
+      if(domain && String(state.standards[domain]?.status||"").includes("PENDING")) issues.push({code:"PENDING",text:`El dominio ${domain} está declarado PENDING_DOCUMENTATION en standards_catalog.js.`});
+      if(f.key==="TAMPON_ROSCADO_PNP" && arr(f.patrones_requeridos).includes("RODILLOS_ROSCA")) issues.push({code:"REVIEW",text:"equipment_families.js declara RODILLOS_ROSCA como patrón requerido, pero el procedimiento de rosca los trata como útil de medición no bloqueante. Debe unificarse antes de cerrar MT16."});
+      const strategy=state.strategies[f.key];
+      if(strategy && strategy.procedimiento && f.procedimiento_base && strategy.procedimiento!==f.procedimiento_base) issues.push({code:"REVIEW",text:`Procedimiento distinto entre catálogo (${f.procedimiento_base}) y estrategia (${strategy.procedimiento}).`});
+      let status="OK";
+      if(issues.some(i=>i.code==="REVIEW")) status="REVIEW";
+      else if(issues.some(i=>i.code==="PENDING")) status="PENDING";
+      else if(issues.some(i=>i.code==="GENERIC")) status="GENERIC";
+      return {status,issues};
+    }
+    function statusPill(st){return st==="OK"?'<span class="pill ok">Configurado</span>':st==="REVIEW"?'<span class="pill bad">Revisar</span>':st==="PENDING"?'<span class="pill warn">Doc. pendiente</span>':'<span class="pill gray">Pauta genérica</span>';}
 
-    <!-- 2. Marco normativo y definiciones -->
-    <section id="s2">
-      <h2><span class="idx">2</span> Marco normativo y definiciones básicas</h2>
+    function populateFilters(){
+      const groups=[...new Set(state.families.map(f=>f.grupo).filter(Boolean))].sort();
+      $("#filter-group").innerHTML='<option value="">Todos los grupos</option>'+groups.map(g=>`<option>${esc(g)}</option>`).join("");
+    }
+    function filteredFamilies(){
+      const q=$("#search").value.trim().toLowerCase(),g=$("#filter-group").value,st=$("#filter-status").value;
+      return state.families.filter(f=>{
+        const fs=familyStatus(f).status;
+        const blob=[f.key,f.nombre,f.grupo,f.procedimiento_base,f.motor,f.metodo,...arr(f.patrones_requeridos),f.decision_global].join(" ").toLowerCase();
+        return (!q||blob.includes(q))&&(!g||f.grupo===g)&&(!st||fs===st);
+      });
+    }
+    function renderFamilies(){
+      const rows=filteredFamilies();
+      $("#family-rows").innerHTML=rows.length?rows.map(f=>{
+        const fs=familyStatus(f);const strategy=state.strategies[f.key];
+        return `<tr class="clickable" data-family="${esc(f.key)}"><td><div class="td-main">${esc(f.nombre||f.key)}</div><div class="td-sub mono">${esc(f.key)} · ${esc(f.grupo||"—")}</div></td><td><div class="td-main mono">${esc(f.procedimiento_base||"—")}</div><div class="td-sub">${strategy?esc(strategy.norma||""):""}</div></td><td><div class="td-main mono">${esc(f.motor||"—")}</div><div class="td-sub mono">${esc(f.metodo||"—")}</div></td><td><div class="chips">${arr(f.patrones_requeridos).map(x=>`<span class="chip">${esc(nice(x))}</span>`).join("")||'<span class="chip">Sin definir</span>'}</div></td><td><div class="mono">${esc(nice(f.decision_global||strategy?.decision_global?.regla||"—"))}</div><div class="td-sub">${f.repeticiones_defecto?`${f.repeticiones_defecto} rep.`:""}</div></td><td>${statusPill(fs.status)}</td></tr>`;
+      }).join(""):'<tr><td colspan="6" class="empty">No hay familias que coincidan con el filtro.</td></tr>';
+      document.querySelectorAll("[data-family]").forEach(tr=>tr.addEventListener("click",()=>openDetail(tr.dataset.family)));
+    }
 
-      <h3>2.1 Referencias</h3>
-      <p>El sistema metrológico TMP toma como referencia, entre otras:</p>
-      <ul>
-        <li>Requisitos de gestión de la medición de sistemas de calidad (ej. ISO 9001).</li>
-        <li>Buenas prácticas de laboratorios de calibración (ej. ISO/IEC 17025).</li>
-        <li>Recomendaciones de gestión de equipos de medida (ej. ISO 10012, VIM).</li>
-        <li>Especificaciones de clientes y normas internas de TMP.</li>
-      </ul>
+    function renderStandards(){
+      const cards=Object.entries(state.standards).map(([key,s])=>{
+        const pending=String(s.status||"").includes("PENDING");
+        const refs=[s.base_standard,...arr(s.quality_system),...arr(s.likely_standards)].filter(Boolean);
+        return `<div class="standard-card"><div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><h4>${esc(s.title||key)}</h4>${pending?'<span class="pill warn">Pendiente</span>':'<span class="pill ok">Documentado</span>'}</div><p><b>Dominio:</b> ${esc(s.domain||key)}${refs.length?`<br><b>Referencias:</b> ${esc(refs.join(" · "))}`:""}</p></div>`;
+      });
+      $("#standards").innerHTML=cards.join("")||'<div class="empty">Sin catálogo normativo.</div>';
+    }
 
-      <h3>2.2 Conceptos utilizados en este documento</h3>
-      <ul>
-        <li><b>Error de indicación</b>: diferencia entre el valor indicado por el instrumento y el valor
-          de referencia del patrón.</li>
-        <li><b>Incertidumbre de medida</b>: parámetro que caracteriza la dispersión de valores atribuidos
-          a un mensurando. En certificados se expresa normalmente como
-          <code>U (k = 2)</code> (95 % aprox.).</li>
-        <li><b>Tolerancia del producto (Tpieza)</b>: campo de aceptación en plano (ej. 20,00 ± 0,01 mm → T = 0,02 mm).</li>
-        <li><b>Capacidad del instrumento</b>: aptitud del equipo, considerando su error e incertidumbre,
-          para decidir aceptación/rechazo de pieza sin comprometer la calidad.</li>
-        <li><b>Relación instrumento / tolerancia</b>: cociente entre la tolerancia de pieza y la
-          incertidumbre o error máximo permitido del instrumento.</li>
-      </ul>
+    function renderFindings(){
+      const findings=[];
+      const thread=state.families.find(f=>f.key==="TAMPON_ROSCADO_PNP");
+      if(thread && arr(thread.patrones_requeridos).includes("RODILLOS_ROSCA")) findings.push({type:"bad",title:"MT16 · patrón vs accesorio",text:"El catálogo de familias todavía marca RODILLOS_ROSCA como patrón requerido, mientras el procedimiento experto de tampón roscado define los rodillos como útiles de medición no bloqueantes. Esta incoherencia debe corregirse antes de certificar MT16."});
+      Object.entries(state.standards).forEach(([k,s])=>{if(String(s.status||"").includes("PENDING")) findings.push({type:"warn",title:`${k} · documentación pendiente`,text:`El propio standards_catalog.js mantiene ${k} como PENDING_DOCUMENTATION. Puede existir una pauta de cálculo, pero la cobertura normativa no está declarada cerrada.`});});
+      const generic=state.families.filter(f=>!SPECIFIC_BUILDERS.has(f.key));
+      if(generic.length) findings.push({type:"warn",title:`${generic.length} familias sin pauta específica en Procedure Builder V1`,text:`${generic.map(f=>f.nombre).join(", ")}. Si se enrutan por ese builder, pueden caer en GENERIC-TMP y deben revisarse antes de uso productivo.`});
+      if(state.db.patterns.length){const bad=state.db.patterns.filter(p=>!(Number(p.u_k2)>0)||!p.fecha_calibracion||!p.proxima_calibracion);if(bad.length)findings.push({type:"warn",title:`${bad.length} patrones con trazabilidad incompleta`,text:"Falta U(k=2), fecha de calibración o próxima calibración en Supabase. Criterios no modifica esos valores; deben venir del certificado o de la gestión de patrones."});else findings.push({type:"ok",title:"Patrones con datos básicos completos",text:"Los patrones cargados tienen U(k=2), fecha de calibración y próxima calibración informadas."});}
+      findings.push({type:"ok",title:"Decisión operativa centralizada",text:"decision_engine.js mantiene resultado de auditoría y resultado operativo; el operario no necesita decidir manualmente la conformidad."});
+      $("#findings").innerHTML=findings.map(f=>`<div class="finding ${f.type}"><strong>${esc(f.title)}</strong><p>${esc(f.text)}</p></div>`).join("");
+    }
 
-      <div class="callout info">
-        <div class="callout-icon">📏</div>
-        <div>
-          A efectos prácticos, en TMP se utilizan reglas sencillas para relacionar
-          <b>tolerancia de pieza</b> e <b>incertidumbre / error del instrumento</b> (reglas 4:1, 5:1, 10:1).
-        </div>
-      </div>
-    </section>
+    function openDetail(key){
+      const f=state.families.find(x=>x.key===key);if(!f)return;const fs=familyStatus(f),strategy=state.strategies[key];
+      $("#dlg-title").textContent=f.nombre||key;$("#dlg-sub").textContent=`${key} · ${f.grupo||"—"}`;
+      const boxes=[
+        ["Procedimiento base",f.procedimiento_base],["Motor",f.motor],["Método",f.metodo],["Unidad",f.unidad],["Repeticiones",f.repeticiones_defecto||strategy?.repeticiones],["Regla global",f.decision_global||strategy?.decision_global?.regla],
+        ["Patrones requeridos",arr(f.patrones_requeridos).join(" · ")],["Patrones opcionales",arr(f.patrones_opcionales).join(" · ")||"—"],["Datos requeridos",arr(f.requiere).join(" · ")||"—"],["Norma estrategia",strategy?.norma||"—"]
+      ];
+      $("#dlg-grid").innerHTML=boxes.map(([a,b])=>`<div class="detail-box"><span>${esc(a)}</span><strong>${esc(nice(b||"—"))}</strong></div>`).join("");
+      $("#dlg-notes").innerHTML=fs.issues.length?fs.issues.map(i=>`<div class="finding ${i.code==="REVIEW"?'bad':i.code==="PENDING"||i.code==="GENERIC"?'warn':'info'}"><strong>${esc(i.code)}</strong><p>${esc(i.text)}</p></div>`).join(""):'<div class="finding ok"><strong>Sin incoherencias detectadas en esta vista</strong><p>La configuración básica de catálogo/estrategia no presenta avisos automáticos.</p></div>';
+      $("#detail-dialog").showModal();
+    }
 
-    <!-- 3. Calibración interna -->
-    <section id="s3">
-      <h2><span class="idx">3</span> Calibración interna TMP · Criterios de aceptación</h2>
-
-      <h3>3.1 Condiciones generales</h3>
-      <ul>
-        <li>El instrumento debe estar <b>identificado</b> con:
-          código TMP, descripción y estado de calibración.</li>
-        <li>Se calibra contra <b>patrones internos</b> con trazabilidad vigente
-          (certificados en plazo y aceptados).</li>
-        <li>Se siguen instrucciones internas de calibración TMP
-          (puntos de medida, procedimiento, condiciones ambientales, etc.).</li>
-        <li>Los resultados se registran en el sistema TMP y se emite
-          <b>informe o ficha de calibración interno</b>.</li>
-      </ul>
-
-      <h3>3.2 Criterio de aceptación metrológica (calibración interna)</h3>
-      <p>
-        Un instrumento se considera <span class="tag pill-ok">APTO (calibración interna)</span> cuando:
-      </p>
-      <ul>
-        <li>En todos los puntos ensayados se cumple:
-          <br><code>|Error observado| ≤ Error máximo permitido (EMP TMP)</code></li>
-        <li>La <b>deriva</b> respecto a la calibración anterior está dentro de un límite definido
-          (ejemplo típico: ≤ 70 % del EMP o según criterio interno TMP).</li>
-        <li>La repetibilidad e histéresis están dentro de los límites fijados en el procedimiento.</li>
-        <li>No se observan daños mecánicos, holguras o defectos que comprometan la medida.</li>
-      </ul>
-
-      <p>
-        Se considera <span class="tag pill-bad">NO APTO (calibración interna)</span> cuando:
-      </p>
-      <ul>
-        <li>En algún punto de calibración:
-          <br><code>|Error observado| &gt; EMP TMP</code></li>
-        <li>La deriva es superior al límite establecido o se observa
-          comportamiento inestable (saltos, holguras, histéresis excesiva).</li>
-        <li>Se detectan golpes, deterioro o cualquier defecto que pueda
-          afectar al uso en producción.</li>
-      </ul>
-
-      <h3>3.3 Acciones en caso de NO APTO (calibración interna)</h3>
-      <ul>
-        <li>Marcar el equipo como
-          <span class="tag pill-bad">FUERA DE CALIBRACIÓN / NO UTILIZAR</span>
-          en la app y físicamente.</li>
-        <li>Evaluar:
-          <ul>
-            <li>Ajuste / reparación y nueva calibración.</li>
-            <li>Restricción de uso a determinados rangos (si se justifica).</li>
-            <li><b>Baja técnica</b> si no es viable la recuperación.</li>
-          </ul>
-        </li>
-        <li>Analizar si es necesario revisar producto medido anteriormente
-          con ese equipo (ver sección 8).</li>
-      </ul>
-    </section>
-
-    <!-- 4. Calibración externa -->
-    <section id="s4">
-      <h2><span class="idx">4</span> Calibración externa · Revisión de certificados</h2>
-
-      <h3>4.1 Requisitos del laboratorio externo</h3>
-      <ul>
-        <li>Laboratorio acreditado o evaluado según criterios equivalentes
-          (ej. ISO/IEC 17025) cuando aplique.</li>
-        <li>Certificados con:
-          <ul>
-            <li>Identificación del instrumento (código TMP si es posible).</li>
-            <li><b>Resultados de calibración</b> (errores) por punto.</li>
-            <li><b>Incertidumbre expandida</b> y factor de cobertura <code>k</code>.</li>
-            <li>Condiciones de calibración y trazabilidad declarada.</li>
-          </ul>
-        </li>
-      </ul>
-
-      <h3>4.2 Criterio de aceptación del instrumento (certificado externo)</h3>
-      <p>
-        Al recibir un certificado externo, Calidad / Metrología realiza una
-        revisión y decide el estado TMP:
-      </p>
-      <div class="pill-row">
-        <span class="tag pill-ok">Certificado aceptado → Equipo APTO</span>
-        <span class="tag pill-warn">Certificado aceptado con restricciones</span>
-        <span class="tag pill-bad">Certificado NO aceptado → Equipo NO APTO</span>
-      </div>
-
-      <p>Se acepta el equipo cuando se cumple:</p>
-      <ul>
-        <li>Los errores declarados están dentro del <b>EMP TMP</b> para ese instrumento.</li>
-        <li>La incertidumbre del laboratorio es coherente con el uso previsto
-          (se revisa en el punto 5).</li>
-        <li>No existen observaciones limitantes del tipo:
-          “solo indicativo”, “no apto para aceptación de producto”, etc.</li>
-      </ul>
-
-      <p>No se acepta el equipo cuando:</p>
-      <ul>
-        <li>El certificado indica claramente que el instrumento <b>no es apto</b> para su uso normal.</li>
-        <li>Los errores están fuera de los límites internos TMP.</li>
-        <li>La incertidumbre es excesiva para las tolerancias donde se usa
-          (ver criterio 4:1 / 10:1 en sección 5).</li>
-      </ul>
-
-      <div class="callout warn">
-        <div class="callout-icon">⚠️</div>
-        <div>
-          Un certificado externo puede estar técnicamente correcto,
-          pero el instrumento <b>no ser adecuado</b> para ciertas tolerancias exigentes.
-          En ese caso, se acepta la calibración pero se <b>restringe el uso</b> del equipo.
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. Adecuación instrumento/tolerancia -->
-    <section id="s5">
-      <h2><span class="idx">5</span> Adecuación del instrumento a la tolerancia (4:1 / 10:1)</h2>
-
-      <h3>5.1 Regla general TMP</h3>
-      <p>
-        Además de estar calibrado, un equipo debe ser <b>adecuado a la tolerancia</b> del producto.
-        TMP adopta la siguiente regla general:
-      </p>
-
-      <table>
-        <thead>
-        <tr>
-          <th>Relación Tpieza / Uinstrumento</th>
-          <th>Criterio TMP</th>
-          <th>Uso recomendado</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td>&ge; 10 : 1</td>
-          <td><span class="status-ok">Óptimo</span></td>
-          <td>Uso sin restricciones para aceptación de producto.</td>
-        </tr>
-        <tr>
-          <td>entre 4 : 1 y 10 : 1</td>
-          <td><span class="status-warn">Aceptable</span></td>
-          <td>Uso permitido; considerar margen de seguridad y método de control.</td>
-        </tr>
-        <tr>
-          <td>&lt; 4 : 1</td>
-          <td><span class="status-bad">No recomendado</span></td>
-          <td>En principio NO apto para liberar producto; solo uso condicionado / ajustes.</td>
-        </tr>
-        </tbody>
-      </table>
-
-      <p>
-        Donde:
-      </p>
-      <ul>
-        <li><b>Tpieza</b>: tolerancia total de la cota (ej. ±0,01 → T = 0,02 mm).</li>
-        <li><b>Uinstrumento</b>: incertidumbre expandida del sistema de medida
-          (calibración + métodos internos), aproximada por la incertidumbre del certificado
-          más el efecto de uso.</li>
-      </ul>
-
-      <h3>5.2 Ejemplo práctico TMP (dimensional)</h3>
-
-      <p>
-        Pieza con cota 20,00 ± 0,01 mm → <b>Tpieza = 0,02 mm</b>.
-      </p>
-      <ul>
-        <li>Micrómetro A: certificado con <b>U = 0,002 mm</b>  
-          → Tpieza / U = 0,02 / 0,002 = 10 → <b>Relación 10:1 (Óptimo)</b>.</li>
-        <li>Micrómetro B: certificado con <b>U = 0,005 mm</b>  
-          → Tpieza / U = 0,02 / 0,005 = 4 → <b>Relación 4:1 (Aceptable pero ajustado)</b>.</li>
-        <li>Pie de rey C: certificado con <b>U = 0,01 mm</b>  
-          → Tpieza / U = 0,02 / 0,01 = 2 → <b>Relación 2:1 (No recomendado para aceptación)</b>.</li>
-      </ul>
-
-      <div class="callout info">
-        <div class="callout-icon">🧠</div>
-        <div>
-          En TMP, para cotas críticas o piezas de cliente exigente,
-          se priorizarán relaciones cercanas a <b>10:1</b> y se evitará trabajar por debajo de <b>4:1</b>
-          salvo justificación explícita.
-        </div>
-      </div>
-
-      <h3>5.3 Uso condicionado</h3>
-      <p>
-        En algunos casos puede aceptarse un instrumento con relación <b>&lt; 4:1</b> siempre que:
-      </p>
-      <ul>
-        <li>Se utilice como <b>equipo de preajuste</b> o control no vinculante a liberación final.</li>
-        <li>Exista un <b>control reforzado</b> posterior con equipo más preciso
-          (por ejemplo en laboratorio).</li>
-        <li>Exista una <b>justificación documentada</b> y aceptada por Calidad / cliente.</li>
-      </ul>
-    </section>
-
-    <!-- 6. Criterios por tipo -->
-    <section id="s6">
-      <h2><span class="idx">6</span> Criterios por tipo de instrumento (orientativo TMP)</h2>
-
-      <h3>6.1 Instrumentos dimensionales en taller</h3>
-      <ul>
-        <li><b>Pies de rey</b>:
-          <ul>
-            <li>Uso general para tolerancias medias / amplias.</li>
-            <li>Evitar utilizarlos para decisiones finales de cotas muy ajustadas
-              (&lt; 0,02 mm) salvo confirmación con micrómetro.</li>
-          </ul>
-        </li>
-        <li><b>Micrómetros</b>:
-          <ul>
-            <li>Equipo preferente para tolerancias finas.</li>
-            <li>Se comprobará que la relación Tpieza / U es
-              &ge; 4:1 (ideal &ge; 10:1) para cotas críticas.</li>
-          </ul>
-        </li>
-        <li><b>Relojes comparadores, palpadores, etc.</b>:
-          <ul>
-            <li>Se utilizarán principalmente como comparadores respecto a un patrón o útil.</li>
-            <li>Importa tanto su resolución como su error y linealidad.</li>
-          </ul>
-        </li>
-      </ul>
-
-      <h3>6.2 Elementos P/NP, tampones, anillos, galgas</h3>
-      <ul>
-        <li>Se consideran <b>equipos de verificación directa de tolerancia</b>:
-          el fabricante define ya una parte del criterio.</li>
-        <li>La calibración interna/externa verificará la cota nominal y los desvíos
-          según plano de fabricación de la galga/tampón.</li>
-        <li>Si los desvíos de la galga están fuera de lo permitido,
-          el útil se marcará como <b>NO APTO</b> y no se utilizará para aceptar producto.</li>
-      </ul>
-
-      <h3>6.3 Llaves dinamométricas</h3>
-      <ul>
-        <li>Se define un campo de trabajo (por ejemplo 20–200 Nm).</li>
-        <li>El EMP TMP se fija como un porcentaje del valor (ej. ±4 %).</li>
-        <li>La relación tolerancia / incertidumbre se verificará en función
-          de la tolerancia exigida al par de apriete de la unión.</li>
-        <li>Para uniones críticas, se recomendará trabajar con llaves cuya discrepancia
-          máxima sea significativamente inferior a la tolerancia de par permitida por el cliente.</li>
-      </ul>
-
-      <h3>6.4 Balanzas / básculas</h3>
-      <ul>
-        <li>Se verifica:
-          <ul>
-            <li>Error en varios puntos de carga.</li>
-            <li>Repetibilidad en cargas representativas.</li>
-          </ul>
-        </li>
-        <li>La relación Tpieza / U se evaluará en función de la tolerancia de masa
-          permitida en plano o especificación (ej. piezas por peso).</li>
-        <li>Para pesadas críticas, se utilizarán equipos con resolución e incertidumbre
-          claramente por debajo de la tolerancia de producto.</li>
-      </ul>
-
-      <h3>6.5 Durometros / equipos de dureza</h3>
-      <ul>
-        <li>La aceptación se basará en:
-          <ul>
-            <li>Resultados con bloque patrón (o bloques) dentro de tolerancia.</li>
-            <li>Repetibilidad aceptable en varias penetraciones.</li>
-          </ul>
-        </li>
-        <li>Para validación de producto se considerará la tolerancia de dureza especificada
-          y la incertidumbre del ensayo para valorar si el equipo es adecuado.</li>
-      </ul>
-
-      <div class="callout info">
-        <div class="callout-icon">📌</div>
-        <div>
-          Estos criterios por tipo son orientativos. TMP puede desarrollar,
-          si lo considera necesario, anexos específicos por familia de instrumentos
-          con valores numéricos y ejemplos concretos.
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. Estados metrológicos -->
-    <section id="s7">
-      <h2><span class="idx">7</span> Estados metrológicos TMP y relación con la app</h2>
-
-      <p>Los estados del equipo que aparecen en la aplicación de trazabilidad TMP se interpretan así:</p>
-
-      <ul>
-        <li><span class="tag pill-ok">CALIBRADO / APTO</span>  
-          → Equipo calibrado dentro de límites y considerado adecuado para el uso previsto.</li>
-        <li><span class="tag pill-warn">PRÓXIMA CALIBRACIÓN</span>  
-          → Dentro de plazo, pero la fecha de próxima calibración está próxima
-          (gestión de alertas en el dashboard).</li>
-        <li><span class="tag pill-bad">FUERA DE CALIBRACIÓN</span>  
-          → Plazo vencido o calibración NO APTO → no se puede utilizar para aceptar producto.</li>
-        <li><span class="tag pill-bad">BAJA TÉCNICA</span>  
-          → Equipo retirado definitivamente (solo puede mantenerse para usos no metrológicos claramente marcados).</li>
-      </ul>
-
-      <div class="callout info">
-        <div class="callout-icon">🖥️</div>
-        <div>
-          El <b>home</b> y las distintas pantallas de la app TMP muestran estos estados y alertas
-          de forma visual para que los operarios identifiquen rápidamente
-          qué equipos pueden utilizar y cuáles deben bloquear.
-        </div>
-      </div>
-    </section>
-
-    <!-- 8. No aptos y trazabilidad -->
-    <section id="s8">
-      <h2><span class="idx">8</span> Equipos NO APTOS y trazabilidad al producto</h2>
-
-      <h3>8.1 Gestión de equipos NO APTOS</h3>
-      <ul>
-        <li>Cuando un equipo pase a estado
-          <span class="tag pill-bad">FUERA DE CALIBRACIÓN</span> o
-          <span class="tag pill-bad">NO APTO</span>:
-          <ul>
-            <li>Se identifica físicamente (etiqueta / precinto).</li>
-            <li>Se actualiza su estado en la app TMP.</li>
-            <li>Se retira de los puestos de trabajo donde pudiera utilizarse por error.</li>
-          </ul>
-        </li>
-        <li>Se evalúa si el equipo ha sido utilizado en el período afectado
-          y si es necesario revisar producto o revalidar lotes.</li>
-      </ul>
-
-      <h3>8.2 Trazabilidad con la app TMP</h3>
-      <p>
-        La app de trazabilidad TMP, a través de los movimientos y estados,
-        permite responder a preguntas típicas de auditoría:
-      </p>
-      <ul>
-        <li>¿Qué equipo se utilizó para medir un lote concreto?</li>
-        <li>¿Ese equipo estaba calibrado y era adecuado a la tolerancia en ese momento?</li>
-        <li>Si un equipo resultó NO APTO, ¿qué productos podrían verse afectados?</li>
-      </ul>
-
-      <div class="callout ok">
-        <div class="callout-icon">✅</div>
-        <div>
-          La combinación de:
-          <b>criterios definidos</b> + <b>calibraciones registradas</b> +
-          <b>trazabilidad en la app TMP</b> constituye el núcleo del
-          <b>sistema metrológico de TMP</b> y su defensa ante clientes y auditorías.
-        </div>
-      </div>
-
-      <p class="muted">
-        Este documento puede complementarse con anexos numéricos específicos
-        (valores de EMP por instrumento, tablas de relación Tpieza/U, ejemplos
-        por cliente, etc.) según crezca el sistema metrológico de TMP.
-      </p>
-    </section>
-
-  </div>
-</main>
-
+    $("#search").addEventListener("input",renderFamilies);$("#filter-group").addEventListener("change",renderFamilies);$("#filter-status").addEventListener("change",renderFamilies);
+    $("#dlg-close").addEventListener("click",()=>$("#detail-dialog").close());
+    $("#btn-refresh").addEventListener("click",async()=>{await loadDb();renderFamilies();renderStandards();renderFindings();});
+    await loadCore();await loadDb();
+  </script>
 </body>
 </html>
