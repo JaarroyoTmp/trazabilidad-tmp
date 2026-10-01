@@ -80,6 +80,17 @@
     padding:10px 14px;border-radius:10px;font-size:12px;box-shadow:0 8px 25px rgba(0,0,0,.45);z-index:50;display:none;
   }
   .toast.error{border-color:#ff6b6b;color:#ffdede}
+
+  /* TMP 2026-10-01 · Control metrológico de patrones */
+  .pat-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:10px 0 12px}
+  .pat-kpi{border:1px solid #2a537a;border-radius:10px;padding:9px 10px;background:#0b2945}
+  .pat-kpi .n{font-size:20px;font-weight:800;line-height:1.1}.pat-kpi .t{font-size:10px;color:#9fc5e8;margin-top:3px}
+  .trace-ok{color:#91f5b5}.trace-warn{color:#ffd27a}.trace-bad{color:#ff9696}
+  .field-help{font-size:10px;color:#8eb4d4;margin-top:4px;line-height:1.35}
+  .metrology-note{border:1px solid #315f85;background:#0b2945;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:11px;color:#bad7ee;line-height:1.45}
+  .metrology-note strong{color:#fff}
+  .required-flag{font-size:10px;color:#ffd27a;font-weight:700}
+  @media(max-width:900px){.pat-summary{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -100,6 +111,13 @@
         <button id="btnRefrescarPat" class="btn secondary sm">Refrescar</button>
       </div>
     </div>
+    <div class="pat-summary">
+      <div class="pat-kpi"><div class="n" id="patKpiTotal">0</div><div class="t">Patrones registrados</div></div>
+      <div class="pat-kpi"><div class="n trace-ok" id="patKpiVigentes">0</div><div class="t">Vigentes</div></div>
+      <div class="pat-kpi"><div class="n trace-warn" id="patKpiProximos">0</div><div class="t">Próximos a vencer</div></div>
+      <div class="pat-kpi"><div class="n trace-bad" id="patKpiFuera">0</div><div class="t">Fuera de calibración</div></div>
+      <div class="pat-kpi"><div class="n trace-warn" id="patKpiIncompletos">0</div><div class="t">Trazabilidad incompleta</div></div>
+    </div>
     <div style="margin-top:8px;max-height:360px;overflow:auto;border-radius:12px;border:1px solid #2a537a">
       <table>
         <thead>
@@ -111,6 +129,7 @@
             <th>F. última cal.</th>
             <th>Próx. cal.</th>
             <th>Estado</th>
+            <th>Trazabilidad</th>
           </tr>
         </thead>
         <tbody id="patronesRows"></tbody>
@@ -136,12 +155,14 @@
       </div>
       <div>
         <label>Familia / Tipo</label>
-        <input id="patFamilia" type="text" placeholder="Ej.: Bloques, Banco, Pesas, Roscas..." />
+        <input id="patFamilia" type="text" list="patFamiliasList" placeholder="Selecciona o escribe familia / tipo..." />
+        <datalist id="patFamiliasList"></datalist>
       </div>
 
       <div>
-        <label>Incertidumbre base U(k=2)</label>
-        <input id="patUk2" type="text" placeholder="Ej.: 0.002 mm" />
+        <label>Incertidumbre expandida U(k=2) <span class="required-flag">· dato de certificado</span></label>
+        <input id="patUk2" type="text" inputmode="decimal" placeholder="Ej.: 0.002" />
+        <div class="field-help">Introduce el valor trazable del certificado del patrón. No se calcula ni se inventa desde esta pantalla.</div>
       </div>
       <div>
         <label>Fecha última calibración</label>
@@ -162,9 +183,10 @@
       </div>
       <div style="grid-column:1/-1">
         <label>Nota / Trazabilidad</label>
-        <textarea id="patNota" rows="2" placeholder="Información sobre certificado, referencia de laboratorio, observaciones de uso, etc."></textarea>
+        <textarea id="patNota" rows="2" placeholder="Nº de certificado, laboratorio emisor, correcciones aplicables, observaciones o restricciones de uso..."></textarea>
       </div>
     </div>
+    <div class="metrology-note"><strong>Regla TMP:</strong> esta ficha identifica la referencia trazable y su U(k=2). Un patrón sin incertidumbre válida, fecha de calibración o próxima calibración se marcará como <strong>TRAZABILIDAD INCOMPLETA</strong>. La pantalla no modifica fórmulas de MT15/MT16.</div>
     <div class="row" style="margin-top:12px;justify-content:flex-end">
       <button id="btnPatNuevo" class="btn secondary">Nuevo</button>
       <button id="btnPatEliminar" class="btn danger">Eliminar</button>
@@ -184,6 +206,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const state = {
   online:false,
   patrones:[],
+  familias:[],
   selectedId:null
 };
 
@@ -219,6 +242,34 @@ function parseNum(v){
   const n = Number(String(v).trim().replace(',','.'));
   return Number.isFinite(n) ? n : null;
 }
+function estadoDerivadoPatron(p){
+  const prox = p?.proxima_calibracion ? new Date(p.proxima_calibracion + "T00:00:00") : null;
+  if (!prox || Number.isNaN(+prox)) return p?.estado_cal || p?.estado || "vigente";
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const dias = Math.ceil((prox-hoy)/86400000);
+  if (dias < 0) return "fuera";
+  if (dias <= 30) return "proximo";
+  return "vigente";
+}
+function trazabilidadPatron(p){
+  const u = parseNum(p?.u_k2);
+  const faltan=[];
+  if (!(u>0)) faltan.push("U(k=2)");
+  if (!p?.fecha_calibracion) faltan.push("fecha calibración");
+  if (!p?.proxima_calibracion) faltan.push("próxima calibración");
+  return {ok:faltan.length===0, faltan};
+}
+function renderResumenPatrones(){
+  const arr=state.patrones||[];
+  let vig=0,pro=0,fuera=0,inc=0;
+  arr.forEach(p=>{
+    const e=estadoDerivadoPatron(p);
+    if(e==="fuera") fuera++; else if(e==="proximo") pro++; else vig++;
+    if(!trazabilidadPatron(p).ok) inc++;
+  });
+  const set=(id,v)=>{const el=$(id); if(el) el.textContent=v;};
+  set("#patKpiTotal",arr.length);set("#patKpiVigentes",vig);set("#patKpiProximos",pro);set("#patKpiFuera",fuera);set("#patKpiIncompletos",inc);
+}
 
 /* ========= SUPABASE CLIENT ========= */
 let supabase = null;
@@ -237,7 +288,16 @@ async function ensureSupabase(){
   return supabase;
 }
 
-/* ========= CARGA PATRONES ========= */
+/* ========= CARGA FAMILIAS / PATRONES ========= */
+async function cargarFamiliasPatron(){
+  await ensureSupabase();
+  if (!supabase) return;
+  const {data,error}=await supabase.from("familias").select("familia").order("familia",{ascending:true});
+  if(error){ console.warn("No se pudieron cargar familias para patrones:",error); return; }
+  state.familias=(data||[]).map(x=>x.familia).filter(Boolean);
+  const dl=$("#patFamiliasList");
+  if(dl) dl.innerHTML=state.familias.map(f=>`<option value="${String(f).replace(/&/g,"&amp;").replace(/"/g,"&quot;")}"></option>`).join("");
+}
 async function cargarPatrones(){
   await ensureSupabase();
   if (!supabase){
@@ -266,7 +326,8 @@ function renderTablaPatrones(){
              (p.descripcion||"").toLowerCase().includes(filtro);
     })
     .map(p=>{
-      const estado = p.estado_cal || p.estado || "vigente";
+      const estado = estadoDerivadoPatron(p);
+      const tr = trazabilidadPatron(p);
       let dotClass="dot-ok";
       if (estado==="proximo") dotClass="dot-warn";
       if (estado==="fuera") dotClass="dot-bad";
@@ -280,9 +341,12 @@ function renderTablaPatrones(){
           <td>${fmtFecha(p.fecha_calibracion)}</td>
           <td>${fmtFecha(p.proxima_calibracion)}</td>
           <td><span class="pill"><span class="status-dot ${dotClass}"></span>${estado}</span></td>
+          <td>${tr.ok ? '<span class="trace-ok">✓ Completa</span>' : `<span class="trace-warn" title="Falta: ${tr.faltan.join(', ')}">⚠ Incompleta</span>`}</td>
         </tr>`;
     }).join('');
+  renderResumenPatrones();
 }
+
 
 /* ========= FORMULARIO ========= */
 function limpiarPatForm(){
@@ -316,11 +380,24 @@ async function guardarPatron(){
   const uk2 = $("#patUk2").value.trim();
   const fecha_calibracion = $("#patFechaCal").value || null;
   const proxima_calibracion = $("#patProxCal").value || null;
-  const estado = $("#patEstado").value;
+  let estado = $("#patEstado").value;
+  if (proxima_calibracion){
+    estado = estadoDerivadoPatron({proxima_calibracion, estado_cal:estado});
+    $("#patEstado").value = estado;
+  }
   const nota = $("#patNota").value.trim();
 
   if (!codigo || !descripcion){
     showToast("Código y descripción son obligatorios.", true);
+    return;
+  }
+  const uNum = uk2 ? parseNum(uk2) : null;
+  if (uk2 && !(uNum > 0)){
+    showToast("U(k=2) debe ser un número positivo procedente del certificado.", true);
+    return;
+  }
+  if (fecha_calibracion && proxima_calibracion && proxima_calibracion < fecha_calibracion){
+    showToast("La próxima calibración no puede ser anterior a la última calibración.", true);
     return;
   }
   await ensureSupabase();
@@ -333,7 +410,7 @@ async function guardarPatron(){
     codigo,
     descripcion,
     familia,
-    u_k2: uk2 ? parseNum(uk2) : null,
+    u_k2: uNum,
     fecha_calibracion,
     proxima_calibracion,
     estado_cal: estado,
@@ -359,7 +436,8 @@ async function guardarPatron(){
     showToast("Error al guardar patrón.", true);
   }else{
     showToast("Patrón guardado correctamente.");
-    await cargarPatrones();
+    await cargarFamiliasPatron();
+cargarPatrones();
     limpiarPatForm();
   }
 }
@@ -368,9 +446,21 @@ async function eliminarPatron(){
     showToast("Selecciona un patrón primero.", true);
     return;
   }
-  if (!confirm("¿Eliminar este patrón? Asegúrate de que no se usa en planes de calibración.")) return;
   await ensureSupabase();
   if (!supabase) return;
+  const p = state.patrones.find(x=>String(x.id)===String(state.selectedId));
+  try{
+    const {count,error:refErr}=await supabase.from("calibracion_patrones").select("id",{count:"exact",head:true}).eq("patron_id",state.selectedId);
+    if(!refErr && count>0){
+      showToast(`No se puede eliminar: patrón usado en ${count} calibración(es).`, true);
+      return;
+    }
+  }catch(e){ console.warn("No se pudo verificar calibracion_patrones",e); }
+  const codigoConf = prompt(`Para eliminar definitivamente el patrón escribe su código: ${p?.codigo||""}`);
+  if (codigoConf !== (p?.codigo||"")){
+    showToast("Eliminación cancelada: el código no coincide.", true);
+    return;
+  }
   const { error } = await supabase
     .from("patrones")
     .delete()
