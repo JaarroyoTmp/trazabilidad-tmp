@@ -50,7 +50,7 @@
     <h2>Ficha del instrumento</h2>
     <div id="msgAlta" class="alert info hidden"></div>
     <div class="grid">
-      <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
+      <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
       <div><label>Descripción *</label><input id="descripcion" placeholder="Ej. Tampón liso P/NP"></div>
       <div>
         <label>Familia del instrumento *</label>
@@ -339,6 +339,21 @@
     panelAlta.classList.remove("active");
   };
 
+  function normalizarCodigoInstrumento(valor){
+    const raw = String(valor ?? "").replace(/\u00A0/g, " ").trim();
+    // Los códigos TMP no deben contener espacios. Si llega texto pegado con relleno
+    // u otro valor a continuación, conservar únicamente el primer bloque real.
+    return raw ? raw.split(/\s+/)[0] : "";
+  }
+
+  f.codigo.addEventListener("input", () => {
+    const normalizado = normalizarCodigoInstrumento(f.codigo.value);
+    if (normalizado !== f.codigo.value.trim()) {
+      f.codigo.value = normalizado;
+      showMsg(msgAlta, "Código normalizado automáticamente: se han eliminado espacios o texto residual.", "info");
+    }
+  });
+
   function limpiarFormulario(){
     f.codigo.value = "";
     f.descripcion.value = "";
@@ -362,7 +377,7 @@
   async function buscarPorCodigo(){
     hideMsg(msgAlta);
 
-    const codigo = f.codigo.value.trim();
+    const codigo = normalizarCodigoInstrumento(f.codigo.value);
     if(!codigo){
       showMsg(msgAlta,"Introduce un código.","err");
       return;
@@ -416,7 +431,7 @@
   async function guardarInstrumento(){
     hideMsg(msgAlta);
 
-    const codigo = f.codigo.value.trim();
+    const codigo = normalizarCodigoInstrumento(f.codigo.value);
     const descripcion = f.descripcion.value.trim();
     const fabricante = f.fabricante.value.trim();
     const familiaId = f.familia_id.value || null;
@@ -431,6 +446,9 @@
       : tipoNorm === "taller"
         ? "En uso"
         : estadoInstrumentoCargado;
+
+    // Persistir siempre el código ya saneado para evitar sufijos/espacios residuales.
+    f.codigo.value = codigo;
 
     if(!codigo || !descripcion || !fabricante){
       showMsg(msgAlta,"Código, descripción y fabricante son obligatorios.","err");
