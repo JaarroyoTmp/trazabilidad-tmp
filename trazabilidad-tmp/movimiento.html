@@ -532,17 +532,15 @@
 
         <div>
           <label>Operario 1</label>
-          <select id="operario1">
-            <option value="">Cargando usuarios...</option>
-          </select>
+          <input id="operario1" list="operariosLista" placeholder="Selecciona o escribe operario 1...">
         </div>
 
         <div>
           <label>Operario 2</label>
-          <select id="operario2">
-            <option value="">Cargando usuarios...</option>
-          </select>
+          <input id="operario2" list="operariosLista" placeholder="Selecciona o escribe operario 2...">
         </div>
+
+        <datalist id="operariosLista"></datalist>
 
         <div style="grid-column:1/-1">
           <label>Observaciones</label>
@@ -768,22 +766,33 @@ async function cargarCatalogosMovimiento() {
 
   pintarSelect("maquinaDestino", catalogos.maquinas, "Selecciona máquina / destino...");
   pintarSelect("responsable", catalogos.responsables, "Selecciona responsable calidad...");
-  pintarSelect("operario1", catalogos.usuarios, "Selecciona operario 1...");
-  pintarSelect("operario2", catalogos.usuarios, "Selecciona operario 2...");
+  const listaOperarios = document.getElementById("operariosLista");
+  if (listaOperarios) {
+    listaOperarios.innerHTML = (catalogos.usuarios || [])
+      .filter(x => x && (x.activo === undefined || x.activo === true))
+      .map(x => `<option value="${String(getNombre(x)).replaceAll('\"','&quot;')}"></option>`)
+      .join("");
+  }
 }
 
 function seleccionarOpcionPorTexto(selectId, texto) {
-  const sel = document.getElementById(selectId);
-  const objetivo = String(texto || "").trim().toLowerCase();
-  if (!sel || !objetivo) return false;
+  const el = document.getElementById(selectId);
+  const valor = String(texto || "").trim();
+  if (!el || !valor) return false;
 
-  const opt = Array.from(sel.options).find(o =>
+  // Los operarios son campos editables con datalist: admiten catálogo o nombre manual.
+  if (el.tagName === "INPUT") {
+    el.value = valor;
+    return true;
+  }
+
+  const objetivo = valor.toLowerCase();
+  const opt = Array.from(el.options || []).find(o =>
     String(o.textContent || "").trim().toLowerCase() === objetivo ||
     String(o.value || "").trim().toLowerCase() === objetivo
   );
-
   if (!opt) return false;
-  sel.value = opt.value;
+  el.value = opt.value;
   return true;
 }
 
@@ -1140,11 +1149,8 @@ async function registrarMovimiento() {
   const responsableId = $("#responsable").value;
   const responsable = getSelectedText("responsable");
 
-  const operario1Id = $("#operario1").value;
-  const operario1 = getSelectedText("operario1");
-
-  const operario2Id = $("#operario2").value;
-  const operario2 = getSelectedText("operario2");
+  const operario1 = $("#operario1").value.trim();
+  const operario2 = $("#operario2").value.trim();
 
   const maquinaId = $("#maquinaDestino").value;
   const destino = construirDestinoTexto();
@@ -1235,8 +1241,8 @@ async function registrarMovimiento() {
 
   // En Salida y Entrada se guardan los operarios seleccionados.
   // En una Entrada normalmente vienen precargados desde la última Salida.
-  if (operario1Id) datosMovimiento.operario1 = operario1;
-  if (operario2Id) datosMovimiento.operario2 = operario2;
+  if (operario1) datosMovimiento.operario1 = operario1;
+  if (operario2) datosMovimiento.operario2 = operario2;
 
   try {
     const { error: errorMov } = await sb.from("movimientos").insert(datosMovimiento);
@@ -1248,11 +1254,17 @@ async function registrarMovimiento() {
       return;
     }
 
+    const ubicacionSeleccionada = (catalogos.ubicaciones || [])
+      .find(u => String(u.id) === String(nuevaUbicacionId));
+    const nuevaUbicacionTipo = ubicacionSeleccionada?.tipo ||
+      (tipo === "Entrada" ? "Laboratorio" : nuevaUbicacion);
+
     const { error: errorUpd } = await sb
       .from("instrumentos")
       .update({
         ubicacion_actual: nuevaUbicacion,
         ubicacion_id: nuevaUbicacionId,
+        ubicacion: nuevaUbicacionTipo,
         estado: nuevoEstado
       })
       .eq("codigo", instrumentoActual.codigo);
@@ -1271,6 +1283,7 @@ async function registrarMovimiento() {
 
     instrumentoActual.ubicacion_actual = nuevaUbicacion;
     instrumentoActual.ubicacion_id = nuevaUbicacionId;
+    instrumentoActual.ubicacion = nuevaUbicacionTipo;
     instrumentoActual.estado = nuevoEstado;
 
     await cargarMovimientos(instrumentoActual.codigo);

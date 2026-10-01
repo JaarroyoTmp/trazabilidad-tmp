@@ -158,6 +158,8 @@
   let familiasInstrumento = [];
   let familiasCalibracion = [];
   let familiasCalibracionById = new Map();
+  let ubicacionesCatalogo = [];
+  let estadoInstrumentoCargado = null;
 
   function actualizarCalibracionAsignada(){
     const familiaId = f.familia_id.value || null;
@@ -258,15 +260,18 @@
     actualizarCalibracionAsignada();
 
     const listaProp = document.getElementById("propietarios_lista");
-    listaProp.innerHTML = `<option value="Propiedad TMP"></option>` +
+    // Opciones habituales siempre disponibles; el campo sigue permitiendo escritura manual.
+    listaProp.innerHTML = `<option value="Propiedad TMP"></option><option value="John Deere"></option>` +
       (propietariosRes.data || [])
         .filter(x => x && (x.activo === undefined || x.activo === true))
         .map(x => `<option value="${String(x.nombre || "").replaceAll('"','&quot;')}"></option>`)
         .join("");
 
+    ubicacionesCatalogo = (ubicacionesRes.data || []).filter(x => x && (x.activo === undefined || x.activo === true));
+
     f.ubicacion_id.innerHTML =
       `<option value="">Selecciona ubicación...</option>` +
-      (ubicacionesRes.data || [])
+      ubicacionesCatalogo
         .filter(x => x && (x.activo === undefined || x.activo === true))
         .map(x => optionHTML(x.id, x.nombre)).join("");
   }
@@ -347,6 +352,7 @@
     f.fecha_calibracion.value = "";
     f.fecha_proxima_calibracion.value = "";
     f.observaciones.value = "";
+    estadoInstrumentoCargado = null;
     actualizarCalibracionAsignada();
     hideMsg(msgAlta);
   }
@@ -393,6 +399,7 @@
     f.fecha_calibracion.value = (data.fecha_calibracion ?? "").substring(0,10);
     f.fecha_proxima_calibracion.value = (data.fecha_proxima_calibracion ?? "").substring(0,10);
     f.observaciones.value = data.observaciones ?? "";
+    estadoInstrumentoCargado = data.estado || null;
 
     showMsg(msgAlta,`Instrumento ${codigo} cargado.`,"ok");
   }
@@ -416,6 +423,14 @@
     const propietarioNombre = f.propietario_nombre.value.trim() || "Propiedad TMP";
     const ubicacionId = f.ubicacion_id.value || null;
     const ubicacionActual = ubicacionId ? getSelectedText(f.ubicacion_id) : null;
+    const ubicacionObj = ubicacionesCatalogo.find(x => String(x.id) === String(ubicacionId));
+    const ubicacionTipo = ubicacionObj?.tipo || (ubicacionActual === "Calidad" ? "Laboratorio" : null);
+    const tipoNorm = String(ubicacionTipo || "").trim().toLowerCase();
+    const estadoCoherente = tipoNorm === "laboratorio"
+      ? "En laboratorio"
+      : tipoNorm === "taller"
+        ? "En uso"
+        : estadoInstrumentoCargado;
 
     if(!codigo || !descripcion || !fabricante){
       showMsg(msgAlta,"Código, descripción y fabricante son obligatorios.","err");
@@ -459,6 +474,9 @@
       propietario_id: propietarioId,
       ubicacion_id: ubicacionId,
       ubicacion_actual: ubicacionActual,
+      // Mantener también el campo legado sincronizado para Home, búsquedas e históricos.
+      ubicacion: ubicacionTipo || ubicacionActual,
+      estado: estadoCoherente || "En laboratorio",
       fecha_calibracion: f.fecha_calibracion.value || null,
       fecha_proxima_calibracion: f.fecha_proxima_calibracion.value || null,
       observaciones: f.observaciones.value || null,
