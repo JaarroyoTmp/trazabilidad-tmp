@@ -2,213 +2,267 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>TMP · Alcance & KPIs Metrológicos</title>
+  <title>TMP · Control Tower Metrológico</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="img/tmp-quality.png" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
-      --bg:#eef6ff;--bg2:#f7fbff;--ink:#0d2340;--muted:#66809a;--panel:#fff;
-      --line:#dbe7f2;--line2:#c9ddea;--blue:#2563eb;--cyan:#0ea5e9;--green:#16a34a;
-      --orange:#f59e0b;--red:#ef4444;--violet:#8b5cf6;--slate:#64748b;
-      --shadow:0 14px 36px rgba(15,45,75,.09);--radius:18px;
+      --bg:#eef5fb;--bg2:#f8fbfe;--ink:#102a43;--muted:#657d95;--panel:#fff;
+      --line:#d9e5ef;--line2:#c7d9e7;--nav:#0b2e52;--blue:#2563eb;--cyan:#0891b2;
+      --green:#16a34a;--orange:#ea8a00;--red:#dc2626;--violet:#7c3aed;--slate:#64748b;
+      --shadow:0 12px 30px rgba(16,42,67,.08);--r:16px;
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
     body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);
-      background:radial-gradient(circle at 10% 0,rgba(37,99,235,.12),transparent 28%),linear-gradient(180deg,var(--bg),var(--bg2));}
-    header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(15,45,75,.07)}
-    .topbar{max-width:1500px;margin:auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .brand{display:flex;align-items:center;gap:11px}.brand-logo{width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:13px;padding:4px;object-fit:contain}
-    .brand b{display:block;font-size:17px}.brand span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-    .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .live{display:flex;align-items:center;gap:7px;font-size:11px;color:#45647f}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.14)}
-    .btn{border:1px solid var(--line2);background:#fff;color:var(--ink);border-radius:10px;padding:8px 11px;font-weight:800;font-size:11px;cursor:pointer;text-decoration:none}
-    .btn:hover{border-color:#93c5fd;background:#f7fbff}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
-    main{max-width:1500px;margin:16px auto 36px;padding:0 18px}
-    .hero{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;margin-bottom:12px}
-    .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:15px;min-width:0}
-    .hero-main{background:linear-gradient(135deg,#0c3158,#0b4a82);color:#fff;border:0}.hero-main .eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:800}.hero-main h1{font-size:27px;margin:8px 0 5px}.hero-main p{font-size:12px;line-height:1.5;margin:0;color:#dceeff;max-width:850px}
-    .coverage-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.coverage-score{font-size:35px;font-weight:950;letter-spacing:-.04em;color:var(--blue)}
-    .coverage-sub{font-size:11px;color:var(--muted);line-height:1.4}.bar{height:10px;border-radius:999px;background:#edf2f7;overflow:hidden;margin:10px 0 8px}.bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:999px;transition:.25s}
-    .mini-coverage{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mini-coverage div{border:1px solid var(--line);border-radius:10px;padding:7px;background:#fbfdff}.mini-coverage b{font-size:14px;display:block}.mini-coverage span{font-size:9px;color:var(--muted)}
-    .kpis{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:9px;margin-bottom:12px}.kpi{padding:12px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 8px 20px rgba(15,45,75,.06);position:relative;overflow:hidden}.kpi:before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:var(--blue)}.kpi.good:before{background:var(--green)}.kpi.warn:before{background:var(--orange)}.kpi.bad:before{background:var(--red)}.kpi.violet:before{background:var(--violet)}.kpi .label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}.kpi .value{font-size:25px;font-weight:950;margin-top:4px}.kpi .note{font-size:9.5px;color:var(--muted);margin-top:2px;line-height:1.25}
-    .grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-bottom:12px}.gridEqual{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-    .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:9px}.title{font-size:14px;font-weight:950}.sub{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.35}.pill{display:inline-flex;padding:4px 7px;border-radius:999px;font-size:9px;font-weight:900;border:1px solid}.pill.ok{color:#15803d;background:#ecfdf3;border-color:#bbf7d0}.pill.warn{color:#b45309;background:#fff8eb;border-color:#fed7aa}.pill.bad{color:#b91c1c;background:#fff1f2;border-color:#fecaca}.pill.info{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}.pill.gray{color:#475569;background:#f8fafc;border-color:#cbd5e1}
-    .charts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.chart{border:1px solid var(--line);border-radius:13px;padding:9px;height:225px;background:#fbfdff}.chart h3{font-size:10px;margin:0 0 5px;color:#47637e}.chart canvas{max-height:190px}
-    .table-wrap{border:1px solid var(--line);border-radius:13px;overflow:auto;max-height:300px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{padding:7px 8px;border-bottom:1px solid #eaf1f7;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#f5f9fd;color:#45647f;font-size:9px;text-transform:uppercase;letter-spacing:.05em;z-index:1}tr:last-child td{border-bottom:0}.num{text-align:right;font-variant-numeric:tabular-nums}
-    .audit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.audit-card{border:1px solid var(--line);border-radius:13px;padding:10px;background:#fbfdff}.audit-card b{font-size:10px;display:block}.audit-card .metric{font-size:20px;font-weight:950;margin:4px 0}.audit-card span{font-size:9.5px;color:var(--muted);line-height:1.3;display:block}
-    .issues{display:grid;gap:7px}.issue{border:1px solid var(--line);border-left:4px solid var(--orange);border-radius:11px;padding:8px 10px;background:#fff}.issue.bad{border-left-color:var(--red)}.issue.ok{border-left-color:var(--green)}.issue b{font-size:10px}.issue span{font-size:9.5px;color:var(--muted);margin-left:6px}
-    footer{text-align:center;color:var(--muted);font-size:10px;padding:5px 0 22px}
-    @media(max-width:1250px){.kpis{grid-template-columns:repeat(4,1fr)}.hero,.grid2,.gridEqual{grid-template-columns:1fr}.audit-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.charts,.audit-grid,.mini-coverage{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
+      background:radial-gradient(circle at 15% -5%,rgba(37,99,235,.12),transparent 28%),linear-gradient(180deg,var(--bg),var(--bg2));}
+    button,input,select{font:inherit}
+    header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);box-shadow:0 6px 20px rgba(16,42,67,.07)}
+    .top{max-width:1680px;margin:auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .brand{display:flex;align-items:center;gap:10px}.brand img{width:38px;height:38px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:11px;padding:3px}
+    .brand b{display:block;font-size:16px}.brand span{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+    .top-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}.live{font-size:10px;color:#45647f;display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.14)}
+    .btn{border:1px solid var(--line2);background:#fff;color:var(--ink);border-radius:9px;padding:7px 10px;text-decoration:none;font-weight:800;font-size:10px;cursor:pointer}.btn:hover{border-color:#93c5fd;background:#f7fbff}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    main{max-width:1680px;margin:12px auto 30px;padding:0 16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:13px;min-width:0}
+    .hero{display:grid;grid-template-columns:1.4fr .6fr;gap:10px;margin-bottom:10px}.hero-main{background:linear-gradient(135deg,#0b3158,#0d4f88);color:#fff;border:0;padding:17px}.eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:.15em;font-weight:900;opacity:.78}.hero h1{font-size:24px;margin:6px 0 4px;letter-spacing:-.03em}.hero p{font-size:10.5px;line-height:1.5;margin:0;color:#dceeff;max-width:980px}
+    .quality-score{display:flex;align-items:center;justify-content:space-between;gap:10px}.score{font-size:34px;font-weight:950;color:var(--blue);letter-spacing:-.05em}.small{font-size:9.5px;color:var(--muted);line-height:1.35}.progress{height:8px;border-radius:999px;background:#edf2f7;overflow:hidden;margin:8px 0}.progress>div{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));width:0}
+    .tabs{display:flex;gap:6px;overflow:auto;padding:2px 0 9px;margin-bottom:2px}.tab{white-space:nowrap;border:1px solid var(--line2);background:#fff;border-radius:999px;padding:6px 10px;font-size:9.5px;font-weight:900;color:#46627b;cursor:pointer}.tab.active{background:#eaf2ff;color:#1d4ed8;border-color:#93c5fd}
+    .tabview{display:none}.tabview.active{display:block}
+    .kpis{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px;margin-bottom:10px}.kpi{background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px;box-shadow:0 6px 18px rgba(16,42,67,.05);position:relative;overflow:hidden}.kpi:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--blue)}.kpi.good:before{background:var(--green)}.kpi.warn:before{background:var(--orange)}.kpi.bad:before{background:var(--red)}.kpi.violet:before{background:var(--violet)}.kpi .label{font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:900}.kpi .value{font-size:22px;font-weight:950;margin-top:3px;letter-spacing:-.04em}.kpi .note{font-size:8.5px;color:var(--muted);margin-top:2px;line-height:1.25}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}.grid6040{display:grid;grid-template-columns:1.2fr .8fr;gap:10px;margin-bottom:10px}
+    .head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}.title{font-size:12px;font-weight:950}.sub{font-size:9px;color:var(--muted);margin-top:2px;line-height:1.3}.pill{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-size:8px;font-weight:900;border:1px solid;white-space:nowrap}.pill.ok{background:#ecfdf3;color:#15803d;border-color:#bbf7d0}.pill.warn{background:#fff8eb;color:#b45309;border-color:#fed7aa}.pill.bad{background:#fff1f2;color:#b91c1c;border-color:#fecaca}.pill.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.pill.gray{background:#f8fafc;color:#475569;border-color:#cbd5e1}
+    .chart{height:220px;border:1px solid var(--line);border-radius:12px;background:#fbfdff;padding:8px}.chart.sm{height:190px}.chart canvas{max-height:100%}
+    .table-wrap{border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:310px}table{width:100%;border-collapse:collapse;font-size:9px}th,td{padding:6px 7px;border-bottom:1px solid #eaf1f7;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#f4f8fc;color:#46627b;text-transform:uppercase;letter-spacing:.05em;font-size:8px;z-index:1}tr:last-child td{border-bottom:0}.num{text-align:right;font-variant-numeric:tabular-nums}.truncate{max-width:250px;overflow:hidden;text-overflow:ellipsis}
+    .risk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.risk{border:1px solid var(--line);border-left:4px solid var(--orange);border-radius:11px;padding:9px;background:#fbfdff}.risk.bad{border-left-color:var(--red)}.risk.ok{border-left-color:var(--green)}.risk.info{border-left-color:var(--blue)}.risk b{display:block;font-size:9px}.risk .metric{font-size:19px;font-weight:950;margin:3px 0}.risk span{font-size:8.5px;color:var(--muted);line-height:1.3;display:block}
+    .modules{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.module{border:1px solid var(--line);border-radius:12px;padding:9px;background:#fff;text-decoration:none;color:var(--ink);display:flex;gap:8px;align-items:center;min-height:56px}.module:hover{border-color:#93c5fd;background:#f8fbff}.ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#edf5ff;color:var(--blue);font-size:15px;flex:0 0 auto}.module b{display:block;font-size:9px}.module span{font-size:8px;color:var(--muted);display:block;margin-top:2px}
+    .alert-list{display:grid;gap:6px}.alert{border:1px solid var(--line);border-left:4px solid var(--orange);border-radius:10px;padding:7px 9px;background:#fff}.alert.bad{border-left-color:var(--red)}.alert.ok{border-left-color:var(--green)}.alert.info{border-left-color:var(--blue)}.alert b{font-size:9px}.alert span{font-size:8.5px;color:var(--muted);margin-left:5px}
+    .machine-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.machine-card{border:1px solid var(--line);border-radius:10px;padding:8px;background:#fbfdff}.machine-card b{font-size:9px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.machine-card .mval{font-size:18px;font-weight:950;color:var(--blue);margin-top:2px}.machine-card span{font-size:8px;color:var(--muted)}
+    .toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.toolbar input,.toolbar select{border:1px solid var(--line2);background:#fff;border-radius:9px;padding:6px 8px;font-size:9px;color:var(--ink);outline:0}.toolbar input{min-width:220px}.toolbar input:focus,.toolbar select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.09)}
+    .footer{text-align:center;color:var(--muted);font-size:8.5px;padding:10px 0 20px}
+    @media(max-width:1450px){.kpis{grid-template-columns:repeat(5,1fr)}.modules{grid-template-columns:repeat(4,1fr)}.machine-grid{grid-template-columns:repeat(4,1fr)}}
+    @media(max-width:1000px){.hero,.grid2,.grid3,.grid6040{grid-template-columns:1fr}.risk-grid{grid-template-columns:repeat(2,1fr)}.modules{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:650px){.kpis{grid-template-columns:repeat(2,1fr)}.risk-grid,.modules,.machine-grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.toolbar input{min-width:0;width:100%}}
   </style>
 </head>
 <body>
-<header>
-  <div class="topbar">
-    <div class="brand"><img class="brand-logo" src="img/tmp-quality.png" alt="TMP"><div><b>Alcance & KPIs Metrológicos</b><span>Control auditable · datos vivos de Supabase</span></div></div>
-    <div class="actions"><div class="live"><span class="dot"></span><span id="onlineText">Conectando...</span></div><button class="btn" id="btnRefresh">⟳ Actualizar</button><a class="btn primary" href="home.html">← Inicio</a></div>
-  </div>
-</header>
+<header><div class="top"><div class="brand"><img src="img/tmp-quality.png" alt="TMP"><div><b>Control Tower Metrológico TMP</b><span>Inventario · calibración · producción · patrones · certificados · actividad · calidad de datos</span></div></div><div class="top-actions"><div class="live"><span class="dot"></span><span id="online">Conectando...</span></div><button class="btn" id="refresh">⟳ Actualizar</button><button class="btn" id="csv">Exportar resumen</button><a class="btn primary" href="home.html">← Inicio</a></div></div></header>
 <main>
   <section class="hero">
-    <article class="panel hero-main"><div class="eyebrow">TMP · Sistema de gestión metrológica</div><h1>Alcance operativo y evidencia de control</h1><p>Vista preparada para gestión y auditoría: inventario activo, cobertura de calibración, ubicación, familia metrológica, actividad anual, certificados y riesgos reales en producción. Cada indicador se calcula directamente desde los datos registrados; no utiliza puntuaciones decorativas.</p></article>
-    <aside class="panel">
-      <div class="coverage-head"><div><div class="title">Cobertura documental del inventario</div><div class="coverage-sub">Equipos activos con ubicación, familia metrológica y próxima calibración definidas.</div></div><div class="coverage-score" id="coverageScore">—%</div></div>
-      <div class="bar"><div id="coverageBar"></div></div>
-      <div class="mini-coverage"><div><b id="covUbic">—%</b><span>Ubicación</span></div><div><b id="covFam">—%</b><span>Familia</span></div><div><b id="covCal">—%</b><span>Plan/calibración</span></div></div>
-    </aside>
+    <article class="panel hero-main"><div class="eyebrow">TMP · Visión global de la gestión metrológica</div><h1>Toda la aplicación en una sola vista de gestión</h1><p>Cuadro de mando transversal de la flota metrológica. Integra inventario, ubicación física, calibración, actividad, certificados, patrones, familias, necesidades y calidad del dato. Esta pantalla es de lectura y auditoría: no modifica decisiones ni parámetros metrológicos.</p></article>
+    <aside class="panel"><div class="quality-score"><div><div class="title">Cobertura de gestión</div><div class="small">Promedio auditable de ubicación, familia, próxima calibración y propietario/cliente identificados.</div></div><div class="score" id="score">—%</div></div><div class="progress"><div id="scorebar"></div></div><div class="small" id="scoreDetail">Calculando cobertura...</div></aside>
   </section>
 
-  <section class="kpis">
-    <div class="kpi"><div class="label">Equipos activos</div><div class="value" id="kpiActive">—</div><div class="note" id="kpiActiveNote">Inventario operativo</div></div>
-    <div class="kpi good"><div class="label">En regla &gt;30 días</div><div class="value" id="kpiOk">—</div><div class="note" id="kpiOkNote">—</div></div>
-    <div class="kpi warn"><div class="label">Próximos &lt;30 días</div><div class="value" id="kpiSoon">—</div><div class="note">Planificación inmediata</div></div>
-    <div class="kpi bad"><div class="label">Fuera calibración</div><div class="value" id="kpiExpired">—</div><div class="note">Requieren reacción</div></div>
-    <div class="kpi bad"><div class="label">Vencidos en taller</div><div class="value" id="kpiExpiredProd">—</div><div class="note">Riesgo crítico</div></div>
-    <div class="kpi violet"><div class="label">Sin próxima fecha</div><div class="value" id="kpiNoDate">—</div><div class="note">Plan incompleto</div></div>
-    <div class="kpi good"><div class="label">Calibraciones año</div><div class="value" id="kpiCalYtd">—</div><div class="note" id="kpiCalYtdNote">Registros reales</div></div>
-    <div class="kpi good"><div class="label">Certificados año</div><div class="value" id="kpiCertYtd">—</div><div class="note" id="kpiCertYtdNote">Documentos emitidos</div></div>
-  </section>
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="executive">Resumen ejecutivo</button>
+    <button class="tab" data-tab="calibration">Calibración & certificados</button>
+    <button class="tab" data-tab="production">Taller & máquinas</button>
+    <button class="tab" data-tab="traceability">Patrones & trazabilidad</button>
+    <button class="tab" data-tab="activity">Actividad & movimientos</button>
+    <button class="tab" data-tab="quality">Calidad del dato</button>
+  </div>
 
-  <section class="grid2">
-    <article class="panel"><div class="panel-head"><div><div class="title">Distribución del alcance</div><div class="sub">Solo equipos activos. Ubicación resuelta prioritariamente por <b>ubicacion_id → ubicaciones</b>.</div></div><span class="pill info" id="scopePill">—</span></div>
-      <div class="charts"><div class="chart"><h3>Estado de calibración</h3><canvas id="chartCal"></canvas></div><div class="chart"><h3>Ubicación: laboratorio / taller</h3><canvas id="chartArea"></canvas></div><div class="chart"><h3>Familias metrológicas</h3><canvas id="chartFam"></canvas></div><div class="chart"><h3>Calibraciones por mes · año actual</h3><canvas id="chartMonth"></canvas></div></div>
-    </article>
-    <aside class="panel"><div class="panel-head"><div><div class="title">Prioridad de calibración</div><div class="sub">Equipos vencidos y próximos ordenados por fecha. Primero los riesgos más urgentes.</div></div><span class="pill warn" id="priorityPill">—</span></div>
-      <div class="table-wrap"><table><thead><tr><th>Código</th><th>Equipo</th><th>Ubicación</th><th>Próxima</th><th>Situación</th></tr></thead><tbody id="tablaPrioridad"><tr><td colspan="5">Cargando...</td></tr></tbody></table></div>
-    </aside>
-  </section>
-
-  <section class="gridEqual">
-    <article class="panel"><div class="panel-head"><div><div class="title">Equipos por ubicación / máquina</div><div class="sub">Permite demostrar dónde está físicamente el inventario y dónde se concentran los riesgos.</div></div></div>
-      <div class="table-wrap"><table><thead><tr><th>Ubicación</th><th>Tipo</th><th class="num">Total</th><th class="num">OK</th><th class="num">Próx.</th><th class="num">Fuera</th><th class="num">Sin fecha</th></tr></thead><tbody id="tablaUbicaciones"></tbody></table></div>
-    </article>
-    <article class="panel"><div class="panel-head"><div><div class="title">Cobertura por familia metrológica</div><div class="sub">Familias de calibración asignadas al inventario activo y su situación.</div></div></div>
-      <div class="table-wrap"><table><thead><tr><th>Familia</th><th class="num">Equipos</th><th class="num">OK</th><th class="num">Próx.</th><th class="num">Fuera</th><th class="num">Sin fecha</th></tr></thead><tbody id="tablaFamilias"></tbody></table></div>
-    </article>
-  </section>
-
-  <section class="panel" style="margin-bottom:12px"><div class="panel-head"><div><div class="title">KPIs de auditoría</div><div class="sub">Indicadores explicables y reproducibles. No modifican datos ni decisiones metrológicas.</div></div><span class="pill info" id="auditPill">Evaluando...</span></div>
-    <div class="audit-grid">
-      <div class="audit-card"><b>0 vencidos en taller / producción</b><div class="metric" id="auditProdMetric">—</div><span id="auditProdText">—</span></div>
-      <div class="audit-card"><b>100% ubicación clasificada</b><div class="metric" id="auditUbicMetric">—</div><span id="auditUbicText">—</span></div>
-      <div class="audit-card"><b>100% familia metrológica</b><div class="metric" id="auditFamMetric">—</div><span id="auditFamText">—</span></div>
-      <div class="audit-card"><b>100% próxima calibración</b><div class="metric" id="auditCalMetric">—</div><span id="auditCalText">—</span></div>
+  <section class="tabview active" id="tab-executive">
+    <div class="kpis">
+      <div class="kpi"><div class="label">Activos</div><div class="value" id="kActive">—</div><div class="note" id="kActiveN">Inventario operativo</div></div>
+      <div class="kpi good"><div class="label">OK &gt;30 días</div><div class="value" id="kOk">—</div><div class="note" id="kOkN">—</div></div>
+      <div class="kpi warn"><div class="label">Próximos &lt;30</div><div class="value" id="kSoon">—</div><div class="note">Planificación</div></div>
+      <div class="kpi bad"><div class="label">Fuera calibración</div><div class="value" id="kExpired">—</div><div class="note">Reacción necesaria</div></div>
+      <div class="kpi bad"><div class="label">Vencidos en taller</div><div class="value" id="kProdExp">—</div><div class="note">Riesgo producción</div></div>
+      <div class="kpi violet"><div class="label">Sin fecha</div><div class="value" id="kNoDate">—</div><div class="note">Plan incompleto</div></div>
+      <div class="kpi good"><div class="label">Calibraciones año</div><div class="value" id="kCalY">—</div><div class="note" id="kCalYN">—</div></div>
+      <div class="kpi good"><div class="label">Certificados año</div><div class="value" id="kCertY">—</div><div class="note" id="kCertYN">—</div></div>
+      <div class="kpi"><div class="label">Patrones</div><div class="value" id="kPatterns">—</div><div class="note" id="kPatternsN">—</div></div>
+      <div class="kpi warn"><div class="label">Necesidades abiertas</div><div class="value" id="kNeeds">—</div><div class="note">Reposición / compra</div></div>
+    </div>
+    <div class="grid6040">
+      <article class="panel"><div class="head"><div><div class="title">Mapa global de situación</div><div class="sub">Calibración, área de uso, actividad anual y familias predominantes.</div></div><span class="pill info" id="scopePill">—</span></div><div class="grid2" style="margin:0"><div class="chart sm"><canvas id="chStatus"></canvas></div><div class="chart sm"><canvas id="chArea"></canvas></div></div></article>
+      <article class="panel"><div class="head"><div><div class="title">Riesgos y prioridades</div><div class="sub">Lo que requiere atención desde gestión.</div></div><span class="pill warn" id="riskPill">—</span></div><div class="alert-list" id="riskList"></div></article>
+    </div>
+    <div class="grid2">
+      <article class="panel"><div class="head"><div><div class="title">Equipos prioritarios</div><div class="sub">Vencidos y próximos, ordenados por fecha.</div></div><span class="pill bad" id="priorityPill">—</span></div><div class="table-wrap"><table><thead><tr><th>Código</th><th>Descripción</th><th>Ubicación</th><th>Próxima</th><th>Estado</th></tr></thead><tbody id="priorityBody"></tbody></table></div></article>
+      <article class="panel"><div class="head"><div><div class="title">Accesos de gestión</div><div class="sub">Entrada directa a los módulos clave de la aplicación.</div></div></div><div class="modules">
+        <a class="module" href="alta_instrumento.html"><span class="ico">✎</span><div><b>Alta / Edición</b><span>Inventario maestro</span></div></a>
+        <a class="module" href="movimiento.html"><span class="ico">↔</span><div><b>Movimientos</b><span>Entradas y salidas</span></div></a>
+        <a class="module" href="calibraciones.html"><span class="ico">◎</span><div><b>Calibración</b><span>Centro operativo</span></div></a>
+        <a class="module" href="App_Patrones_TMP.html"><span class="ico">▧</span><div><b>Patrones</b><span>Trazabilidad</span></div></a>
+        <a class="module" href="App_Familias_TMP.html"><span class="ico">▣</span><div><b>Familias</b><span>Arquitectura</span></div></a>
+        <a class="module" href="criterios.html"><span class="ico">◇</span><div><b>Criterios</b><span>Auditoría técnica</span></div></a>
+        <a class="module" href="certificados.html"><span class="ico">▤</span><div><b>Informes</b><span>Certificados</span></div></a>
+        <a class="module" href="equipos-referencia-consulta.html"><span class="ico">☷</span><div><b>Equipos / Buscar</b><span>Consulta global</span></div></a>
+        <a class="module" href="reposiciones.html"><span class="ico">🛒</span><div><b>Necesidades</b><span>Reposición</span></div></a>
+        <a class="module" href="inventario_valoracion.html"><span class="ico">€</span><div><b>Inventario & Valor</b><span>Activo económico</span></div></a>
+        <a class="module" href="qr/qr.index.html"><span class="ico">▦</span><div><b>QR</b><span>Identificación</span></div></a>
+        <a class="module" href="equipos-referencia-crear.html"><span class="ico">＋</span><div><b>Referencias</b><span>Crear / mantener</span></div></a>
+      </div></article>
     </div>
   </section>
 
-  <section class="panel"><div class="panel-head"><div><div class="title">Diagnóstico automático</div><div class="sub">Puntos que un responsable debería revisar antes de una auditoría o planificación semanal.</div></div></div><div class="issues" id="issues"><div class="issue"><b>Analizando...</b></div></div></section>
+  <section class="tabview" id="tab-calibration">
+    <div class="kpis">
+      <div class="kpi good"><div class="label">Calibraciones año</div><div class="value" id="calTotal">—</div><div class="note">Registros guardados</div></div>
+      <div class="kpi good"><div class="label">Resultados OK/APTO</div><div class="value" id="calOk">—</div><div class="note" id="calOkN">—</div></div>
+      <div class="kpi bad"><div class="label">NOK / NO APTO</div><div class="value" id="calNok">—</div><div class="note">Resultado no conforme</div></div>
+      <div class="kpi warn"><div class="label">Indet./pendientes</div><div class="value" id="calPend">—</div><div class="note">Revisión técnica</div></div>
+      <div class="kpi"><div class="label">Certificados año</div><div class="value" id="certTotal">—</div><div class="note">Documentos emitidos</div></div>
+      <div class="kpi violet"><div class="label">Certificados con PDF</div><div class="value" id="certPdf">—</div><div class="note" id="certPdfN">—</div></div>
+      <div class="kpi warn"><div class="label">Sin regla decisión</div><div class="value" id="certNoRule">—</div><div class="note">Evidencia incompleta</div></div>
+      <div class="kpi bad"><div class="label">Vencidos actuales</div><div class="value" id="calExpiredNow">—</div><div class="note">Flota activa</div></div>
+      <div class="kpi warn"><div class="label">Próximos 30 días</div><div class="value" id="calSoonNow">—</div><div class="note">Planificar</div></div>
+      <div class="kpi violet"><div class="label">Sin próxima fecha</div><div class="value" id="calNoDateNow">—</div><div class="note">Plan pendiente</div></div>
+    </div>
+    <div class="grid2"><article class="panel"><div class="head"><div><div class="title">Calibraciones por mes</div><div class="sub">Actividad anual registrada.</div></div></div><div class="chart"><canvas id="chMonth"></canvas></div></article><article class="panel"><div class="head"><div><div class="title">Resultado de calibraciones</div><div class="sub">Distribución de decisiones registradas.</div></div></div><div class="chart"><canvas id="chCalResults"></canvas></div></article></div>
+    <article class="panel"><div class="head"><div><div class="title">Últimas calibraciones</div><div class="sub">Muestra reciente para trazabilidad operativa.</div></div><a class="btn" href="calibraciones.html">Abrir centro</a></div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Equipo</th><th>Resultado</th><th>ID calibración</th></tr></thead><tbody id="calBody"></tbody></table></div></article>
+  </section>
+
+  <section class="tabview" id="tab-production">
+    <div class="kpis">
+      <div class="kpi"><div class="label">En laboratorio</div><div class="value" id="pLab">—</div><div class="note">Área tipo Laboratorio</div></div>
+      <div class="kpi"><div class="label">En taller</div><div class="value" id="pShop">—</div><div class="note">Producción / máquina</div></div>
+      <div class="kpi bad"><div class="label">Vencidos taller</div><div class="value" id="pExpired">—</div><div class="note">Riesgo de uso</div></div>
+      <div class="kpi warn"><div class="label">Próximos taller</div><div class="value" id="pSoon">—</div><div class="note">Previsión</div></div>
+      <div class="kpi"><div class="label">Máquinas con equipos</div><div class="value" id="pMachines">—</div><div class="note">Ubicaciones Taller</div></div>
+      <div class="kpi"><div class="label">Movimientos 30 días</div><div class="value" id="pMov30">—</div><div class="note">Actividad logística</div></div>
+      <div class="kpi warn"><div class="label">Ubicación inconsistente</div><div class="value" id="pInconsistent">—</div><div class="note">Campos no sincronizados</div></div>
+      <div class="kpi"><div class="label">Sin ubicación</div><div class="value" id="pNoLoc">—</div><div class="note">Dato a completar</div></div>
+      <div class="kpi"><div class="label">En uso</div><div class="value" id="pUse">—</div><div class="note">Estado operativo</div></div>
+      <div class="kpi"><div class="label">En laboratorio</div><div class="value" id="pLabState">—</div><div class="note">Estado registrado</div></div>
+    </div>
+    <div class="grid6040"><article class="panel"><div class="head"><div><div class="title">Equipos por máquina</div><div class="sub">Mapa completo de carga de equipos en producción.</div></div><span class="pill info" id="machinePill">—</span></div><div class="machine-grid" id="machineGrid"></div></article><article class="panel"><div class="head"><div><div class="title">Estado en producción</div><div class="sub">OK / próximo / fuera por equipos ubicados en Taller.</div></div></div><div class="chart sm"><canvas id="chProdStatus"></canvas></div></article></div>
+    <article class="panel"><div class="head"><div><div class="title">Detalle por ubicación</div><div class="sub">Total y estado de calibración por laboratorio/máquina.</div></div></div><div class="table-wrap"><table><thead><tr><th>Ubicación</th><th>Tipo</th><th class="num">Total</th><th class="num">OK</th><th class="num">Próx.</th><th class="num">Fuera</th><th class="num">Sin fecha</th></tr></thead><tbody id="locBody"></tbody></table></div></article>
+  </section>
+
+  <section class="tabview" id="tab-traceability">
+    <div class="kpis">
+      <div class="kpi"><div class="label">Patrones totales</div><div class="value" id="tPatterns">—</div><div class="note">Tabla patrones</div></div>
+      <div class="kpi good"><div class="label">Patrones vigentes</div><div class="value" id="tPatternOk">—</div><div class="note">Fecha vigente</div></div>
+      <div class="kpi warn"><div class="label">Patrones próximos</div><div class="value" id="tPatternSoon">—</div><div class="note">&lt;30 días</div></div>
+      <div class="kpi bad"><div class="label">Patrones vencidos</div><div class="value" id="tPatternExp">—</div><div class="note">No utilizar</div></div>
+      <div class="kpi violet"><div class="label">Patrones sin U</div><div class="value" id="tPatternNoU">—</div><div class="note">Trazabilidad incompleta</div></div>
+      <div class="kpi violet"><div class="label">Patrones sin próxima</div><div class="value" id="tPatternNoDate">—</div><div class="note">Vigencia indefinida</div></div>
+      <div class="kpi"><div class="label">Familias metrológicas</div><div class="value" id="tFamilies">—</div><div class="note">familias_calibracion</div></div>
+      <div class="kpi warn"><div class="label">Equipos sin familia</div><div class="value" id="tNoFamily">—</div><div class="note">Clasificación pendiente</div></div>
+      <div class="kpi"><div class="label">Familias físicas</div><div class="value" id="tPhysicalFam">—</div><div class="note">familias_instrumentos</div></div>
+      <div class="kpi"><div class="label">Cobertura familia</div><div class="value" id="tFamCov">—%</div><div class="note">Inventario activo</div></div>
+    </div>
+    <div class="grid2"><article class="panel"><div class="head"><div><div class="title">Patrones y trazabilidad</div><div class="sub">Estado de vigencia y datos esenciales de los patrones registrados.</div></div><a class="btn" href="App_Patrones_TMP.html">Gestionar patrones</a></div><div class="table-wrap"><table><thead><tr><th>Código</th><th>Descripción</th><th>Estado</th><th>U(k=2)</th><th>Próxima</th></tr></thead><tbody id="patternBody"></tbody></table></div></article><article class="panel"><div class="head"><div><div class="title">Cobertura por familia</div><div class="sub">Inventario activo agrupado por familia metrológica.</div></div><a class="btn" href="App_Familias_TMP.html">Gestionar familias</a></div><div class="chart"><canvas id="chFamilies"></canvas></div></article></div>
+  </section>
+
+  <section class="tabview" id="tab-activity">
+    <div class="kpis">
+      <div class="kpi"><div class="label">Movimientos cargados</div><div class="value" id="aMovTotal">—</div><div class="note">Muestra consultada</div></div>
+      <div class="kpi"><div class="label">Movimientos 30 días</div><div class="value" id="aMov30">—</div><div class="note">Actividad reciente</div></div>
+      <div class="kpi"><div class="label">Entradas 30 días</div><div class="value" id="aIn30">—</div><div class="note">Retorno laboratorio</div></div>
+      <div class="kpi"><div class="label">Salidas 30 días</div><div class="value" id="aOut30">—</div><div class="note">Entrega producción</div></div>
+      <div class="kpi warn"><div class="label">Necesidades abiertas</div><div class="value" id="aNeeds">—</div><div class="note">Reposición / compra</div></div>
+      <div class="kpi"><div class="label">Propietarios/clientes</div><div class="value" id="aOwners">—</div><div class="note">Catálogo</div></div>
+      <div class="kpi"><div class="label">John Deere activos</div><div class="value" id="aJD">—</div><div class="note">Equipos asociados</div></div>
+      <div class="kpi"><div class="label">Equipos TMP</div><div class="value" id="aTMP">—</div><div class="note">Propiedad interna/otros</div></div>
+      <div class="kpi"><div class="label">Última actividad</div><div class="value" id="aLast" style="font-size:14px">—</div><div class="note">Movimiento más reciente</div></div>
+      <div class="kpi"><div class="label">Operarios detectados</div><div class="value" id="aOperators">—</div><div class="note">En movimientos</div></div>
+    </div>
+    <div class="grid2"><article class="panel"><div class="head"><div><div class="title">Actividad logística reciente</div><div class="sub">Últimos movimientos disponibles en la base.</div></div><a class="btn" href="movimiento.html">Registrar movimiento</a></div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Destino</th><th>Operarios</th></tr></thead><tbody id="movBody"></tbody></table></div></article><article class="panel"><div class="head"><div><div class="title">Movimientos por tipo</div><div class="sub">Distribución de la actividad consultada.</div></div></div><div class="chart"><canvas id="chMoves"></canvas></div></article></div>
+  </section>
+
+  <section class="tabview" id="tab-quality">
+    <div class="risk-grid" style="margin-bottom:10px">
+      <div class="risk" id="qLocCard"><b>Ubicación completa</b><div class="metric" id="qLoc">—%</div><span id="qLocT">—</span></div>
+      <div class="risk" id="qFamCard"><b>Familia metrológica</b><div class="metric" id="qFam">—%</div><span id="qFamT">—</span></div>
+      <div class="risk" id="qDateCard"><b>Próxima calibración</b><div class="metric" id="qDate">—%</div><span id="qDateT">—</span></div>
+      <div class="risk" id="qOwnerCard"><b>Propietario / cliente</b><div class="metric" id="qOwner">—%</div><span id="qOwnerT">—</span></div>
+      <div class="risk" id="qSyncCard"><b>Coherencia ubicación</b><div class="metric" id="qSync">—</div><span id="qSyncT">—</span></div>
+      <div class="risk" id="qPatternCard"><b>Trazabilidad patrones</b><div class="metric" id="qPattern">—</div><span id="qPatternT">—</span></div>
+      <div class="risk" id="qCertCard"><b>Documentación certificados</b><div class="metric" id="qCert">—</div><span id="qCertT">—</span></div>
+      <div class="risk" id="qProdCard"><b>Vencidos en producción</b><div class="metric" id="qProd">—</div><span id="qProdT">—</span></div>
+    </div>
+    <article class="panel"><div class="head"><div><div class="title">Diagnóstico automático de la base</div><div class="sub">Incidencias estructurales y de cobertura detectadas sin modificar datos.</div></div><span class="pill warn" id="qualityPill">—</span></div><div class="alert-list" id="qualityList"></div></article>
+  </section>
+
+  <div class="footer">Talleres Mecánicos Paramio · Control Tower Metrológico · datos vivos de Supabase · actualización manual y automática</div>
 </main>
-<footer>Talleres Mecánicos Paramio · Alcance & KPIs · datos vivos desde Supabase</footer>
 <script type="module" src="config.mjs"></script>
 <script type="module">
-  const supabase = window.supabase;
-  const $ = id => document.getElementById(id);
-  const charts = {};
-  const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-  const YEAR = TODAY.getFullYear();
-
-  const norm = v => String(v ?? "").trim();
-  const upper = v => norm(v).toUpperCase();
-  const lower = v => norm(v).toLowerCase();
-  const pct = (n,t) => t ? Math.round((n/t)*100) : 0;
-  const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-  function parseDate(v){ if(!v) return null; const d=new Date(String(v).replace(/_/g,"-")); return isNaN(d)?null:d; }
-  function fmtDate(v){ const d=parseDate(v); return d?d.toLocaleDateString("es-ES"):"—"; }
-  function nextDate(i){ return i.fecha_proxima_calibracion || i.proxima_calibracion || null; }
-  function isRetired(i){ return ["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(upper(i.estado)) || upper(i.ubicacion_actual)==="RETIRADO"; }
-  function calStatus(i){ const d=parseDate(nextDate(i)); if(!d) return "SIN FECHA"; d.setHours(0,0,0,0); const d30=new Date(TODAY.getTime()+30*86400000); if(d<TODAY)return "FUERA"; if(d<=d30)return "PRÓXIMO"; return "OK"; }
-  function statusPill(s){ return `<span class="pill ${s==='OK'?'ok':s==='PRÓXIMO'?'warn':s==='FUERA'?'bad':'gray'}">${s}</span>`; }
-  function setText(id,v){ if($(id)) $(id).textContent=v; }
-  function inc(map,key,n=1){ const k=key||"Sin dato"; map[k]=(map[k]||0)+n; }
-
-  function renderChart(id,type,labels,data,label){
-    const el=$(id); if(!el) return; if(charts[id]) charts[id].destroy();
-    charts[id]=new Chart(el.getContext("2d"),{type,data:{labels,datasets:[{label:label||"Equipos",data}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{boxWidth:10,font:{size:9}}}},scales:type==='bar'?{x:{ticks:{font:{size:8}}},y:{beginAtZero:true,ticks:{precision:0,font:{size:8}}}}:undefined}});
-  }
-
-  function resolveLocation(i,locMap){
-    const u=locMap.get(String(i.ubicacion_id||""));
-    const type=lower(u?.tipo);
-    const name=norm(u?.nombre) || norm(i.ubicacion_actual) || "Sin ubicación";
-    if(type==="laboratorio") return {name,type:"Laboratorio",classified:true};
-    if(type==="taller") return {name,type:"Taller",classified:true};
-    const txt=lower(i.ubicacion);
-    const act=lower(i.ubicacion_actual);
-    if(txt==="laboratorio" || act==="laboratorio" || act==="calidad") return {name:name||"Laboratorio",type:"Laboratorio",classified:true};
-    if(txt==="taller") return {name,type:"Taller",classified:true};
-    return {name,type:u?.tipo||"Sin tipo",classified:Boolean(u?.id || i.ubicacion_actual)};
-  }
-
-  function renderPriority(active,locMap){
-    const rows=active.map(i=>({i,s:calStatus(i),d:parseDate(nextDate(i)),loc:resolveLocation(i,locMap)})).filter(x=>x.s==='FUERA'||x.s==='PRÓXIMO').sort((a,b)=>(a.d?.getTime()||0)-(b.d?.getTime()||0)).slice(0,18);
-    setText("priorityPill", `${rows.length} prioritarios`);
-    $("tablaPrioridad").innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.i.codigo)}</b></td><td>${esc(x.i.descripcion||"—")}</td><td>${esc(x.loc.name)}</td><td>${fmtDate(nextDate(x.i))}</td><td>${statusPill(x.s)}</td></tr>`).join(""):`<tr><td colspan="5">Sin equipos vencidos o próximos.</td></tr>`;
-  }
-
-  function renderLocations(active,locMap){
-    const g={}; active.forEach(i=>{const loc=resolveLocation(i,locMap); const key=`${loc.name}|||${loc.type}`; if(!g[key])g[key]={name:loc.name,type:loc.type,total:0,OK:0,PRÓXIMO:0,FUERA:0,"SIN FECHA":0}; const r=g[key];r.total++;r[calStatus(i)]++;});
-    const rows=Object.values(g).sort((a,b)=>b.total-a.total);
-    $("tablaUbicaciones").innerHTML=rows.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.type)}</td><td class="num">${r.total}</td><td class="num">${r.OK}</td><td class="num">${r.PRÓXIMO}</td><td class="num">${r.FUERA}</td><td class="num">${r["SIN FECHA"]}</td></tr>`).join("")||`<tr><td colspan="7">Sin datos.</td></tr>`;
-  }
-
-  function renderFamilies(active,famMap){
-    const g={}; active.forEach(i=>{const f=famMap.get(String(i.familia_calibracion_id||"")); const name=f?.nombre||"Sin familia metrológica"; if(!g[name])g[name]={name,total:0,OK:0,PRÓXIMO:0,FUERA:0,"SIN FECHA":0}; const r=g[name];r.total++;r[calStatus(i)]++;});
-    const rows=Object.values(g).sort((a,b)=>b.total-a.total);
-    $("tablaFamilias").innerHTML=rows.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td class="num">${r.total}</td><td class="num">${r.OK}</td><td class="num">${r.PRÓXIMO}</td><td class="num">${r.FUERA}</td><td class="num">${r["SIN FECHA"]}</td></tr>`).join("")||`<tr><td colspan="6">Sin datos.</td></tr>`;
-  }
-
-  function addIssue(kind,title,text){ const d=document.createElement("div"); d.className=`issue ${kind||""}`; d.innerHTML=`<b>${esc(title)}</b><span>${esc(text)}</span>`; $("issues").appendChild(d); }
+  const sb=window.supabase, $=id=>document.getElementById(id), YEAR=new Date().getFullYear();
+  const charts={}; let snapshot={};
+  const norm=v=>String(v??"").trim(), lower=v=>norm(v).toLowerCase(), upper=v=>norm(v).toUpperCase();
+  const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null};
+  const date=v=>{if(!v)return null;const d=new Date(String(v).replace(/_/g,"-"));return isNaN(d)?null:d};
+  const fmt=v=>{const d=date(v);return d?d.toLocaleDateString("es-ES"):"—"};
+  const pct=(a,b)=>b?Math.round(a*100/b):0;
+  const set=(id,v)=>{if($(id))$(id).textContent=v};
+  const isRetired=i=>["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(upper(i?.estado))||upper(i?.ubicacion_actual)==="RETIRADO";
+  const nextDate=i=>i?.fecha_proxima_calibracion||i?.proxima_calibracion||null;
+  function calStatus(i){const d=date(nextDate(i));if(!d)return"SIN FECHA";const h=new Date();h.setHours(0,0,0,0);d.setHours(0,0,0,0);if(d<h)return"FUERA";if(d<=new Date(h.getTime()+30*86400000))return"PRÓXIMO";return"OK"}
+  function badge(s){return `<span class="pill ${s==='OK'?'ok':s==='PRÓXIMO'?'warn':s==='FUERA'?'bad':'gray'}">${esc(s)}</span>`}
+  async function q(table,select='*',opts={}){try{let x=sb.from(table).select(select);if(opts.order)x=x.order(opts.order,{ascending:opts.asc??false});if(opts.limit)x=x.limit(opts.limit);const r=await x;return {data:r.data||[],error:r.error};}catch(e){return {data:[],error:e}}}
+  function makeChart(id,type,labels,data,label){const el=$(id);if(!el)return;if(charts[id])charts[id].destroy();charts[id]=new Chart(el,{type,data:{labels,datasets:[{label:label||'',data}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:9}}}},scales:type==='bar'?{x:{ticks:{font:{size:8}}},y:{beginAtZero:true,ticks:{precision:0,font:{size:8}}}}:undefined}})}
+  function resolveLoc(i,locMap){const u=locMap.get(String(i?.ubicacion_id||''));const t=lower(u?.tipo),name=norm(u?.nombre)||norm(i?.ubicacion_actual)||'Sin ubicación';if(t==='laboratorio')return{name,type:'Laboratorio',ok:true};if(t==='taller')return{name,type:'Taller',ok:true};const txt=lower(i?.ubicacion),act=lower(i?.ubicacion_actual);if(txt==='laboratorio'||act==='laboratorio'||act==='calidad')return{name:name||'Laboratorio',type:'Laboratorio',ok:true};if(txt==='taller')return{name,type:'Taller',ok:true};return{name,type:norm(u?.tipo)||'Sin tipo',ok:Boolean(u?.id||i?.ubicacion_actual)}}
+  function inconsistentLoc(i,locMap){const u=locMap.get(String(i?.ubicacion_id||''));if(!u)return false;const t=lower(u.tipo),txt=lower(i.ubicacion),act=lower(i.ubicacion_actual);if(t==='taller'&&txt==='laboratorio')return true;if(t==='laboratorio'&&txt==='taller')return true;if(t==='taller'&&act==='laboratorio')return true;return false}
+  function resultClass(c){const vals=[c?.resultado,c?.estado_final,c?.decision_global,c?.decision,c?.conforme].map(v=>upper(v)).filter(Boolean).join(' ');if(/NO APTO|NOK|NO CONFORME|RECHAZ/.test(vals))return'NOK';if(/INDETERMIN|PENDIENT|NO EVALUABLE/.test(vals))return'PEND';if(/APTO|OK|CONFORME|TRUE/.test(vals))return'OK';return'PEND'}
+  function patternNext(p){return p?.proxima_calibracion||p?.fecha_proxima_calibracion||p?.proxima_fecha||null}
+  function patternU(p){return p?.incertidumbre_u_k2??p?.incertidumbre??p?.u_k2??p?.U??null}
+  function patternState(p){const d=date(patternNext(p));if(!d)return'SIN FECHA';const h=new Date();h.setHours(0,0,0,0);d.setHours(0,0,0,0);if(d<h)return'FUERA';if(d<=new Date(h.getTime()+30*86400000))return'PRÓXIMO';return'OK'}
+  function addAlert(container,kind,title,text){const d=document.createElement('div');d.className=`alert ${kind||''}`;d.innerHTML=`<b>${esc(title)}</b><span>${esc(text)}</span>`;container.appendChild(d)}
 
   async function load(){
-    if(!supabase){setText("onlineText","Supabase no disponible");return;}
-    setText("onlineText","Actualizando...");
-    try{
-      const from=`${YEAR}-01-01T00:00:00`, to=`${YEAR+1}-01-01T00:00:00`;
-      const [insR,locR,famR,calR,certR]=await Promise.all([
-        supabase.from("instrumentos").select("id,codigo,descripcion,estado,ubicacion_id,ubicacion_actual,ubicacion,propietario_id,familia_id,familia_calibracion_id,fecha_proxima_calibracion,proxima_calibracion"),
-        supabase.from("ubicaciones").select("id,nombre,tipo,activo"),
-        supabase.from("familias_calibracion").select("id,nombre,codigo,activo"),
-        supabase.from("calibraciones").select("id,instrumento_id,codigo,fecha_calibracion,fecha_ultima,creado_en,resultado,estado_final,conforme").gte("creado_en",from).lt("creado_en",to),
-        supabase.from("certificados").select("id,calibracion_id,numero,decision_global,regla_decision,certificado_pdf_url,creado_en").gte("creado_en",from).lt("creado_en",to)
-      ]);
-      if(insR.error) throw insR.error;
-      const locMap=new Map((locR.data||[]).map(x=>[String(x.id),x]));
-      const famMap=new Map((famR.data||[]).map(x=>[String(x.id),x]));
-      const all=insR.data||[]; const active=all.filter(i=>!isRetired(i)); const retired=all.length-active.length;
-      const total=active.length;
-      const st={OK:0,PRÓXIMO:0,FUERA:0,"SIN FECHA":0}; let lab=0,taller=0,locClassified=0,famAssigned=0,dateAssigned=0,expiredProd=0;
-      const famCounts={}, monthCounts=Array(12).fill(0);
-      active.forEach(i=>{const s=calStatus(i);st[s]++;const l=resolveLocation(i,locMap);if(l.classified)locClassified++;if(lower(l.type)==="laboratorio")lab++;if(lower(l.type)==="taller"){taller++;if(s==="FUERA")expiredProd++;}if(i.familia_calibracion_id&&famMap.has(String(i.familia_calibracion_id))){famAssigned++;inc(famCounts,famMap.get(String(i.familia_calibracion_id)).nombre);}else inc(famCounts,"Sin familia");if(nextDate(i))dateAssigned++;});
-      (calR.data||[]).forEach(c=>{const d=parseDate(c.fecha_calibracion)||parseDate(c.fecha_ultima)||parseDate(c.creado_en);if(d&&d.getFullYear()===YEAR)monthCounts[d.getMonth()]++;});
-      const covU=pct(locClassified,total),covF=pct(famAssigned,total),covC=pct(dateAssigned,total),coverage=Math.round((covU+covF+covC)/3);
+    if(!sb){set('online','Supabase no disponible');return} set('online','Actualizando...');
+    const [insR,locR,famR,pfamR,patR,calR,certR,movR,repR,ownR]=await Promise.all([
+      q('instrumentos','*'),q('ubicaciones','*'),q('familias_calibracion','*'),q('familias_instrumentos','*'),q('patrones','*'),q('calibraciones','*',{order:'creado_en',limit:3000}),q('certificados','*',{order:'creado_en',limit:3000}),q('movimientos','*',{order:'fecha',limit:1000}),q('reposiciones','*',{order:'creado_en',limit:1000}),q('propietarios_equipos','*')
+    ]);
+    if(insR.error){console.error(insR.error);set('online','Error instrumentos');return}
+    const locMap=new Map(locR.data.map(x=>[String(x.id),x])), famMap=new Map(famR.data.map(x=>[String(x.id),x])), ownerMap=new Map(ownR.data.map(x=>[String(x.id),x]));
+    const all=insR.data, active=all.filter(i=>!isRetired(i)), total=active.length, retired=all.length-total;
+    const st={OK:0,'PRÓXIMO':0,FUERA:0,'SIN FECHA':0};let lab=0,shop=0,prodExp=0,prodSoon=0,noLoc=0,incons=0,inUse=0,inLabState=0,locCovered=0,famCovered=0,dateCovered=0,ownerCovered=0;
+    const machine={}, locAgg={}, famAgg={}, ownerAgg={};
+    active.forEach(i=>{const s=calStatus(i);st[s]++;const l=resolveLoc(i,locMap);if(l.ok)locCovered++;else noLoc++;if(lower(l.type)==='laboratorio')lab++;if(lower(l.type)==='taller'){shop++;if(s==='FUERA')prodExp++;if(s==='PRÓXIMO')prodSoon++;machine[l.name]=(machine[l.name]||0)+1}if(inconsistentLoc(i,locMap))incons++;if(lower(i.estado)==='en uso')inUse++;if(lower(i.estado)==='en laboratorio')inLabState++;if(i.familia_calibracion_id&&famMap.has(String(i.familia_calibracion_id)))famCovered++;if(nextDate(i))dateCovered++;if(i.propietario_id&&ownerMap.has(String(i.propietario_id)))ownerCovered++;
+      const lk=`${l.name}|||${l.type}`;locAgg[lk]??={name:l.name,type:l.type,total:0,OK:0,'PRÓXIMO':0,FUERA:0,'SIN FECHA':0};locAgg[lk].total++;locAgg[lk][s]++;
+      const f=famMap.get(String(i.familia_calibracion_id||''));const fn=f?.nombre||'Sin familia';famAgg[fn]=(famAgg[fn]||0)+1;
+      const o=ownerMap.get(String(i.propietario_id||''));const on=o?.nombre||'Sin propietario';ownerAgg[on]=(ownerAgg[on]||0)+1;
+    });
+    const covL=pct(locCovered,total),covF=pct(famCovered,total),covD=pct(dateCovered,total),covO=pct(ownerCovered,total),score=Math.round((covL+covF+covD+covO)/4);
+    const calYear=calR.data.filter(c=>{const d=date(c.fecha_calibracion||c.fecha_ultima||c.creado_en);return d&&d.getFullYear()===YEAR});
+    const certYear=certR.data.filter(c=>{const d=date(c.creado_en||c.fecha_emision||c.fecha);return d&&d.getFullYear()===YEAR});
+    const calRes={OK:0,NOK:0,PEND:0};calYear.forEach(c=>calRes[resultClass(c)]++);
+    const certPdf=certYear.filter(c=>c.certificado_pdf_url||c.pdf_url||c.url_pdf||c.archivo_url).length, certNoRule=certYear.filter(c=>!norm(c.regla_decision||c.regla||c.decision_rule)).length;
+    const patterns=patR.data,pst={OK:0,'PRÓXIMO':0,FUERA:0,'SIN FECHA':0};let pNoU=0;patterns.forEach(p=>{pst[patternState(p)]++;if(!(num(patternU(p))>0))pNoU++});
+    const openNeeds=repR.data.filter(r=>!['CERRADA','CERRADO','RESUELTA','RESUELTO','COMPLETADA','COMPLETADO','CANCELADA','CANCELADO'].includes(upper(r.estado||r.status))).length;
+    const now=Date.now(),d30=30*86400000;const mov30=movR.data.filter(m=>{const d=date(m.fecha||m.creado_en);return d&&now-d.getTime()<=d30});const in30=mov30.filter(m=>lower(m.tipo_movimiento).includes('entrada')).length,out30=mov30.filter(m=>lower(m.tipo_movimiento).includes('salida')).length;
+    const ops=new Set();movR.data.forEach(m=>{if(norm(m.operario1))ops.add(norm(m.operario1));if(norm(m.operario2))ops.add(norm(m.operario2))});
+    const owners=ownR.data;const jdIds=new Set(owners.filter(o=>lower(o.nombre).includes('john deere')).map(o=>String(o.id)));const jd=active.filter(i=>jdIds.has(String(i.propietario_id))).length;
+    const lastMove=movR.data.map(m=>date(m.fecha||m.creado_en)).filter(Boolean).sort((a,b)=>b-a)[0];
+    snapshot={total,retired,st,lab,shop,prodExp,prodSoon,noLoc,incons,calYear:calYear.length,certYear:certYear.length,patterns:patterns.length,openNeeds,score};
 
-      setText("onlineText",`Online · ${total} activos`);setText("kpiActive",total);setText("kpiActiveNote",`${retired} retirados fuera del alcance activo`);setText("kpiOk",st.OK);setText("kpiOkNote",`${pct(st.OK,total)}% del inventario activo`);setText("kpiSoon",st.PRÓXIMO);setText("kpiExpired",st.FUERA);setText("kpiExpiredProd",expiredProd);setText("kpiNoDate",st["SIN FECHA"]);setText("kpiCalYtd",(calR.data||[]).length);setText("kpiCalYtdNote",`Año ${YEAR}`);setText("kpiCertYtd",(certR.data||[]).length);setText("kpiCertYtdNote",`Año ${YEAR}`);
-      setText("coverageScore",`${coverage}%`);$("coverageBar").style.width=`${coverage}%`;setText("covUbic",`${covU}%`);setText("covFam",`${covF}%`);setText("covCal",`${covC}%`);setText("scopePill",`${lab} laboratorio · ${taller} taller`);
+    set('online',`Online · ${total} activos · ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`);set('score',`${score}%`);$('scorebar').style.width=`${score}%`;set('scoreDetail',`Ubicación ${covL}% · Familia ${covF}% · Próxima calibración ${covD}% · Propietario/cliente ${covO}%`);
+    set('kActive',total);set('kActiveN',`${retired} fuera del alcance activo`);set('kOk',st.OK);set('kOkN',`${pct(st.OK,total)}% del inventario`);set('kSoon',st['PRÓXIMO']);set('kExpired',st.FUERA);set('kProdExp',prodExp);set('kNoDate',st['SIN FECHA']);set('kCalY',calYear.length);set('kCalYN',`Año ${YEAR}`);set('kCertY',certYear.length);set('kCertYN',`${certPdf} con PDF`);set('kPatterns',patterns.length);set('kPatternsN',`${pst.FUERA} vencidos`);set('kNeeds',openNeeds);set('scopePill',`${lab} laboratorio · ${shop} taller`);
+    makeChart('chStatus','doughnut',['OK','Próximo','Fuera','Sin fecha'],[st.OK,st['PRÓXIMO'],st.FUERA,st['SIN FECHA']],'Equipos');makeChart('chArea','doughnut',['Laboratorio','Taller','Otros'],[lab,shop,Math.max(0,total-lab-shop)],'Equipos');
+    const risk=$('riskList');risk.innerHTML='';let riskN=0;if(prodExp){addAlert(risk,'bad','Vencidos en producción',`${prodExp} equipos vencidos están ubicados en Taller.`);riskN++}if(st['SIN FECHA']){addAlert(risk,'','Plan incompleto',`${st['SIN FECHA']} equipos activos no tienen próxima calibración.`);riskN++}if(incons){addAlert(risk,'','Ubicaciones incoherentes',`${incons} equipos tienen campos de ubicación que no coinciden con ubicacion_id.`);riskN++}if(pst.FUERA){addAlert(risk,'bad','Patrones vencidos',`${pst.FUERA} patrones tienen la próxima calibración vencida.`);riskN++}if(pNoU){addAlert(risk,'','Patrones sin incertidumbre',`${pNoU} patrones no tienen U(k=2) válida registrada.`);riskN++}if(!riskN)addAlert(risk,'ok','Sin riesgos estructurales prioritarios','No se detectan incidencias con los controles actuales.');set('riskPill',`${riskN} foco${riskN===1?'':'s'}`);
+    const priority=active.map(i=>({i,s:calStatus(i),d:date(nextDate(i)),l:resolveLoc(i,locMap)})).filter(x=>['FUERA','PRÓXIMO'].includes(x.s)).sort((a,b)=>(a.d?.getTime()||0)-(b.d?.getTime()||0)).slice(0,25);set('priorityPill',`${priority.length} mostrados`);$('priorityBody').innerHTML=priority.map(x=>`<tr><td><b>${esc(x.i.codigo)}</b></td><td class="truncate">${esc(x.i.descripcion||'—')}</td><td>${esc(x.l.name)}</td><td>${fmt(nextDate(x.i))}</td><td>${badge(x.s)}</td></tr>`).join('')||'<tr><td colspan="5">Sin prioridades.</td></tr>';
 
-      setText("auditProdMetric",expiredProd);setText("auditProdText",expiredProd===0?"Cumplido: no hay vencidos clasificados en taller.":`${expiredProd} equipo(s) vencidos en taller.`);
-      setText("auditUbicMetric",`${covU}%`);setText("auditUbicText",covU===100?"Cobertura completa de ubicación.":`${total-locClassified} equipo(s) sin clasificación de ubicación suficiente.`);
-      setText("auditFamMetric",`${covF}%`);setText("auditFamText",covF===100?"Todo el inventario activo tiene familia metrológica.":`${total-famAssigned} equipo(s) sin familia metrológica resoluble.`);
-      setText("auditCalMetric",`${covC}%`);setText("auditCalText",covC===100?"Todo el inventario activo tiene próxima fecha.":`${total-dateAssigned} equipo(s) sin próxima calibración.`);
-      const auditGood=expiredProd===0&&covU===100&&covF===100&&covC===100;$("auditPill").className=`pill ${auditGood?'ok':'warn'}`;setText("auditPill",auditGood?"CONTROL COMPLETO":"REVISAR PENDIENTES");
+    set('calTotal',calYear.length);set('calOk',calRes.OK);set('calOkN',`${pct(calRes.OK,calYear.length)}%`);set('calNok',calRes.NOK);set('calPend',calRes.PEND);set('certTotal',certYear.length);set('certPdf',certPdf);set('certPdfN',`${pct(certPdf,certYear.length)}% cobertura`);set('certNoRule',certNoRule);set('calExpiredNow',st.FUERA);set('calSoonNow',st['PRÓXIMO']);set('calNoDateNow',st['SIN FECHA']);
+    const months=Array(12).fill(0);calYear.forEach(c=>{const d=date(c.fecha_calibracion||c.fecha_ultima||c.creado_en);if(d)months[d.getMonth()]++});makeChart('chMonth','bar',['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],months,'Calibraciones');makeChart('chCalResults','doughnut',['OK/APTO','NOK/NO APTO','Pend./Indet.'],[calRes.OK,calRes.NOK,calRes.PEND],'Resultados');
+    const lastCal=[...calR.data].sort((a,b)=>(date(b.fecha_calibracion||b.creado_en)?.getTime()||0)-(date(a.fecha_calibracion||a.creado_en)?.getTime()||0)).slice(0,30);$('calBody').innerHTML=lastCal.map(c=>`<tr><td>${fmt(c.fecha_calibracion||c.fecha_ultima||c.creado_en)}</td><td>${esc(c.codigo||c.codigo_instrumento||c.instrumento_codigo||c.instrumento_id||'—')}</td><td>${esc(resultClass(c))}</td><td>${esc(c.id||'—')}</td></tr>`).join('')||'<tr><td colspan="4">Sin calibraciones.</td></tr>';
 
-      renderChart("chartCal","doughnut",["OK","Próximo","Fuera","Sin fecha"],[st.OK,st.PRÓXIMO,st.FUERA,st["SIN FECHA"]],"Equipos");
-      renderChart("chartArea","doughnut",["Laboratorio","Taller","Otros / no clasificados"],[lab,taller,Math.max(0,total-lab-taller)],"Equipos");
-      const famRows=Object.entries(famCounts).sort((a,b)=>b[1]-a[1]).slice(0,12);renderChart("chartFam","bar",famRows.map(x=>x[0]),famRows.map(x=>x[1]),"Equipos");
-      renderChart("chartMonth","bar",["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],monthCounts,"Calibraciones");
-      renderPriority(active,locMap);renderLocations(active,locMap);renderFamilies(active,famMap);
+    set('pLab',lab);set('pShop',shop);set('pExpired',prodExp);set('pSoon',prodSoon);set('pMachines',Object.keys(machine).length);set('pMov30',mov30.length);set('pInconsistent',incons);set('pNoLoc',noLoc);set('pUse',inUse);set('pLabState',inLabState);set('machinePill',`${Object.keys(machine).length} máquinas`);
+    $('machineGrid').innerHTML=Object.entries(machine).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="machine-card"><b title="${esc(n)}">${esc(n)}</b><div class="mval">${c}</div><span>equipo${c===1?'':'s'}</span></div>`).join('')||'<div class="small">Sin máquinas con equipos.</div>';makeChart('chProdStatus','doughnut',['OK','Próximo','Fuera'],[active.filter(i=>lower(resolveLoc(i,locMap).type)==='taller'&&calStatus(i)==='OK').length,prodSoon,prodExp],'Equipos');
+    $('locBody').innerHTML=Object.values(locAgg).sort((a,b)=>b.total-a.total).map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.type)}</td><td class="num">${r.total}</td><td class="num">${r.OK}</td><td class="num">${r['PRÓXIMO']}</td><td class="num">${r.FUERA}</td><td class="num">${r['SIN FECHA']}</td></tr>`).join('');
 
-      $("issues").innerHTML="";
-      if(expiredProd>0)addIssue("bad","Vencidos en producción",`${expiredProd} equipos vencidos están clasificados en ubicaciones tipo Taller.`); else addIssue("ok","Producción sin vencidos","No se detectan equipos fuera de calibración en ubicaciones tipo Taller.");
-      if(st["SIN FECHA"]>0)addIssue("","Plan de calibración incompleto",`${st["SIN FECHA"]} equipos activos no tienen próxima calibración.`);
-      if(total-famAssigned>0)addIssue("","Familia metrológica pendiente",`${total-famAssigned} equipos activos no tienen familia_calibracion_id resoluble.`);
-      if(total-locClassified>0)addIssue("","Ubicación pendiente",`${total-locClassified} equipos activos no tienen ubicación suficientemente clasificada.`);
-      const certs=certR.data||[]; const certNoPdf=certs.filter(c=>!c.certificado_pdf_url).length; const certNoRule=certs.filter(c=>!norm(c.regla_decision)).length; if(certNoPdf)addIssue("","Certificados sin PDF",`${certNoPdf} certificados del año no tienen PDF enlazado.`); if(certNoRule)addIssue("","Regla de decisión no documentada",`${certNoRule} certificados del año no declaran regla_decision.`);
-      if(!$("issues").children.length)addIssue("ok","Sin incidencias estructurales","No se han detectado incidencias con los controles configurados.");
-    }catch(e){console.error(e);setText("onlineText","Error cargando KPIs");$("issues").innerHTML=`<div class="issue bad"><b>Error de carga</b><span>${esc(e.message||e)}</span></div>`;}
+    set('tPatterns',patterns.length);set('tPatternOk',pst.OK);set('tPatternSoon',pst['PRÓXIMO']);set('tPatternExp',pst.FUERA);set('tPatternNoU',pNoU);set('tPatternNoDate',pst['SIN FECHA']);set('tFamilies',famR.data.length);set('tNoFamily',total-famCovered);set('tPhysicalFam',pfamR.data.length);set('tFamCov',`${covF}%`);
+    $('patternBody').innerHTML=[...patterns].sort((a,b)=>{const sa=patternState(a),sb=patternState(b);const rank={FUERA:0,'PRÓXIMO':1,'SIN FECHA':2,OK:3};return rank[sa]-rank[sb]}).slice(0,60).map(p=>`<tr><td><b>${esc(p.codigo||p.code||'—')}</b></td><td class="truncate">${esc(p.descripcion||p.nombre||p.tipo||'—')}</td><td>${badge(patternState(p))}</td><td>${num(patternU(p))??'—'}</td><td>${fmt(patternNext(p))}</td></tr>`).join('')||'<tr><td colspan="5">Sin patrones.</td></tr>';
+    const famRows=Object.entries(famAgg).sort((a,b)=>b[1]-a[1]).slice(0,20);makeChart('chFamilies','bar',famRows.map(x=>x[0]),famRows.map(x=>x[1]),'Equipos');
+
+    set('aMovTotal',movR.data.length);set('aMov30',mov30.length);set('aIn30',in30);set('aOut30',out30);set('aNeeds',openNeeds);set('aOwners',owners.length);set('aJD',jd);set('aTMP',Math.max(0,total-jd));set('aLast',lastMove?lastMove.toLocaleDateString('es-ES'):'—');set('aOperators',ops.size);
+    $('movBody').innerHTML=movR.data.slice(0,60).map(m=>`<tr><td>${fmt(m.fecha||m.creado_en)}</td><td><b>${esc(m.codigo_instrumento||m.codigo||'—')}</b></td><td>${esc(m.tipo_movimiento||m.tipo||'—')}</td><td>${esc(m.destino||m.ubicacion_destino||'—')}</td><td>${esc([m.operario1,m.operario2].filter(Boolean).join(' / ')||'—')}</td></tr>`).join('')||'<tr><td colspan="5">Sin movimientos.</td></tr>';
+    const moveTypes={};movR.data.forEach(m=>{const t=norm(m.tipo_movimiento||m.tipo)||'Sin tipo';moveTypes[t]=(moveTypes[t]||0)+1});makeChart('chMoves','doughnut',Object.keys(moveTypes),Object.values(moveTypes),'Movimientos');
+
+    set('qLoc',`${covL}%`);set('qLocT',`${total-locCovered} equipos pendientes`);set('qFam',`${covF}%`);set('qFamT',`${total-famCovered} sin familia`);set('qDate',`${covD}%`);set('qDateT',`${total-dateCovered} sin próxima fecha`);set('qOwner',`${covO}%`);set('qOwnerT',`${total-ownerCovered} sin propietario/cliente`);set('qSync',incons);set('qSyncT','equipos con campos de ubicación incoherentes');set('qPattern',pNoU+pst.FUERA+pst['SIN FECHA']);set('qPatternT','incidencias de patrón detectadas');set('qCert',certNoRule+(certYear.length-certPdf));set('qCertT','carencias documentales en certificados del año');set('qProd',prodExp);set('qProdT','equipos vencidos ubicados en Taller');
+    [['qLocCard',covL===100],['qFamCard',covF===100],['qDateCard',covD===100],['qOwnerCard',covO===100],['qSyncCard',incons===0],['qPatternCard',(pNoU+pst.FUERA+pst['SIN FECHA'])===0],['qCertCard',(certNoRule+(certYear.length-certPdf))===0],['qProdCard',prodExp===0]].forEach(([id,ok])=>$(id).classList.add(ok?'ok':'bad'));
+    const ql=$('qualityList');ql.innerHTML='';let issues=0;const issue=(kind,t,x)=>{addAlert(ql,kind,t,x);issues++};if(total-locCovered)issue('','Equipos sin ubicación completa',`${total-locCovered} activos no pueden clasificarse con seguridad por ubicación.`);if(total-famCovered)issue('','Equipos sin familia metrológica',`${total-famCovered} activos no tienen familia_calibracion_id resoluble.`);if(total-dateCovered)issue('','Equipos sin próxima calibración',`${total-dateCovered} activos no tienen fecha de próxima calibración.`);if(total-ownerCovered)issue('','Equipos sin propietario / cliente',`${total-ownerCovered} activos no tienen propietario_id resoluble.`);if(incons)issue('','Campos de ubicación incoherentes',`${incons} equipos no coinciden entre ubicacion_id / ubicacion / ubicacion_actual.`);if(prodExp)issue('bad','Vencidos en producción',`${prodExp} equipos fuera de calibración están actualmente en Taller.`);if(pst.FUERA)issue('bad','Patrones vencidos',`${pst.FUERA} patrones han superado su próxima calibración.`);if(pNoU)issue('','Patrones sin U(k=2)',`${pNoU} patrones no tienen una incertidumbre válida registrada.`);if(pst['SIN FECHA'])issue('','Patrones sin próxima calibración',`${pst['SIN FECHA']} patrones no tienen fecha de próxima calibración.`);if(certYear.length-certPdf)issue('','Certificados sin PDF',`${certYear.length-certPdf} certificados del año no tienen PDF enlazado.`);if(certNoRule)issue('','Certificados sin regla de decisión',`${certNoRule} certificados del año no declaran regla de decisión.`);if(!issues)addAlert(ql,'ok','Cobertura completa','No se detectan incidencias con los controles automáticos configurados.');set('qualityPill',`${issues} incidencia${issues===1?'':'s'}`);
   }
-  $("btnRefresh").addEventListener("click",load); load(); setInterval(load,60000);
+
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tabview').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(`tab-${b.dataset.tab}`).classList.add('active');setTimeout(()=>Object.values(charts).forEach(c=>c.resize()),40)}));
+  $('refresh').addEventListener('click',load);
+  $('csv').addEventListener('click',()=>{const rows=[['Indicador','Valor'],...Object.entries(snapshot)];const csv=rows.map(r=>r.map(v=>`"${String(typeof v==='object'?JSON.stringify(v):v??'').replaceAll('"','""')}"`).join(';')).join('\n');const blob=new Blob(["\ufeff"+csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`TMP_Control_Tower_${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)});
+  load(); setInterval(load,90000);
 </script>
 </body>
 </html>
