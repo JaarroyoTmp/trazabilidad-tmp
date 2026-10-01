@@ -3,881 +3,268 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TMP · Portal de Certificados de Calibración</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
+  <title>TMP · Informes y Certificados</title>
   <style>
     :root{
-      --bg:#06101d;
-      --bg2:#081423;
-      --panel:#0c1728;
-      --panel2:#101c31;
-      --panel3:#13233b;
-      --card:#111c30;
-      --border:#203452;
-      --border-soft:#1a2a42;
-      --txt:#edf4ff;
-      --muted:#9cb0cd;
-      --muted2:#7f95b5;
-      --accent:#1dd75f;
-      --accent2:#58f08d;
-      --accent3:#0fa84a;
-      --blue:#4ea1ff;
-      --blue2:#80bcff;
-      --gold:#f2b94b;
-      --shadow:0 20px 60px rgba(0,0,0,.40);
-      --shadow-soft:0 10px 35px rgba(0,0,0,.28);
-      --radius-xl:28px;
-      --radius-lg:22px;
-      --radius-md:16px;
+      --bg:#eef6ff; --bg2:#f8fbff; --ink:#0d2340; --muted:#647d96;
+      --panel:#fff; --line:#dbe7f2; --line2:#c9dceb; --blue:#2563eb;
+      --blue2:#0ea5e9; --green:#16a34a; --orange:#f59e0b; --red:#ef4444;
+      --purple:#7c3aed; --shadow:0 14px 34px rgba(15,45,75,.09);
     }
-
     *{box-sizing:border-box}
-    html,body{min-height:100%}
-
-    body{
-      margin:0;
-      font-family:"Inter",sans-serif;
-      color:var(--txt);
-      background:
-        radial-gradient(900px 500px at 0% 0%, rgba(78,161,255,.16), transparent 60%),
-        radial-gradient(800px 400px at 100% 0%, rgba(29,215,95,.10), transparent 60%),
-        linear-gradient(180deg, #08111f 0%, #050c17 50%, #040914 100%);
-      background-color:var(--bg);
-    }
-
-    .shell{
-      max-width:1240px;
-      margin:0 auto;
-      padding:22px 18px 38px;
-    }
-
-    .hero{
-      position:relative;
-      overflow:hidden;
-      border:1px solid var(--border);
-      border-radius:32px;
-      background:
-        linear-gradient(135deg, rgba(15,24,42,.96), rgba(9,16,28,.94)),
-        radial-gradient(circle at top right, rgba(78,161,255,.10), transparent 35%);
-      box-shadow:var(--shadow);
-      padding:22px;
-    }
-
-    .hero::before{
-      content:"";
-      position:absolute;
-      top:-80px;
-      right:-80px;
-      width:260px;
-      height:260px;
-      background:radial-gradient(circle, rgba(29,215,95,.10), transparent 70%);
-      pointer-events:none;
-    }
-
-    .hero::after{
-      content:"";
-      position:absolute;
-      left:-100px;
-      bottom:-120px;
-      width:280px;
-      height:280px;
-      background:radial-gradient(circle, rgba(78,161,255,.08), transparent 72%);
-      pointer-events:none;
-    }
-
-    .hero-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
-
-    .logo-box{
-      width:58px;
-      height:58px;
-      border-radius:18px;
-      display:grid;
-      place-items:center;
-      font-size:18px;
-      font-weight:900;
-      color:#032014;
-      background:linear-gradient(135deg,var(--accent2),var(--accent));
-      box-shadow:0 14px 30px rgba(29,215,95,.24);
-      letter-spacing:.4px;
-      flex:0 0 auto;
-    }
-
-    .brand-copy h1{
-      margin:0;
-      font-size:30px;
-      line-height:1.05;
-      font-weight:900;
-      letter-spacing:.15px;
-      color:#f5f9ff;
-    }
-
-    .brand-copy p{
-      margin:5px 0 0;
-      font-size:14px;
-      color:var(--muted);
-      line-height:1.5;
-    }
-
-    .hero-badges{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid #274160;
-      background:#0b1627;
-      color:#d9e9ff;
-      font-size:12px;
-      font-weight:700;
-      letter-spacing:.25px;
-      white-space:nowrap;
-    }
-
-    .badge.ok{
-      border-color:#1f7448;
-      background:#0d2318;
-      color:#bff3d1;
-    }
-
-    .hero-grid{
-      display:grid;
-      grid-template-columns:1.25fr .8fr;
-      gap:18px;
-    }
-
-    .hero-main{
-      border:1px solid var(--border-soft);
-      border-radius:26px;
-      padding:24px;
-      background:linear-gradient(180deg, rgba(16,28,49,.88), rgba(11,20,35,.88));
-      box-shadow:var(--shadow-soft);
-    }
-
-    .hero-main h2{
-      margin:0 0 12px;
-      font-size:28px;
-      line-height:1.15;
-      font-weight:800;
-      color:#f4f8ff;
-      max-width:18ch;
-    }
-
-    .hero-main p{
-      margin:0;
-      font-size:15px;
-      line-height:1.75;
-      color:var(--muted);
-      max-width:70ch;
-    }
-
-    .hero-cta{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:18px;
-    }
-
-    .hero-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      min-height:48px;
-      padding:12px 18px;
-      border-radius:14px;
-      text-decoration:none;
-      border:1px solid #355174;
-      background:#0c1628;
-      color:#e8f2ff;
-      font-weight:700;
-      transition:.2s ease;
-    }
-
-    .hero-btn:hover{
-      transform:translateY(-1px);
-      border-color:#5681b7;
-      background:#101c31;
-    }
-
-    .hero-btn.primary{
-      border:none;
-      color:#032516;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      box-shadow:0 14px 30px rgba(29,215,95,.22);
-    }
-
-    .hero-btn.primary:hover{
-      filter:brightness(1.04);
-    }
-
-    .hero-side{
-      display:grid;
-      gap:12px;
-    }
-
-    .metric-card{
-      border:1px solid var(--border-soft);
-      border-radius:22px;
-      padding:18px;
-      background:linear-gradient(180deg, rgba(14,24,41,.92), rgba(10,18,31,.92));
-      box-shadow:var(--shadow-soft);
-    }
-
-    .metric-kicker{
-      font-size:11px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.45px;
-      color:#9dcbff;
-      margin-bottom:8px;
-    }
-
-    .metric-value{
-      font-size:20px;
-      font-weight:800;
-      color:#f4f8ff;
-      margin-bottom:6px;
-      line-height:1.2;
-    }
-
-    .metric-card p{
-      margin:0;
-      font-size:13px;
-      line-height:1.6;
-      color:var(--muted);
-    }
-
-    .strip{
-      margin-top:18px;
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px;
-    }
-
-    .strip-item{
-      border:1px solid var(--border-soft);
-      border-radius:18px;
-      padding:16px;
-      background:linear-gradient(180deg, rgba(11,19,33,.95), rgba(8,14,24,.95));
-      box-shadow:var(--shadow-soft);
-    }
-
-    .strip-item .t{
-      display:block;
-      font-size:12px;
-      font-weight:800;
-      color:#a8c4e6;
-      text-transform:uppercase;
-      letter-spacing:.35px;
-      margin-bottom:8px;
-    }
-
-    .strip-item .v{
-      display:block;
-      font-size:16px;
-      font-weight:800;
-      color:#f2f7ff;
-      margin-bottom:5px;
-    }
-
-    .strip-item .d{
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.55;
-    }
-
-    .section{
-      margin-top:28px;
-    }
-
-    .section-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:14px;
-      flex-wrap:wrap;
-      margin-bottom:14px;
-    }
-
-    .section-head h2{
-      margin:0;
-      font-size:22px;
-      font-weight:900;
-      color:#eef5ff;
-      letter-spacing:.1px;
-    }
-
-    .section-head p{
-      margin:0;
-      font-size:14px;
-      color:var(--muted);
-    }
-
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:20px;
-    }
-
-    .card{
-      position:relative;
-      overflow:hidden;
-      min-height:345px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:22px;
-      background:linear-gradient(180deg, rgba(17,28,48,.96), rgba(10,18,31,.96));
-      box-shadow:var(--shadow);
-      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-    }
-
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:0 0 auto 0;
-      height:3px;
-      background:linear-gradient(90deg, transparent, rgba(78,161,255,.7), transparent);
-      opacity:.9;
-    }
-
-    .card:hover{
-      transform:translateY(-4px);
-      box-shadow:0 26px 56px rgba(0,0,0,.52);
-      border-color:#355174;
-    }
-
-    .card-top{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom:12px;
-    }
-
-    .card-icon{
-      width:54px;
-      height:54px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      font-size:24px;
-      background:#0c1729;
-      border:1px solid #22344e;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
-      flex:0 0 auto;
-    }
-
-    .card-tag{
-      font-size:11px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.35px;
-      padding:8px 11px;
-      border-radius:999px;
-      background:#0a1628;
-      color:#c3dbff;
-      border:1px solid #233752;
-      white-space:nowrap;
-    }
-
-    .card h3{
-      margin:0 0 8px;
-      font-size:21px;
-      font-weight:800;
-      color:#f4f8ff;
-      line-height:1.2;
-    }
-
-    .card p{
-      margin:0 0 12px;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.65;
-    }
-
-    .card-list{
-      margin:12px 0 0;
-      padding-left:18px;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.65;
-    }
-
-    .card-list li{margin-bottom:4px}
-
-    .field{
-      margin-top:14px;
-    }
-
-    .field label{
-      display:block;
-      margin-bottom:8px;
-      font-size:12px;
-      font-weight:700;
-      color:#d7e7fb;
-      letter-spacing:.25px;
-    }
-
-    input{
-      width:100%;
-      padding:14px 14px;
-      border-radius:14px;
-      border:1px solid #33445f;
-      background:#030a14;
-      color:var(--txt);
-      font-size:14px;
-      outline:none;
-      transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-    }
-
-    input:focus{
-      border-color:#69adff;
-      box-shadow:0 0 0 4px rgba(105,173,255,.12);
-      transform:translateY(-1px);
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:16px;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      min-height:48px;
-      padding:12px 16px;
-      border-radius:14px;
-      border:1px solid #334760;
-      background:#0a1526;
-      color:#eef5ff;
-      text-decoration:none;
-      font-weight:800;
-      cursor:pointer;
-      transition:.2s ease;
-    }
-
-    .btn:hover{
-      background:#0f1b31;
-      border-color:#4b6891;
-      transform:translateY(-1px);
-    }
-
-    .btn-primary{
-      border:none;
-      color:#032416;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      box-shadow:0 12px 28px rgba(29,215,95,.22);
-    }
-
-    .btn-primary:hover{
-      filter:brightness(1.05);
-    }
-
-    .btn-outline{
-      background:transparent;
-    }
-
-    .evidence{
-      display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:18px;
-    }
-
-    .evidence-panel{
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:22px;
-      background:linear-gradient(180deg, rgba(14,24,41,.96), rgba(9,16,27,.96));
-      box-shadow:var(--shadow);
-    }
-
-    .evidence-panel h3{
-      margin:0 0 10px;
-      font-size:20px;
-      font-weight:800;
-      color:#f3f8ff;
-    }
-
-    .evidence-panel p{
-      margin:0;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.7;
-    }
-
-    .evidence-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px;
-      margin-top:16px;
-    }
-
-    .evidence-item{
-      border:1px solid var(--border-soft);
-      border-radius:18px;
-      padding:16px;
-      background:#0b1525;
-    }
-
-    .evidence-item strong{
-      display:block;
-      font-size:14px;
-      color:#edf4ff;
-      margin-bottom:6px;
-    }
-
-    .evidence-item span{
-      display:block;
-      font-size:13px;
-      line-height:1.55;
-      color:var(--muted);
-    }
-
-    .footer-note{
-      margin-top:28px;
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:20px 20px;
-      background:linear-gradient(180deg, rgba(13,22,39,.95), rgba(8,14,24,.95));
-      box-shadow:var(--shadow);
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.75;
-    }
-
-    .footer-note strong{
-      color:#edf5ff;
-    }
-
-    .hl{
-      color:#d7f9e4;
-      font-weight:800;
-    }
-
-    @media (max-width: 1120px){
-      .hero-grid,
-      .evidence{
-        grid-template-columns:1fr;
-      }
-      .cards{
-        grid-template-columns:1fr 1fr;
-      }
-      .strip{
-        grid-template-columns:1fr 1fr;
-      }
-    }
-
-    @media (max-width: 760px){
-      .shell{
-        padding:16px 12px 28px;
-      }
-      .hero{
-        padding:16px;
-        border-radius:24px;
-      }
-      .brand-copy h1{
-        font-size:24px;
-      }
-      .hero-main h2{
-        font-size:23px;
-      }
-      .cards,
-      .strip,
-      .evidence-grid{
-        grid-template-columns:1fr;
-      }
-      .card{
-        min-height:auto;
-      }
-    }
+    body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 15% -5%,rgba(37,99,235,.13),transparent 25%),linear-gradient(180deg,var(--bg),var(--bg2));min-height:100vh}
+    .shell{max-width:1600px;margin:0 auto;padding:18px 22px 36px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;display:grid;place-items:center;font-weight:950;box-shadow:0 10px 24px rgba(37,99,235,.22)}
+    h1{margin:0;font-size:25px;letter-spacing:-.035em}.subtitle{font-size:12px;color:var(--muted);margin-top:3px;font-weight:700}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{border:1px solid var(--line2);background:#fff;color:#173d63;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:850;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .btn:hover{box-shadow:0 7px 18px rgba(15,45,75,.09);transform:translateY(-1px)}.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn-soft{background:#edf5ff;border-color:#bfd8f5;color:#1d4ed8}.btn-danger{background:#fff3f3;border-color:#fecaca;color:#dc2626}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);padding:14px}
+    .hero{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.55fr);gap:12px;margin-bottom:12px}
+    .hero-main{padding:18px 20px;background:linear-gradient(135deg,#0b315b,#0d477b);color:#fff;border:0;position:relative;overflow:hidden}
+    .hero-main:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-120px;background:rgba(255,255,255,.08)}
+    .hero-main h2{margin:0;font-size:21px}.hero-main p{margin:7px 0 0;color:#dcecff;font-size:12px;line-height:1.55;max-width:90ch}
+    .lookup{display:flex;gap:7px;margin-top:14px;max-width:700px}.lookup input{flex:1;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:10px;padding:9px 11px;outline:0}.lookup input::placeholder{color:#d5e5f7}
+    .hero-side{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mini{padding:12px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}.mini .k{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:900}.mini .v{font-size:22px;font-weight:950;margin-top:3px;color:#0d2b50}.mini .d{font-size:10px;color:var(--muted);margin-top:2px}
+    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}.kpi{padding:12px 13px;display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:center}.ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;font-weight:900}.ib{background:#e8f1ff;color:#2563eb}.ig{background:#eafaf0;color:#16a34a}.ir{background:#fff0f0;color:#ef4444}.io{background:#fff7e9;color:#f59e0b}.ip{background:#f1ecff;color:#7c3aed}.klabel{font-size:10px;color:var(--muted);font-weight:850}.kvalue{font-size:21px;font-weight:950;color:#0d2b50;line-height:1.05}.kextra{font-size:9px;color:#7890a8;margin-top:2px}
+    .workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px}
+    .head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}.head h2{margin:0;font-size:16px}.head p{margin:3px 0 0;font-size:11px;color:var(--muted)}
+    .filters{display:grid;grid-template-columns:minmax(220px,1.6fr) repeat(3,minmax(130px,.7fr)) auto;gap:7px;margin-bottom:10px}.filters input,.filters select{border:1px solid var(--line2);border-radius:9px;padding:8px 10px;background:#fff;color:var(--ink);font-size:11px;outline:0}.filters input:focus,.filters select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:570px}.table{width:100%;border-collapse:collapse;font-size:11px;min-width:900px}.table th{position:sticky;top:0;background:#f3f8fd;color:#415f7c;font-size:10px;text-align:left;padding:8px;border-bottom:1px solid var(--line);z-index:1}.table td{padding:8px;border-bottom:1px solid #eaf1f7;vertical-align:middle}.table tr:hover td{background:#fbfdff}.code{font-weight:900;color:#133b61}.muted{color:var(--muted)}
+    .chip{display:inline-flex;align-items:center;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:900;border:1px solid;white-space:nowrap}.c-ok{color:#15803d;background:#ecfdf3;border-color:#bbf7d0}.c-bad{color:#dc2626;background:#fff1f2;border-color:#fecdd3}.c-pend{color:#b45309;background:#fff7ed;border-color:#fed7aa}.c-info{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}.c-neutral{color:#64748b;background:#f8fafc;border-color:#e2e8f0}
+    .row-actions{display:flex;gap:5px;white-space:nowrap}.row-actions .btn{padding:5px 7px;font-size:9px;border-radius:8px}
+    .side{display:grid;gap:10px;align-content:start}.side h3{margin:0 0 7px;font-size:13px}.audit-grid{display:grid;gap:7px}.audit-item{border:1px solid var(--line);border-radius:11px;padding:9px 10px;background:#fbfdff;display:flex;justify-content:space-between;gap:10px;align-items:center}.audit-item span{font-size:10px;color:var(--muted)}.audit-item strong{font-size:13px;color:#0d2b50}.warnbox{border:1px solid #fed7aa;background:#fffaf0;color:#92400e;border-radius:11px;padding:10px;font-size:10px;line-height:1.5}.okbox{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:11px;padding:10px;font-size:10px;line-height:1.5}
+    .quick{display:grid;grid-template-columns:1fr 1fr;gap:7px}.quick .btn{min-height:48px;flex-direction:column;font-size:10px}
+    .empty{padding:35px;text-align:center;color:var(--muted);font-size:12px}
+    dialog{border:1px solid var(--line);border-radius:18px;padding:0;width:min(780px,95vw);box-shadow:0 30px 80px rgba(15,45,75,.25)}dialog::backdrop{background:rgba(9,30,55,.38)}.dlg-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start}.dlg-body{padding:14px 16px;max-height:70vh;overflow:auto}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.detail{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fbfdff}.detail label{display:block;font-size:9px;color:var(--muted);font-weight:850;text-transform:uppercase}.detail div{font-size:12px;font-weight:750;margin-top:3px;word-break:break-word}.dlg-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+    .status-line{font-size:10px;color:var(--muted);margin-top:8px}.footer{text-align:center;color:#7890a8;font-size:9px;margin-top:12px}
+    @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.workspace{grid-template-columns:1fr}.side{grid-template-columns:repeat(3,1fr)}.hero{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}}
+    @media(max-width:700px){.shell{padding:10px}.topbar{align-items:flex-start;flex-direction:column}.kpis{grid-template-columns:1fr 1fr}.hero-side{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.side{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div class="shell">
-
-    <section class="hero">
-      <div class="hero-top">
-        <div class="brand">
-          <div class="logo-box">TMP</div>
-          <div class="brand-copy">
-            <h1>Portal de Certificados de Calibración</h1>
-            <p>Acceso documental del laboratorio TMP para consulta de certificados, historial técnico y operación interna.</p>
-          </div>
-        </div>
-
-        <div class="hero-badges">
-          <div class="badge ok">Trazabilidad metrológica</div>
-          <div class="badge">ISO/IEC 17025</div>
-          <div class="badge">ILAC-G8</div>
-        </div>
-      </div>
-
-      <div class="hero-grid">
-        <div class="hero-main">
-          <h2>Presentación documental sólida para clientes, calidad y auditoría</h2>
-          <p>
-            Este portal reúne en un único punto de entrada la visualización de certificados oficiales,
-            el acceso al histórico documental y el entorno interno de calibración. Su diseño refuerza
-            la imagen de control, orden, trazabilidad y consistencia documental del laboratorio,
-            facilitando la consulta por parte de clientes, responsables de calidad y procesos de auditoría.
-          </p>
-
-          <div class="hero-cta">
-            <a href="#accesos" class="hero-btn primary">Accesos principales</a>
-            <a href="calibraciones.historial.html" class="hero-btn">Ver histórico documental</a>
-          </div>
-        </div>
-
-        <div class="hero-side">
-          <div class="metric-card">
-            <div class="metric-kicker">Consulta documental</div>
-            <div class="metric-value">Certificados verificables y accesibles</div>
-            <p>Localización rápida del certificado emitido mediante identificador documental y acceso directo a su visualización.</p>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-kicker">Imagen de laboratorio</div>
-            <div class="metric-value">Entorno con presencia técnica y corporativa</div>
-            <p>Presentación pensada para transmitir robustez metrológica, profesionalidad y coherencia institucional.</p>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-kicker">Uso dual</div>
-            <div class="metric-value">Cliente externo + control interno</div>
-            <p>Preparado tanto para consulta externa de certificados como para revisión interna, seguimiento y soporte de auditoría.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="strip">
-        <div class="strip-item">
-          <span class="t">Documentación</span>
-          <span class="v">Consulta controlada</span>
-          <span class="d">Acceso estructurado a certificados emitidos y registros históricos del sistema TMP.</span>
-        </div>
-        <div class="strip-item">
-          <span class="t">Conformidad</span>
-          <span class="v">Criterio ILAC-G8</span>
-          <span class="d">Entorno alineado con evaluación de conformidad y comunicación técnica formal.</span>
-        </div>
-        <div class="strip-item">
-          <span class="t">Calidad</span>
-          <span class="v">Enfoque ISO/IEC 17025</span>
-          <span class="d">Presentación coherente con un sistema documental de laboratorio y trazabilidad metrológica.</span>
-        </div>
-        <div class="strip-item">
-          <span class="t">Operación</span>
-          <span class="v">Portal centralizado</span>
-          <span class="d">Consulta externa, histórico y acceso interno concentrados en una misma entrada.</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="accesos">
-      <div class="section-head">
-        <div>
-          <h2>Accesos principales del sistema</h2>
-          <p>Selecciona la operación documental o técnica que necesitas realizar dentro del entorno TMP.</p>
-        </div>
-      </div>
-
-      <div class="cards">
-
-        <article class="card">
-          <div>
-            <div class="card-top">
-              <div class="card-icon">📑</div>
-              <div class="card-tag">Cliente / Auditoría</div>
-            </div>
-
-            <h3>Ver certificado oficial</h3>
-            <p>
-              Introduce el identificador del certificado para abrir el informe oficial emitido.
-              Esta opción está orientada a consulta documental, revisión por cliente y presentación ante auditoría.
-            </p>
-
-            <ul class="card-list">
-              <li>Acceso por número de certificado</li>
-              <li>Consulta directa del documento emitido</li>
-              <li>Uso adecuado para revisión documental</li>
-            </ul>
-
-            <div class="field">
-              <label for="certId">ID del certificado</label>
-              <input id="certId" placeholder="Ej: CC-2025-0001">
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-primary" onclick="abrirCertificado()">Abrir certificado</button>
-          </div>
-        </article>
-
-        <article class="card">
-          <div>
-            <div class="card-top">
-              <div class="card-icon">📂</div>
-              <div class="card-tag">Trazabilidad</div>
-            </div>
-
-            <h3>Historial de certificados</h3>
-            <p>
-              Consulta el histórico de certificados emitidos y conservados en el sistema.
-              Útil para seguimiento, control documental, revisiones internas y soporte de trazabilidad.
-            </p>
-
-            <ul class="card-list">
-              <li>Acceso al histórico emitido</li>
-              <li>Soporte para evidencias documentales</li>
-              <li>Apoyo a control y seguimiento</li>
-            </ul>
-          </div>
-
-          <div class="actions">
-            <a href="calibraciones.historial.html" class="btn btn-outline">Abrir historial</a>
-          </div>
-        </article>
-
-        <article class="card">
-          <div>
-            <div class="card-top">
-              <div class="card-icon">🛠</div>
-              <div class="card-tag">Uso interno TMP</div>
-            </div>
-
-            <h3>Calibración interna</h3>
-            <p>
-              Acceso al flujo técnico de trabajo del laboratorio: planificación, medición,
-              resultados, aplicación del criterio ILAC-G8, validación, firma y emisión oficial.
-            </p>
-
-            <ul class="card-list">
-              <li>Plan, medición y resultados</li>
-              <li>Firma y emisión documental</li>
-              <li>Entorno reservado a personal técnico</li>
-            </ul>
-          </div>
-
-          <div class="actions">
-            <a href="calibraciones.html" class="btn btn-outline">Entrar al entorno interno</a>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Soporte de imagen y confianza documental</h2>
-          <p>Mensajes de refuerzo visual y técnico para presentación ante clientes y revisiones de sistema.</p>
-        </div>
-      </div>
-
-      <div class="evidence">
-        <div class="evidence-panel">
-          <h3>Entorno preparado para transmitir control, coherencia y profesionalidad</h3>
-          <p>
-            La estructura del portal está orientada a mostrar una organización documental clara,
-            con acceso diferenciado a certificados, histórico y operación interna. Esto ayuda a reforzar
-            la percepción de un sistema controlado y una gestión metrológica ordenada.
-          </p>
-
-          <div class="evidence-grid">
-            <div class="evidence-item">
-              <strong>Acceso estructurado</strong>
-              <span>Separación clara entre consulta externa, histórico documental y flujo técnico interno.</span>
-            </div>
-            <div class="evidence-item">
-              <strong>Imagen de laboratorio</strong>
-              <span>Diseño con presencia corporativa y enfoque técnico compatible con una revisión seria.</span>
-            </div>
-            <div class="evidence-item">
-              <strong>Apoyo a auditoría</strong>
-              <span>La navegación y el lenguaje refuerzan orden, trazabilidad y consistencia documental.</span>
-            </div>
-            <div class="evidence-item">
-              <strong>Comunicación profesional</strong>
-              <span>Presentación adecuada para clientes industriales y responsables de calidad.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="evidence-panel">
-          <h3>Puntos fuertes de presentación</h3>
-          <div class="evidence-grid">
-            <div class="evidence-item">
-              <strong>Trazabilidad</strong>
-              <span>Portal orientado a consulta y seguimiento de certificados emitidos.</span>
-            </div>
-            <div class="evidence-item">
-              <strong>Conformidad</strong>
-              <span>Referencia explícita a la regla de decisión ILAC-G8 en el ecosistema documental.</span>
-            </div>
-            <div class="evidence-item">
-              <strong>Calidad</strong>
-              <span>Lenguaje y visual alineados con una operativa de laboratorio seria y controlada.</span>
-            </div>
-            <div class="evidence-item">
-              <strong>Centralización</strong>
-              <span>Una única entrada para consulta, seguimiento y operación interna.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="footer-note">
-      <strong>TMP · Portal documental de calibración.</strong>
-      Esta interfaz está diseñada para facilitar la <span class="hl">consulta de certificados oficiales</span>,
-      el acceso al <span class="hl">histórico documental</span> y la entrada al entorno de
-      <span class="hl">calibración interna</span>. La validez técnica y metrológica final de cada certificado
-      dependerá de los procedimientos aplicados, del estado de los patrones utilizados, de la trazabilidad mantenida
-      y del sistema de calidad efectivamente implantado por el laboratorio.
+<div class="shell">
+  <div class="topbar">
+    <div class="brand"><div class="logo">TMP</div><div><h1>Informes y Certificados</h1><div class="subtitle">Control documental real · trazabilidad · consulta · auditoría</div></div></div>
+    <div class="top-actions">
+      <a class="btn" href="home.html">← Inicio</a>
+      <a class="btn" href="calibraciones.historial.html">Histórico calibraciones</a>
+      <a class="btn btn-primary" href="calibraciones.html">Centro calibración</a>
     </div>
-
   </div>
 
-  <script>
-    function abrirCertificado(){
-      const id = document.getElementById("certId").value.trim();
-      if(!id){
-        alert("Introduce un ID de certificado. Ejemplo: CC-2025-0001");
-        return;
-      }
-      window.location.href = "certificados.ver.html?id=" + encodeURIComponent(id);
+  <section class="hero">
+    <div class="panel hero-main">
+      <h2>Consulta documental y control de certificados emitidos</h2>
+      <p>Esta pantalla trabaja sobre los registros reales de Supabase. Permite localizar un certificado, comprobar si tiene documento PDF, revisar su decisión y relacionarlo con la calibración y el equipo cuando existe vínculo disponible.</p>
+      <div class="lookup"><input id="cert-direct" placeholder="Número de certificado · Ej. CC-2026-0001"><button class="btn" id="btn-direct">Abrir certificado</button></div>
+      <div class="status-line" id="load-status">Preparando consulta documental…</div>
+    </div>
+    <div class="hero-side">
+      <div class="mini"><div class="k">Fuente principal</div><div class="v">Supabase</div><div class="d">certificados + calibraciones + instrumentos</div></div>
+      <div class="mini"><div class="k">Regla registrada</div><div class="v">ILAC-G8</div><div class="d">Se muestra la regla guardada en cada certificado</div></div>
+      <div class="mini"><div class="k">Documento</div><div class="v" id="hero-pdf">—</div><div class="d">certificados con PDF enlazado</div></div>
+      <div class="mini"><div class="k">Cobertura</div><div class="v" id="hero-link">—</div><div class="d">certificados vinculados a calibración/equipo</div></div>
+    </div>
+  </section>
+
+  <section class="kpis">
+    <div class="panel kpi"><div class="ico ib">▤</div><div><div class="klabel">Certificados</div><div class="kvalue" id="k-total">—</div><div class="kextra">registros localizados</div></div></div>
+    <div class="panel kpi"><div class="ico ig">✓</div><div><div class="klabel">APTO / OK</div><div class="kvalue" id="k-ok">—</div><div class="kextra" id="k-ok-extra"></div></div></div>
+    <div class="panel kpi"><div class="ico ir">!</div><div><div class="klabel">NO APTO / NOK</div><div class="kvalue" id="k-nok">—</div><div class="kextra" id="k-nok-extra"></div></div></div>
+    <div class="panel kpi"><div class="ico io">?</div><div><div class="klabel">Pendiente / Indeterm.</div><div class="kvalue" id="k-pend">—</div><div class="kextra">requieren revisión documental</div></div></div>
+    <div class="panel kpi"><div class="ico ip">PDF</div><div><div class="klabel">Con documento</div><div class="kvalue" id="k-pdf">—</div><div class="kextra" id="k-pdf-extra"></div></div></div>
+    <div class="panel kpi"><div class="ico ib">↔</div><div><div class="klabel">Vinculados</div><div class="kvalue" id="k-linked">—</div><div class="kextra">con calibración/equipo resoluble</div></div></div>
+  </section>
+
+  <section class="workspace">
+    <div class="panel">
+      <div class="head"><div><h2>Registro documental</h2><p>Filtra, revisa y abre certificados emitidos sin perder el contexto del equipo y de la calibración.</p></div><button class="btn btn-soft" id="btn-export">Exportar CSV filtrado</button></div>
+      <div class="filters">
+        <input id="f-search" placeholder="Buscar certificado, equipo, descripción, regla…">
+        <select id="f-decision"><option value="">Todas las decisiones</option><option value="OK">APTO / OK</option><option value="NOK">NO APTO / NOK</option><option value="PEND">Pendiente / Indeterminado</option><option value="OTHER">Otros</option></select>
+        <select id="f-doc"><option value="">Con y sin PDF</option><option value="pdf">Con PDF</option><option value="nopdf">Sin PDF</option></select>
+        <select id="f-year"><option value="">Todos los años</option></select>
+        <button class="btn" id="btn-clear">Limpiar</button>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Certificado</th><th>Equipo</th><th>Descripción</th><th>Fecha</th><th>Decisión</th><th>Regla</th><th>PDF</th><th>Acciones</th></tr></thead>
+          <tbody id="cert-body"><tr><td colspan="8" class="empty">Cargando certificados…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="status-line" id="result-info">—</div>
+    </div>
+
+    <aside class="side">
+      <div class="panel"><h3>Control documental</h3><div class="audit-grid">
+        <div class="audit-item"><span>Con PDF</span><strong id="a-pdf">—</strong></div>
+        <div class="audit-item"><span>Sin PDF</span><strong id="a-nopdf">—</strong></div>
+        <div class="audit-item"><span>Con número</span><strong id="a-num">—</strong></div>
+        <div class="audit-item"><span>Sin número</span><strong id="a-nonum">—</strong></div>
+        <div class="audit-item"><span>Con regla de decisión</span><strong id="a-rule">—</strong></div>
+        <div class="audit-item"><span>Sin regla registrada</span><strong id="a-norule">—</strong></div>
+      </div></div>
+
+      <div class="panel"><h3>Diagnóstico de auditoría</h3><div id="audit-message" class="warnbox">Analizando la consistencia documental…</div></div>
+
+      <div class="panel"><h3>Accesos relacionados</h3><div class="quick">
+        <a class="btn" href="calibraciones.historial.html">Histórico</a>
+        <a class="btn" href="criterios.html">Criterios</a>
+        <a class="btn" href="App_Patrones_TMP.html">Patrones</a>
+        <a class="btn" href="alcance_kpi.html">KPIs</a>
+      </div></div>
+    </aside>
+  </section>
+
+  <div class="footer">TMP · Sistema de Trazabilidad Metrológica · Los indicadores de esta pantalla describen los datos registrados, no sustituyen la validación técnica del certificado.</div>
+</div>
+
+<dialog id="detail-dialog">
+  <div class="dlg-head"><div><strong id="dlg-title">Detalle certificado</strong><div class="subtitle" id="dlg-sub"></div></div><button class="btn" id="dlg-close">Cerrar</button></div>
+  <div class="dlg-body"><div class="detail-grid" id="dlg-grid"></div><div class="dlg-actions" id="dlg-actions"></div></div>
+</dialog>
+
+<script type="module" src="config.mjs"></script>
+<script type="module">
+  const $ = s => document.querySelector(s);
+  const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  const safe = v => v == null || v === "" ? "—" : String(v);
+  const pct = (a,b) => b ? `${Math.round(a*100/b)}%` : "0%";
+  const dateVal = v => { if(!v) return null; const d=new Date(v); return isNaN(d)?null:d; };
+  const dateTxt = v => { const d=dateVal(v); return d ? d.toLocaleDateString("es-ES") : "—"; };
+
+  let certs=[], calibraciones=[], instrumentos=[], rows=[];
+
+  function decisionClass(v){
+    const s=String(v||"").trim().toUpperCase();
+    if(["APTO","OK","CONFORME"].includes(s)) return "OK";
+    if(["NO APTO","NOK","NO_CONFORME","NO CONFORME"].includes(s)) return "NOK";
+    if(s.includes("INDETER") || s.includes("PEND") || s.includes("NO EVALUABLE")) return "PEND";
+    return s ? "OTHER" : "PEND";
+  }
+  function chipDecision(v){
+    const c=decisionClass(v); const cls=c==="OK"?"c-ok":c==="NOK"?"c-bad":c==="PEND"?"c-pend":"c-neutral";
+    return `<span class="chip ${cls}">${esc(v||"SIN DECISIÓN")}</span>`;
+  }
+  function certNumber(c){ return c.numero || c.numero_certificado || c.codigo || c.id || ""; }
+  function certPdf(c){ return c.certificado_pdf_url || c.pdf_url || c.certificado_url || ""; }
+  function certDate(c){ return c.fecha_creado || c.creado_en || c.fecha || c.fecha_emision || ""; }
+
+  async function load(){
+    const sb=window.supabase;
+    if(!sb){ $("#load-status").textContent="Supabase no está disponible en esta sesión."; return; }
+    $("#load-status").textContent="Consultando certificados, calibraciones e instrumentos…";
+
+    const [cr,ca,ir]=await Promise.all([
+      sb.from("certificados").select("*").order("fecha_creado",{ascending:false}).limit(1000),
+      sb.from("calibraciones").select("*").order("creado_en",{ascending:false}).limit(1000),
+      sb.from("instrumentos").select("id,codigo,descripcion,estado,ubicacion_actual").limit(1500)
+    ]);
+
+    if(cr.error){
+      console.error(cr.error); $("#load-status").textContent=`Error leyendo certificados: ${cr.error.message||cr.error}`;
+      $("#cert-body").innerHTML='<tr><td colspan="8" class="empty">No se pudo consultar la tabla certificados.</td></tr>'; return;
     }
-  </script>
+    certs=cr.data||[]; calibraciones=ca.error?[]:(ca.data||[]); instrumentos=ir.error?[]:(ir.data||[]);
+    if(ca.error) console.warn("calibraciones:",ca.error); if(ir.error) console.warn("instrumentos:",ir.error);
+    buildRows(); buildYearFilter(); updateKpis(); applyFilters();
+    $("#load-status").textContent=`Datos actualizados · ${new Date().toLocaleString("es-ES")}`;
+  }
+
+  function buildRows(){
+    const calById=new Map(calibraciones.map(c=>[String(c.id),c]));
+    const instById=new Map(instrumentos.map(i=>[String(i.id),i]));
+    const instByCode=new Map(instrumentos.map(i=>[String(i.codigo||"").toUpperCase(),i]));
+
+    rows=certs.map(c=>{
+      const calId=c.calibracion_id || c.calibracion_uid || c.calibracionId;
+      const cal=calId ? calById.get(String(calId)) : null;
+      const code=cal?.codigo || cal?.codigo_instrumento || c.codigo_instrumento || c.datos?.instrumento?.codigo || c.datos?.codigo || "";
+      const inst=(cal?.instrumento_id && instById.get(String(cal.instrumento_id))) || instByCode.get(String(code).toUpperCase()) || null;
+      const num=certNumber(c);
+      const pdf=certPdf(c) || cal?.certificado_url || cal?.pdf_url || "";
+      const decision=c.decision_global || cal?.decision_global || cal?.resultado || cal?.estado_final || c.datos?.decision_global || "";
+      const regla=c.regla_decision || c.datos?.regla_decision || cal?.regla_decision || "";
+      const fecha=certDate(c) || cal?.fecha_calibracion || cal?.fecha_ultima || cal?.creado_en || "";
+      return {c,cal,inst,num,pdf,decision,regla,fecha,code:inst?.codigo||code,desc:inst?.descripcion||c.datos?.instrumento?.descripcion||"",linked:Boolean(cal||inst)};
+    });
+  }
+
+  function buildYearFilter(){
+    const years=[...new Set(rows.map(r=>dateVal(r.fecha)?.getFullYear()).filter(Boolean))].sort((a,b)=>b-a);
+    $("#f-year").innerHTML='<option value="">Todos los años</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  }
+
+  function updateKpis(){
+    const total=rows.length, ok=rows.filter(r=>decisionClass(r.decision)==="OK").length, nok=rows.filter(r=>decisionClass(r.decision)==="NOK").length;
+    const pend=rows.filter(r=>decisionClass(r.decision)==="PEND").length, pdf=rows.filter(r=>r.pdf).length, linked=rows.filter(r=>r.linked).length;
+    $("#k-total").textContent=total; $("#k-ok").textContent=ok; $("#k-nok").textContent=nok; $("#k-pend").textContent=pend; $("#k-pdf").textContent=pdf; $("#k-linked").textContent=linked;
+    $("#k-ok-extra").textContent=pct(ok,total); $("#k-nok-extra").textContent=pct(nok,total); $("#k-pdf-extra").textContent=pct(pdf,total);
+    $("#hero-pdf").textContent=pct(pdf,total); $("#hero-link").textContent=pct(linked,total);
+    const withNum=rows.filter(r=>r.num).length, withRule=rows.filter(r=>r.regla).length;
+    $("#a-pdf").textContent=pdf; $("#a-nopdf").textContent=total-pdf; $("#a-num").textContent=withNum; $("#a-nonum").textContent=total-withNum; $("#a-rule").textContent=withRule; $("#a-norule").textContent=total-withRule;
+    const issues=[]; if(total-pdf) issues.push(`${total-pdf} sin PDF`); if(total-withNum) issues.push(`${total-withNum} sin número`); if(total-withRule) issues.push(`${total-withRule} sin regla registrada`); if(pend) issues.push(`${pend} con decisión pendiente/indeterminada`);
+    const box=$("#audit-message");
+    if(!issues.length){ box.className="okbox"; box.innerHTML="No se detectan carencias documentales básicas en los certificados cargados."; }
+    else { box.className="warnbox"; box.innerHTML=`Revisar: <strong>${issues.join(" · ")}</strong>. Esto es un diagnóstico de datos registrados; no altera certificados ni decisiones.`; }
+  }
+
+  function filtered(){
+    const q=$("#f-search").value.trim().toLowerCase(), dec=$("#f-decision").value, doc=$("#f-doc").value, year=$("#f-year").value;
+    return rows.filter(r=>{
+      if(q && ![r.num,r.code,r.desc,r.decision,r.regla].some(v=>String(v||"").toLowerCase().includes(q))) return false;
+      if(dec && decisionClass(r.decision)!==dec) return false;
+      if(doc==="pdf" && !r.pdf) return false; if(doc==="nopdf" && r.pdf) return false;
+      if(year && String(dateVal(r.fecha)?.getFullYear()||"")!==year) return false;
+      return true;
+    });
+  }
+
+  function applyFilters(){
+    const list=filtered();
+    $("#result-info").textContent=`Mostrando ${list.length} de ${rows.length} certificados`;
+    if(!list.length){ $("#cert-body").innerHTML='<tr><td colspan="8" class="empty">No hay certificados que coincidan con los filtros.</td></tr>'; return; }
+    $("#cert-body").innerHTML=list.map((r,i)=>`<tr>
+      <td><span class="code">${esc(r.num||"SIN NÚMERO")}</span></td>
+      <td>${esc(r.code||"—")}</td>
+      <td>${esc(r.desc||"—")}</td>
+      <td>${dateTxt(r.fecha)}</td>
+      <td>${chipDecision(r.decision)}</td>
+      <td>${r.regla?`<span class="chip c-info">${esc(r.regla)}</span>`:'<span class="chip c-neutral">SIN REGLA</span>'}</td>
+      <td>${r.pdf?'<span class="chip c-ok">PDF</span>':'<span class="chip c-pend">FALTA</span>'}</td>
+      <td><div class="row-actions"><button class="btn" data-detail="${rows.indexOf(r)}">Detalle</button>${r.num?`<a class="btn btn-soft" href="certificados.ver.html?id=${encodeURIComponent(r.num)}">Ver</a>`:''}${r.pdf?`<a class="btn" href="${esc(r.pdf)}" target="_blank" rel="noopener">PDF</a>`:''}</div></td>
+    </tr>`).join('');
+    document.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>openDetail(rows[Number(b.dataset.detail)])));
+  }
+
+  function openDetail(r){
+    if(!r) return;
+    $("#dlg-title").textContent=r.num||"Certificado sin número"; $("#dlg-sub").textContent=[r.code,r.desc].filter(Boolean).join(" · ");
+    const pairs=[
+      ["Número",r.num],["Equipo",r.code],["Descripción",r.desc],["Fecha",dateTxt(r.fecha)],["Decisión",r.decision],["Regla",r.regla],["PDF",r.pdf?"Disponible":"No registrado"],
+      ["Calibración vinculada",r.cal?.id||r.c.calibracion_id||r.c.calibracion_uid],["Resultado calibración",r.cal?.resultado||r.cal?.decision_global||r.cal?.estado_final],["Operador",r.cal?.operador||r.cal?.usuario],["Laboratorio",r.cal?.laboratorio],["Ubicación actual",r.inst?.ubicacion_actual]
+    ];
+    $("#dlg-grid").innerHTML=pairs.map(([k,v])=>`<div class="detail"><label>${esc(k)}</label><div>${esc(safe(v))}</div></div>`).join('');
+    $("#dlg-actions").innerHTML=`${r.num?`<a class="btn btn-primary" href="certificados.ver.html?id=${encodeURIComponent(r.num)}">Ver certificado oficial</a>`:''}${r.pdf?`<a class="btn" href="${esc(r.pdf)}" target="_blank" rel="noopener">Abrir PDF</a>`:''}${r.code?`<a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(r.code)}">Ficha equipo</a>`:''}`;
+    $("#detail-dialog").showModal();
+  }
+
+  function openDirect(){ const id=$("#cert-direct").value.trim(); if(!id){alert("Introduce un número de certificado.");return;} location.href=`certificados.ver.html?id=${encodeURIComponent(id)}`; }
+  function exportCsv(){
+    const list=filtered(); if(!list.length){alert("No hay registros para exportar.");return;}
+    const headers=["certificado","codigo_equipo","descripcion","fecha","decision","regla_decision","pdf_url","calibracion_id"];
+    const quote=v=>'"'+String(v??'').replaceAll('"','""')+'"';
+    const lines=[headers.join(',')].concat(list.map(r=>[r.num,r.code,r.desc,dateTxt(r.fecha),r.decision,r.regla,r.pdf,r.cal?.id||r.c.calibracion_id||r.c.calibracion_uid||''].map(quote).join(',')));
+    const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`TMP_certificados_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  ["#f-search","#f-decision","#f-doc","#f-year"].forEach(s=>$(s).addEventListener(s==="#f-search"?"input":"change",applyFilters));
+  $("#btn-clear").addEventListener("click",()=>{ $("#f-search").value=""; $("#f-decision").value=""; $("#f-doc").value=""; $("#f-year").value=""; applyFilters(); });
+  $("#btn-direct").addEventListener("click",openDirect); $("#cert-direct").addEventListener("keydown",e=>{if(e.key==="Enter")openDirect();});
+  $("#btn-export").addEventListener("click",exportCsv); $("#dlg-close").addEventListener("click",()=>$("#detail-dialog").close());
+  load();
+</script>
 </body>
 </html>
