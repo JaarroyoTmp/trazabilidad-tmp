@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chat interno TMP</title>
+  <title>Consultas internas TMP</title>
 
   <style>
     :root{
@@ -760,6 +760,23 @@
       font-size:14px;
     }
 
+
+    /* CONSULTAS TMP PREMIUM */
+    .consult-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 8px}
+    .consult-kpi{border:1px solid var(--border);background:linear-gradient(180deg,#0b1120,#0a1020);border-radius:12px;padding:9px 11px;min-width:0}
+    .consult-kpi-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .consult-kpi-value{font-size:22px;font-weight:900;margin-top:2px;color:#f8fafc}
+    .consult-kpi-sub{font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .consult-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
+    .consult-toolbar .btn-mini{white-space:nowrap}
+    .audit-note{font-size:10px;color:#cbd5e1;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:7px 9px;margin-bottom:8px;line-height:1.35}
+    .audit-note strong{color:#86efac}
+    .msg-ack-btn{border:1px solid #22c55e;background:rgba(34,197,94,.12);color:#bbf7d0;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:800;cursor:pointer}
+    .msg-ack-btn:hover{background:rgba(34,197,94,.22)}
+    .msg-ack-list{font-size:10px;color:#bbf7d0}
+    .consult-filter-active{outline:2px solid rgba(34,197,94,.35);background:#052e16!important}
+    @media(max-width:800px){.consult-kpis{grid-template-columns:repeat(2,1fr)}}
+
   </style>
 </head>
 <body>
@@ -769,8 +786,8 @@
     <div class="chat-logo-title">
       <div class="chat-logo">💬</div>
       <div class="chat-header-text">
-        <h1>Chat interno TMP</h1>
-        <p>Conversaciones tipo WhatsApp · mensajes importantes con validación</p>
+        <h1>Consultas internas TMP</h1>
+        <p>Comunicación interna trazable · consultas importantes con acuse de consulta</p>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:6px;">
@@ -778,6 +795,21 @@
       <div class="chat-user-pill" id="user-pill">Usuario: –</div>
     </div>
   </header>
+
+  <section class="consult-kpis" aria-label="Resumen de consultas">
+    <div class="consult-kpi"><div class="consult-kpi-label">Pendientes para mí</div><div class="consult-kpi-value" id="kpi-consult-pending">0</div><div class="consult-kpi-sub">Importantes sin confirmar</div></div>
+    <div class="consult-kpi"><div class="consult-kpi-label">Importantes enviados</div><div class="consult-kpi-value" id="kpi-consult-sent">0</div><div class="consult-kpi-sub">Con seguimiento</div></div>
+    <div class="consult-kpi"><div class="consult-kpi-label">Conversaciones</div><div class="consult-kpi-value" id="kpi-consult-conv">0</div><div class="consult-kpi-sub">Visibles para este usuario</div></div>
+    <div class="consult-kpi"><div class="consult-kpi-label">Usuarios</div><div class="consult-kpi-value" id="kpi-consult-users">0</div><div class="consult-kpi-sub">Operarios disponibles</div></div>
+  </section>
+
+  <div class="consult-toolbar">
+    <button class="btn-mini consult-filter-active" id="consult-filter-all">Todas</button>
+    <button class="btn-mini" id="consult-filter-pending">Pendientes para mí</button>
+    <button class="btn-mini" id="consult-filter-important">Importantes</button>
+    <button class="btn-mini" id="consult-export">Exportar seguimiento CSV</button>
+  </div>
+  <div class="audit-note"><strong>Acuse de consulta:</strong> los mensajes marcados como IMPORTANTE requieren confirmación. El sistema conserva quién los ha consultado mediante el campo de seguimiento ya existente, sin modificar el esquema de Supabase.</div>
 
   <div class="chat-layout">
     <!-- SIDEBAR -->
@@ -813,7 +845,7 @@
         <div class="chat-main-header-right">
           <span class="badge-pill" id="conv-participants-pill">–</span>
           <button class="btn-ghost" id="btn-open-important">
-            ⭐ Importantes
+            ⭐ Seguimiento
           </button>
         </div>
       </header>
@@ -829,7 +861,7 @@
           <div class="chat-input-top-left">
             <label class="chat-important-label">
               <input type="checkbox" id="chk-important">
-              <span>Marcar como <span class="chat-important-word">IMPORTANTE</span></span>
+              <span>Marcar como <span class="chat-important-word">IMPORTANTE</span> · requiere acuse</span>
             </label>
             <div class="chat-dest-chip" id="dest-chip">
               Destinatarios: <span id="dest-chip-text">Auto (según conversación)</span>
@@ -871,7 +903,7 @@
 <div class="overlay" id="overlay-important">
   <div class="panel" style="width:min(520px,96vw);">
     <div class="panel-header">
-      <span>Mensajes importantes</span>
+      <span>Seguimiento de consultas importantes</span>
       <button class="panel-close" id="btn-close-important">✕</button>
     </div>
     <div class="panel-body" id="important-body" style="font-size:12px;">
@@ -958,6 +990,7 @@
   let conversations = {}; // key -> { key, participantes, title, messages, lastMessage }
   let selectedConvKey = null;
   let selectedConvParticipants = [];  // user ids (username) sin asegurar orden
+  let consultFilterMode = "all";
 
   // ======== CARGAR USUARIO LOCAL ========
 
@@ -976,6 +1009,37 @@
       `Usuario: ${currentNombre} (${currentUsername})`;
   }
 
+
+  function actualizarResumenConsultas(){
+    const visibles = (allMessages || []).filter(esParaMi);
+    const pendientes = visibles.filter(m => m.importante && m.autor !== currentUsername && !normalizeArray(m.leido_por).includes(currentUsername));
+    const enviados = visibles.filter(m => m.importante && m.autor === currentUsername);
+    const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=String(v); };
+    set("kpi-consult-pending", pendientes.length);
+    set("kpi-consult-sent", enviados.length);
+    set("kpi-consult-conv", Object.keys(conversations || {}).length);
+    set("kpi-consult-users", operarios.length);
+  }
+
+  function exportarSeguimientoCSV(){
+    const rows = (allMessages || []).filter(m => m.importante && esParaMi(m));
+    const head = ["fecha","autor","destinatarios","mensaje","consultado_por","estado"];
+    const esc = v => `"${String(v ?? "").replaceAll('"','""')}"`;
+    const lines = [head.join(";")];
+    rows.sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||""))).forEach(m => {
+      const dest = normalizeArray(m.destinatarios).map(u => mapaOperarios[u]?.nombre || u).join(", ");
+      const leidos = normalizeArray(m.leido_por).map(u => mapaOperarios[u]?.nombre || u).join(", ");
+      const estado = normalizeArray(m.leido_por).length ? "CONSULTADO" : "PENDIENTE";
+      lines.push([m.created_at||"", mapaOperarios[m.autor]?.nombre || m.autor || "", dest, m.mensaje||"", leidos, estado].map(esc).join(";"));
+    });
+    const blob = new Blob(["\ufeff" + lines.join("\n")], {type:"text/csv;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `consultas_tmp_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  }
+
   // ======== SUPABASE: OPERARIOS ========
 
   async function cargarOperarios(){
@@ -992,6 +1056,7 @@
     operarios = data || [];
     mapaOperarios = {};
     operarios.forEach(o => mapaOperarios[o.username] = o);
+    actualizarResumenConsultas();
 
     // Rellenar panel de nueva conversación
     const body = document.getElementById("new-chat-body");
@@ -1344,15 +1409,15 @@
       if (msg.importante){
         if (!mine && !userLeido){
           const btn = document.createElement("button");
-          btn.className = "msg-done-btn";
-          btn.textContent = "Marcar hecho";
-          btn.addEventListener("click", () => marcarMensajeHecho(msg.id));
+          btn.className = "msg-ack-btn";
+          btn.textContent = "Confirmar consulta";
+          btn.addEventListener("click", () => confirmarConsulta(msg.id));
           metaLeft.appendChild(btn);
         }
         if (userLeido && !mine){
           const t = document.createElement("span");
           t.className = "msg-tag msg-tag-hecho";
-          t.textContent = "Marcado como hecho";
+          t.textContent = "Consulta confirmada";
           metaLeft.appendChild(t);
         }
 
@@ -1360,8 +1425,8 @@
         if (mine && leidos.length > 0){
           const nombres = leidos.map(u => mapaOperarios[u]?.nombre || u);
           const spanH = document.createElement("span");
-          spanH.className = "msg-hechos-list";
-          spanH.textContent = "Hecho por: " + nombres.join(", ");
+          spanH.className = "msg-ack-list";
+          spanH.textContent = "Consultado por: " + nombres.join(", ");
           metaLeft.appendChild(spanH);
         }
       }
@@ -1381,9 +1446,9 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  // ======== MARCAR MENSAJE COMO HECHO ========
+  // ======== CONFIRMAR CONSULTA IMPORTANTE ========
 
-  async function marcarMensajeHecho(id){
+  async function confirmarConsulta(id){
     if (!supabase || !id) return;
     const msg = allMessages.find(m => String(m.id) === String(id));
     if (!msg) return;
@@ -1400,8 +1465,8 @@
       .single();
 
     if (error){
-      console.error("Error marcando mensaje como hecho:", error);
-      showToast("Error", "No se ha podido marcar como hecho.", "⚠️");
+      console.error("Error confirmando consulta:", error);
+      showToast("Error", "No se ha podido confirmar la consulta.", "⚠️");
       return;
     }
 
@@ -1511,7 +1576,7 @@
 
     if (!importantes.length){
       body.innerHTML = `<p style="color:var(--muted);font-size:12px;">
-        No tienes mensajes importantes.
+        No tienes consultas importantes en seguimiento.
       </p>`;
     } else {
       importantes.sort((a,b) => (b.created_at || "").localeCompare(a.created_at || ""));
@@ -1527,8 +1592,8 @@
 
         const nombresLeidos = leidos.map(u => mapaOperarios[u]?.nombre || u);
         const hechoTxt = nombresLeidos.length
-          ? `Hecho por: ${nombresLeidos.join(", ")}`
-          : "Pendiente de marcar como hecho";
+          ? `Consultado por: ${nombresLeidos.join(", ")}`
+          : "Pendiente de acuse";
 
         return `
           <div style="border-bottom:1px solid var(--border);padding:6px 0;">
@@ -1614,8 +1679,8 @@
               if (nuevos.length){
                 const nombres = nuevos.map(u => mapaOperarios[u]?.nombre || u);
                 showToast(
-                  "Tarea marcada como hecha",
-                  `${nombres.join(", ")} confirmó tu mensaje importante.`,
+                  "Consulta confirmada",
+                  `${nombres.join(", ")} confirmó la consulta importante.`,
                   "✅"
                 );
               }
@@ -1668,6 +1733,19 @@
       );
     }
   });
+
+
+  function setConsultFilter(mode){
+    consultFilterMode = mode;
+    [["consult-filter-all","all"],["consult-filter-pending","pending"],["consult-filter-important","important"]].forEach(([id,m]) => {
+      document.getElementById(id)?.classList.toggle("consult-filter-active", m===mode);
+    });
+    renderConversaciones();
+  }
+  document.getElementById("consult-filter-all")?.addEventListener("click",()=>setConsultFilter("all"));
+  document.getElementById("consult-filter-pending")?.addEventListener("click",()=>setConsultFilter("pending"));
+  document.getElementById("consult-filter-important")?.addEventListener("click",()=>setConsultFilter("important"));
+  document.getElementById("consult-export")?.addEventListener("click",exportarSeguimientoCSV);
 
   // ======== INIT ========
 
