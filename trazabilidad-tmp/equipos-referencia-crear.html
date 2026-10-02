@@ -22,7 +22,11 @@
     @media(max-width:1100px){.form-grid{grid-template-columns:repeat(2,1fr)}.field.span2,.field.span3{grid-column:span 1}.field.span6{grid-column:1/-1}.results{grid-template-columns:repeat(2,1fr)}.search-box{grid-template-columns:1fr 1fr}.summary{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:700px){.wrap{padding:10px}.grid{grid-template-columns:1fr}.results{grid-template-columns:1fr}.search-box{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.span2,.field.span3,.field.span6{grid-column:auto}.summary{grid-template-columns:repeat(2,1fr)}.checklist{grid-template-columns:1fr}}
     @media print{.no-print,.tabs,.top-actions,.toolbar,.ref-actions{display:none!important}.wrap{max-width:none;padding:0}.card{box-shadow:none;border:0;padding:0}.view{display:block!important}.view:not(.print-target){display:none!important}.tbl th,.tbl td{font-size:10px}.top{margin-bottom:8px}}
-  </style>
+  
+    .sheet-head{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:stretch}.piece-photo{border:2px dashed #bfd1e3;border-radius:16px;background:#f8fbff;min-height:190px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.piece-photo img{width:100%;height:100%;max-height:250px;object-fit:contain;background:#fff}.photo-empty{text-align:center;color:var(--muted);font-size:12px;padding:24px}.photo-actions{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}.control-title{text-align:center;font-size:22px;font-weight:1000;letter-spacing:.06em;margin:4px 0 14px;color:#153e67}.tbl.elements th:nth-child(1),.tbl.elements td:nth-child(1){width:72px;text-align:center}.tbl.elements th:nth-child(2){width:48%}.tbl.elements input{min-width:140px}.tbl.elements .equipment{font-weight:800}.photo-input{display:none}
+    @media(max-width:900px){.sheet-head{grid-template-columns:1fr}.piece-photo{min-height:150px}.form-grid{grid-template-columns:repeat(2,1fr)}.field.span2,.field.span3{grid-column:span 2}}
+    @media print{.piece-photo{border:1px solid #bbb;min-height:150px}.photo-actions{display:none!important}.control-title{font-size:18px}.tbl.elements input{border:0!important;background:transparent!important;padding:2px!important}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -53,38 +57,47 @@
     <div class="grid">
       <div class="card full">
         <div class="card-head"><div><div class="title">Definición de la hoja</div><div class="sub">Una referencia + revisión = una hoja de equipos de control. El histórico se conserva por versiones.</div></div><span class="chip blue" id="modeBadge">NUEVA</span></div>
-        <div class="form-grid">
-          <div class="field span2"><label>Referencia *</label><input id="referencia" autocomplete="off" placeholder="Ej. CE38127"></div>
-          <div class="field"><label>Revisión</label><input id="revision" placeholder="Ej. D.2 / Rev C"></div>
-          <div class="field span2"><label>Descripción / pieza</label><input id="pieza" placeholder="Descripción de la pieza"></div>
-          <div class="field"><label>Cliente</label><input id="cliente" list="clientesList" placeholder="Ej. John Deere"><datalist id="clientesList"></datalist></div>
-          <div class="field"><label>Responsable TMP</label><input id="responsable" list="responsablesList" placeholder="Calidad"><datalist id="responsablesList"></datalist></div>
-          <div class="field"><label>Fecha</label><input id="fecha" type="date"></div>
-          <div class="field"><label>Versión interna</label><input id="version" placeholder="V1" readonly></div>
-          <div class="field span3"><label>Observaciones</label><input id="observaciones" placeholder="Notas de montaje, plano, condiciones especiales..."></div>
+        <div class="sheet-head">
+          <div class="form-grid">
+            <div class="field span2"><label>Referencia *</label><input id="referencia" autocomplete="off" placeholder="Ej. CE38127"></div>
+            <div class="field"><label>Revisión</label><input id="revision" placeholder="Ej. D.2 / Rev C"></div>
+            <div class="field span2"><label>Descripción / pieza</label><input id="pieza" placeholder="Descripción de la pieza"></div>
+            <div class="field"><label>Cliente</label><input id="cliente" list="clientesList" placeholder="Ej. John Deere"><datalist id="clientesList"></datalist></div>
+            <div class="field"><label>Responsable TMP</label><input id="responsable" list="responsablesList" placeholder="Calidad"><datalist id="responsablesList"></datalist></div>
+            <div class="field"><label>Fecha</label><input id="fecha" type="date"></div>
+            <div class="field"><label>Versión interna</label><input id="version" placeholder="V1" readonly></div>
+            <div class="field span3"><label>Observaciones generales</label><input id="observaciones" placeholder="Notas generales de la hoja..."></div>
+          </div>
+          <div class="piece-photo" id="piecePhotoBox">
+            <div class="photo-empty" id="photoEmpty"><b>IMAGEN DE LA PIEZA</b><br><br>Sube una foto, captura o recorte para identificarla visualmente.</div>
+            <img id="piecePhoto" alt="Imagen de la pieza" style="display:none">
+            <div class="photo-actions no-print"><button class="btn small primary" id="btnPhoto" type="button">Añadir imagen</button><button class="btn small danger" id="btnRemovePhoto" type="button" style="display:none">Quitar</button></div>
+            <input class="photo-input" id="photoInput" type="file" accept="image/*">
+          </div>
         </div>
       </div>
 
       <div class="card full">
-        <div class="card-head"><div><div class="title">Equipos que hay que preparar</div><div class="sub">Define el medio necesario. El código de instrumento es opcional: úsalo solo si debe prepararse un equipo concreto.</div></div><span class="chip" id="lineCount">0 líneas</span></div>
+        <div class="control-title">ELEMENTOS DE CONTROL</div>
+        <div class="card-head"><div><div class="title">Equipos que hay que preparar</div><div class="sub">Numera los elementos y escribe exactamente el equipo que Calidad debe montar. Usa Observaciones solo cuando necesites aclarar algo.</div></div><span class="chip" id="lineCount">0 elementos</span></div>
         <div class="toolbar no-print">
-          <button class="btn primary" id="btnAdd">＋ Añadir medio</button>
+          <button class="btn primary" id="btnAdd">＋ Añadir elemento</button>
           <button class="btn" id="btnInventory">Seleccionar del inventario</button>
           <button class="btn" id="btnClone">Clonar otra referencia</button>
           <button class="btn" id="btnChecklist">Vista de preparación</button>
           <button class="btn" id="btnPrint">Imprimir hoja</button>
-          <input class="grow" id="rowSearch" placeholder="Filtrar equipos de esta hoja...">
+          <input class="grow" id="rowSearch" placeholder="Filtrar elementos de esta hoja...">
         </div>
         <div class="summary">
-          <div class="stat"><b id="sumLines">0</b><span>medios definidos</span></div>
-          <div class="stat"><b id="sumUnits">0</b><span>unidades a preparar</span></div>
+          <div class="stat"><b id="sumLines">0</b><span>elementos de control</span></div>
+          <div class="stat"><b id="sumUnits">0</b><span>equipos a preparar</span></div>
           <div class="stat"><b id="sumLinked">0</b><span>vinculados a inventario</span></div>
-          <div class="stat"><b id="sumGeneric">0</b><span>genéricos / por tipo</span></div>
+          <div class="stat"><b id="sumGeneric">0</b><span>definidos por descripción</span></div>
           <div class="stat"><b id="sumAlerts">0</b><span>avisos metrológicos</span></div>
         </div>
         <div class="table-wrap">
-          <table class="tbl">
-            <thead><tr><th>#</th><th>Cant.</th><th>Tipo de control</th><th>Equipo / medio de control *</th><th>Especificación</th><th>Código concreto (opcional)</th><th>Estado</th><th>Observación</th><th class="no-print">Acciones</th></tr></thead>
+          <table class="tbl elements">
+            <thead><tr><th>Nº</th><th>Equipo</th><th>Observaciones</th><th class="no-print">Acciones</th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
@@ -154,19 +167,25 @@ function renderSearch(){const q=norm($('#searchRef').value),rev=$('#searchRevisi
  $$('[data-open]').forEach(b=>b.onclick=()=>openRecord(b.dataset.open,false));$$('[data-newrev]').forEach(b=>b.onclick=()=>openRecord(b.dataset.newrev,true));$$('[data-prepare]').forEach(b=>b.onclick=()=>openChecklistById(b.dataset.prepare));}
 ['searchRef','searchRevision','searchClient'].forEach(id=>$('#'+id).addEventListener(id==='searchRef'?'input':'change',renderSearch));$('#btnNew').onclick=()=>{resetForm();switchTab('editar')};
 
-function makeRow(data={}){const preserved={...data};const tr=document.createElement('tr');tr._preserved=preserved;const desc=data.medio_control||data.descripcion_equipo||'';const spec=data.especificacion||data.caracteristica||'';const note=data.observacion||data.nota||'';const type=data.tipo_medida||data.tipo_control||'';tr.innerHTML=`<td class="idx"></td><td><input class="qty" type="number" min="1" value="${esc(data.cantidad||1)}"></td><td><select class="type"><option value="">—</option>${['Dimensional','Pasa / No pasa','Rugosidad','Par','Visual','Geométrico','Otro'].map(x=>`<option ${x===type?'selected':''}>${x}</option>`).join('')}</select></td><td><input class="desc" value="${esc(desc)}" placeholder="Ej. Pie de rey 0–150 / Tampón P/NP M8"></td><td><input class="spec" value="${esc(spec)}" placeholder="Ej. 0–150 mm / M8×1.25 6H"></td><td><input class="code" value="${esc(data.codigo_equipo||'')}" placeholder="Opcional"></td><td class="state"></td><td><input class="note" value="${esc(note)}" placeholder="Montaje / condición"></td><td class="no-print"><button class="btn small" data-dup>Duplicar</button> <button class="btn small danger" data-del>Quitar</button></td>`;
- $('#rows').appendChild(tr);tr.querySelector('[data-del]').onclick=()=>{tr.remove();renumber();setDirty();updateSummary()};tr.querySelector('[data-dup]').onclick=()=>{makeRow(readRow(tr));setDirty();updateSummary()};tr.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',()=>{if(e.classList.contains('code'))syncCode(tr);setDirty();updateSummary()}));syncCode(tr);renumber();updateSummary();return tr}
-function renumber(){[...$('#rows').children].forEach((r,i)=>r.querySelector('.idx').textContent=i+1);$('#lineCount').textContent=`${$('#rows').children.length} línea${$('#rows').children.length===1?'':'s'}`}
-function readRow(tr){const base={...(tr._preserved||{})};base.cantidad=Math.max(1,parseInt(tr.querySelector('.qty').value||'1')||1);base.tipo_medida=tr.querySelector('.type').value.trim();base.medio_control=tr.querySelector('.desc').value.trim();base.descripcion_equipo=base.medio_control;base.especificacion=tr.querySelector('.spec').value.trim();base.codigo_equipo=tr.querySelector('.code').value.trim();base.observacion=tr.querySelector('.note').value.trim();return base}
+function legacyEquipmentText(data={}){const d=data.medio_control||data.descripcion_equipo||'';const spec=data.especificacion||data.caracteristica||'';return [d,spec].filter(Boolean).join(spec&&d&&!norm(d).includes(norm(spec))?' · ':'')}
+function makeRow(data={}){const preserved={...data};const tr=document.createElement('tr');tr._preserved=preserved;const desc=legacyEquipmentText(data);const note=data.observacion||data.nota||'';tr.innerHTML=`<td class="idx"></td><td><input class="equipment" value="${esc(desc)}" placeholder="Ej. Alexómetro Ø158 / Pie de rey 150 / Tampón P/NP M8"></td><td><input class="note" value="${esc(note)}" placeholder="Ej. Reloj centesimal / condición especial"></td><td class="no-print"><button class="btn small" data-dup>Duplicar</button> <button class="btn small danger" data-del>Quitar</button></td>`;$('#rows').appendChild(tr);tr.querySelector('[data-del]').onclick=()=>{tr.remove();renumber();setDirty();updateSummary()};tr.querySelector('[data-dup]').onclick=()=>{makeRow(readRow(tr));setDirty();updateSummary()};tr.querySelectorAll('input').forEach(e=>e.addEventListener('input',()=>{setDirty();updateSummary()}));renumber();updateSummary();return tr}
+function renumber(){[...$('#rows').children].forEach((r,i)=>r.querySelector('.idx').textContent=i+1);$('#lineCount').textContent=`${$('#rows').children.length} elemento${$('#rows').children.length===1?'':'s'}`}
+function readRow(tr){const base={...(tr._preserved||{})};const text=tr.querySelector('.equipment').value.trim();base.cantidad=1;base.medio_control=text;base.descripcion_equipo=text;base.observacion=tr.querySelector('.note').value.trim();return base}
 function allRows(){return [...$('#rows').children].map(readRow).filter(x=>x.medio_control||x.codigo_equipo)}
-function syncCode(tr){const code=tr.querySelector('.code').value.trim();const st=tr.querySelector('.state');if(!code){st.innerHTML='<span class="chip">GENÉRICO</span>';return}const i=inventory.find(x=>String(x.codigo||'').trim()===code);if(!i){st.innerHTML='<span class="chip warn">NO ENCONTRADO</span>';return}if(!tr.querySelector('.desc').value.trim())tr.querySelector('.desc').value=i.descripcion||'';const s=calibrationState(i);st.innerHTML=`<span class="chip ${s.c}">${s.t}</span><div style="font-size:9px;color:#6b8299;margin-top:3px">${esc(locationName(i))}</div>`}
-function updateSummary(){const rows=allRows();$('#sumLines').textContent=rows.length;$('#sumUnits').textContent=rows.reduce((a,b)=>a+(Number(b.cantidad)||0),0);let linked=0,generic=0,alerts=0;rows.forEach(r=>{if(r.codigo_equipo){const i=inventory.find(x=>String(x.codigo||'').trim()===r.codigo_equipo);if(i){linked++;if(calibrationState(i).t!=='OK')alerts++}else alerts++}else generic++});$('#sumLinked').textContent=linked;$('#sumGeneric').textContent=generic;$('#sumAlerts').textContent=alerts;renumber()}
+function updateSummary(){const rows=allRows();$('#sumLines').textContent=rows.length;$('#sumUnits').textContent=rows.length;let linked=0,alerts=0;rows.forEach(r=>{if(r.codigo_equipo){const i=inventory.find(x=>String(x.codigo||'').trim()===String(r.codigo_equipo||'').trim());if(i){linked++;if(calibrationState(i).t!=='OK')alerts++}else alerts++}});$('#sumLinked').textContent=linked;$('#sumGeneric').textContent=rows.length-linked;$('#sumAlerts').textContent=alerts;renumber()}
 $('#btnAdd').onclick=()=>{makeRow();setDirty()};$('#rowSearch').oninput=()=>{const q=norm($('#rowSearch').value);[...$('#rows').children].forEach(r=>r.style.display=!q||norm(JSON.stringify(readRow(r))).includes(q)?'':'none')};
 
-function resetForm(){currentId=null;currentRecord=null;$('#referencia').value='';$('#revision').value='';$('#pieza').value='';$('#cliente').value='';$('#responsable').value='';$('#fecha').value=today();$('#version').value='';$('#observaciones').value='';$('#rows').innerHTML='';makeRow();$('#modeBadge').textContent='NUEVA';$('#btnSaveCurrent').style.display='none';setDirty(false)}
-function openRecord(id,newRevision){const r=refs.find(x=>String(x.id)===String(id));if(!r)return;currentRecord=r;currentId=newRevision?null:r.id;$('#referencia').value=r.referencia||'';$('#revision').value=revisionOf(r)||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=newRevision?today():(r.fecha||today());$('#version').value=newRevision?'':(r.version||'');$('#observaciones').value=r.observaciones||'';$('#rows').innerHTML='';(Array.isArray(r.equipos)?r.equipos:[]).forEach(makeRow);if(!$('#rows').children.length)makeRow();$('#modeBadge').textContent=newRevision?'NUEVA REVISIÓN':(r.version||'EDITANDO');$('#btnSaveCurrent').style.display=newRevision?'none':'inline-flex';setDirty(false);switchTab('editar')}
+let piecePhotoData='';
+function setPiecePhoto(src=''){piecePhotoData=src||'';$('#piecePhoto').src=piecePhotoData;$('#piecePhoto').style.display=piecePhotoData?'block':'none';$('#photoEmpty').style.display=piecePhotoData?'none':'block';$('#btnRemovePhoto').style.display=piecePhotoData?'inline-flex':'none'}
+$('#btnPhoto').onclick=()=>$('#photoInput').click();$('#btnRemovePhoto').onclick=()=>{setPiecePhoto('');setDirty()};
+$('#photoInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{const im=new Image();im.onload=()=>{const max=1100,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);setPiecePhoto(c.toDataURL('image/jpeg',.78));setDirty()};im.src=reader.result};reader.readAsDataURL(f);e.target.value=''};
+function photoFromRecord(r){const eq=Array.isArray(r?.equipos)?r.equipos:[];return eq.find(x=>x&&x._imagen_pieza)?._imagen_pieza||''}
+function attachPhoto(rows){if(rows.length&&piecePhotoData)rows[0]._imagen_pieza=piecePhotoData;else rows.forEach(x=>{if(x&&x._imagen_pieza)delete x._imagen_pieza});return rows}
 
-function buildPayload(){const ref=$('#referencia').value.trim();if(!ref){showMsg('La referencia es obligatoria.','err');return null}const rows=allRows();if(!rows.length){showMsg('Añade al menos un equipo o medio de control.','err');return null}if(rows.some(x=>!x.medio_control&&!x.codigo_equipo)){showMsg('Hay líneas sin equipo definido.','err');return null}const rev=$('#revision').value.trim();let obs=$('#observaciones').value.trim();if(rev&&!/REV/i.test(obs))obs=`REVISION: ${rev}${obs?` | ${obs}`:''}`;return {referencia:ref,pieza:$('#pieza').value.trim()||null,cliente:$('#cliente').value.trim()||null,responsable:$('#responsable').value.trim()||null,fecha:$('#fecha').value||null,version:$('#version').value.trim()||null,observaciones:obs||null,equipos:rows}}
+function resetForm(){currentId=null;currentRecord=null;$('#referencia').value='';$('#revision').value='';$('#pieza').value='';$('#cliente').value='';$('#responsable').value='';$('#fecha').value=today();$('#version').value='';$('#observaciones').value='';$('#rows').innerHTML='';setPiecePhoto('');makeRow();$('#modeBadge').textContent='NUEVA';$('#btnSaveCurrent').style.display='none';setDirty(false)}
+function openRecord(id,newRevision){const r=refs.find(x=>String(x.id)===String(id));if(!r)return;currentRecord=r;currentId=newRevision?null:r.id;$('#referencia').value=r.referencia||'';$('#revision').value=revisionOf(r)||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=newRevision?today():(r.fecha||today());$('#version').value=newRevision?'':(r.version||'');$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(Array.isArray(r.equipos)?r.equipos:[]).forEach(makeRow);if(!$('#rows').children.length)makeRow();$('#modeBadge').textContent=newRevision?'NUEVA REVISIÓN':(r.version||'EDITANDO');$('#btnSaveCurrent').style.display=newRevision?'none':'inline-flex';setDirty(false);switchTab('editar')}
+
+function buildPayload(){const ref=$('#referencia').value.trim();if(!ref){showMsg('La referencia es obligatoria.','err');return null}const rows=attachPhoto(allRows());if(!rows.length){showMsg('Añade al menos un equipo o medio de control.','err');return null}if(rows.some(x=>!x.medio_control&&!x.codigo_equipo)){showMsg('Hay líneas sin equipo definido.','err');return null}const rev=$('#revision').value.trim();let obs=$('#observaciones').value.trim();if(rev&&!/REV/i.test(obs))obs=`REVISION: ${rev}${obs?` | ${obs}`:''}`;return {referencia:ref,pieza:$('#pieza').value.trim()||null,cliente:$('#cliente').value.trim()||null,responsable:$('#responsable').value.trim()||null,fecha:$('#fecha').value||null,version:$('#version').value.trim()||null,observaciones:obs||null,equipos:rows}}
 async function nextVersion(ref){const list=refs.filter(r=>r.referencia===ref);let m=0;list.forEach(r=>{const n=String(r.version||'').match(/(\d+)/);if(n)m=Math.max(m,+n[1])});return `V${m+1}`}
 $('#btnSaveCurrent').onclick=async()=>{if(!currentId)return;const p=buildPayload();if(!p)return;if(!confirm('¿Guardar cambios sobre esta versión?'))return;const {error}=await sb.from('control_metrologico').update(p).eq('id',currentId);if(error)return showMsg(error.message,'err');showMsg('Hoja actualizada correctamente.','ok');setDirty(false);await loadData()}
 $('#btnSaveVersion').onclick=async()=>{const p=buildPayload();if(!p)return;p.version=await nextVersion(p.referencia);if(!confirm(`Se creará ${p.referencia} · ${p.version}. ¿Continuar?`))return;const {data,error}=await sb.from('control_metrologico').insert(p).select('*').single();if(error)return showMsg(error.message,'err');showMsg(`Hoja guardada como ${p.version}.`,'ok');setDirty(false);await loadData();if(data)openRecord(data.id,false)}
@@ -179,13 +198,13 @@ function renderClone(){const q=norm($('#cloneSearch')?.value);const list=refs.fi
 $('#btnClone').onclick=()=>{$('#cloneDialog').showModal();renderClone()};$('#cloneSearch').oninput=renderClone;
 
 function openChecklistById(id){const r=refs.find(x=>String(x.id)===String(id));if(r)openChecklist(r)}
-function openChecklist(r=null){const ref=r||buildPayload();if(!ref)return;const eq=Array.isArray(ref.equipos)?ref.equipos:allRows();$('#checkTitle').textContent=`Preparar equipos · ${ref.referencia||$('#referencia').value}`;$('#checkSub').textContent=`Rev. ${revisionOf(ref)||$('#revision').value||'—'} · ${ref.pieza||$('#pieza').value||''}`;$('#checkList').innerHTML=eq.map((e,i)=>{const code=e.codigo_equipo?` · ${esc(e.codigo_equipo)}`:'';const spec=e.especificacion?` · ${esc(e.especificacion)}`:'';return `<label class="check-item"><input type="checkbox"><div class="check-main"><b>${esc(e.cantidad||1)} × ${esc(e.medio_control||e.descripcion_equipo||'Equipo')}${spec}</b><span>${esc(e.tipo_medida||'')}${code}${e.observacion?` · ${esc(e.observacion)}`:''}</span></div><span class="chip">${i+1}</span></label>`}).join('');$('#checkDialog').showModal()}
+function openChecklist(r=null){const ref=r||buildPayload();if(!ref)return;const eq=Array.isArray(ref.equipos)?ref.equipos:allRows();$('#checkTitle').textContent=`Preparar equipos · ${ref.referencia||$('#referencia').value}`;$('#checkSub').textContent=`Rev. ${revisionOf(ref)||$('#revision').value||'—'} · ${ref.pieza||$('#pieza').value||''}`;$('#checkList').innerHTML=eq.map((e,i)=>{const label=legacyEquipmentText(e)||'Equipo';return `<label class="check-item"><input type="checkbox"><div class="check-main"><b>${i+1}. ${esc(label)}</b><span>${e.observacion?esc(e.observacion):''}</span></div><span class="chip">${i+1}</span></label>`}).join('');$('#checkDialog').showModal()}
 $('#btnChecklist').onclick=()=>openChecklist();$('#btnPrintChecklist').onclick=()=>window.print();$('#btnPrint').onclick=()=>{document.body.dataset.print='sheet';window.print()};
 
 $$('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).close());
 ['referencia','revision','pieza','cliente','responsable','fecha','observaciones'].forEach(id=>$('#'+id).addEventListener('input',()=>setDirty()));window.addEventListener('beforeunload',e=>{if(!dirty)return;e.preventDefault();e.returnValue=''})
 
-const params=new URLSearchParams(location.search);const editRaw=localStorage.getItem('editarReferencia');resetForm();loadData().then(()=>{if(params.get('modo')==='editar'&&editRaw){try{const r=JSON.parse(editRaw);refs.unshift(r);openRecord(r.id||'',false);if(!r.id){currentRecord=r;currentId=null;$('#referencia').value=r.referencia||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=r.fecha||today();$('#version').value=r.version||'';$('#observaciones').value=r.observaciones||'';$('#rows').innerHTML='';(r.equipos||[]).forEach(makeRow);switchTab('editar')}}catch(e){console.warn(e)}}});
+const params=new URLSearchParams(location.search);const editRaw=localStorage.getItem('editarReferencia');resetForm();loadData().then(()=>{if(params.get('modo')==='editar'&&editRaw){try{const r=JSON.parse(editRaw);refs.unshift(r);openRecord(r.id||'',false);if(!r.id){currentRecord=r;currentId=null;$('#referencia').value=r.referencia||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=r.fecha||today();$('#version').value=r.version||'';$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(r.equipos||[]).forEach(makeRow);switchTab('editar')}}catch(e){console.warn(e)}}});
 </script>
 </body>
 </html>
