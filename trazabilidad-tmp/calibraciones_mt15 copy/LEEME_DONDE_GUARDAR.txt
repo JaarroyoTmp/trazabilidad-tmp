@@ -1,0 +1,28 @@
+MT15 - CORRECCION FINAL DE REGRESION
+===================================
+
+Sustituir SOLO estos 3 archivos en la RAIZ ACTIVA del repositorio:
+
+1) TMP_Calibraciones_MT15.html
+   DESTINO:
+   trazabilidad-tmp/TMP_Calibraciones_MT15.html
+
+2) app_mt15.js
+   DESTINO:
+   trazabilidad-tmp/calibraciones_mt15 copy/core/metrology_core/app_mt15.js
+
+3) plain_limit_gauge_engine.js
+   DESTINO:
+   trazabilidad-tmp/calibraciones_mt15 copy/core/metrology_core/plain_limit_gauge_engine.js
+
+NO sustituir copias dentro de:
+- parches/
+- trazabilidad-tmp/trazabilidad-tmp/
+- otras carpetas anidadas antiguas.
+
+Pruebas objetivo:
+- 40205 / Ø25.41 +0.03 -> PASA 25.410 / NO PASA 25.440
+- TP119 / Ø11.983 ±0.011 -> PASA 11.972 / NO PASA 11.994
+- Ø18H7 -> sigue resolviendo por ISO 286.
+
+El botón "Abrir calibración clásica" queda eliminado.
