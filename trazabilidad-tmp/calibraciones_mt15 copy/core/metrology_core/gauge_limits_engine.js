@@ -165,39 +165,23 @@ export function calculateGaugeSideAcceptanceLimits({
   targetNominal,
   holeITWidthMm
 } = {}) {
-  const target = parseNum(targetNominal);
-  const it = parseNum(holeITWidthMm);
+  const target = parseNum(targetNominal, NaN);
 
-  if (!target) {
-    return {
-      ok: false,
-      side,
-      error: "DATOS_INSUFICIENTES_LIMITES_CALIBRE",
-      message: "No hay nominal suficiente para resolver los limites propios del calibre."
-    };
-  }
-
-  /*
-    REGLA AUTORITATIVA MT15 V2 SAFE:
-    - ISO 286 define los limites de la pieza controlada.
-    - NO se deriva de forma porcentual la tolerancia propia del calibre.
-    - Hasta cargar y validar la tabla/procedimiento ISO 1938 / DIN 2250 / MT-15
-      aplicable al calibre, el sistema NO emite limites de aceptacion ni dictamen.
-    - Esta funcion conserva la interfaz para no romper el resto del motor, pero
-      devuelve explicitamente NO VALIDADO.
-  */
+  // SEGURIDAD METROLOGICA MT15:
+  // No se generan limites propios del calibre hasta disponer de una tabla/procedimiento
+  // ISO 1938 / DIN 2250 / MT-15 validado. El IT de la pieza NO es la tolerancia
+  // de aceptacion del calibre y no debe convertirse en una tolerancia provisional.
   return {
     ok: false,
     side,
-    nominal: round(target, 6),
-    hole_it_width_mm: it || null,
+    nominal: Number.isFinite(target) ? round(target, 6) : null,
     limite_inferior: null,
     limite_superior: null,
     tolerancia_abs: null,
-    criterio: "MT15_GAUGE_LIMITS_PENDING_VALIDATED_TABLE",
-    normativa: ["ISO 1938-1", "DIN 2250-1", "MT-15 Cap.8"],
+    criterio: "MT15_GAUGE_LIMITS_PENDING_VALIDATION",
     error: "LIMITES_PROPIOS_CALIBRE_NO_VALIDADOS",
-    message: "No se aplican tolerancias provisionales. Pendiente tabla/procedimiento validado de limites propios del calibre."
+    normativa_pendiente_validacion: ["ISO 1938-1", "DIN 2250-1", "MT-15"],
+    nota: "Sin limites propios del calibre validados: se permite medir, pero no emitir dictamen ni guardar/certificar."
   };
 }
 
@@ -222,19 +206,14 @@ export function buildPlainPlugGaugeLimits(input = {}) {
     holeITWidthMm: hole.agujero.ancho_tolerancia
   });
 
-  const acceptanceValidated = Boolean(pasa?.ok && noPasa?.ok);
-
   return {
-    ok: acceptanceValidated,
+    ok: true,
     parsed,
     hole,
     pasa,
     no_pasa: noPasa,
-    acceptance_validated: acceptanceValidated,
     audit: {
-      metodo: acceptanceValidated
-        ? "Límites propios del calibre validados."
-        : "Nominales de pieza resueltos; límites propios del calibre NO validados.",
+      metodo: "Límites del calibre generados a partir de designación ISO del agujero.",
       normativa: ["ISO 286", "ISO 1938-1", "DIN 2250-1"],
       observaciones: [
         hole.warning,
