@@ -131,17 +131,106 @@ export function iso286ITWidthUm(nominalMm, grade) {
 }
 
 export function parsePlainLimitDesignation(input = {}) {
-  const raw = [
+  const rawParts = [
     input.designacion,
     input.rango,
     input.descripcion,
     input.nombre,
     input.modelo,
     input.observaciones
-  ].filter(Boolean).join(" ");
-
+  ].filter(Boolean);
+  const raw = rawParts.join(" ");
   const txt = normalizeText(raw);
 
+  /* ==========================================================
+     PRIORIDAD A · LIMITES / TOLERANCIAS DIRECTAS DEL EQUIPO
+     ----------------------------------------------------------
+     Formatos reales TMP soportados:
+       Ø25.41 +0.03              -> 25.410 / 25.440
+       Ø11.983 ±0.011            -> 11.972 / 11.994
+       Ø25 +0.021/-0             -> 25.000 / 25.021
+       Ø25 +0.010/-0.005         -> 24.995 / 25.010
+
+     Estos valores NO se presentan como ISO286 calculado:
+     proceden directamente de la designacion/rango registrado.
+     ========================================================== */
+  const directText = String(raw || "")
+    .replace(/,/g, ".")
+    .replace(/[−–—]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  let m = directText.match(/(?:Ø|⌀|D(?:IAM(?:ETRO)?)?\.?\s*)?(\d+(?:\.\d+)?)\s*±\s*(\d+(?:\.\d+)?)/i);
+  if (m) {
+    const nominal = Number(m[1]);
+    const tol = Math.abs(Number(m[2]));
+    return {
+      ok: true,
+      raw,
+      normalized: txt,
+      nominal,
+      tipo: "AGUJERO",
+      system: "DIRECT_LIMITS",
+      source: "TOLERANCIA_DIRECTA_SIMETRICA",
+      direct_limits: true,
+      tolerance_text: `±${tol}`,
+      lower_deviation_mm: -tol,
+      upper_deviation_mm: tol,
+      limits_mm: {
+        lower: round(nominal - tol, 6),
+        upper: round(nominal + tol, 6)
+      }
+    };
+  }
+
+  m = directText.match(/(?:Ø|⌀|D(?:IAM(?:ETRO)?)?\.?\s*)?(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)\s*\/\s*-?\s*(\d+(?:\.\d+)?)/i);
+  if (m) {
+    const nominal = Number(m[1]);
+    const plus = Math.abs(Number(m[2]));
+    const minus = Math.abs(Number(m[3]));
+    return {
+      ok: true,
+      raw,
+      normalized: txt,
+      nominal,
+      tipo: "AGUJERO",
+      system: "DIRECT_LIMITS",
+      source: "TOLERANCIA_DIRECTA_BILATERAL",
+      direct_limits: true,
+      tolerance_text: `+${plus}/-${minus}`,
+      lower_deviation_mm: -minus,
+      upper_deviation_mm: plus,
+      limits_mm: {
+        lower: round(nominal - minus, 6),
+        upper: round(nominal + plus, 6)
+      }
+    };
+  }
+
+  m = directText.match(/(?:Ø|⌀|D(?:IAM(?:ETRO)?)?\.?\s*)?(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)(?!\s*\/)/i);
+  if (m) {
+    const nominal = Number(m[1]);
+    const plus = Math.abs(Number(m[2]));
+    return {
+      ok: true,
+      raw,
+      normalized: txt,
+      nominal,
+      tipo: "AGUJERO",
+      system: "DIRECT_LIMITS",
+      source: "TOLERANCIA_DIRECTA_UNILATERAL_POSITIVA",
+      direct_limits: true,
+      tolerance_text: `+${plus}`,
+      lower_deviation_mm: 0,
+      upper_deviation_mm: plus,
+      limits_mm: {
+        lower: round(nominal, 6),
+        upper: round(nominal + plus, 6)
+      }
+    };
+  }
+
+  /* PRIORIDAD B · DESIGNACION ISO 286 (ej. Ø18H7) */
   const match = txt.match(/(?:Ø|D|DIAM(?:ETRO)?\.?)?\s*(\d+(?:[\.,]\d+)?)\s*([A-Z]{1,2})\s*(\d{1,2})/i);
 
   if (!match) {
@@ -150,7 +239,7 @@ export function parsePlainLimitDesignation(input = {}) {
       raw,
       normalized: txt,
       error: "NO_SE_PUDO_PARSEAR_DESIGNACION",
-      message: "No se pudo detectar nominal y tolerancia tipo Ø8.5 H8."
+      message: "No se pudo detectar una tolerancia directa ni una designación ISO 286 tipo Ø8.5 H8."
     };
   }
 
@@ -506,6 +595,50 @@ export function resolvePlainPlugGoNoGo(input = {}) {
     };
   }
 
+  if (parsed.direct_limits && parsed.limits_mm) {
+    const nominal_pasa = parsed.tipo === "EJE" ? parsed.limits_mm.upper : parsed.limits_mm.lower;
+    const nominal_no_pasa = parsed.tipo === "EJE" ? parsed.limits_mm.lower : parsed.limits_mm.upper;
+
+    return {
+      ok: true,
+      source: "plain_limit_gauge_engine",
+      engine_version: "V5.2_DIRECT_LIMITS",
+      parsed,
+      limits: {
+        ok: true,
+        system: "DIRECT_LIMITS",
+        source: parsed.source,
+        nominal: parsed.nominal,
+        tipo: parsed.tipo,
+        limits_mm: parsed.limits_mm,
+        deviations_mm: {
+          lower: parsed.lower_deviation_mm,
+          upper: parsed.upper_deviation_mm
+        },
+        warnings: ["Límites obtenidos directamente del rango/designación registrado del instrumento; no calculados por ISO 286."]
+      },
+      nominal_pasa,
+      nominal_no_pasa,
+      pauta_hint: {
+        nominal_pasa,
+        nominal_no_pasa,
+        lado_pasa: "PASA",
+        lado_no_pasa: "NO_PASA",
+        patron_tipo: "BANCO_HORIZONTAL",
+        repeticiones: 5,
+        unidad: "mm"
+      },
+      audit: {
+        norma_base: ["ISO 1938-1", "ILAC-G8", "ISO 14253"],
+        metodo: "Límites directos obtenidos de la designación/rango registrado del equipo.",
+        origen_limites: parsed.source,
+        tolerancia_texto: parsed.tolerance_text,
+        limites_mm: parsed.limits_mm,
+        observaciones: ["No se atribuye a ISO 286 un cálculo que no se ha realizado."]
+      }
+    };
+  }
+
   const limits = calculateISO286Limits(parsed);
 
   if (!limits.ok) {
@@ -533,7 +666,7 @@ export function resolvePlainPlugGoNoGo(input = {}) {
   return {
     ok: true,
     source: "plain_limit_gauge_engine",
-    engine_version: "V5.1",
+    engine_version: "V5.2",
     parsed,
     limits,
     nominal_pasa,
