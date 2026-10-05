@@ -10,6 +10,7 @@ import { getAuditRequirements } from "./metrology_rules_repository.js";
 import { openTMPReportPreview } from "./report_engine.js";
 import { resolvePatternCorrectionAtPoint } from "./pattern_correction_resolver.js";
 import { saveCalibrationExecutionPayload, resolveCalibrationDates } from "./calibration_save_helper.js";
+import { resolvePlainPlugGoNoGo } from "./plain_limit_gauge_engine.js";
 
 const $ = q => document.querySelector(q);
 const $$ = q => Array.from(document.querySelectorAll(q));
@@ -655,6 +656,24 @@ async function cargarInstrumento() {
   $("#goStep2").disabled = false;
 }
 
+function resolveAutomaticPlainLimits(inst = {}) {
+  try {
+    return resolvePlainPlugGoNoGo(inst);
+  } catch (err) {
+    console.warn("TMP MT15 · error resolviendo límites automáticos:", err);
+    return { ok: false, error: "RESOLVER_EXCEPTION", message: err?.message || String(err) };
+  }
+}
+
+function plainLimitOriginLabel(resolved = {}) {
+  if (!resolved?.ok) return "No resuelto automáticamente";
+  const system = resolved?.limits?.system || resolved?.parsed?.system || "";
+  if (system === "DIRECT_LIMITS") return "Tolerancia directa registrada en el equipo";
+  if (system === "ISO_286_DATABASE") return "ISO 286 · tabla interna TMP";
+  if (system === "ISO_286_FORMULA_FALLBACK") return "ISO 286 · cálculo del motor TMP";
+  return resolved?.limits?.source || resolved?.source || "Motor MT15";
+}
+
 function renderQuestions() {
   const family = state.familyResolved?.family;
   let html = "";
@@ -674,8 +693,38 @@ function renderQuestions() {
     }
 
   } else if (family === "TAMPON_LISO_PNP") {
-    html += inputQuestion("nominal_pasa", "Nominal lado PASA (mm)", "");
-    html += inputQuestion("nominal_no_pasa", "Nominal lado NO PASA (mm)", "");
+    const resolved = resolveAutomaticPlainLimits(state.instrumento || {});
+    const rangeText = state.instrumento?.rango || state.instrumento?.designacion || "-";
+
+    if (resolved?.ok) {
+      state.answers.nominal_pasa = String(resolved.nominal_pasa ?? "");
+      state.answers.nominal_no_pasa = String(resolved.nominal_no_pasa ?? "");
+      state.answers.mt15_limites_origen = plainLimitOriginLabel(resolved);
+      state.answers.mt15_limites_motor = resolved;
+
+      html += `
+        <div class="banner ok">
+          <strong>Valores detectados automáticamente</strong><br>
+          <span class="mini">
+            Equipo: ${state.instrumento?.codigo || "-"} ·
+            Rango: ${rangeText} ·
+            Origen: <strong>${plainLimitOriginLabel(resolved)}</strong>
+          </span>
+        </div>
+      `;
+      html += inputQuestion("nominal_pasa", "Nominal lado PASA (mm) · automático", fmt(resolved.nominal_pasa, 6));
+      html += inputQuestion("nominal_no_pasa", "Nominal lado NO PASA (mm) · automático", fmt(resolved.nominal_no_pasa, 6));
+      html += `<div class="mini mt">Los valores se precargan desde el motor MT15. Se mantienen editables únicamente para una corrección excepcional y trazable.</div>`;
+    } else {
+      html += `
+        <div class="banner warn">
+          <strong>No se pudieron resolver automáticamente los límites.</strong><br>
+          <span class="mini">Rango: ${rangeText} · ${resolved?.message || resolved?.error || "Formato no reconocido"}</span>
+        </div>
+      `;
+      html += inputQuestion("nominal_pasa", "Nominal lado PASA (mm)", "");
+      html += inputQuestion("nominal_no_pasa", "Nominal lado NO PASA (mm)", "");
+    }
 
   } else if (family === "TAMPON_ROSCADO_PNP") {
     html += inputQuestion("tipo_rosca", "Tipo de rosca", "ISO_METRICA");
@@ -845,8 +894,25 @@ async function prepararOpcionesPatron() {
         preferidos: [p.patron_tipo || f.patron_tipo].filter(Boolean)
       };
 
-      state.patternOptionsByPoint[pointKey(f.id, p.id)] =
-        buildPatternOptions(input, state.patterns, { includeRejected: false });
+      const key = pointKey(f.id, p.id);
+      const built = buildPatternOptions(input, state.patterns, { includeRejected: false });
+      state.patternOptionsByPoint[key] = built;
+
+      // Si solo existe un patrón técnicamente válido, MT15 lo aplica automáticamente.
+      // El operario solo elige cuando existen varias alternativas válidas.
+      if (built?.options?.length === 1) {
+        const only = built.options[0];
+        const selected = selectPatternOption(built, only.patron_id, {
+          operario: $("#firmanteNombre")?.value || ""
+        });
+        if (selected?.ok) {
+          state.selections[key] = {
+            ...selected.seleccion,
+            raw: selected.selected_pattern?.raw || selected.selected_pattern || null,
+            auto_selected: true
+          };
+        }
+      }
     }
   }
 
@@ -881,9 +947,9 @@ function renderPatternOptions() {
           }
 
           html += `
-            <div class="option-card" data-option="${key}" data-patron="${opt.patron_id}">
+            <div class="option-card ${String(state.selections[key]?.patron_id)===String(opt.patron_id)?"selected":""}" data-option="${key}" data-patron="${opt.patron_id}">
               <label style="display:flex;gap:8px;align-items:flex-start;color:var(--txt)">
-                <input type="radio" name="pat_${key}" value="${opt.patron_id}" style="width:auto;margin-top:3px">
+                <input type="radio" name="pat_${key}" value="${opt.patron_id}" ${String(state.selections[key]?.patron_id)===String(opt.patron_id)?"checked":""} style="width:auto;margin-top:3px">
                 <span>
                   <strong>${opt.codigo || ""} · ${opt.descripcion || opt.label}</strong>
                   <br>
@@ -927,6 +993,8 @@ function renderPatternOptions() {
       validatePatternSelections();
     });
   });
+
+  validatePatternSelections();
 }
 
 function validatePatternSelections() {
@@ -1109,22 +1177,27 @@ async function calcularResultadosMT15() {
       const ls = getPointMeta(p, "limite_superior", null);
       const toleranciaAbs = getPointMeta(p, "tolerancia_abs", null);
 
-      if (li !== null && li !== undefined) {
-        decisionInput.limite_inferior = li;
-      }
-
-      if (ls !== null && ls !== undefined) {
-        decisionInput.limite_superior = ls;
-      }
-
-      const hasLimits =
-        Number.isFinite(Number(decisionInput.limite_inferior)) &&
-        Number.isFinite(Number(decisionInput.limite_superior));
-      const hasTolerance = Number.isFinite(Number(toleranciaAbs)) && Number(toleranciaAbs) > 0;
+      const limitsValidated = Boolean(
+        li !== null && li !== undefined && Number.isFinite(Number(li)) &&
+        ls !== null && ls !== undefined && Number.isFinite(Number(ls))
+      );
+      const toleranceValidated = Boolean(
+        toleranciaAbs !== null && toleranciaAbs !== undefined && Number.isFinite(Number(toleranciaAbs)) && Number(toleranciaAbs) > 0
+      );
 
       let decision;
 
-      if (!hasLimits && !hasTolerance) {
+      if (limitsValidated) {
+        decisionInput.limite_inferior = Number(li);
+        decisionInput.limite_superior = Number(ls);
+        decision = decidePoint(decisionInput);
+      } else if (toleranceValidated) {
+        decisionInput.tolerancia_abs = Number(toleranciaAbs);
+        decisionInput.regla_decision = "ERROR_ABSOLUTO_ILAC_G8";
+        decision = decidePoint(decisionInput);
+      } else {
+        // Seguridad metrológica: nunca convertir ausencia de límites en NO APTO.
+        // Se conserva medida, error, U y trazabilidad, pero no existe dictamen certificable.
         decision = {
           status: "NO_EVALUABLE",
           decision: "NO_EVALUABLE",
@@ -1134,21 +1207,17 @@ async function calcularResultadosMT15() {
           decision_operativa: "NO_EVALUABLE",
           conforme: false,
           conforme_operativo: false,
-          motivo: "Limites propios del calibre no validados. No se emite dictamen metrologico.",
-          motivo_operativo: "MT15 bloqueado para dictamen: faltan limites propios del calibre validados.",
+          motivo: "Límites propios del calibre no validados. No se aplican tolerancias provisionales.",
+          motivo_operativo: "MT15 bloqueado para dictamen: faltan límites de aceptación validados del calibre.",
           reason: "LIMITES_PROPIOS_CALIBRE_NO_VALIDADOS",
-          regla_decision: "MT15_LIMITES_PENDIENTES_VALIDACION",
+          regla_decision: "MT15_REQUIERE_LIMITES_CALIBRE_VALIDADOS",
           nominal: valorReferencia,
           valor_medido: mediaCorregida,
-          error: mediaCorregida - valorReferencia,
-          U: uncertainty.U
+          error,
+          U: uncertainty?.U ?? null,
+          tolerancia_abs: null,
+          limites: null
         };
-      } else {
-        if (!hasLimits) {
-          decisionInput.tolerancia_abs = toleranciaAbs;
-          decisionInput.regla_decision = "ERROR_ABSOLUTO_ILAC_G8";
-        }
-        decision = decidePoint(decisionInput);
       }
 
       const trazabilidadPatron = {
@@ -1226,7 +1295,13 @@ async function calcularResultadosMT15() {
 
   renderResults();
   renderAudit();
-  $("#goStep7").disabled = false;
+  const canSave = !results.some(p => getDecisionOperational(p.decision) === "NO_EVALUABLE");
+  $("#goStep7").disabled = !canSave;
+  if (!canSave) {
+    $("#goStep7").title = "Guardado bloqueado: existen puntos NO EVALUABLES por falta de límites de aceptación validados.";
+  } else {
+    $("#goStep7").title = "";
+  }
   setStep(6);
 }
 
@@ -1241,9 +1316,12 @@ function renderResults() {
   const maxU = r.puntos.reduce((m, p) => Math.max(m, Number(p.uncertainty?.U || p.U || 0)), 0);
   const maxErrorAbs = r.puntos.reduce((m, p) => Math.max(m, Math.abs(Number(p.error || 0))), 0);
 
-  const evalText = puntosIlacIndeterminados > 0
-    ? "La incertidumbre de medida se ha considerado en la evaluación técnica. No se muestra como segundo dictamen."
-    : "La incertidumbre de medida se ha considerado dentro del criterio de decisión. No existen advertencias técnicas relevantes.";
+  const puntosNoEvaluables = r.puntos.filter(p => getDecisionOperational(p.decision) === "NO_EVALUABLE").length;
+  const evalText = puntosNoEvaluables > 0
+    ? "Hay puntos NO EVALUABLES: la medición, incertidumbre y trazabilidad se conservan, pero no se emite dictamen hasta disponer de límites de aceptación validados del calibre."
+    : puntosIlacIndeterminados > 0
+      ? "La incertidumbre de medida se ha considerado en la evaluación técnica. No se muestra como segundo dictamen."
+      : "La incertidumbre de medida se ha considerado dentro del criterio de decisión. No existen advertencias técnicas relevantes.";
 
   let html = `
     <div class="banner ${bannerClass(dictamenFinal)}">
@@ -1562,7 +1640,14 @@ async function guardarSupabase() {
 }
 
 $("#btnCargarInstrumento").addEventListener("click", cargarInstrumento);
-$("#goStep2").addEventListener("click", () => { renderQuestions(); setStep(2); });
+$("#goStep2")?.addEventListener("click", () => {
+  if (!state.instrumento || state.familyResolved?.family !== "TAMPON_LISO_PNP") {
+    alert("Carga primero un tampón liso P/NP válido.");
+    return;
+  }
+  renderQuestions();
+  setStep(2);
+});
 $("#btnGenerarPauta").addEventListener("click", generarPauta);
 $("#goStep4").addEventListener("click", prepararOpcionesPatron);
 $("#goStep5").addEventListener("click", () => { renderReadings(); setStep(5); });
@@ -1589,9 +1674,7 @@ $("#btnVerJSON").addEventListener("click", () => {
 
 $$("[data-prev]").forEach(btn => btn.addEventListener("click", () => setStep(Number(btn.dataset.prev))));
 
-$("#btnVolverVieja").addEventListener("click", () => {
-  window.location.href = "./TMP_Calibraciones_lab.html";
-});
+
 
 setBadge(false);
 setStep(1);
