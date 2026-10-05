@@ -52,11 +52,14 @@ function safeBuildGaugeLimits(input = {}) {
 function getGaugeSideLimits(gaugeLimits = null, side = "pasa") {
   const data = gaugeLimits?.[side] || null;
 
+  const valid = Boolean(data?.ok && Number.isFinite(Number(data?.limite_inferior)) && Number.isFinite(Number(data?.limite_superior)));
+
   return {
-    limite_inferior: data?.limite_inferior ?? null,
-    limite_superior: data?.limite_superior ?? null,
-    tolerancia_abs: data?.tolerancia_abs ?? null,
+    limite_inferior: valid ? data.limite_inferior : null,
+    limite_superior: valid ? data.limite_superior : null,
+    tolerancia_abs: valid ? (data.tolerancia_abs ?? null) : null,
     criterio_normativo: data?.criterio ?? null,
+    limites_calibre_validados: valid,
     gauge_limits: data
   };
 }
@@ -166,10 +169,11 @@ export function buildTamponLisoProcedure(ctx = {}) {
     warnings.push(auto.message || "No se pudo calcular automaticamente PASA/NO PASA.");
   }
 
-  if (!gaugeLimits?.pasa || !gaugeLimits?.no_pasa) {
+  if (!gaugeLimits?.acceptance_validated) {
     warnings.push(
-      "No hay limites normativos completos de aceptacion del calibre en gauge_limits_engine.js. " +
-      "La decision se realizara por tolerancia/error disponible hasta completar la tabla de calibre."
+      "LIMITES PROPIOS DEL CALIBRE NO VALIDADOS: se muestran nominales PASA/NO PASA y se permite medir, " +
+      "pero MT15 bloqueara el dictamen y el guardado hasta disponer de la tabla/procedimiento validado " +
+      "ISO 1938 / DIN 2250 / MT-15. No se aplican tolerancias provisionales."
     );
   }
 

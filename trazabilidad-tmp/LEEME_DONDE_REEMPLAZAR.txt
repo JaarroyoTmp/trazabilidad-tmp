@@ -1,0 +1,27 @@
+MT15 - CORRECCION SEGURA DE DECISION Y PATRON
+==============================================
+
+COPIAR EL CONTENIDO DE ESTE ZIP DIRECTAMENTE DENTRO DE:
+
+GitHub\trazabilidad-tmp\
+
+Windows debe pedir reemplazar 3 archivos:
+
+1) calibraciones_mt15 copy\core\metrology_core\app_mt15.js
+2) calibraciones_mt15 copy\core\metrology_core\gauge_limits_engine.js
+3) calibraciones_mt15 copy\core\metrology_core\procedure_rules\tampon_liso.js
+
+NO copiar en:
+- parches\
+- trazabilidad-tmp\trazabilidad-tmp\
+- ninguna copia anidada.
+
+CAMBIOS:
+- Elimina la tolerancia provisional = 10 % del IT del agujero.
+- Si faltan limites propios del calibre validados, resultado = NO_EVALUABLE, nunca NO_APTO falso.
+- Bloquea Guardar/Certificar mientras el resultado sea NO_EVALUABLE.
+- Si solo hay un patron valido para un punto, se selecciona automaticamente.
+- Mantiene lecturas, correccion, incertidumbre y trazabilidad del patron.
+
+IMPORTANTE:
+Esta correccion es deliberadamente conservadora. No inventa la tabla ISO 1938/DIN 2250 que no esta validada en el proyecto actual.
