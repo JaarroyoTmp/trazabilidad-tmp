@@ -1,4 +1,8 @@
 /* ===========================================================
+   LEGACY / COMPATIBILIDAD - NO ES FUENTE AUTORITATIVA MT16 ACTIVA
+   La ruta activa es thread/core/mt16_master_engine.js + thread/core/trimos_engine.js.
+   Tabla de rodillos corregida para evitar regresiones si algun modulo historico lo carga.
+
    TMP THREAD METRIC TRIMOS ENGINE V1
    -----------------------------------------------------------
    Motor inicial MT16 para tampones roscados métricos ISO
@@ -52,18 +56,12 @@ export function mean(values = []) {
   La clave es el paso P en mm.
 */
 export const TMP_THREAD_WIRE_DATABASE = {
-  "0.5": 0.335,
-  "0.75": 0.53,
-  "1": 0.725,
-  "1.25": 0.895,
-  "1.5": 1.35,
-  "1.75": 1.10,
-  "2": 1.35,
-  "2.5": 1.65,
-  "3": 2.05,
-  "3.5": 2.55,
-  "4": 2.55,
-  "5": 3.20
+  "0.25": 0.170, "0.3": 0.170, "0.35": 0.220, "0.4": 0.250,
+  "0.45": 0.290, "0.5": 0.290, "0.6": 0.335, "0.7": 0.455,
+  "0.8": 0.455, "0.9": 0.530, "1": 0.620, "1.25": 0.725,
+  "1.5": 0.895, "1.75": 1.100, "2": 1.350, "2.5": 1.650,
+  "3": 2.050, "3.5": 2.050, "4": 2.550, "4.5": 2.550,
+  "5": 3.200, "5.5": 3.200
 };
 
 /*

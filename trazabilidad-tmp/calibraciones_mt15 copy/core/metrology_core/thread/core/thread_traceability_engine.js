@@ -1,7 +1,8 @@
 /* TMP THREAD CORE V33 - thread_traceability_engine.js */
 import { classifyPatternRecord, TMP_THREAD_PATTERN_CLASSIFIER_VERSION } from "./thread_pattern_classifier.js";
+import { MT16_TRACEABILITY_POLICY, TMP_MT16_AUTHORITATIVE_RULES_VERSION } from "./mt16_authoritative_rules.js";
 
-export const TMP_THREAD_TRACEABILITY_ENGINE_VERSION = "TMP_THREAD_TRACEABILITY_ENGINE_V34_20260925_TRIMOS_PRIMARY";
+export const TMP_THREAD_TRACEABILITY_ENGINE_VERSION = "TMP_THREAD_TRACEABILITY_ENGINE_V34_20261005_TRIMOS_PRIMARY";
 export const DEFAULT_TRACEABILITY_VIEW = "v_patron_valores_activos";
 
 export function normalizeText(v = "") {
@@ -103,12 +104,12 @@ export function buildClassificationSummary(items = []) {
 
 export async function resolveTraceability({ supabase, parsedThread, trimosPlan, view = DEFAULT_TRACEABILITY_VIEW } = {}) {
   if (!supabase || typeof supabase.from !== "function") {
-    return { ok: false, ok_full_traceability: false, source: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, classifier_version: TMP_THREAD_PATTERN_CLASSIFIER_VERSION, error: "SUPABASE_CLIENT_MISSING", rows: [], selected: {}, candidates: {}, classification_summary: {}, score: { total: 0, max: 200 }, warnings: ["Sin Supabase: no se puede validar trazabilidad real."] };
+    return { ok: false, ok_full_traceability: false, source: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, classifier_version: TMP_THREAD_PATTERN_CLASSIFIER_VERSION, error: "SUPABASE_CLIENT_MISSING", rows: [], selected: {}, candidates: {}, classification_summary: {}, score: { total: 0, max: 400 }, warnings: ["Sin Supabase: no se puede validar trazabilidad real."] };
   }
 
   const { data, error } = await supabase.from(view).select("*").limit(3000);
   if (error) {
-    return { ok: false, ok_full_traceability: false, source: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, classifier_version: TMP_THREAD_PATTERN_CLASSIFIER_VERSION, error: error.message || String(error), rows: [], selected: {}, candidates: {}, classification_summary: {}, score: { total: 0, max: 200 }, warnings: [error.message || String(error)] };
+    return { ok: false, ok_full_traceability: false, source: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, classifier_version: TMP_THREAD_PATTERN_CLASSIFIER_VERSION, error: error.message || String(error), rows: [], selected: {}, candidates: {}, classification_summary: {}, score: { total: 0, max: 400 }, warnings: [error.message || String(error)] };
   }
 
   const rows = Array.isArray(data) ? data : [];
@@ -127,24 +128,30 @@ export async function resolveTraceability({ supabase, parsedThread, trimosPlan, 
   const selected_master = masters.find(x => x.compatible && x.vigente) || masters[0] || null;
 
   const bankOk = Boolean(selected_bank && selected_bank.vigente && Number.isFinite(selected_bank.u_standard_mm));
-  // Modelo TMP MT16: banco Trimos = patron trazable principal.
-  // Rodillos/hilos = utiles de medicion; patron de rosca independiente = no requerido por este metodo.
-  const rollersOk = Boolean(Number.isFinite(parseNum(targetWire, null)));
-  const masterOk = true;
+  const rollersOk = Boolean(selected_rollers && selected_rollers.vigente && selected_rollers.compatible);
+  const masterOk = Boolean(selected_master && selected_master.vigente && selected_master.compatible);
 
   const bankScore = bankOk ? 100 : selected_bank ? 55 : 0;
   const normativeScore = parsedThread?.ok && trimosPlan?.ok ? 100 : 0;
+  // Rodillos y maestro quedan como diagnostico/informacion; NO forman parte del requisito trazable por defecto.
+  const rollersScore = rollersOk ? 100 : selected_rollers ? 45 : 0;
+  const masterScore = masterOk ? 100 : selected_master ? 45 : 0;
   const totalScore = bankScore + normativeScore;
 
   const warnings = [];
-  if (!selected_bank) warnings.push("No se encontro banco Trimos.");
+  if (!selected_bank) warnings.push("No se encontro banco Trimos certificado: trazabilidad MT16 incompleta.");
   if (selected_bank && !selected_bank.vigente) warnings.push("Banco Trimos encontrado pero no vigente.");
   if (selected_bank && !Number.isFinite(selected_bank.u_standard_mm)) warnings.push("Banco Trimos sin incertidumbre estandar resuelta.");
-  if (!rollersOk) warnings.push("Rodillo/hilo no determinado por el motor para este paso. Revisar tabla TMP o designacion de rosca.");
+  if (!selected_rollers) warnings.push("Rodillos/hilos no registrados en Supabase: aviso informativo; no bloquea el certificado MT16.");
+  if (selected_rollers && !selected_rollers.compatible) warnings.push(`Rodillos registrados no coinciden con Ø${targetWire} mm. El montaje debe usar el rodillo indicado por el motor.`);
+  if (!selected_master) warnings.push("Sin patron/maestro roscado asociado: informativo; no es requisito por defecto para MT16.");
+  if (selected_master && !selected_master.compatible) warnings.push("Patron/maestro roscado existente pero no compatible: informativo; no bloquea MT16 por defecto.");
 
   return {
-    ok: bankOk && rollersOk,
-    ok_full_traceability: bankOk && rollersOk,
+    ok: bankOk,
+    ok_full_traceability: bankOk,
+    authoritative_policy_version: TMP_MT16_AUTHORITATIVE_RULES_VERSION,
+    traceability_policy: MT16_TRACEABILITY_POLICY,
     source: TMP_THREAD_TRACEABILITY_ENGINE_VERSION,
     classifier_version: TMP_THREAD_PATTERN_CLASSIFIER_VERSION,
     view,
@@ -158,9 +165,16 @@ export async function resolveTraceability({ supabase, parsedThread, trimosPlan, 
     selected_master,
     candidates: { banks: banks.slice(0, 10), rollers: rollers.slice(0, 10), masters: masters.slice(0, 10) },
     classifier_examples: classified.slice(0, 12).map(x => ({ codigo: x.codigo, descripcion: x.descripcion, class: x.class, score: x.score, evidences: x.classifier?.evidences?.slice(0, 4) || [] })),
-    corrections_mm: { bank: selected_bank?.correction_mm || 0, rollers: 0, master: 0, total: round((selected_bank?.correction_mm || 0), 9) },
-    roles: { bank:"PATRON_TRAZABLE", rollers:"UTIL_MEDICION", master:"NO_REQUERIDO" },
-    score: { bank: bankScore, rollers: rollersOk ? 100 : 0, master: 100, normative: normativeScore, total: totalScore, max: 200, percent: round((totalScore / 200) * 100, 1) },
+    corrections_mm: {
+      bank: selected_bank?.correction_mm || 0,
+      rollers_detected: selected_rollers?.correction_mm || 0,
+      master_detected: selected_master?.correction_mm || 0,
+      rollers_applied: 0,
+      master_applied: 0,
+      total: round(selected_bank?.correction_mm || 0, 9),
+      policy: "Solo correccion certificada del banco Trimos; rodillos y maestro no se suman por defecto."
+    },
+    score: { bank: bankScore, normative: normativeScore, total: totalScore, max: 200, percent: round((totalScore / 200) * 100, 1), diagnostics: { rollers: rollersScore, master: masterScore } },
     warnings
   };
 }

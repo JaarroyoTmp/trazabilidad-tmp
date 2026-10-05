@@ -1,21 +1,12 @@
 import { createPoint, parseNum } from "./shared.js";
+import { resolveValidatedMetricWire, TMP_MT16_AUTHORITATIVE_RULES_VERSION } from "../thread/core/mt16_authoritative_rules.js";
 
 export const TAMPON_ROSCADO_PROCEDURE_VERSION =
-  "TMP_TAMPON_ROSCADO_PROCEDURE_V3_20260925_TMP_WIRE_TABLE";
-
-const TMP_METRIC_WIRE_BY_PITCH_MM = Object.freeze({
-  "0.25":0.170, "0.30":0.170, "0.35":0.220, "0.40":0.250,
-  "0.45":0.290, "0.50":0.290, "0.60":0.335, "0.70":0.455,
-  "0.80":0.455, "0.90":0.530, "1.00":0.620, "1.25":0.725,
-  "1.50":0.895, "1.75":1.100, "2.00":1.350, "2.50":1.650,
-  "3.00":2.050, "3.50":2.050, "4.00":2.550, "4.50":2.550,
-  "5.00":3.200, "5.50":3.200
-});
+  "TMP_TAMPON_ROSCADO_PROCEDURE_V3_20261005_AUTHORITATIVE_WIRES";
 
 function rodilloMetricoISO(paso) {
-  const p = parseNum(paso);
-  if (!p) return null;
-  return TMP_METRIC_WIRE_BY_PITCH_MM[p.toFixed(2)] ?? null;
+  const result = resolveValidatedMetricWire(parseNum(paso));
+  return result.ok ? result.wire_mm : null;
 }
 
 function parseThreadFromText(text = "") {

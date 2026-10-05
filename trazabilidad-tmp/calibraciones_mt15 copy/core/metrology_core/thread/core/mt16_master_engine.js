@@ -9,8 +9,9 @@ import { decideThreadCalibration, TMP_THREAD_DECISION_CORE_VERSION } from "./thr
 import { resolveTraceability, TMP_THREAD_TRACEABILITY_ENGINE_VERSION } from "./thread_traceability_engine.js";
 import { TMP_THREAD_PATTERN_CLASSIFIER_VERSION } from "./thread_pattern_classifier.js";
 import { getThreadProcedure, TMP_MT16_PROCEDURE_ROUTER_VERSION } from "../procedure_rules/index.js";
+import { TMP_MT16_AUTHORITATIVE_RULES_VERSION, getMT16AuthoritativePolicy } from "./mt16_authoritative_rules.js";
 
-export const TMP_MT16_MASTER_ENGINE_VERSION = "TMP_MT16_EXPERT_CORE_V74_20260925_TMP_WIRES_TRIMOS_TRACE";
+export const TMP_MT16_MASTER_ENGINE_VERSION = "TMP_MT16_EXPERT_CORE_V74_20261005_AUTHORITATIVE_RULES";
 
 export function round(v, d = 9) {
   const n = parseNum(v, null);
@@ -244,7 +245,7 @@ function buildMT16Audit({ equipment, parsed, iso724, iso965, iso1502, trimos, tr
       { step: parsed?.thread_system === 'BSPP_ISO228' ? 'ISO228-1_TOLERANCIAS' : parsed?.thread_system === 'BSPT_ISO7' ? 'ISO7-1_TOLERANCIAS' : 'ISO965_TOLERANCIAS', ok: !!iso965?.ok, input: { key: iso965?.key, class: parsed?.tolerance_class }, output: iso965?.summary || iso965, version: iso965?.source || TMP_ISO965_ENGINE_VERSION, error: iso965?.error || iso965?.message || null },
       { step: parsed?.thread_system === 'BSPP_ISO228' ? 'ISO228-2_VERIFICACION' : parsed?.thread_system === 'BSPT_ISO7' ? 'ISO7-2_VERIFICACION' : 'ISO1502_VERIFICACION', ok: !!iso1502?.ok, input: { key: iso1502?.key, TD2_mm: iso1502Inner?.summary?.TD2_mm }, output: iso1502?.summary || iso1502, version: iso1502?.source || TMP_ISO1502_ENGINE_VERSION, error: iso1502?.error || iso1502?.message || iso1502Detail?.error || null, table: iso1502Table },
       { step: 'TRIMOS', ok: !!trimos?.ok, input: { wire_mm: trimos?.wire?.selected_wire_mm, iso1502_ok: !!iso1502?.ok }, output: trimos?.plan || trimos, version: TMP_TRIMOS_THREAD_ENGINE_VERSION, error: trimos?.error || trimos?.message || null },
-      { step: 'TRAZABILIDAD', ok: !!traceability?.ok, input: { needs_bank: true, needs_rollers: true }, output: traceability?.score || traceability, version: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, error: traceability?.error || null }
+      { step: 'TRAZABILIDAD', ok: !!traceability?.ok, input: { needs_bank: true, needs_rollers_as_traceable_pattern: false, needs_thread_master_by_default: false }, output: traceability?.score || traceability, version: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, error: traceability?.error || null }
     ],
     engines: {
       parser: TMP_THREAD_PARSER_VERSION,
@@ -257,8 +258,10 @@ function buildMT16Audit({ equipment, parsed, iso724, iso965, iso1502, trimos, tr
       uncertainty: TMP_THREAD_UNCERTAINTY_CORE_VERSION,
       decision: TMP_THREAD_DECISION_CORE_VERSION,
       master: TMP_MT16_MASTER_ENGINE_VERSION,
-      procedure_router: TMP_MT16_PROCEDURE_ROUTER_VERSION
-    }
+      procedure_router: TMP_MT16_PROCEDURE_ROUTER_VERSION,
+      authoritative_rules: TMP_MT16_AUTHORITATIVE_RULES_VERSION
+    },
+    authoritative_policy: getMT16AuthoritativePolicy()
   };
 }
 
@@ -310,7 +313,11 @@ export async function resolveMT16Core({ equipment = {}, supabase = null, reading
   let readings = null, uncertainty = null, decision = null;
   if (readingsByPoint && (isMetricIso || isBsppIso228 || isUnified)) {
     readings = evaluateReadings({ trimos, traceability, readingsByPoint });
-    uncertainty = calculateThreadUncertainty({ readingResults: readings.results || [], patterns: { selected_bank: traceability.selected_bank, selected_rollers: traceability.selected_rollers, selected_master: traceability.selected_master }, model: { u_rollers_mm: 0, u_master_mm: 0, resolution_mm: 0.001, k: 2 } });
+    uncertainty = calculateThreadUncertainty({
+      readingResults: readings.results || [],
+      patterns: { selected_bank: traceability.selected_bank, selected_rollers: traceability.selected_rollers, selected_master: traceability.selected_master },
+      model: { include_accessory_uncertainty: false, resolution_mm: 0.001, k: 2 }
+    });
     decision = decideThreadCalibration({ readingResults: readings.results || [], uncertainty });
   }
 
@@ -335,7 +342,8 @@ export async function resolveMT16Core({ equipment = {}, supabase = null, reading
     can_emit_technical_result: canEmitTechnicalResult,
     can_emit_full_certificate: canEmitFullCertificate,
     equipment,
-    engines: { parser: TMP_THREAD_PARSER_VERSION, iso724: TMP_ISO724_GEOMETRY_ENGINE_VERSION, iso965: TMP_ISO965_ENGINE_VERSION, iso1502: TMP_ISO1502_ENGINE_VERSION, trimos: TMP_TRIMOS_THREAD_ENGINE_VERSION, classifier: TMP_THREAD_PATTERN_CLASSIFIER_VERSION, traceability: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, uncertainty: TMP_THREAD_UNCERTAINTY_CORE_VERSION, decision: TMP_THREAD_DECISION_CORE_VERSION, procedure_router: TMP_MT16_PROCEDURE_ROUTER_VERSION },
+    engines: { parser: TMP_THREAD_PARSER_VERSION, iso724: TMP_ISO724_GEOMETRY_ENGINE_VERSION, iso965: TMP_ISO965_ENGINE_VERSION, iso1502: TMP_ISO1502_ENGINE_VERSION, trimos: TMP_TRIMOS_THREAD_ENGINE_VERSION, classifier: TMP_THREAD_PATTERN_CLASSIFIER_VERSION, traceability: TMP_THREAD_TRACEABILITY_ENGINE_VERSION, uncertainty: TMP_THREAD_UNCERTAINTY_CORE_VERSION, decision: TMP_THREAD_DECISION_CORE_VERSION, procedure_router: TMP_MT16_PROCEDURE_ROUTER_VERSION, authoritative_rules: TMP_MT16_AUTHORITATIVE_RULES_VERSION },
+    authoritative_policy: getMT16AuthoritativePolicy(),
     parsed, iso724, iso965, iso1502, trimos, traceability, patterns: traceability, readings, uncertainty, decision, audit,
     summary: {
       designation: parsed.normalized,

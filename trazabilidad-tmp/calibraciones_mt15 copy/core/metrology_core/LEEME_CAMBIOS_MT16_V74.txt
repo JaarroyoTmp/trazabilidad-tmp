@@ -1,0 +1,34 @@
+MT16 V74 - CORRECCION NUCLEO / FUENTE DE VERDAD
+Fecha: 2026-10-05
+
+Este paquete contiene SOLO archivos modificados/nuevos.
+No borra nada del proyecto.
+
+NUEVOS:
+- thread/core/mt16_authoritative_rules.js
+- thread/docs/MT16_FUENTE_DE_VERDAD.md
+
+MODIFICADOS:
+- thread/core/trimos_engine.js
+- thread/core/thread_traceability_engine.js
+- thread/core/thread_uncertainty_engine_core.js
+- thread/core/mt16_master_engine.js
+- thread/procedure_rules/metric.js
+- procedure_rules/tampon_roscado.js
+- thread/engines/thread_trimos_engine.js (legacy: tabla corregida + aviso NO autoritativo)
+
+REGLAS ACTIVAS:
+- Metrica ISO: rodillo exacto tabla TMP; sin nearest-commercial fallback.
+- M12x1.25 => 0.725 mm.
+- Banco Trimos = patron trazable principal.
+- Rodillos = accesorio de medicion, no bloquean certificado por trazabilidad.
+- Patron/maestro roscado = opcional por defecto.
+- Correccion certificada aplicada = banco Trimos.
+- Sin u_rollers=0.0003 hardcodeada.
+- Se conserva legacy, pero queda marcado como NO fuente activa.
+
+VALIDACIONES EJECUTADAS:
+- node --check en todos los JS modificados/nuevos.
+- Import del master V74 correcto.
+- Test rodillo M12x1.25 => 0.725 mm.
+- Test paso 1.10 no validado => bloqueado, sin aproximacion.
