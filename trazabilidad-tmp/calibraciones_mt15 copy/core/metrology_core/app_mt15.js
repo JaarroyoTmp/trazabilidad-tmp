@@ -10,6 +10,7 @@ import { getAuditRequirements } from "./metrology_rules_repository.js";
 import { openTMPReportPreview } from "./report_engine.js";
 import { resolvePatternCorrectionAtPoint } from "./pattern_correction_resolver.js";
 import { saveCalibrationExecutionPayload, resolveCalibrationDates } from "./calibration_save_helper.js";
+import { resolvePlainPlugGoNoGo } from "./plain_limit_gauge_engine.js";
 
 const $ = q => document.querySelector(q);
 const $$ = q => Array.from(document.querySelectorAll(q));
@@ -655,6 +656,24 @@ async function cargarInstrumento() {
   $("#goStep2").disabled = false;
 }
 
+function resolveAutomaticPlainLimits(inst = {}) {
+  try {
+    return resolvePlainPlugGoNoGo(inst);
+  } catch (err) {
+    console.warn("TMP MT15 · error resolviendo límites automáticos:", err);
+    return { ok: false, error: "RESOLVER_EXCEPTION", message: err?.message || String(err) };
+  }
+}
+
+function plainLimitOriginLabel(resolved = {}) {
+  if (!resolved?.ok) return "No resuelto automáticamente";
+  const system = resolved?.limits?.system || resolved?.parsed?.system || "";
+  if (system === "DIRECT_LIMITS") return "Tolerancia directa registrada en el equipo";
+  if (system === "ISO_286_DATABASE") return "ISO 286 · tabla interna TMP";
+  if (system === "ISO_286_FORMULA_FALLBACK") return "ISO 286 · cálculo del motor TMP";
+  return resolved?.limits?.source || resolved?.source || "Motor MT15";
+}
+
 function renderQuestions() {
   const family = state.familyResolved?.family;
   let html = "";
@@ -674,8 +693,38 @@ function renderQuestions() {
     }
 
   } else if (family === "TAMPON_LISO_PNP") {
-    html += inputQuestion("nominal_pasa", "Nominal lado PASA (mm)", "");
-    html += inputQuestion("nominal_no_pasa", "Nominal lado NO PASA (mm)", "");
+    const resolved = resolveAutomaticPlainLimits(state.instrumento || {});
+    const rangeText = state.instrumento?.rango || state.instrumento?.designacion || "-";
+
+    if (resolved?.ok) {
+      state.answers.nominal_pasa = String(resolved.nominal_pasa ?? "");
+      state.answers.nominal_no_pasa = String(resolved.nominal_no_pasa ?? "");
+      state.answers.mt15_limites_origen = plainLimitOriginLabel(resolved);
+      state.answers.mt15_limites_motor = resolved;
+
+      html += `
+        <div class="banner ok">
+          <strong>Valores detectados automáticamente</strong><br>
+          <span class="mini">
+            Equipo: ${state.instrumento?.codigo || "-"} ·
+            Rango: ${rangeText} ·
+            Origen: <strong>${plainLimitOriginLabel(resolved)}</strong>
+          </span>
+        </div>
+      `;
+      html += inputQuestion("nominal_pasa", "Nominal lado PASA (mm) · automático", fmt(resolved.nominal_pasa, 6));
+      html += inputQuestion("nominal_no_pasa", "Nominal lado NO PASA (mm) · automático", fmt(resolved.nominal_no_pasa, 6));
+      html += `<div class="mini mt">Los valores se precargan desde el motor MT15. Se mantienen editables únicamente para una corrección excepcional y trazable.</div>`;
+    } else {
+      html += `
+        <div class="banner warn">
+          <strong>No se pudieron resolver automáticamente los límites.</strong><br>
+          <span class="mini">Rango: ${rangeText} · ${resolved?.message || resolved?.error || "Formato no reconocido"}</span>
+        </div>
+      `;
+      html += inputQuestion("nominal_pasa", "Nominal lado PASA (mm)", "");
+      html += inputQuestion("nominal_no_pasa", "Nominal lado NO PASA (mm)", "");
+    }
 
   } else if (family === "TAMPON_ROSCADO_PNP") {
     html += inputQuestion("tipo_rosca", "Tipo de rosca", "ISO_METRICA");
@@ -1127,6 +1176,7 @@ async function calcularResultadosMT15() {
       const li = getPointMeta(p, "limite_inferior", null);
       const ls = getPointMeta(p, "limite_superior", null);
       const toleranciaAbs = getPointMeta(p, "tolerancia_abs", null);
+
       const limitsValidated = Boolean(
         li !== null && li !== undefined && Number.isFinite(Number(li)) &&
         ls !== null && ls !== undefined && Number.isFinite(Number(ls))
@@ -1590,7 +1640,14 @@ async function guardarSupabase() {
 }
 
 $("#btnCargarInstrumento").addEventListener("click", cargarInstrumento);
-$("#goStep2").addEventListener("click", () => { renderQuestions(); setStep(2); });
+$("#goStep2")?.addEventListener("click", () => {
+  if (!state.instrumento || state.familyResolved?.family !== "TAMPON_LISO_PNP") {
+    alert("Carga primero un tampón liso P/NP válido.");
+    return;
+  }
+  renderQuestions();
+  setStep(2);
+});
 $("#btnGenerarPauta").addEventListener("click", generarPauta);
 $("#goStep4").addEventListener("click", prepararOpcionesPatron);
 $("#goStep5").addEventListener("click", () => { renderReadings(); setStep(5); });
@@ -1617,9 +1674,7 @@ $("#btnVerJSON").addEventListener("click", () => {
 
 $$("[data-prev]").forEach(btn => btn.addEventListener("click", () => setStep(Number(btn.dataset.prev))));
 
-$("#btnVolverVieja").addEventListener("click", () => {
-  window.location.href = "./TMP_Calibraciones_lab.html";
-});
+
 
 setBadge(false);
 setStep(1);
