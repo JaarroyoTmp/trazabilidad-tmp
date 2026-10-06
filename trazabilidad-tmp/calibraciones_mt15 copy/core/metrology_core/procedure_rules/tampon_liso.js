@@ -3,11 +3,14 @@ import { resolvePlainPlugGoNoGo } from "../plain_limit_gauge_engine.js";
 import { buildPlainPlugGaugeLimits } from "../gauge_limits_engine.js";
 
 /* ===========================================================
-   TMP PROCEDURE RULE - TAMPON LISO P/NP V2
+   TMP PROCEDURE RULE - TAMPON LISO P/NP V3 ISO1938
    -----------------------------------------------------------
    Genera pauta MT15 para tampones lisos PASA / NO PASA.
 
-   V2:
+   V3:
+   - Limites propios del calibre segun ISO 1938-1:2015.
+   - Evaluacion periodica contra limites de desgaste.
+   - Conserva limites de nuevo para trazabilidad.
    - Mantiene compatibilidad con V1.
    - Siempre intenta resolver ISO286 desde designacion/rango.
    - Usa plain_limit_gauge_engine.js como fuente principal de PASA/NO PASA.
@@ -55,7 +58,7 @@ function getGaugeSideLimits(gaugeLimits = null, side = "pasa") {
   return {
     limite_inferior: data?.limite_inferior ?? null,
     limite_superior: data?.limite_superior ?? null,
-    tolerancia_abs: data?.tolerancia_abs ?? null,
+    tolerancia_abs: data?.tolerancia_abs ?? undefined,
     criterio_normativo: data?.criterio ?? null,
     gauge_limits: data
   };
@@ -168,9 +171,7 @@ export function buildTamponLisoProcedure(ctx = {}) {
 
   if (!gaugeLimits?.pasa || !gaugeLimits?.no_pasa) {
     warnings.push(
-      "LIMITES PROPIOS DEL CALIBRE NO VALIDADOS: se muestran nominales PASA/NO PASA y se permite medir, " +
-      "pero MT15 bloqueara el dictamen y el guardado hasta disponer de la tabla/procedimiento validado ISO 1938 / DIN 2250 / MT-15. " +
-      "No se aplican tolerancias provisionales."
+      "No se han podido resolver los limites ISO 1938-1:2015 del calibre. La calibracion queda NO_EVALUABLE hasta disponer de datos suficientes."
     );
   }
 

@@ -215,6 +215,29 @@ export function decideOperationalBinary(input = {}, auditStatus = null) {
     };
   }
 
+  // Si el procedimiento entrega limites directos, tienen prioridad.
+  // Esto es imprescindible para zonas asimetricas como ISO 1938-1.
+  const hasDirectLimits =
+    input.limite_inferior !== undefined || input.limite_superior !== undefined ||
+    input.li !== undefined || input.ls !== undefined;
+
+  const limits = buildLimits(input);
+  const measured = getMeasuredValue(input);
+
+  if (hasDirectLimits && measured !== null && limits.tipo !== "SIN_LIMITES") {
+    const ok = measured >= limits.li && measured <= limits.ls;
+    return {
+      status: ok ? DECISION_STATUS.APTO : DECISION_STATUS.NO_APTO,
+      decision: ok ? DECISION_STATUS.APTO : DECISION_STATUS.NO_APTO,
+      reason: ok ? "TMP_BINARIO_DENTRO_LIMITES" : "TMP_BINARIO_FUERA_LIMITES",
+      motivo: buildHumanReason(
+        ok ? DECISION_STATUS.APTO : DECISION_STATUS.NO_APTO,
+        ok ? "TMP_BINARIO_DENTRO_LIMITES" : "TMP_BINARIO_FUERA_LIMITES"
+      ),
+      regla_decision: DECISION_RULES.TMP_BINARIO_GUARD_BAND
+    };
+  }
+
   const error = calculateError(input);
   const T = getToleranceAbs(input);
 
@@ -233,9 +256,6 @@ export function decideOperationalBinary(input = {}, auditStatus = null) {
       regla_decision: DECISION_RULES.TMP_BINARIO_GUARD_BAND
     };
   }
-
-  const limits = buildLimits(input);
-  const measured = getMeasuredValue(input);
 
   if (measured === null || limits.tipo === "SIN_LIMITES") {
     return {
