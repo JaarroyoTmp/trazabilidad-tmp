@@ -54,7 +54,8 @@ function setStep(n) {
 }
 
 function setMotorStatus(t) {
-  $("#motorStatus").innerHTML = t;
+  const el = $("#motorStatus");
+  if (el) el.innerHTML = t;
 }
 
 function pointKey(fid, pid) {
@@ -1081,7 +1082,8 @@ function renderReadings() {
 }
 
 async function calcularResultadosMT15() {
-  const results = [];
+  try {
+    const results = [];
 
   for (const f of state.pauta.funciones || []) {
     for (const p of f.puntos || []) {
@@ -1213,7 +1215,7 @@ async function calcularResultadosMT15() {
           regla_decision: "MT15_REQUIERE_LIMITES_CALIBRE_VALIDADOS",
           nominal: valorReferencia,
           valor_medido: mediaCorregida,
-          error,
+          error: mediaCorregida - valorReferencia,
           U: uncertainty?.U ?? null,
           tolerancia_abs: null,
           limites: null
@@ -1296,13 +1298,18 @@ async function calcularResultadosMT15() {
   renderResults();
   renderAudit();
   const canSave = !results.some(p => getDecisionOperational(p.decision) === "NO_EVALUABLE");
-  $("#goStep7").disabled = !canSave;
-  if (!canSave) {
-    $("#goStep7").title = "Guardado bloqueado: existen puntos NO EVALUABLES por falta de límites de aceptación validados.";
-  } else {
-    $("#goStep7").title = "";
+  const goStep7 = $("#goStep7");
+  if (goStep7) {
+    goStep7.disabled = !canSave;
+    goStep7.title = !canSave
+      ? "Guardado bloqueado: existen puntos NO EVALUABLES por falta de límites de aceptación validados."
+      : "";
   }
   setStep(6);
+  } catch (err) {
+    console.error("TMP MT15 · error calculando resultados:", err);
+    alert("MT15 no pudo calcular los resultados: " + (err?.message || err));
+  }
 }
 
 function renderResults() {
