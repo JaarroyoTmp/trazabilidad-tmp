@@ -1,0 +1,19 @@
+MT15 ISO 1938-1:2026 - RUTA RAIZ CORRECTA
+
+COPIAR EL CONTENIDO DE ESTE ZIP DIRECTAMENTE EN LA RAIZ REAL DEL REPOSITORIO:
+GitHub\trazabilidad-tmp\
+
+NO copiar dentro de:
+GitHub\trazabilidad-tmp\trazabilidad-tmp\
+ni dentro de:
+GitHub\trazabilidad-tmp\trazabilidad-tmp\trazabilidad-tmp\
+
+Al copiar en la ruta correcta Windows debe pedir REEMPLAZAR 3 archivos existentes:
+- calibraciones_mt15 copy\core\metrology_core\gauge_limits_engine.js
+- calibraciones_mt15 copy\core\metrology_core\decision_engine.js
+- calibraciones_mt15 copy\core\metrology_core\procedure_rules\tampon_liso.js
+
+y debe AÑADIR 1 archivo nuevo en la raiz activa:
+- calibraciones_mt15 copy\core\metrology_core\iso1938_plain_gauge_limits.js
+
+No se modifica app_mt15.js.
