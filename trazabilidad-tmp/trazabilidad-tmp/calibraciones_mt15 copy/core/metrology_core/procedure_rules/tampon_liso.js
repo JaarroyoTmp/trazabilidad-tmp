@@ -3,11 +3,14 @@ import { resolvePlainPlugGoNoGo } from "../plain_limit_gauge_engine.js";
 import { buildPlainPlugGaugeLimits } from "../gauge_limits_engine.js";
 
 /* ===========================================================
-   TMP PROCEDURE RULE - TAMPON LISO P/NP V2
+   TMP PROCEDURE RULE - TAMPON LISO P/NP V4 ISO1938:2026
    -----------------------------------------------------------
    Genera pauta MT15 para tampones lisos PASA / NO PASA.
 
-   V2:
+   V3:
+   - Limites propios del calibre segun ISO 1938-1:2026 vigente.
+   - Evaluacion periodica contra limites de desgaste.
+   - Conserva limites de nuevo para trazabilidad.
    - Mantiene compatibilidad con V1.
    - Siempre intenta resolver ISO286 desde designacion/rango.
    - Usa plain_limit_gauge_engine.js como fuente principal de PASA/NO PASA.
@@ -55,7 +58,7 @@ function getGaugeSideLimits(gaugeLimits = null, side = "pasa") {
   return {
     limite_inferior: data?.limite_inferior ?? null,
     limite_superior: data?.limite_superior ?? null,
-    tolerancia_abs: data?.tolerancia_abs ?? null,
+    tolerancia_abs: data?.tolerancia_abs ?? undefined,
     criterio_normativo: data?.criterio ?? null,
     gauge_limits: data
   };
@@ -159,7 +162,15 @@ export function buildTamponLisoProcedure(ctx = {}) {
   }
 
   if (auto?.ok) {
-    warnings.push(...(auto.audit?.observaciones || []));
+    const observacionesAuto = (auto.audit?.observaciones || []).filter(msg =>
+      !String(msg || "").includes("No se atribuye a ISO 286 un cálculo que no se ha realizado")
+    );
+    warnings.push(...observacionesAuto);
+    if (gaugeLimits?.ok) {
+      warnings.push(
+        "Cadena normativa MT15: limites funcionales de pieza -> grado IT ISO 286-1:2010 -> MPL del calibre ISO 1938-1:2026 -> decision con incertidumbre ISO 14253-1:2017."
+      );
+    }
   }
 
   if (auto && !auto.ok) {
@@ -168,14 +179,13 @@ export function buildTamponLisoProcedure(ctx = {}) {
 
   if (!gaugeLimits?.pasa || !gaugeLimits?.no_pasa) {
     warnings.push(
-      "No hay limites normativos completos de aceptacion del calibre en gauge_limits_engine.js. " +
-      "La decision se realizara por tolerancia/error disponible hasta completar la tabla de calibre."
+      "No se han podido resolver los limites ISO 1938-1:2026 del calibre. La calibracion queda NO_EVALUABLE hasta disponer de datos suficientes."
     );
   }
 
   return {
     procedimiento: "MT15-CAP-08",
-    norma: ["MT-15 Cap.8", "DIN 7162", "ISO 1938-1", "ISO 286", "ILAC-G8", "ISO 14253"],
+    norma: ["MT-15 Cap.8", "DIN 7162", "ISO 1938-1:2026", "ISO 286-1:2010", "ILAC-G8", "ISO 14253-1:2017"],
     descripcion: "Pauta automatica tampon liso P/NP",
 
     datos_calculados: auto?.ok ? {

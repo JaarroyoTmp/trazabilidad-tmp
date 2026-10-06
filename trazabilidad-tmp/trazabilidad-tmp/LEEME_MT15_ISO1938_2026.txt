@@ -1,0 +1,25 @@
+MT15 - ACTUALIZACION NORMATIVA 2026
+==================================
+
+Copiar el contenido de este ZIP directamente en la raiz ACTIVA del repositorio trazabilidad-tmp.
+
+Reemplaza 3 archivos:
+- calibraciones_mt15 copy/core/metrology_core/gauge_limits_engine.js
+- calibraciones_mt15 copy/core/metrology_core/decision_engine.js
+- calibraciones_mt15 copy/core/metrology_core/procedure_rules/tampon_liso.js
+
+Anade 1 archivo (si ya existe, reemplazar):
+- calibraciones_mt15 copy/core/metrology_core/iso1938_plain_gauge_limits.js
+
+NO sustituye app_mt15.js.
+
+Base normativa declarada por el motor:
+- ISO 1938-1:2026, Edition 2 (vigente; sustituye ISO 1938-1:2015)
+- ISO 286-1:2010 (vigente, confirmada en 2026)
+- ISO 14253-1:2017 (vigente, confirmada en 2023)
+
+La revision ISO 1938-1:2026 declara como cambios principales definiciones 3.1.3/3.1.4/3.2.1,
+caracteristicas de diseno/metrologicas de GO tipos B-K en Clause 5/Tables 4-5 y Table B.1.
+No declara cambios en Clause 7 ni Tables 6-11. Para el alcance MT15 actual (tampon cilindrico completo,
+Gauge type A, caracteristica interna), se conserva el calculo MPL de 7.2/7.4 y se actualiza la referencia
+normativa a la edicion vigente 2026.

@@ -1,20 +1,20 @@
+import { calculateInternalPlugGaugeLimits } from "./iso1938_plain_gauge_limits.js";
+
 /* ===========================================================
-   TMP GAUGE LIMITS ENGINE V1
+   TMP GAUGE LIMITS ENGINE V3 - ISO 1938-1:2026
    -----------------------------------------------------------
-   Motor normativo para límites de calibres lisos P/NP.
+   Limites normativos para calibres lisos P/NP.
 
-   Objetivo:
-   - No inventar tolerancias.
-   - Calcular límites de uso del calibre desde Ø + tolerancia ISO.
-   - Entregar límites al decision_engine.
+   Esta version elimina definitivamente la antigua tolerancia
+   provisional del 10 % del IT.
 
-   V1:
-   - Agujeros H con grados IT5-IT12.
-   - Base ISO 286 para anchura IT.
-   - Preparado para ampliar ISO 1938 / DIN 2250 con desgaste.
+   Alcance:
+   - tampon liso cilindrico P/NP para agujero (Gauge type A)
+   - hasta 500 mm
+   - limites de desgaste para calibracion periodica
    =========================================================== */
 
-export function parseNum(value, fallback = 0) {
+export function parseNum(value, fallback = NaN) {
   if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
   if (value === null || value === undefined || value === "") return fallback;
   const n = Number(String(value).replace(",", ".").trim());
@@ -22,215 +22,166 @@ export function parseNum(value, fallback = 0) {
 }
 
 export function round(value, decimals = 6) {
-  const f = Math.pow(10, decimals);
-  return Math.round(parseNum(value) * f) / f;
+  const n = parseNum(value);
+  if (!Number.isFinite(n)) return null;
+  const f = 10 ** decimals;
+  return Math.round(n * f) / f;
 }
 
-export function iso286UnitI(nominalMm) {
-  const D = parseNum(nominalMm);
-  if (!D || D <= 0) return 0;
-
-  // i en micras, fórmula ISO 286 para 1-500 mm
-  return 0.45 * Math.cbrt(D) + 0.001 * D;
-}
-
-export function iso286ITWidthUm(nominalMm, grade) {
-  const factors = {
-    5: 7,
-    6: 10,
-    7: 16,
-    8: 25,
-    9: 40,
-    10: 64,
-    11: 100,
-    12: 160
-  };
-
-  const factor = factors[grade];
-
-  if (!factor) {
-    return {
-      ok: false,
-      error: "GRADO_IT_NO_IMPLEMENTADO",
-      grade
-    };
-  }
-
-  const i = iso286UnitI(nominalMm);
-
-  return {
-    ok: true,
-    grade,
-    i_um: round(i, 6),
-    width_um: round(i * factor, 3),
-    width_mm: round((i * factor) / 1000, 6)
-  };
-}
-
-export function parseGaugeDesignation(input = {}) {
-  const raw = [
+function collectRawText(input = {}) {
+  return [
     input.designacion,
     input.rango,
     input.descripcion,
     input.nombre,
-    input.modelo
+    input.modelo,
+    input.observaciones
   ].filter(Boolean).join(" ");
+}
 
-  const txt = String(raw || "")
-    .toUpperCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[Ø⌀]/g, " Ø")
+function parseDirectLinearTolerance(input = {}) {
+  const raw = collectRawText(input)
+    .replace(/[Ø⌀]/g, " ")
+    .replace(/,/g, ".")
     .replace(/\s+/g, " ")
     .trim();
 
-  const match = txt.match(/(?:Ø|D|DIAM(?:ETRO)?\.?)?\s*(\d+(?:[\.,]\d+)?)\s*([A-Z]{1,2})\s*(\d{1,2})/i);
+  // X +/- A
+  let m = raw.match(/(\d+(?:\.\d+)?)\s*[±]\s*(\d+(?:\.\d+)?)/);
+  if (m) {
+    const nominal = Number(m[1]);
+    const t = Number(m[2]);
+    return { ok: true, lower: nominal - t, upper: nominal + t, nominal, source: "DIRECT_PLUS_MINUS" };
+  }
 
-  if (!match) {
+  // X +A / -B   (permite /, espacios o texto intermedio corto)
+  m = raw.match(/(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)\s*(?:\/|;|\s)\s*-\s*(\d+(?:\.\d+)?)/);
+  if (m) {
+    const nominal = Number(m[1]);
     return {
-      ok: false,
-      error: "DESIGNACION_NO_RECONOCIDA",
-      message: "No se pudo interpretar una designación tipo Ø8.5 H8.",
-      raw,
-      normalized: txt
+      ok: true,
+      lower: nominal - Number(m[3]),
+      upper: nominal + Number(m[2]),
+      nominal,
+      source: "DIRECT_ASYMMETRIC"
     };
   }
 
-  const nominal = parseNum(match[1]);
-  const letter = match[2];
-  const grade = parseInt(match[3], 10);
-  const tipo = letter === letter.toUpperCase() ? "AGUJERO" : "EJE";
+  // X +A (desviacion inferior cero)
+  m = raw.match(/(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)/);
+  if (m) {
+    const nominal = Number(m[1]);
+    return { ok: true, lower: nominal, upper: nominal + Number(m[2]), nominal, source: "DIRECT_PLUS" };
+  }
+
+  return { ok: false };
+}
+
+function resolveWorkpieceLimits(input = {}) {
+  const explicitPasa = parseNum(input.nominal_pasa);
+  const explicitNoPasa = parseNum(input.nominal_no_pasa);
+
+  if (Number.isFinite(explicitPasa) && Number.isFinite(explicitNoPasa) && explicitNoPasa > explicitPasa) {
+    return {
+      ok: true,
+      lower: explicitPasa,
+      upper: explicitNoPasa,
+      size: parseNum(input.plain_limit_data?.parsed?.nominal, explicitPasa),
+      isoGrade: input.plain_limit_data?.parsed?.grade ?? null,
+      source: "NOMINALES_PASA_NO_PASA_RESUELTOS"
+    };
+  }
+
+  const pld = input.plain_limit_data;
+  if (pld?.ok) {
+    const pasa = parseNum(pld.nominal_pasa);
+    const noPasa = parseNum(pld.nominal_no_pasa);
+    if (Number.isFinite(pasa) && Number.isFinite(noPasa) && noPasa > pasa) {
+      return {
+        ok: true,
+        lower: pasa,
+        upper: noPasa,
+        size: parseNum(pld.parsed?.nominal, pasa),
+        isoGrade: pld.parsed?.grade ?? null,
+        source: "PLAIN_LIMIT_ENGINE"
+      };
+    }
+  }
+
+  const direct = parseDirectLinearTolerance(input);
+  if (direct.ok && direct.upper > direct.lower) {
+    return {
+      ok: true,
+      lower: direct.lower,
+      upper: direct.upper,
+      size: direct.nominal,
+      isoGrade: null,
+      source: direct.source
+    };
+  }
 
   return {
-    ok: true,
-    raw,
-    normalized: txt,
-    nominal,
-    letter,
-    grade,
-    tipo,
-    tolerance: `${letter}${grade}`
+    ok: false,
+    error: "LIMITES_PIEZA_NO_RESUELTOS",
+    message: "No se han podido resolver los limites funcionales PASA/NO PASA de la pieza."
   };
 }
 
-export function calculateHoleLimitsISO286(parsed) {
-  if (!parsed?.ok) return parsed;
-
-  if (parsed.tipo !== "AGUJERO") {
-    return {
-      ok: false,
-      error: "SOLO_AGUJERO_IMPLEMENTADO_V1",
-      message: "V1 solo implementa calibres para agujeros."
-    };
-  }
-
-  if (String(parsed.letter).toUpperCase() !== "H") {
-    return {
-      ok: false,
-      error: "SOLO_AGUJERO_H_IMPLEMENTADO_V1",
-      message: `V1 solo implementa agujeros H. Recibido: ${parsed.letter}${parsed.grade}.`
-    };
-  }
-
-  const it = iso286ITWidthUm(parsed.nominal, parsed.grade);
-
-  if (!it.ok) return it;
-
-  const lower = parsed.nominal;
-  const upper = parsed.nominal + it.width_mm;
-
-  return {
-    ok: true,
-    nominal_base: parsed.nominal,
-    tolerance: parsed.tolerance,
-    agujero: {
-      limite_inferior: round(lower, 6),
-      limite_superior: round(upper, 6),
-      ancho_tolerancia: it.width_mm
-    },
-    it,
-    normativa: ["ISO 286", "ISO 1938-1", "DIN 2250-1"],
-    warning: "V1 calcula límites ISO 286. La tolerancia propia del calibre/desgaste debe completarse con tabla ISO 1938/DIN 2250 validada."
-  };
-}
-
-/*
-  V1 de límites de aceptación del calibre:
-  - Genera ventana de aceptación alrededor de cada nominal.
-  - De momento usa tolerancia del calibre como porcentaje prudente del IT del agujero.
-  - Lo correcto en V2 será cargar tabla ISO 1938/DIN 2250 real.
-*/
-export function calculateGaugeSideAcceptanceLimits({
-  side,
-  targetNominal,
-  holeITWidthMm
-} = {}) {
-  const target = parseNum(targetNominal);
-  const it = parseNum(holeITWidthMm);
-
-  if (!target || !it) {
-    return {
-      ok: false,
-      error: "DATOS_INSUFICIENTES_LIMITES_CALIBRE"
-    };
-  }
-
-  /*
-    Regla V1 TMP:
-    tolerancia de aceptación provisional del calibre = 10% del IT del agujero,
-    limitada entre 0.001 mm y 0.003 mm.
-    Esto evita usar 0.01 genérico y deja el punto listo para sustituir por tabla ISO 1938.
-  */
-  const tol = Math.min(0.003, Math.max(0.001, it * 0.10));
+function buildSide(result, side) {
+  const data = side === "PASA" ? result.pasa : result.no_pasa;
+  const wear = data.wear_state;
 
   return {
     ok: true,
     side,
-    nominal: round(target, 6),
-    tolerancia_abs: round(tol, 6),
-    limite_inferior: round(target - tol, 6),
-    limite_superior: round(target + tol, 6),
-    criterio: "TMP_GAUGE_LIMITS_V1",
-    normativa: ["ISO 286", "ISO 1938-1", "DIN 2250-1"],
-    nota: "Tolerancia V1 provisional derivada del IT. Sustituir por tabla ISO 1938/DIN 2250 validada."
+    nominal_funcional: side === "PASA" ? result.workpiece.lower_mm : result.workpiece.upper_mm,
+    limite_inferior: wear.lower_mm,
+    limite_superior: wear.upper_mm,
+    centro_zona_desgaste: wear.center_mm,
+    // NO se devuelve tolerancia_abs: la zona puede ser asimetrica respecto al nominal marcado.
+    criterio: "ISO1938_1_2026_TYPE_A_WEAR_LIMITS",
+    estado_evaluado: "LIMITE_DESGASTE",
+    new_state: data.new_state,
+    wear_state: data.wear_state,
+    equivalent_it: result.equivalent_it,
+    parameters: result.parameters,
+    normativa: ["ISO 1938-1:2026", "ISO 286-1:2010", "ISO 14253-1:2017"],
+    audit: result.audit
   };
 }
 
 export function buildPlainPlugGaugeLimits(input = {}) {
-  const parsed = parseGaugeDesignation(input);
+  const workpiece = resolveWorkpieceLimits(input);
+  if (!workpiece.ok) return workpiece;
 
-  if (!parsed.ok) return parsed;
-
-  const hole = calculateHoleLimitsISO286(parsed);
-
-  if (!hole.ok) return hole;
-
-  const pasa = calculateGaugeSideAcceptanceLimits({
-    side: "PASA",
-    targetNominal: hole.agujero.limite_inferior,
-    holeITWidthMm: hole.agujero.ancho_tolerancia
+  const calculated = calculateInternalPlugGaugeLimits({
+    workpieceLowerMm: workpiece.lower,
+    workpieceUpperMm: workpiece.upper,
+    sizeMm: workpiece.size,
+    isoGrade: workpiece.isoGrade
   });
 
-  const noPasa = calculateGaugeSideAcceptanceLimits({
-    side: "NO_PASA",
-    targetNominal: hole.agujero.limite_superior,
-    holeITWidthMm: hole.agujero.ancho_tolerancia
-  });
+  if (!calculated.ok) {
+    return {
+      ...calculated,
+      workpiece_source: workpiece.source
+    };
+  }
 
   return {
     ok: true,
-    parsed,
-    hole,
-    pasa,
-    no_pasa: noPasa,
+    engine_version: "TMP_GAUGE_LIMITS_V3_ISO1938_2026",
+    workpiece_source: workpiece.source,
+    workpiece: calculated.workpiece,
+    equivalent_it: calculated.equivalent_it,
+    parameters: calculated.parameters,
+    pasa: buildSide(calculated, "PASA"),
+    no_pasa: buildSide(calculated, "NO_PASA"),
     audit: {
-      metodo: "Límites del calibre generados a partir de designación ISO del agujero.",
-      normativa: ["ISO 286", "ISO 1938-1", "DIN 2250-1"],
-      observaciones: [
-        hole.warning,
-        pasa.nota,
-        noPasa.nota
-      ]
+      ...calculated.audit,
+      workpiece_source: workpiece.source,
+      normativa: ["ISO 1938-1:2026 7.2/7.4 Tables 6-11", "ISO 286-1:2010", "ISO 14253-1:2017"],
+      note: "Para calibracion periodica se evaluan los limites de desgaste del calibre. Los limites de nuevo se conservan para trazabilidad. Base normativa vigente: ISO 1938-1:2026 + ISO 286-1:2010 + ISO 14253-1:2017."
     }
   };
 }
