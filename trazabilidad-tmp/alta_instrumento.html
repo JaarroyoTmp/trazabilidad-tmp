@@ -43,6 +43,7 @@
 <main>
   <div class="tabs">
     <button id="tabAlta" class="tab active">Alta / Edición</button>
+    <a class="tab" href="revision_roscas.html" style="text-decoration:none">🔩 Revisión roscas MT16</a>
     <button id="tabBaja" class="tab">Baja por QR / Código</button>
   </div>
 
@@ -50,7 +51,7 @@
     <h2>Ficha del instrumento</h2>
     <div id="msgAlta" class="alert info hidden"></div>
     <div class="grid">
-      <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
+      <div><label>Código (único) *</label><div class="row"><input id="codigo" placeholder="Ej. 400600"><button class="btn btn-ghost" id="btnBuscarCodigo">Buscar</button></div></div>
       <div><label>Descripción *</label><input id="descripcion" placeholder="Ej. Tampón liso P/NP"></div>
       <div>
         <label>Familia del instrumento *</label>
@@ -158,8 +159,6 @@
   let familiasInstrumento = [];
   let familiasCalibracion = [];
   let familiasCalibracionById = new Map();
-  let ubicacionesCatalogo = [];
-  let estadoInstrumentoCargado = null;
 
   function actualizarCalibracionAsignada(){
     const familiaId = f.familia_id.value || null;
@@ -260,18 +259,15 @@
     actualizarCalibracionAsignada();
 
     const listaProp = document.getElementById("propietarios_lista");
-    // Opciones habituales siempre disponibles; el campo sigue permitiendo escritura manual.
-    listaProp.innerHTML = `<option value="Propiedad TMP"></option><option value="John Deere"></option>` +
+    listaProp.innerHTML = `<option value="Propiedad TMP"></option>` +
       (propietariosRes.data || [])
         .filter(x => x && (x.activo === undefined || x.activo === true))
         .map(x => `<option value="${String(x.nombre || "").replaceAll('"','&quot;')}"></option>`)
         .join("");
 
-    ubicacionesCatalogo = (ubicacionesRes.data || []).filter(x => x && (x.activo === undefined || x.activo === true));
-
     f.ubicacion_id.innerHTML =
       `<option value="">Selecciona ubicación...</option>` +
-      ubicacionesCatalogo
+      (ubicacionesRes.data || [])
         .filter(x => x && (x.activo === undefined || x.activo === true))
         .map(x => optionHTML(x.id, x.nombre)).join("");
   }
@@ -339,21 +335,6 @@
     panelAlta.classList.remove("active");
   };
 
-  function normalizarCodigoInstrumento(valor){
-    const raw = String(valor ?? "").replace(/\u00A0/g, " ").trim();
-    // Los códigos TMP no deben contener espacios. Si llega texto pegado con relleno
-    // u otro valor a continuación, conservar únicamente el primer bloque real.
-    return raw ? raw.split(/\s+/)[0] : "";
-  }
-
-  f.codigo.addEventListener("input", () => {
-    const normalizado = normalizarCodigoInstrumento(f.codigo.value);
-    if (normalizado !== f.codigo.value.trim()) {
-      f.codigo.value = normalizado;
-      showMsg(msgAlta, "Código normalizado automáticamente: se han eliminado espacios o texto residual.", "info");
-    }
-  });
-
   function limpiarFormulario(){
     f.codigo.value = "";
     f.descripcion.value = "";
@@ -367,7 +348,6 @@
     f.fecha_calibracion.value = "";
     f.fecha_proxima_calibracion.value = "";
     f.observaciones.value = "";
-    estadoInstrumentoCargado = null;
     actualizarCalibracionAsignada();
     hideMsg(msgAlta);
   }
@@ -377,7 +357,7 @@
   async function buscarPorCodigo(){
     hideMsg(msgAlta);
 
-    const codigo = normalizarCodigoInstrumento(f.codigo.value);
+    const codigo = f.codigo.value.trim();
     if(!codigo){
       showMsg(msgAlta,"Introduce un código.","err");
       return;
@@ -414,7 +394,6 @@
     f.fecha_calibracion.value = (data.fecha_calibracion ?? "").substring(0,10);
     f.fecha_proxima_calibracion.value = (data.fecha_proxima_calibracion ?? "").substring(0,10);
     f.observaciones.value = data.observaciones ?? "";
-    estadoInstrumentoCargado = data.estado || null;
 
     showMsg(msgAlta,`Instrumento ${codigo} cargado.`,"ok");
   }
@@ -431,24 +410,13 @@
   async function guardarInstrumento(){
     hideMsg(msgAlta);
 
-    const codigo = normalizarCodigoInstrumento(f.codigo.value);
+    const codigo = f.codigo.value.trim();
     const descripcion = f.descripcion.value.trim();
     const fabricante = f.fabricante.value.trim();
     const familiaId = f.familia_id.value || null;
     const propietarioNombre = f.propietario_nombre.value.trim() || "Propiedad TMP";
     const ubicacionId = f.ubicacion_id.value || null;
     const ubicacionActual = ubicacionId ? getSelectedText(f.ubicacion_id) : null;
-    const ubicacionObj = ubicacionesCatalogo.find(x => String(x.id) === String(ubicacionId));
-    const ubicacionTipo = ubicacionObj?.tipo || (ubicacionActual === "Calidad" ? "Laboratorio" : null);
-    const tipoNorm = String(ubicacionTipo || "").trim().toLowerCase();
-    const estadoCoherente = tipoNorm === "laboratorio"
-      ? "En laboratorio"
-      : tipoNorm === "taller"
-        ? "En uso"
-        : estadoInstrumentoCargado;
-
-    // Persistir siempre el código ya saneado para evitar sufijos/espacios residuales.
-    f.codigo.value = codigo;
 
     if(!codigo || !descripcion || !fabricante){
       showMsg(msgAlta,"Código, descripción y fabricante son obligatorios.","err");
@@ -492,9 +460,6 @@
       propietario_id: propietarioId,
       ubicacion_id: ubicacionId,
       ubicacion_actual: ubicacionActual,
-      // Mantener también el campo legado sincronizado para Home, búsquedas e históricos.
-      ubicacion: ubicacionTipo || ubicacionActual,
-      estado: estadoCoherente || "En laboratorio",
       fecha_calibracion: f.fecha_calibracion.value || null,
       fecha_proxima_calibracion: f.fecha_proxima_calibracion.value || null,
       observaciones: f.observaciones.value || null,
