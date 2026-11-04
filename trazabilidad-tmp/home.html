@@ -809,6 +809,7 @@
 <script type="module" src="config.mjs"></script>
 <!-- SCRIPT PRINCIPAL DASHBOARD (KPIs + MOVIMIENTOS) -->
 <script type="module">
+import { loadAllInstruments } from "./instrumentos_loader.mjs";
   const supabase = window.supabase;
 
 
@@ -1001,7 +1002,7 @@
     }
 
     const [{ data: instrumentos, error }, { data: ubicaciones, error: errUbic }] = await Promise.all([
-      supabase.from("instrumentos").select("codigo, descripcion, estado, ubicacion_id, ubicacion_actual, ubicacion, fecha_proxima_calibracion, proxima_calibracion"),
+      loadAllInstruments(supabase, "codigo, descripcion, estado, ubicacion_id, ubicacion_actual, ubicacion, fecha_proxima_calibracion, proxima_calibracion"),
       supabase.from("ubicaciones").select("id,nombre,tipo,activo")
     ]);
 
