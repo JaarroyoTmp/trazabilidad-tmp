@@ -101,6 +101,7 @@
 <script type="module" src="config.mjs"></script>
 
 <script type="module">
+import { loadAllInstruments } from "./instrumentos_loader.mjs";
 
 const supabase = window.supabase;
 
@@ -143,9 +144,7 @@ function formatDate(d){
 // Cargar instrumentos
 // ==========================
 async function cargar(){
-  const { data, error } = await supabase
-    .from("instrumentos")
-    .select("codigo, ubicacion_actual, estado, fecha_proxima_calibracion, proxima_calibracion");
+  const { data, error } = await loadAllInstruments(supabase, "codigo, ubicacion_actual, estado, fecha_proxima_calibracion, proxima_calibracion");
 
   if(error){
     console.error("Error cargando instrumentos:", error);
