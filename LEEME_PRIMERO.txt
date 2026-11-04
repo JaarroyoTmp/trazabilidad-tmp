@@ -1,0 +1,33 @@
+CORRECCIÓN PUNTUAL DEL CONTADOR TMP — 04/11/2026
+Preparada sobre los archivos descargados de https://trazabilidad-tmp.vercel.app/ el 04/11/2026.
+Este paquete es independiente de la revisión MT16 NO INSTALAR. Solo corrige la carga completa de equipos en el Inicio y el listado.
+
+QUÉ SUBIR
+Abre archivos_para_subir y sube SUS TRES ARCHIVOS a la raíz del repositorio de la app, junto a config.mjs:
+- home.html (reemplazar)
+- listado_instrumentos.html (reemplazar)
+- instrumentos_loader.mjs (añadir)
+No crees una carpeta archivos_para_subir en la web. Los tres archivos deben quedar al mismo nivel que config.mjs. No subas respaldo_publicado ni este documento como sustitutos de la app.
+
+PASOS
+1. Guarda o descarga una copia de tu repositorio actual antes del cambio. También se incluyen los dos HTML publicados en respaldo_publicado.
+2. En GitHub, abre la carpeta raíz de trazabilidad-tmp, donde ya están home.html y config.mjs.
+3. Usa Add file > Upload files y arrastra juntos los tres archivos de archivos_para_subir. Revisa que las rutas queden en esa raíz.
+4. Confirma el cambio con el mensaje: Corregir carga completa del inventario y contador.
+5. Espera a que Vercel termine el despliegue. Este paquete no lo ha publicado automáticamente.
+6. Abre home.html y pulsa Ctrl+F5. Revisa el total y el listado.
+
+RESULTADO ESPERADO
+En la comprobación de la API real: 1027 equipos, 1018 activos y 9 retirados. La consulta anterior solo devolvía 1000 registros y calculaba 991 activos. Las nuevas altas pueden hacer que estas cifras aumenten.
+Los 37 anillos de rosca P/NP inspeccionados están guardados y en estado En laboratorio. No hace falta volver a darlos de alta.
+
+ALCANCE
+Carga paginada ordenada por id con recuento exacto. La pantalla conserva sus filtros actuales y sigue separando equipos activos de retirados.
+Se conservan el mosaico de máquinas, avisos de Consultas, navegación, estilos, movimientos y resto del HTML publicado. Al revertir únicamente la importación y la consulta nuevas, cada HTML coincide byte a byte con el publicado.
+No incluye cambios de MT16, acceso de usuarios, configuración ni SQL. No modifica datos o familias.
+
+PRUEBAS
+8/8 pruebas locales con el cargador y los HTML corregidos: inventario superior a 1000, límites de servidor menores, vacío, fallo de una página, cambio de recuento, duplicados, contador de activos y listado completo. Se comprobó la API real solo por lectura; no se ha probado todavía el despliegue corregido en Vercel.
+
+SI NECESITAS VOLVER ATRÁS
+Reemplaza los dos HTML por sus copias de respaldo_publicado. El nuevo instrumentos_loader.mjs queda sin utilizar por esas copias.
