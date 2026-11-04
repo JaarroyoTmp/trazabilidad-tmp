@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-11-04T10:41:07.884Z",
+  "scope": "GET only, public application API; no writes. Counts may change as operators add equipment.",
+  "first_page_rows": 1000,
+  "api_exact_count": 1027,
+  "previous_active_counter": 991,
+  "paginated_rows": 1027,
+  "paginated_active_counter": 1018,
+  "retired": 9
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "archivo": "home.html",
+    "sha256_publicado": "9c30918c3b25565db8be1aee85fe172a4fe207b9ccf872eb7e90e5e88ad4dcb0",
+    "sha256_corregido": "67239553fc9b87e3164109e59e69a53e056b1219ac049189da0d7abe000514b6",
+    "comprobacion": "Al revertir solo importación y consulta, coincide byte a byte con el publicado."
+  },
+  {
+    "archivo": "listado_instrumentos.html",
+    "sha256_publicado": "5c503296923a8f5451841bf2d3350562035672c44cfaf9676dbcce25cb2ba1e1",
+    "sha256_corregido": "3c9f64a4692373812a5a19f6ffe72d6622ffbe64d2e001b060d3cf2c0b0e26ae",
+    "comprobacion": "Al revertir solo importación y consulta, coincide byte a byte con el publicado."
+  }
+]

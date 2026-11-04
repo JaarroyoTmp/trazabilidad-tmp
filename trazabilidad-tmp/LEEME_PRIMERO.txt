@@ -1,56 +1,33 @@
-PARCHE MT16 TMP - 25/09/2026
+CORRECCIÓN PUNTUAL DEL CONTADOR TMP — 04/11/2026
+Preparada sobre los archivos descargados de https://trazabilidad-tmp.vercel.app/ el 04/11/2026.
+Este paquete es independiente de la revisión MT16 NO INSTALAR. Solo corrige la carga completa de equipos en el Inicio y el listado.
 
-IMPORTANTE: este paquete NO sustituye el proyecto completo.
-Copiar/sobrescribir UNICAMENTE estos archivos conservando las rutas:
+QUÉ SUBIR
+Abre archivos_para_subir y sube SUS TRES ARCHIVOS a la raíz del repositorio de la app, junto a config.mjs:
+- home.html (reemplazar)
+- listado_instrumentos.html (reemplazar)
+- instrumentos_loader.mjs (añadir)
+No crees una carpeta archivos_para_subir en la web. Los tres archivos deben quedar al mismo nivel que config.mjs. No subas respaldo_publicado ni este documento como sustitutos de la app.
 
-1) home.html
-   - Es EXACTAMENTE el home bueno entregado por el usuario. No se ha modificado.
+PASOS
+1. Guarda o descarga una copia de tu repositorio actual antes del cambio. También se incluyen los dos HTML publicados en respaldo_publicado.
+2. En GitHub, abre la carpeta raíz de trazabilidad-tmp, donde ya están home.html y config.mjs.
+3. Usa Add file > Upload files y arrastra juntos los tres archivos de archivos_para_subir. Revisa que las rutas queden en esa raíz.
+4. Confirma el cambio con el mensaje: Corregir carga completa del inventario y contador.
+5. Espera a que Vercel termine el despliegue. Este paquete no lo ha publicado automáticamente.
+6. Abre home.html y pulsa Ctrl+F5. Revisa el total y el listado.
 
-2) calibraciones_mt15 copy/core/metrology_core/thread/core/trimos_engine.js
-   - Para rosca METRIC_ISO usa la tabla de rodillos validada TMP por PASO.
-   - Ya NO elige el rodillo por proximidad matematica.
-   - Si el paso no existe en la tabla TMP devuelve NO_SOPORTADO.
+RESULTADO ESPERADO
+En la comprobación de la API real: 1027 equipos, 1018 activos y 9 retirados. La consulta anterior solo devolvía 1000 registros y calculaba 991 activos. Las nuevas altas pueden hacer que estas cifras aumenten.
+Los 37 anillos de rosca P/NP inspeccionados están guardados y en estado En laboratorio. No hace falta volver a darlos de alta.
 
-3) calibraciones_mt15 copy/core/metrology_core/thread/core/thread_traceability_engine.js
-   - Trimos certificado = patron trazable principal.
-   - Rodillos/hilos = utiles de medicion, no bloquean por certificado individual.
-   - Patron de rosca adicional = no requerido para este metodo.
-   - Solo la correccion del Trimos entra como correccion certificada.
+ALCANCE
+Carga paginada ordenada por id con recuento exacto. La pantalla conserva sus filtros actuales y sigue separando equipos activos de retirados.
+Se conservan el mosaico de máquinas, avisos de Consultas, navegación, estilos, movimientos y resto del HTML publicado. Al revertir únicamente la importación y la consulta nuevas, cada HTML coincide byte a byte con el publicado.
+No incluye cambios de MT16, acceso de usuarios, configuración ni SQL. No modifica datos o familias.
 
-4) calibraciones_mt15 copy/core/metrology_core/thread/core/thread_uncertainty_engine_core.js
-   - Rodillos y patron de rosca no se meten como contribuciones certificadas independientes.
+PRUEBAS
+8/8 pruebas locales con el cargador y los HTML corregidos: inventario superior a 1000, límites de servidor menores, vacío, fallo de una página, cambio de recuento, duplicados, contador de activos y listado completo. Se comprobó la API real solo por lectura; no se ha probado todavía el despliegue corregido en Vercel.
 
-5) calibraciones_mt15 copy/core/metrology_core/thread/core/mt16_master_engine.js
-   - Alineado con el modelo anterior y mantiene los motores ISO/parser existentes.
-
-6) calibraciones_mt15 copy/core/metrology_core/procedure_rules/tampon_roscado.js
-   - Mismo criterio de tabla TMP para que el procedimiento experto general no calcule otro rodillo distinto.
-
-TABLA TMP IMPLEMENTADA:
-Paso 0.25 / 0.30 -> rodillo 0.170 mm
-Paso 0.35        -> rodillo 0.220 mm
-Paso 0.40        -> rodillo 0.250 mm
-Paso 0.45 / 0.50 -> rodillo 0.290 mm
-Paso 0.60        -> rodillo 0.335 mm
-Paso 0.70 / 0.80 -> rodillo 0.455 mm
-Paso 0.90        -> rodillo 0.530 mm
-Paso 1.00        -> rodillo 0.620 mm
-Paso 1.25        -> rodillo 0.725 mm
-Paso 1.50        -> rodillo 0.895 mm
-Paso 1.75        -> rodillo 1.100 mm
-Paso 2.00        -> rodillo 1.350 mm
-Paso 2.50        -> rodillo 1.650 mm
-Paso 3.00 / 3.50 -> rodillo 2.050 mm
-Paso 4.00 / 4.50 -> rodillo 2.550 mm
-Paso 5.00 / 5.50 -> rodillo 3.200 mm
-
-PRUEBAS REALIZADAS:
-- Todas las entradas de la tabla TMP devuelven exactamente el rodillo esperado.
-- M12 x 1.25 6H -> rodillo 0.725 mm.
-- M12 x 1.25 6H -> objetivo PASA 12.292468245 mm.
-- M12 x 1.25 6H -> objetivo NO PASA 12.460468245 mm.
-- Con banco Trimos vigente + incertidumbre y SIN rodillos certificados / SIN patron rosca adicional:
-  traceability.ok = true
-  traceability.ok_full_traceability = true
-  can_emit_full_certificate = true
-- Paso metrico no incluido (ej. 1.10) -> NO_SOPORTADO; no inventa un rodillo por proximidad.
+SI NECESITAS VOLVER ATRÁS
+Reemplaza los dos HTML por sus copias de respaldo_publicado. El nuevo instrumentos_loader.mjs queda sin utilizar por esas copias.

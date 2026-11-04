@@ -1,0 +1,39 @@
+{
+  "scope": "Loader real y home real con inventario sintético de 1027 registros; no modifica Supabase.",
+  "total": 8,
+  "passed": 8,
+  "results": [
+    {
+      "name": "1027 equipos y 37 anillos se recuperan más allá de la primera página",
+      "status": "PASS"
+    },
+    {
+      "name": "Un límite del servidor inferior a la página solicitada no corta el inventario",
+      "status": "PASS"
+    },
+    {
+      "name": "Inventario vacío devuelve cero confirmado",
+      "status": "PASS"
+    },
+    {
+      "name": "Error en segunda página no entrega un total parcial",
+      "status": "PASS"
+    },
+    {
+      "name": "Cambio de recuento durante la carga requiere actualizar",
+      "status": "PASS"
+    },
+    {
+      "name": "Registro repetido entre páginas no infla el contador",
+      "status": "PASS"
+    },
+    {
+      "name": "Home real muestra 1018 activos y 9 retirados, conservando la regla existente",
+      "status": "PASS"
+    },
+    {
+      "name": "Listado publicado corregido incluye el equipo 1027 sin recortar a 1000",
+      "status": "PASS"
+    }
+  ]
+}
