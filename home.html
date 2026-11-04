@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TMP · Trazabilidad Metrológica</title>
+  <!-- HOME_BUILD: 2026-10-01-V7-MAQUINAS-MOSAICO -->
 
   <style>
     :root{
@@ -528,65 +529,93 @@
     }
 
 
-    /* HOME V6 - Equipos por máquina visibles, sin carrusel horizontal */
-    .machine-more-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;font-size:10px;color:#617b94}
-    .machine-more-row .btn{padding:5px 9px;font-size:10px}
+    /* HOME V7 - Equipos por maquina: mosaico completo, sin desplazamiento lateral */
+    .machine-more-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 5px;font-size:9px;color:#617b94;min-height:28px;flex:0 0 auto}
+    .machine-more-row .btn{padding:4px 8px;font-size:9px}
     #machine-all-dialog{max-width:1180px;width:min(96vw,1180px)}
     #machine-all-dialog .dialog-table-wrap{max-height:66vh}
+
+    /* Una sola fuente de verdad para el mosaico de maquinas. */
+    #machine-overview-grid{
+      display:grid!important;
+      grid-template-columns:repeat(8,minmax(0,1fr))!important;
+      gap:4px!important;
+      margin:3px 0 5px!important;
+      overflow:visible!important;
+      width:100%!important;
+      padding:0!important;
+    }
+    #machine-overview-grid .machine-overview-card{
+      width:100%!important;
+      min-width:0!important;
+      max-width:none!important;
+      min-height:30px!important;
+      padding:3px 5px!important;
+      border-radius:8px!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) auto;
+      grid-template-rows:auto auto;
+      column-gap:4px;
+      align-items:center;
+    }
+    #machine-overview-grid .machine-overview-name{
+      font-size:8.5px!important;
+      line-height:1.05!important;
+      grid-column:1;
+      grid-row:1;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    #machine-overview-grid .machine-overview-count{
+      font-size:14px!important;
+      line-height:1!important;
+      margin:0!important;
+      grid-column:2;
+      grid-row:1/3;
+      align-self:center;
+    }
+    #machine-overview-grid .machine-overview-label{
+      font-size:7px!important;
+      line-height:1!important;
+      grid-column:1;
+      grid-row:2;
+    }
+
     @media (min-width:1500px) and (min-height:800px){
       .machine-section{overflow:hidden}
-      .machine-overview-grid{
-        display:grid!important;
-        grid-template-columns:repeat(6,minmax(0,1fr))!important;
-        gap:4px!important;
-        margin:3px 0 5px!important;
-        overflow:visible!important;
-        flex:0 0 auto!important;
-        padding:0!important;
-      }
-      .machine-overview-card{
-        min-width:0!important;
-        flex:none!important;
-        padding:4px 6px!important;
-        border-radius:8px!important;
-        min-height:34px!important;
-        display:grid;
-        grid-template-columns:minmax(0,1fr) auto;
-        grid-template-rows:auto auto;
-        column-gap:5px;
-        align-items:center;
-      }
-      .machine-overview-name{font-size:8.5px!important;grid-column:1;grid-row:1;min-width:0}
-      .machine-overview-count{font-size:15px!important;line-height:1!important;margin:0!important;grid-column:2;grid-row:1/3;align-self:center}
-      .machine-overview-label{font-size:7.5px!important;grid-column:1;grid-row:2}
       #table-machine-equipment{display:table!important;overflow:visible!important;max-height:none!important;width:100%;table-layout:fixed}
       #table-machine-equipment th:nth-child(1),#table-machine-equipment td:nth-child(1){width:12%}
       #table-machine-equipment th:nth-child(2),#table-machine-equipment td:nth-child(2){width:39%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       #table-machine-equipment th:nth-child(3),#table-machine-equipment td:nth-child(3){width:14%}
       #table-machine-equipment th:nth-child(4),#table-machine-equipment td:nth-child(4){width:18%}
       #table-machine-equipment th:nth-child(5),#table-machine-equipment td:nth-child(5){width:17%}
-      .machine-more-row{font-size:8.5px;margin-top:3px}.machine-more-row .btn{padding:3px 7px;font-size:8.5px}
     }
-    @media (min-width:1500px) and (min-height:800px) and (max-width:1750px){
-      .machine-overview-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
-    }
-
-
-    /* HOME - maquinas siempre visibles, sin carrusel lateral */
-    #machine-overview-grid{
-      display:grid!important;
-      grid-template-columns:repeat(6,minmax(0,1fr))!important;
-      gap:5px!important;
-      overflow:visible!important;
-      overflow-x:visible!important;
-      width:100%!important;
-      padding:0!important;
-    }
-    #machine-overview-grid .machine-overview-card{
-      width:100%!important;min-width:0!important;max-width:none!important;flex:none!important;
-    }
+    @media(max-width:1700px){#machine-overview-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important}}
+    @media(max-width:1450px){#machine-overview-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}}
     @media(max-width:1200px){#machine-overview-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
     @media(max-width:760px){#machine-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+  
+    /* Consultas: acceso protegido + avisos en Home */
+    .consultas-card{position:relative}
+    .consultas-alert-badge{
+      position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 6px;
+      border-radius:999px;background:#ef4444;color:#fff;font-size:10px;font-weight:950;
+      display:none;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff,0 6px 16px rgba(239,68,68,.28);z-index:3
+    }
+    .consultas-alert-badge.show{display:flex}
+    .consultas-card.has-new{border-color:#fca5a5!important;background:linear-gradient(135deg,#fff1f2,#fff)!important}
+    .chat-home-toast{
+      position:fixed;right:18px;bottom:18px;z-index:9999;width:min(390px,calc(100vw - 36px));
+      display:none;gap:10px;align-items:flex-start;background:#0d2b50;color:#fff;border:1px solid rgba(255,255,255,.16);
+      border-radius:14px;padding:12px 14px;box-shadow:0 18px 48px rgba(13,43,80,.28)
+    }
+    .chat-home-toast.show{display:flex}
+    .chat-home-toast strong{display:block;font-size:12px;margin-bottom:2px}
+    .chat-home-toast span{font-size:11px;color:#dbeafe;line-height:1.35}
+    .chat-home-toast button{margin-left:auto;border:0;background:transparent;color:#fff;font-size:16px;cursor:pointer}
+
   </style>
 </head>
 
@@ -640,7 +669,7 @@
         <a class="program-card" href="alcance_kpi.html"><span class="program-ico">▥</span><span>Alcance & KPIs</span></a>
         <a class="program-card" href="criterios.html"><span class="program-ico">◇</span><span>Criterios</span></a>
         <a class="program-card" href="equipos-referencia-crear.html"><span class="program-ico">＋</span><span>Referencias / Crear</span></a>
-        <a class="program-card" href="chat.html"><span class="program-ico">☏</span><span>Consultas</span></a>
+        <a class="program-card consultas-card" id="consultas-link" href="chat.html"><span class="program-ico">☏</span><span>Consultas</span><span class="consultas-alert-badge" id="consultas-alert-badge">0</span></a>
       </div>
     </section>
 
@@ -696,6 +725,10 @@
           <span class="machine-count" id="machine-count">Selecciona una máquina</span>
           <span class="badge badge-soft" id="machine-status">Ubicación actual de instrumentos</span>
         </div>
+        <div id="machine-more-row" class="machine-more-row" style="display:none;">
+          <span id="machine-more-info"></span>
+          <button type="button" class="btn btn-primary" id="machine-view-all">Ver todos</button>
+        </div>
         <div id="machine-empty" class="machine-empty">Selecciona una máquina para ver los equipos que tiene actualmente.</div>
         <table class="mini-table" id="table-machine-equipment" style="display:none;">
           <thead>
@@ -703,10 +736,6 @@
           </thead>
           <tbody id="tbody-machine-equipment"></tbody>
         </table>
-        <div id="machine-more-row" class="machine-more-row" style="display:none;">
-          <span id="machine-more-info"></span>
-          <button type="button" class="btn" id="machine-view-all">Ver todos</button>
-        </div>
               </section>
 
       <dialog id="machine-all-dialog">
@@ -771,10 +800,105 @@
 </div>
 
 
+<div class="chat-home-toast" id="chat-home-toast" role="status" aria-live="polite">
+  <div>💬</div>
+  <div><strong id="chat-home-toast-title">Nueva consulta</strong><span id="chat-home-toast-text"></span></div>
+  <button type="button" id="chat-home-toast-close" aria-label="Cerrar">×</button>
+</div>
+
 <script type="module" src="config.mjs"></script>
 <!-- SCRIPT PRINCIPAL DASHBOARD (KPIs + MOVIMIENTOS) -->
 <script type="module">
+import { loadAllInstruments } from "./instrumentos_loader.mjs";
   const supabase = window.supabase;
+
+
+  // ===== CONSULTAS: contraseña simple + avisos de nuevos mensajes =====
+  const consultasLink = document.getElementById("consultas-link");
+  const consultasBadge = document.getElementById("consultas-alert-badge");
+  const chatHomeToast = document.getElementById("chat-home-toast");
+  const chatHomeToastTitle = document.getElementById("chat-home-toast-title");
+  const chatHomeToastText = document.getElementById("chat-home-toast-text");
+  const chatHomeToastClose = document.getElementById("chat-home-toast-close");
+  const CHAT_LAST_SEEN_KEY = "tmp_chat_last_seen";
+  const CHAT_AUTH_KEY = "tmp_consultas_auth";
+  let consultasNoLeidas = 0;
+
+  function getCurrentChatUsername(){
+    try {
+      const op = JSON.parse(localStorage.getItem("operario") || "null");
+      return op?.username || "";
+    } catch { return ""; }
+  }
+
+  function pintarBadgeConsultas(){
+    if (!consultasBadge || !consultasLink) return;
+    consultasBadge.textContent = consultasNoLeidas > 99 ? "99+" : String(consultasNoLeidas);
+    consultasBadge.classList.toggle("show", consultasNoLeidas > 0);
+    consultasLink.classList.toggle("has-new", consultasNoLeidas > 0);
+  }
+
+  function mostrarAvisoConsulta(msg){
+    if (!chatHomeToast) return;
+    const autor = msg?.autor || "Usuario TMP";
+    const texto = String(msg?.mensaje || "Nuevo mensaje en Consultas").trim();
+    chatHomeToastTitle.textContent = msg?.importante ? `⭐ Consulta importante de ${autor}` : `Nueva consulta de ${autor}`;
+    chatHomeToastText.textContent = texto.length > 130 ? texto.slice(0,127) + "…" : texto;
+    chatHomeToast.classList.add("show");
+    clearTimeout(window.__tmpChatToastTimer);
+    window.__tmpChatToastTimer = setTimeout(()=>chatHomeToast.classList.remove("show"),7000);
+  }
+
+  chatHomeToastClose?.addEventListener("click",()=>chatHomeToast?.classList.remove("show"));
+
+  consultasLink?.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    const clave = window.prompt("Contraseña de Consultas:");
+    if (clave === null) return;
+    if (clave !== "cecotec") {
+      window.alert("Contraseña incorrecta.");
+      return;
+    }
+    sessionStorage.setItem(CHAT_AUTH_KEY,"1");
+    localStorage.setItem(CHAT_LAST_SEEN_KEY,new Date().toISOString());
+    consultasNoLeidas = 0;
+    pintarBadgeConsultas();
+    window.location.href = consultasLink.getAttribute("href") || "chat.html";
+  });
+
+  async function iniciarAvisosConsultasHome(){
+    if (!supabase) return;
+    const username = getCurrentChatUsername();
+    let lastSeen = localStorage.getItem(CHAT_LAST_SEEN_KEY);
+    if (!lastSeen){
+      lastSeen = new Date().toISOString();
+      localStorage.setItem(CHAT_LAST_SEEN_KEY,lastSeen);
+    }
+
+    try {
+      let q = supabase.from("chat_mensajes").select("id,autor,mensaje,importante,created_at").gt("created_at",lastSeen).order("created_at",{ascending:true}).limit(100);
+      if (username) q = q.neq("autor",username);
+      const {data,error} = await q;
+      if (!error){
+        consultasNoLeidas = (data || []).length;
+        pintarBadgeConsultas();
+      }
+    } catch(err){
+      console.warn("No se pudo consultar avisos de Consultas:",err);
+    }
+
+    supabase.channel("home_chat_alerts")
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"chat_mensajes"},payload=>{
+        const msg = payload.new || {};
+        if (username && msg.autor === username) return;
+        consultasNoLeidas += 1;
+        pintarBadgeConsultas();
+        mostrarAvisoConsulta(msg);
+      })
+      .subscribe();
+  }
+
+  iniciarAvisosConsultasHome();
 
   // Helpers DOM
   const kpi_total          = document.getElementById("kpi-total");
@@ -878,7 +1002,7 @@
     }
 
     const [{ data: instrumentos, error }, { data: ubicaciones, error: errUbic }] = await Promise.all([
-      supabase.from("instrumentos").select("codigo, descripcion, estado, ubicacion_id, ubicacion_actual, ubicacion, fecha_proxima_calibracion, proxima_calibracion"),
+      loadAllInstruments(supabase, "codigo, descripcion, estado, ubicacion_id, ubicacion_actual, ubicacion, fecha_proxima_calibracion, proxima_calibracion"),
       supabase.from("ubicaciones").select("id,nombre,tipo,activo")
     ]);
 
