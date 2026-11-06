@@ -1,12 +1,12 @@
 import { createPoint, parseNum } from "./shared.js";
-import { resolveValidatedMetricWire, TMP_MT16_AUTHORITATIVE_RULES_VERSION } from "../thread/core/mt16_authoritative_rules.js";
 
 export const TAMPON_ROSCADO_PROCEDURE_VERSION =
-  "TMP_TAMPON_ROSCADO_PROCEDURE_V3_20261005_AUTHORITATIVE_WIRES";
+  "TMP_TAMPON_ROSCADO_PROCEDURE_V2_20260630_GUIDED_KNOWLEDGE";
 
 function rodilloMetricoISO(paso) {
-  const result = resolveValidatedMetricWire(parseNum(paso));
-  return result.ok ? result.wire_mm : null;
+  const p = parseNum(paso);
+  if (!p) return null;
+  return Math.round((0.57735026919 * p) * 1000) / 1000;
 }
 
 function parseThreadFromText(text = "") {
@@ -194,4 +194,44 @@ export function buildTamponRoscadoProcedure(ctx = {}) {
       ? []
       : ["No se pudo calcular rodillo recomendado. Revisar tipo de rosca/paso."]
   };
+}
+// MT16 periodic verification. No calibration dates or initial certificates are changed.
+export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_VERIFICACION_20261105';
+export function evaluateMT16PeriodicVerification(form = {}) {
+  const number = value => value === null || value === undefined || String(value).trim() === '' ? null : Number(String(value).trim().replace(',', '.'));
+  const missing = [], failures = [], points = [];
+  const required = {operario:'Referencia del operario',certificado_inicial:'Certificado inicial',banco:'Banco utilizado',certificado_banco:'Certificado del banco',accesorios:'Accesorios y montaje utilizados',metodo:'Método de medida documentado',criterio:'Documento del criterio de aceptación'};
+  for (const [key,label] of Object.entries(required)) if (!String(form[key] || '').trim()) missing.push(label);
+  if (!form.metodo_confirmado) missing.push('Confirmar que las lecturas y referencias corresponden a la misma magnitud y método');
+  for (const [key,label] of [['identificacion','Identificación'],['limpieza','Limpieza y estado de superficies'],['integridad','Ausencia de daños'],['trazabilidad','Certificado del banco vigente y aplicable']]) {
+    if (form[key] === 'NOK') failures.push(label + ': no conforme');
+    else if (form[key] !== 'OK') missing.push(label);
+  }
+  for (const key of ['PASA','NO_PASA']) {
+    const p = form.puntos?.[key] || {}, label = key === 'PASA' ? 'PASA' : 'NO PASA';
+    const baseline=number(p.referencia), min=number(p.min), max=number(p.max), U=number(p.U);
+    const readings = Array.isArray(p.lecturas) ? p.lecturas.map(number) : [];
+    const problems=[];
+    for (const [v,name] of [[baseline,'referencia inicial'],[min,'variación mínima admitida'],[max,'variación máxima admitida']]) if (v === null || !Number.isFinite(v)) problems.push(name);
+    if (U === null || !Number.isFinite(U) || U <= 0) problems.push('incertidumbre expandida de la comparación, mayor que cero');
+    if (readings.length !== 5 || readings.some(v=>v === null || !Number.isFinite(v))) problems.push('cinco lecturas numéricas');
+    if (min !== null && max !== null && min > max) problems.push('límites ordenados de menor a mayor');
+    if (problems.length) {
+      missing.push(...problems.map(s=>label+': '+s));
+      points.push({lado:key,resultado:'PENDIENTE',media:null,variacion:null});
+      continue;
+    }
+    const avg=readings.reduce((a,b)=>a+b,0)/5, delta=avg-baseline;
+    const accepted=delta-U>=min-1e-12 && delta+U<=max+1e-12;
+    const item={lado:key,resultado:accepted?'OK':'NOK',media:avg,referencia:baseline,variacion:delta,min,max,U,
+      regla:'Aceptar si [variación − U, variación + U] está completamente dentro de [mínimo, máximo]',
+      lectura_magnitud:form.magnitud || 'INDICACION_TRIMOS',unidad:'mm'};
+    points.push(item);
+    if(!accepted) failures.push(label+': no cumple la regla de aceptación con incertidumbre');
+  }
+  const result=failures.length?'NOK':missing.length?'PENDIENTE':'OK';
+  return {tipo:'VERIFICACION_PERIODICA',version:MT16_PERIODIC_VERIFICATION_VERSION,resultado:result,
+    puntos:points,faltantes:missing,motivos:failures,
+    criterio_origen:'INTRODUCIDO_POR_OPERARIO_CON_REFERENCIA_DOCUMENTAL',
+    alcance:'Verificación frente a una referencia inicial y un criterio documentado. No declara validación automática ISO 1502 ni sustituye el certificado inicial.'};
 }

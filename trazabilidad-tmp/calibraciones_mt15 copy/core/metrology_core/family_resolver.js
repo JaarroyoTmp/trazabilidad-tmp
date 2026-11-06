@@ -72,6 +72,10 @@ export function resolveFamilyFromText(text = "") {
   const txt = normalizeText(text);
 
   if (!txt) return TMP_FAMILY_KEYS.DESCONOCIDO;
+  if (txt.includes("anillo") && (!/tampon|tapon/.test(txt) || /^anillo\b/.test(txt))) {
+    return txt.includes("rosca") ? TMP_FAMILY_KEYS.ANILLO_ROSCADO : TMP_FAMILY_KEYS.ANILLO_PATRON;
+  }
+
 
   if (
     (txt.includes("tampon") || txt.includes("tapon")) &&
@@ -144,56 +148,32 @@ export function resolveFamilyFromText(text = "") {
 
 export function resolveFamilyFromInstrument(instrumento = {}, options = {}) {
   const manualMap = options.familyIdMap || options.uuidMap || {};
-
   const familiaId = instrumento.familia_id || instrumento.family_id || null;
-
-  if (familiaId && manualMap[familiaId]) {
-    return {
-      family: manualMap[familiaId],
-      source: "familyIdMap",
-      familia_id: familiaId,
-      confidence: 1
-    };
-  }
-
-  // Si familia viene como texto real.
-  const directFamily = instrumento.familia || instrumento.family || instrumento.familia_nombre || instrumento.nombre_familia;
-
-  if (directFamily && !isUuid(directFamily)) {
-    const family = resolveFamilyFromText(directFamily);
-
-    if (family !== TMP_FAMILY_KEYS.DESCONOCIDO) {
-      return {
-        family,
-        source: "familia_texto",
-        familia_id: familiaId,
-        raw_family: directFamily,
-        confidence: 0.95
-      };
+  const description = instrumento.descripcion || instrumento.nombre || instrumento.tipo || "";
+  const descriptionFamily = resolveFamilyFromText(description);
+  const critical = new Set([TMP_FAMILY_KEYS.TAMPON_LISO_PNP, TMP_FAMILY_KEYS.TAMPON_ROSCADO_PNP, TMP_FAMILY_KEYS.ANILLO_PATRON, TMP_FAMILY_KEYS.ANILLO_ROSCADO]);
+  const explicitDescription = /liso|rosca|anillo\s+patron/.test(normalizeText(description));
+  function reconcile(candidate) {
+    if (explicitDescription && critical.has(candidate.family) && critical.has(descriptionFamily) && candidate.family !== descriptionFamily) {
+      return { family:TMP_FAMILY_KEYS.DESCONOCIDO, source:"conflicto_familia_descripcion", familia_id:familiaId,
+        confidence:0, error:"FAMILIA_CONTRADICTORIA", candidates:[candidate.family,descriptionFamily],
+        message:"La familia registrada y la descripción del instrumento se contradicen. Revisar antes de calibrar." };
     }
+    return candidate;
   }
-
-  const combined = [
-    instrumento.codigo,
-    instrumento.descripcion,
-    instrumento.nombre,
-    instrumento.tipo,
-    instrumento.tipo_calibracion,
-    instrumento.rango,
-    instrumento.modelo,
-    instrumento.fabricante,
-    instrumento.observaciones
-  ].filter(Boolean).join(" ");
-
-  const fromText = resolveFamilyFromText(combined);
-
-  return {
-    family: fromText,
-    source: fromText === TMP_FAMILY_KEYS.DESCONOCIDO ? "no_detectado" : "descripcion_instrumento",
-    familia_id: familiaId,
-    raw_text: combined,
-    confidence: fromText === TMP_FAMILY_KEYS.DESCONOCIDO ? 0 : 0.8
-  };
+  if (familiaId && manualMap[familiaId]) return reconcile({family:manualMap[familiaId],source:"familyIdMap",familia_id:familiaId,confidence:1});
+  const directFamily = instrumento.familia_motor || instrumento.familia || instrumento.family || instrumento.familia_nombre || instrumento.nombre_familia;
+  if (typeof directFamily === "string" && !isUuid(directFamily)) {
+    const family = resolveFamilyFromText(directFamily);
+    if (family !== TMP_FAMILY_KEYS.DESCONOCIDO) return reconcile({family,source:"familia_texto",familia_id:familiaId,raw_family:directFamily,confidence:0.95});
+  }
+  if (critical.has(descriptionFamily) && explicitDescription) {
+    return {family:descriptionFamily,source:"descripcion_instrumento",familia_id:familiaId,raw_text:description,confidence:0.9};
+  }
+  // Observaciones, código y fabricante no definen el tipo de instrumento.
+  const combined = [description,instrumento.tipo,instrumento.rango,instrumento.modelo].filter(Boolean).join(" ");
+  const family = resolveFamilyFromText(combined);
+  return {family,source:family===TMP_FAMILY_KEYS.DESCONOCIDO?"no_detectado":"descripcion_instrumento",familia_id:familiaId,raw_text:combined,confidence:family===TMP_FAMILY_KEYS.DESCONOCIDO?0:0.8};
 }
 
 /* ===========================================================
@@ -213,9 +193,9 @@ export function resolveFamilyFromInstrument(instrumento = {}, options = {}) {
 export async function loadFamilyMapFromSupabase(supabase, options = {}) {
   if (!supabase) throw new Error("Falta cliente Supabase");
 
-  const tableName = options.tableName || "familias";
+  const tableName = options.tableName || "familias_instrumentos";
 
-  const selectCols = options.select || "id,codigo,nombre,descripcion";
+  const selectCols = options.select || (tableName === "familias_instrumentos" ? "id,nombre,descripcion" : "id,nombre");
 
   const { data, error } = await supabase
     .from(tableName)
@@ -262,13 +242,15 @@ export async function resolveFamily(supabase, instrumento = {}, options = {}) {
   }
 
   if (supabase && options.loadFromSupabase !== false) {
-    const tableName = options.tableName || "familias";
+    const tableName = options.tableName || "familias_instrumentos";
     const loaded = await loadFamilyMapFromSupabase(supabase, { tableName, select: options.select });
 
     if (loaded.ok) {
       const resolved = resolveFamilyFromInstrument(instrumento, {
         familyIdMap: loaded.map
       });
+
+      if (resolved.error) return {...resolved,family_table:tableName,source:`supabase_${tableName}_conflict`};
 
       if (resolved.family !== TMP_FAMILY_KEYS.DESCONOCIDO) {
         return {
