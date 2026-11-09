@@ -196,14 +196,22 @@ export function buildTamponRoscadoProcedure(ctx = {}) {
   };
 }
 // MT16 periodic verification. No calibration dates or initial certificates are changed.
-export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_VERIFICACION_20261105';
+export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_AUTO03_20261109';
 export function evaluateMT16PeriodicVerification(form = {}) {
   const number = value => value === null || value === undefined || String(value).trim() === '' ? null : Number(String(value).trim().replace(',', '.'));
+  const text = value => {const s=String(value??'').trim();return /^(null|undefined|-|n\/a)$/i.test(s)?'':s;};
   const missing = [], failures = [], points = [];
-  const required = {operario:'Referencia del operario',certificado_inicial:'Certificado inicial',banco:'Banco utilizado',certificado_banco:'Certificado del banco',accesorios:'Accesorios y montaje utilizados',metodo:'Método de medida documentado',criterio:'Documento del criterio de aceptación'};
-  for (const [key,label] of Object.entries(required)) if (!String(form[key] || '').trim()) missing.push(label);
+  // Missing mode in earlier snapshots means the original historical-comparison model.
+  const mode=form.modo_evaluacion||'VARIACION_HISTORICA',absolute=mode==='DIMENSION_ACTUAL';
+  if(!['DIMENSION_ACTUAL','VARIACION_HISTORICA'].includes(mode))missing.push('Modo de evaluación válido');
+  const required = {operario:'Referencia del operario',banco:'Banco utilizado',certificado_banco:'Certificado del banco',accesorios:'Accesorios y montaje utilizados',metodo:'Método de medida documentado',criterio:'Documento del criterio de aceptación'};
+  for (const [key,label] of Object.entries(required)) if (!text(form[key])) missing.push(label);
+  const origin=form.origen_referencia;
+  if(!['PAUTA','REGISTRO_INTERNO','CERTIFICADO'].includes(origin))missing.push('Origen del criterio de referencia');
+  if(origin==='CERTIFICADO'&&!text(form.certificado_inicial))missing.push('Certificado elegido como origen de referencia');
+  if(absolute&&form.magnitud!=='D2')missing.push('Diámetro de flancos D2 obtenido con el método documentado');
   if (!form.metodo_confirmado) missing.push('Confirmar que las lecturas y referencias corresponden a la misma magnitud y método');
-  for (const [key,label] of [['identificacion','Identificación'],['limpieza','Limpieza y estado de superficies'],['integridad','Ausencia de daños'],['trazabilidad','Certificado del banco vigente y aplicable']]) {
+  for (const [key,label] of [['identificacion','Identificación'],['limpieza','Limpieza y estado de superficies'],['integridad','Ausencia de daños'],['trazabilidad','Vigencia del certificado del banco']]) {
     if (form[key] === 'NOK') failures.push(label + ': no conforme');
     else if (form[key] !== 'OK') missing.push(label);
   }
@@ -212,28 +220,32 @@ export function evaluateMT16PeriodicVerification(form = {}) {
     const baseline=number(p.referencia), min=number(p.min), max=number(p.max), U=number(p.U);
     const readings = Array.isArray(p.lecturas) ? p.lecturas.map(number) : [];
     const problems=[];
-    for (const [v,name] of [[baseline,'referencia inicial'],[min,'variación mínima admitida'],[max,'variación máxima admitida']]) if (v === null || !Number.isFinite(v)) problems.push(name);
-    if (U === null || !Number.isFinite(U) || U <= 0) problems.push('incertidumbre expandida de la comparación, mayor que cero');
+    const fields=absolute?[[min,'límite inferior del diámetro de flancos'],[max,'límite superior del diámetro de flancos']]:[[baseline,'referencia anterior'],[min,'variación mínima admitida'],[max,'variación máxima admitida']];
+    for (const [v,name] of fields) if (v === null || !Number.isFinite(v)) problems.push(name);
+    if (U === null || !Number.isFinite(U) || U <= 0) problems.push('incertidumbre expandida del método, mayor que cero');
     if (readings.length !== 5 || readings.some(v=>v === null || !Number.isFinite(v))) problems.push('cinco lecturas numéricas');
     if (min !== null && max !== null && min > max) problems.push('límites ordenados de menor a mayor');
+    if(absolute&&[min,max,...readings].some(v=>Number.isFinite(v)&&v<=0))problems.push('diámetros de flancos y límites mayores que cero');
     if (problems.length) {
       missing.push(...problems.map(s=>label+': '+s));
-      points.push({lado:key,resultado:'PENDIENTE',media:null,variacion:null});
+      points.push({lado:key,resultado:'PENDIENTE',media:null,variacion:null,modo:mode});
       continue;
     }
-    const avg=readings.reduce((a,b)=>a+b,0)/5, delta=avg-baseline;
-    const accepted=delta-U>=min-1e-12 && delta+U<=max+1e-12;
-    const item={lado:key,resultado:accepted?'OK':'NOK',media:avg,referencia:baseline,variacion:delta,min,max,U,
-      regla:'Aceptar si [variación − U, variación + U] está completamente dentro de [mínimo, máximo]',
-      lectura_magnitud:form.magnitud || 'INDICACION_TRIMOS',unidad:'mm'};
-    points.push(item);
+    const avg=readings.reduce((a,b)=>a+b,0)/5,low=Math.min(...readings),high=Math.max(...readings),delta=absolute?null:avg-baseline;
+    // In dimensional mode all five readings must satisfy the documented bounds.
+    // An acceptable average cannot hide an out-of-bounds reading.
+    const intervalLow=(absolute?low:delta)-U,intervalHigh=(absolute?high:delta)+U;
+    const accepted=intervalLow>=min-1e-12 && intervalHigh<=max+1e-12;
+    points.push({lado:key,resultado:accepted?'OK':'NOK',modo:mode,media:avg,referencia:absolute?null:baseline,variacion:delta,min,max,U,
+      minimo_medido:low,maximo_medido:high,intervalo_evaluado:{min:intervalLow,max:intervalHigh},
+      regla:absolute?'Aceptar si todas las lecturas D2 ± U están dentro de los límites documentados':'Aceptar si [variación − U, variación + U] está completamente dentro de [mínimo, máximo]',
+      lectura_magnitud:form.magnitud || 'INDICACION_TRIMOS',unidad:'mm'});
     if(!accepted) failures.push(label+': no cumple la regla de aceptación con incertidumbre');
   }
   const result=failures.length?'NOK':missing.length?'PENDIENTE':'OK';
-  return {tipo:'VERIFICACION_PERIODICA',version:MT16_PERIODIC_VERIFICATION_VERSION,resultado:result,
-    puntos:points,faltantes:missing,motivos:failures,
-    criterio_origen:'INTRODUCIDO_POR_OPERARIO_CON_REFERENCIA_DOCUMENTAL',
-    alcance:'Verificación frente a una referencia inicial y un criterio documentado. No declara validación automática ISO 1502 ni sustituye el certificado inicial.'};
+  return {tipo:'VERIFICACION_PERIODICA',version:MT16_PERIODIC_VERIFICATION_VERSION,modo:mode,resultado:result,
+    puntos:points,faltantes:missing,motivos:failures,criterio_origen:origin||null,documento_criterio:text(form.criterio),
+    alcance:absolute?'Verificación del diámetro de flancos frente a límites documentados. No determina desgaste histórico sin medidas anteriores ni valida automáticamente tablas normativas.':'Comparación con una referencia anterior de la misma magnitud y montaje, frente a límites de variación documentados. No sustituye una comprobación dimensional actual.'};
 }
 
 // Reuse existing MT16 parser, wire selection and certificate readers.
@@ -265,7 +277,7 @@ export async function resolveMT16VerificationAutomation(client, equipment, famil
     const ref=(refsResponse.data||[]).find(c=>!String(c.procedimiento_codigo||'').startsWith('MT16')&&clean(c.certificado_url));
     if(ref){result.certificate=clean(ref.certificado_url);result.sources.push('calibraciones / certificado de referencia existente');}
   }
-  if(!result.certificate)result.messages.push('Este equipo no tiene certificado inicial enlazado en la ficha ni en el historial consultado.');
+  if(!result.certificate)result.messages.push('No hay certificado del equipo enlazado. Es opcional: identifica el procedimiento o registro interno que aporta el criterio de aceptación.');
   if(ring)result.messages.push('Anillo: montaje interior; no se propone el rodillo exterior de un tampón.');
   return result;
 }
