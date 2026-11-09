@@ -1,3 +1,4 @@
+/* Revisión local 2026-11-03: estados explícitos y coherencia con certificado 1288. No desplegado. */
 /* TMP THREAD CORE V33 - thread_traceability_engine.js */
 import { classifyPatternRecord, TMP_THREAD_PATTERN_CLASSIFIER_VERSION } from "./thread_pattern_classifier.js";
 
@@ -39,37 +40,55 @@ export function isActive(row = {}) {
 }
 export function isValid(row = {}) {
   const e = normalizeText(row.estado || row.estado_certificado || row.status || "");
-  const estadoOk = !e || e.includes("VIGENTE") || e.includes("OK") || e.includes("APTO") || e.includes("VALID");
+  const estadoOk = ["VIGENTE", "OK", "APTO", "VALIDO", "VALID", "VALIDATED", "ACTIVO", "ACTIVE"].includes(e);
   return isActive(row) && estadoOk && !isExpired(getExpiry(row));
 }
-export const getK = (row = {}) => parseNum(row.k, null) || parseNum(row.factor_k, null) || parseNum(row.factor_cobertura, null) || 2;
-
-export function getCorrection(row = {}) {
-  return round(parseNum(row.correccion_num, null) || parseNum(row.correccion, null) || parseNum(row.error_num, null) || parseNum(row.error, null) || parseNum(row.desviacion_num, null) || parseNum(row.desviacion, null) || 0, 9);
+function firstDeclared(row, keys) {
+  for (const key of keys) if (row[key] !== null && row[key] !== undefined && row[key] !== "") return parseNum(row[key], null);
+  return null;
+}
+function usesTrimosGlobalEnvelope(row) {
+  return normalizeText(certNumber(row)) === "C-11377.00002";
+}
+function inTrimosCertifiedRange(nominal) {
+  const value = parseNum(nominal, null);
+  return Number.isFinite(value) && value >= 0 && value <= 300;
+}
+export function getK(row = {}) {
+  const k = firstDeclared(row, ["k", "factor_k", "factor_cobertura"]);
+  return Number.isFinite(k) && k > 0 ? k : null;
+}
+export function getCorrection(row = {}, nominalForTrimos = null) {
+  // C-11377.00002, p.4: la envolvente global Us se declara con corrección global nula.
+  if (usesTrimosGlobalEnvelope(row)) return inTrimosCertifiedRange(nominalForTrimos) ? 0 : null;
+  return round(firstDeclared(row, ["correccion_num", "correccion"]), 9);
 }
 export function getExpandedU(row = {}, nominalForTrimos = null) {
-  const code = String(rowCode(row)).trim();
-  const cert = normalizeText(certNumber(row));
-  const rule = normalizeText(row.source_rule || row.observaciones || "");
-  if (Number.isFinite(parseNum(nominalForTrimos, null)) && (code === "1288" || cert.includes("C-11377.00002") || rule.includes("TRIMOS_1288"))) return round((1.1 + 0.031 * parseNum(nominalForTrimos)) / 1000, 9);
-  return round(parseNum(row.incertidumbre_us_num, null) || parseNum(row.incertidumbre_us, null) || parseNum(row.incertidumbre_num, null) || parseNum(row.incertidumbre, null) || parseNum(row.u_expandida, null) || parseNum(row.u, null), 9);
+  if (usesTrimosGlobalEnvelope(row)) {
+    if (!inTrimosCertifiedRange(nominalForTrimos)) return null;
+    return round((1.1 + 0.031 * parseNum(nominalForTrimos)) / 1000, 9);
+  }
+  const value = firstDeclared(row, ["incertidumbre_us_num", "incertidumbre_us", "incertidumbre_num", "incertidumbre", "u_expandida", "u"]);
+  return Number.isFinite(value) && value > 0 ? round(value, 9) : null;
 }
 export function getStandardU(row = {}, nominalForTrimos = null) {
   const U = getExpandedU(row, nominalForTrimos);
   const k = getK(row);
-  if (!Number.isFinite(U) || !Number.isFinite(k) || k === 0) return null;
+  if (!Number.isFinite(U) || !Number.isFinite(k) || k <= 0) return null;
   return round(U / k, 9);
 }
+
 export function groupRows(rows = []) {
   const map = new Map();
   for (const row of rows) {
     const key = row.patron_id || row.codigo || row.codigo_equipo || row.codigo_patron || row.certificado_id || row.numero_certificado || `${rowCode(row)}|${certNumber(row)}|${rowDescription(row)}`;
-    if (!map.has(key)) map.set(key, []);
-    map.get(key).push(row);
+    const certificateKey = `${key}|${row.certificado_id || certNumber(row)}`;
+    if (!map.has(certificateKey)) map.set(certificateKey, []);
+    map.get(certificateKey).push(row);
   }
   return Array.from(map.entries()).map(([id, groupRows]) => {
     const first = groupRows[0] || {};
-    return { id: String(id), codigo: rowCode(first), descripcion: rowDescription(first), certificado: certNumber(first), fecha_calibracion: first.fecha_calibracion || "", vencimiento: getExpiry(first), vigente: groupRows.some(isValid), rows: groupRows, row: first, text: rowText(first) };
+    return { id: String(first.patron_id || id), codigo: rowCode(first), descripcion: rowDescription(first), certificado: certNumber(first), fecha_calibracion: first.fecha_calibracion || "", vencimiento: getExpiry(first), vigente: groupRows.every(isValid), rows: groupRows, row: first, text: rowText(first) };
   });
 }
 
@@ -88,7 +107,9 @@ export function decoratePattern(group, parsedThread, targetWire, nominalForU = n
     compatible,
     matched_diameter_mm: classification.matched_wire_diameter_mm,
     diameter_error_mm: classification.wire_error_mm,
-    correction_mm: getCorrection(row),
+    correction_mm: getCorrection(row, nominalForU),
+    correction_model: usesTrimosGlobalEnvelope(row) ? "C1137700002_GLOBAL_US_ZERO_CORRECTION" : "CERTIFICATE_EXPLICIT_CORRECTION",
+    uncertainty_reference_mm: nominalForU,
     u_expanded_mm: getExpandedU(row, nominalForU),
     u_standard_mm: getStandardU(row, nominalForU),
     k: getK(row)
@@ -126,7 +147,7 @@ export async function resolveTraceability({ supabase, parsedThread, trimosPlan, 
   const selected_rollers = rollers.find(x => x.compatible && x.vigente) || rollers[0] || null;
   const selected_master = masters.find(x => x.compatible && x.vigente) || masters[0] || null;
 
-  const bankOk = Boolean(selected_bank && selected_bank.vigente && Number.isFinite(selected_bank.u_standard_mm));
+  const bankOk = Boolean(selected_bank && selected_bank.vigente && selected_bank.compatible && selected_bank.certificado !== "-" && Number.isFinite(selected_bank.u_standard_mm) && selected_bank.u_standard_mm > 0);
   const rollersOk = Boolean(selected_rollers && selected_rollers.vigente && selected_rollers.compatible);
   const masterOk = Boolean(selected_master && selected_master.vigente && selected_master.compatible);
 
