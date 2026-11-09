@@ -1,7 +1,6 @@
 /* TMP THREAD CORE V30 - trimos_engine.js */
 import { parseNum } from "./thread_parser.js";
-import { resolveValidatedMetricWire, TMP_MT16_AUTHORITATIVE_RULES_VERSION } from "./mt16_authoritative_rules.js";
-export const TMP_TRIMOS_THREAD_ENGINE_VERSION = "TMP_TRIMOS_THREAD_ENGINE_V31_20261005_STRICT_TMP_WIRES";
+export const TMP_TRIMOS_THREAD_ENGINE_VERSION = "TMP_TRIMOS_THREAD_ENGINE_V30_20260630";
 export const COMMERCIAL_WIRES_MM = [0.170,0.195,0.220,0.250,0.290,0.335,0.390,0.455,0.530,0.620,0.725,0.895,1.100,1.350,1.650,2.050,2.550,3.200];
 
 export function round(value, decimals = 9) {
@@ -15,31 +14,10 @@ export function calculateBestWire(parsedThread, commercialSeries = COMMERCIAL_WI
   const P = parseNum(parsedThread.pitch_mm);
   const angle = parseNum(parsedThread.angle_deg, 60);
   if (!Number.isFinite(P) || !Number.isFinite(angle)) return { ok:false, source:TMP_TRIMOS_THREAD_ENGINE_VERSION, error:"THREAD_NUMERIC_DATA_INCOMPLETE" };
-
-  // REGLA AUTORITATIVA MT16: metrica ISO certificable -> tabla TMP exacta, sin aproximacion.
-  if (parsedThread.thread_system === "METRIC_ISO") {
-    const exact = resolveValidatedMetricWire(P);
-    if (!exact.ok) return { ...exact, source:TMP_TRIMOS_THREAD_ENGINE_VERSION, policy_version:TMP_MT16_AUTHORITATIVE_RULES_VERSION };
-    const ideal = P / (2 * Math.cos((angle / 2) * Math.PI / 180));
-    return {
-      ok:true,
-      source:TMP_TRIMOS_THREAD_ENGINE_VERSION,
-      policy_version:TMP_MT16_AUTHORITATIVE_RULES_VERSION,
-      method:"TMP_VALIDATED_WIRE_TABLE_EXACT",
-      pitch_mm:P,
-      angle_deg:angle,
-      ideal_wire_mm:round(ideal,9),
-      selected_wire_mm:round(exact.wire_mm,9),
-      difference_mm:round(exact.wire_mm - ideal,9),
-      warning:null
-    };
-  }
-
-  // Otras familias aun no cerradas normativamente pueden conservar seleccion geometrica de estudio.
   const ideal = P / (2 * Math.cos((angle / 2) * Math.PI / 180));
   let selected = commercialSeries[0], minDiff = Math.abs(selected - ideal);
   for (const wire of commercialSeries) { const diff = Math.abs(wire - ideal); if (diff < minDiff) { selected = wire; minDiff = diff; } }
-  return { ok:true, source:TMP_TRIMOS_THREAD_ENGINE_VERSION, policy_version:TMP_MT16_AUTHORITATIVE_RULES_VERSION, method:"NON_METRIC_STUDY_NEAREST_COMMERCIAL", pitch_mm:P, angle_deg:angle, ideal_wire_mm:round(ideal,9), selected_wire_mm:round(selected,9), difference_mm:round(selected - ideal,9), commercial_series_mm:commercialSeries, warning:"Familia no metrica: seleccion de rodillo en modo estudio hasta cerrar su tabla normativa especifica." };
+  return { ok:true, source:TMP_TRIMOS_THREAD_ENGINE_VERSION, method:"BEST_WIRE_DIAMETER_60_DEG_NEAREST_COMMERCIAL", pitch_mm:P, angle_deg:angle, ideal_wire_mm:round(ideal,9), selected_wire_mm:round(selected,9), difference_mm:round(selected - ideal,9), commercial_series_mm:commercialSeries, warning:"Verificar fisicamente que el juego de hilos/rodillos seleccionado esta disponible." };
 }
 export function calculateTrimosCorrection(parsedThread, wireResult) {
   if (!parsedThread?.ok || !wireResult?.ok) return { ok:false, source:TMP_TRIMOS_THREAD_ENGINE_VERSION, error:"THREAD_OR_WIRE_NOT_READY" };

@@ -235,3 +235,37 @@ export function evaluateMT16PeriodicVerification(form = {}) {
     criterio_origen:'INTRODUCIDO_POR_OPERARIO_CON_REFERENCIA_DOCUMENTAL',
     alcance:'Verificación frente a una referencia inicial y un criterio documentado. No declara validación automática ISO 1502 ni sustituye el certificado inicial.'};
 }
+
+// Reuse existing MT16 parser, wire selection and certificate readers.
+export async function resolveMT16VerificationAutomation(client, equipment, family) {
+  const [{parseThreadDesignation},{calculateBestWire},trace] = await Promise.all([
+    import('../thread/core/thread_parser.js'), import('../thread/core/trimos_engine.js'),
+    import('../thread/core/thread_traceability_engine.js')
+  ]);
+  const clean=value=>{const s=String(value??'').trim();return /^(null|undefined|-|n\/a)$/i.test(s)?'':s;};
+  const parsed=parseThreadDesignation(equipment.rango || equipment.descripcion || '');
+  const ring=family==='ANILLO_ROSCADO';
+  const wire=!ring && parsed.ok && parsed.angle_deg===60 ? calculateBestWire(parsed) : null;
+  const result={parsed,wire,bank:null,certificate:clean(equipment.informe_calibracion_url),messages:[...(parsed.warnings||[])],sources:[]};
+  const bankRequest=client.from('v_patron_valores_activos').select('*').eq('codigo','1288').limit(100);
+  const refRequest=client.from('calibraciones').select('id,certificado_url,fecha_ultima,procedimiento_codigo').eq('instrumento_id',equipment.id).order('fecha_ultima',{ascending:false,nullsFirst:false}).limit(50);
+  const responses=await Promise.allSettled([bankRequest,refRequest]);
+  const bankResponse=responses[0].status==='fulfilled'?responses[0].value:null;
+  if(bankResponse && !bankResponse.error){
+    const groups=trace.groupRows(bankResponse.data||[]);
+    if(groups.length===1){
+      const g=groups[0],length=parsed.ok?parsed.nominal_mm:null;
+      result.bank={codigo:'1288',descripcion:g.descripcion,certificado:g.certificado,vencimiento:g.vencimiento,
+        vigente:g.vigente,U:trace.getExpandedU(g.row,length),correccion:trace.getCorrection(g.row,length),longitud_referencia:length,k:trace.getK(g.row)};
+      result.sources.push('v_patron_valores_activos / 1288');
+    }else result.messages.push(groups.length?'Banco 1288: hay varios certificados activos; requiere seleccionar el aplicable.':'Banco 1288: no hay certificado disponible en la vista activa.');
+  }else result.messages.push('No se pudo recuperar el certificado del banco 1288.');
+  const refsResponse=responses[1].status==='fulfilled'?responses[1].value:null;
+  if(!result.certificate && refsResponse && !refsResponse.error){
+    const ref=(refsResponse.data||[]).find(c=>!String(c.procedimiento_codigo||'').startsWith('MT16')&&clean(c.certificado_url));
+    if(ref){result.certificate=clean(ref.certificado_url);result.sources.push('calibraciones / certificado de referencia existente');}
+  }
+  if(!result.certificate)result.messages.push('Este equipo no tiene certificado inicial enlazado en la ficha ni en el historial consultado.');
+  if(ring)result.messages.push('Anillo: montaje interior; no se propone el rodillo exterior de un tampón.');
+  return result;
+}

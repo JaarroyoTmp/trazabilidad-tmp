@@ -1,8 +1,8 @@
+/* Revisión local 2026-11-03: estados explícitos y coherencia con certificado 1288. No desplegado. */
 /* TMP THREAD CORE V33 - thread_traceability_engine.js */
 import { classifyPatternRecord, TMP_THREAD_PATTERN_CLASSIFIER_VERSION } from "./thread_pattern_classifier.js";
-import { MT16_TRACEABILITY_POLICY, TMP_MT16_AUTHORITATIVE_RULES_VERSION } from "./mt16_authoritative_rules.js";
 
-export const TMP_THREAD_TRACEABILITY_ENGINE_VERSION = "TMP_THREAD_TRACEABILITY_ENGINE_V34_20261005_TRIMOS_PRIMARY";
+export const TMP_THREAD_TRACEABILITY_ENGINE_VERSION = "TMP_THREAD_TRACEABILITY_ENGINE_V33_20260630_USES_SMART_CLASSIFIER";
 export const DEFAULT_TRACEABILITY_VIEW = "v_patron_valores_activos";
 
 export function normalizeText(v = "") {
@@ -40,37 +40,55 @@ export function isActive(row = {}) {
 }
 export function isValid(row = {}) {
   const e = normalizeText(row.estado || row.estado_certificado || row.status || "");
-  const estadoOk = !e || e.includes("VIGENTE") || e.includes("OK") || e.includes("APTO") || e.includes("VALID");
+  const estadoOk = ["VIGENTE", "OK", "APTO", "VALIDO", "VALID", "VALIDATED", "ACTIVO", "ACTIVE"].includes(e);
   return isActive(row) && estadoOk && !isExpired(getExpiry(row));
 }
-export const getK = (row = {}) => parseNum(row.k, null) || parseNum(row.factor_k, null) || parseNum(row.factor_cobertura, null) || 2;
-
-export function getCorrection(row = {}) {
-  return round(parseNum(row.correccion_num, null) || parseNum(row.correccion, null) || parseNum(row.error_num, null) || parseNum(row.error, null) || parseNum(row.desviacion_num, null) || parseNum(row.desviacion, null) || 0, 9);
+function firstDeclared(row, keys) {
+  for (const key of keys) if (row[key] !== null && row[key] !== undefined && row[key] !== "") return parseNum(row[key], null);
+  return null;
+}
+function usesTrimosGlobalEnvelope(row) {
+  return normalizeText(certNumber(row)) === "C-11377.00002";
+}
+function inTrimosCertifiedRange(nominal) {
+  const value = parseNum(nominal, null);
+  return Number.isFinite(value) && value >= 0 && value <= 300;
+}
+export function getK(row = {}) {
+  const k = firstDeclared(row, ["k", "factor_k", "factor_cobertura"]);
+  return Number.isFinite(k) && k > 0 ? k : null;
+}
+export function getCorrection(row = {}, nominalForTrimos = null) {
+  // C-11377.00002, p.4: la envolvente global Us se declara con corrección global nula.
+  if (usesTrimosGlobalEnvelope(row)) return inTrimosCertifiedRange(nominalForTrimos) ? 0 : null;
+  return round(firstDeclared(row, ["correccion_num", "correccion"]), 9);
 }
 export function getExpandedU(row = {}, nominalForTrimos = null) {
-  const code = String(rowCode(row)).trim();
-  const cert = normalizeText(certNumber(row));
-  const rule = normalizeText(row.source_rule || row.observaciones || "");
-  if (Number.isFinite(parseNum(nominalForTrimos, null)) && (code === "1288" || cert.includes("C-11377.00002") || rule.includes("TRIMOS_1288"))) return round((1.1 + 0.031 * parseNum(nominalForTrimos)) / 1000, 9);
-  return round(parseNum(row.incertidumbre_us_num, null) || parseNum(row.incertidumbre_us, null) || parseNum(row.incertidumbre_num, null) || parseNum(row.incertidumbre, null) || parseNum(row.u_expandida, null) || parseNum(row.u, null), 9);
+  if (usesTrimosGlobalEnvelope(row)) {
+    if (!inTrimosCertifiedRange(nominalForTrimos)) return null;
+    return round((1.1 + 0.031 * parseNum(nominalForTrimos)) / 1000, 9);
+  }
+  const value = firstDeclared(row, ["incertidumbre_us_num", "incertidumbre_us", "incertidumbre_num", "incertidumbre", "u_expandida", "u"]);
+  return Number.isFinite(value) && value > 0 ? round(value, 9) : null;
 }
 export function getStandardU(row = {}, nominalForTrimos = null) {
   const U = getExpandedU(row, nominalForTrimos);
   const k = getK(row);
-  if (!Number.isFinite(U) || !Number.isFinite(k) || k === 0) return null;
+  if (!Number.isFinite(U) || !Number.isFinite(k) || k <= 0) return null;
   return round(U / k, 9);
 }
+
 export function groupRows(rows = []) {
   const map = new Map();
   for (const row of rows) {
     const key = row.patron_id || row.codigo || row.codigo_equipo || row.codigo_patron || row.certificado_id || row.numero_certificado || `${rowCode(row)}|${certNumber(row)}|${rowDescription(row)}`;
-    if (!map.has(key)) map.set(key, []);
-    map.get(key).push(row);
+    const certificateKey = `${key}|${row.certificado_id || certNumber(row)}`;
+    if (!map.has(certificateKey)) map.set(certificateKey, []);
+    map.get(certificateKey).push(row);
   }
   return Array.from(map.entries()).map(([id, groupRows]) => {
     const first = groupRows[0] || {};
-    return { id: String(id), codigo: rowCode(first), descripcion: rowDescription(first), certificado: certNumber(first), fecha_calibracion: first.fecha_calibracion || "", vencimiento: getExpiry(first), vigente: groupRows.some(isValid), rows: groupRows, row: first, text: rowText(first) };
+    return { id: String(first.patron_id || id), codigo: rowCode(first), descripcion: rowDescription(first), certificado: certNumber(first), fecha_calibracion: first.fecha_calibracion || "", vencimiento: getExpiry(first), vigente: groupRows.every(isValid), rows: groupRows, row: first, text: rowText(first) };
   });
 }
 
@@ -89,7 +107,9 @@ export function decoratePattern(group, parsedThread, targetWire, nominalForU = n
     compatible,
     matched_diameter_mm: classification.matched_wire_diameter_mm,
     diameter_error_mm: classification.wire_error_mm,
-    correction_mm: getCorrection(row),
+    correction_mm: getCorrection(row, nominalForU),
+    correction_model: usesTrimosGlobalEnvelope(row) ? "C1137700002_GLOBAL_US_ZERO_CORRECTION" : "CERTIFICATE_EXPLICIT_CORRECTION",
+    uncertainty_reference_mm: nominalForU,
     u_expanded_mm: getExpandedU(row, nominalForU),
     u_standard_mm: getStandardU(row, nominalForU),
     k: getK(row)
@@ -127,31 +147,30 @@ export async function resolveTraceability({ supabase, parsedThread, trimosPlan, 
   const selected_rollers = rollers.find(x => x.compatible && x.vigente) || rollers[0] || null;
   const selected_master = masters.find(x => x.compatible && x.vigente) || masters[0] || null;
 
-  const bankOk = Boolean(selected_bank && selected_bank.vigente && Number.isFinite(selected_bank.u_standard_mm));
+  const bankOk = Boolean(selected_bank && selected_bank.vigente && selected_bank.compatible && selected_bank.certificado !== "-" && Number.isFinite(selected_bank.u_standard_mm) && selected_bank.u_standard_mm > 0);
   const rollersOk = Boolean(selected_rollers && selected_rollers.vigente && selected_rollers.compatible);
   const masterOk = Boolean(selected_master && selected_master.vigente && selected_master.compatible);
 
   const bankScore = bankOk ? 100 : selected_bank ? 55 : 0;
-  const normativeScore = parsedThread?.ok && trimosPlan?.ok ? 100 : 0;
-  // Rodillos y maestro quedan como diagnostico/informacion; NO forman parte del requisito trazable por defecto.
   const rollersScore = rollersOk ? 100 : selected_rollers ? 45 : 0;
   const masterScore = masterOk ? 100 : selected_master ? 45 : 0;
-  const totalScore = bankScore + normativeScore;
+  const normativeScore = parsedThread?.ok && trimosPlan?.ok ? 100 : 0;
+  const totalScore = bankScore + rollersScore + masterScore + normativeScore;
 
   const warnings = [];
-  if (!selected_bank) warnings.push("No se encontro banco Trimos certificado: trazabilidad MT16 incompleta.");
+  if (!selected_bank) warnings.push("No se encontro banco Trimos.");
   if (selected_bank && !selected_bank.vigente) warnings.push("Banco Trimos encontrado pero no vigente.");
   if (selected_bank && !Number.isFinite(selected_bank.u_standard_mm)) warnings.push("Banco Trimos sin incertidumbre estandar resuelta.");
-  if (!selected_rollers) warnings.push("Rodillos/hilos no registrados en Supabase: aviso informativo; no bloquea el certificado MT16.");
-  if (selected_rollers && !selected_rollers.compatible) warnings.push(`Rodillos registrados no coinciden con Ø${targetWire} mm. El montaje debe usar el rodillo indicado por el motor.`);
-  if (!selected_master) warnings.push("Sin patron/maestro roscado asociado: informativo; no es requisito por defecto para MT16.");
-  if (selected_master && !selected_master.compatible) warnings.push("Patron/maestro roscado existente pero no compatible: informativo; no bloquea MT16 por defecto.");
+  if (!selected_rollers) warnings.push("No se encontro registro clasificado como rodillos/hilos en Supabase.");
+  if (selected_rollers && !selected_rollers.compatible) warnings.push(`Rodillos encontrados, pero compatibilidad insuficiente con Ø${targetWire} mm.`);
+  if (!selected_master) warnings.push("No se encontro registro clasificado como patron/anillo/tampon de rosca en Supabase.");
+  if (selected_master && !selected_master.compatible) warnings.push("Patron de rosca encontrado, pero compatibilidad insuficiente por nominal/paso/clase.");
+  if (!rollersOk) warnings.push("Calculo tecnico permitido con rodillo normativo; certificado completo bloqueado hasta rodillos certificados.");
+  if (!masterOk) warnings.push("Calculo tecnico permitido con ISO965/ISO1502; certificado completo bloqueado hasta patron rosca certificado.");
 
   return {
     ok: bankOk,
-    ok_full_traceability: bankOk,
-    authoritative_policy_version: TMP_MT16_AUTHORITATIVE_RULES_VERSION,
-    traceability_policy: MT16_TRACEABILITY_POLICY,
+    ok_full_traceability: bankOk && rollersOk && masterOk,
     source: TMP_THREAD_TRACEABILITY_ENGINE_VERSION,
     classifier_version: TMP_THREAD_PATTERN_CLASSIFIER_VERSION,
     view,
@@ -165,16 +184,8 @@ export async function resolveTraceability({ supabase, parsedThread, trimosPlan, 
     selected_master,
     candidates: { banks: banks.slice(0, 10), rollers: rollers.slice(0, 10), masters: masters.slice(0, 10) },
     classifier_examples: classified.slice(0, 12).map(x => ({ codigo: x.codigo, descripcion: x.descripcion, class: x.class, score: x.score, evidences: x.classifier?.evidences?.slice(0, 4) || [] })),
-    corrections_mm: {
-      bank: selected_bank?.correction_mm || 0,
-      rollers_detected: selected_rollers?.correction_mm || 0,
-      master_detected: selected_master?.correction_mm || 0,
-      rollers_applied: 0,
-      master_applied: 0,
-      total: round(selected_bank?.correction_mm || 0, 9),
-      policy: "Solo correccion certificada del banco Trimos; rodillos y maestro no se suman por defecto."
-    },
-    score: { bank: bankScore, normative: normativeScore, total: totalScore, max: 200, percent: round((totalScore / 200) * 100, 1), diagnostics: { rollers: rollersScore, master: masterScore } },
+    corrections_mm: { bank: selected_bank?.correction_mm || 0, rollers: selected_rollers?.correction_mm || 0, master: selected_master?.correction_mm || 0, total: round((selected_bank?.correction_mm || 0) + (selected_rollers?.correction_mm || 0) + (selected_master?.correction_mm || 0), 9) },
+    score: { bank: bankScore, rollers: rollersScore, master: masterScore, normative: normativeScore, total: totalScore, max: 400, percent: round((totalScore / 400) * 100, 1) },
     warnings
   };
 }
