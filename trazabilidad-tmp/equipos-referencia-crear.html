@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TMP · Hojas de equipos de control</title>
-  <!-- Build 2026-10-05: imagen individual por elemento de control -->
+  <!-- Build HEC-01 · 2026-11-09: eliminación individual de hoja/version con protección de montajes -->
   <style>
     :root{--bg:#eef5fb;--panel:#fff;--ink:#102a43;--muted:#627d98;--line:#d8e5f0;--blue:#2563eb;--blue2:#1d4ed8;--green:#16a34a;--orange:#d97706;--red:#dc2626;--shadow:0 12px 34px rgba(15,45,75,.09);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#edf5fd,#f8fbfe);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
@@ -48,7 +48,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="brand"><img src="img/tmp-quality.png" alt="TMP"><div><h1>Hojas de equipos de control</h1><p>Qué medios debe preparar Calidad para cada referencia mecanizada</p></div></div>
+    <div class="brand"><img src="img/tmp-quality.png" alt="TMP"><div><h1>Hojas de equipos de control</h1><span class="chip blue no-print" id="sheetBuild">HEC-01 · 09/11/2026</span><p>Qué medios debe preparar Calidad para cada referencia mecanizada</p></div></div>
     <div class="top-actions no-print"><a class="btn" href="home.html">Inicio</a><a class="btn" href="equipos-referencia-consulta.html">Equipos / Buscar</a></div>
   </div>
 
@@ -57,6 +57,8 @@
     <button class="tab" data-tab="editar">Crear / editar hoja</button>
   </div>
 
+  <div id="deletionAvailability" class="msg show info no-print" role="status">Comprobando disponibilidad de eliminación…</div>
+  <div id="sheetActionMsg" class="msg" role="status" aria-live="polite"></div>
   <section id="view-buscar" class="view active">
     <div class="card">
       <div class="card-head"><div><div class="title">Buscar hojas ya creadas</div><div class="sub">El operario busca una referencia y obtiene inmediatamente los equipos que debe preparar.</div></div><span class="chip blue" id="searchCount">0 hojas</span></div>
@@ -125,6 +127,7 @@
         </div>
         <div id="msg" class="msg"></div>
         <div class="toolbar no-print" style="justify-content:flex-end;margin-top:12px">
+          <button class="btn danger" id="btnDeleteCurrent" type="button" style="display:none">Eliminar esta hoja</button>
           <button class="btn" id="btnCancel">Cancelar / limpiar</button>
           <button class="btn" id="btnSaveCurrent" style="display:none">Guardar cambios</button>
           <button class="btn green" id="btnSaveVersion">Guardar como nueva revisión/versión</button>
@@ -134,6 +137,14 @@
   </section>
 </div>
 
+<dialog id="deleteSheetDialog" aria-labelledby="deleteSheetTitle" style="max-width:650px">
+  <div class="dialog-head"><div><div class="title" id="deleteSheetTitle">Eliminar esta hoja / versión</div><div class="sub">Comprueba el identificador para elegir la copia duplicada correcta.</div></div></div>
+  <div id="deleteSheetDetails"></div>
+  <p>Se eliminará definitivamente esta hoja y sus elementos. Las otras hojas y versiones de la referencia se conservan. Los instrumentos del inventario no se eliminan.</p>
+  <p id="deleteDraftNotice" class="sub" hidden>Los cambios sin guardar de esta hoja se descartarán al eliminarla.</p>
+  <p id="deleteSheetError" role="status" aria-live="polite" style="color:#b91c1c"></p>
+  <div class="toolbar" style="justify-content:flex-end"><button type="button" class="btn" id="cancelDeleteSheet">Cancelar</button><button type="button" class="btn danger" id="confirmDeleteSheet" disabled>Eliminar definitivamente</button></div>
+</dialog>
 <dialog id="inventoryDialog">
   <div class="dialog-head"><div><div class="title">Seleccionar equipo del inventario</div><div class="sub">Úsalo cuando la hoja requiera un instrumento concreto. Si solo necesitas “1 pie de rey”, no hace falta vincular código.</div></div><button class="btn" data-close="inventoryDialog">Cerrar</button></div>
   <div class="toolbar"><input class="grow" id="inventorySearch" placeholder="Código, descripción, familia o ubicación..."><select id="inventoryStatus"><option value="">Todos</option><option value="OK">OK</option><option value="PRÓXIMO">Próximo</option><option value="FUERA">Fuera</option><option value="SIN FECHA">Sin fecha</option></select></div>
@@ -162,6 +173,7 @@
 const sb=window.supabase; const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"','&quot;');
 const norm=v=>String(v??"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+let deletionEnabled=false;
 let refs=[], inventory=[], ubicMap=new Map(), currentId=null, currentRecord=null, dirty=false;
 let qrMountUrl='', activeMountSession=null, activeChecklistRecord=null, activeChecklistItems=[];
 
@@ -181,7 +193,7 @@ async function loadData(){if(!sb){showMsg("Supabase no disponible.","err");retur
   sb.from('ubicaciones').select('id,nombre,tipo,activo')
 ]);
  if(r.error)console.warn(r.error); if(i.error)console.warn(i.error); if(u.error)console.warn(u.error);
- refs=r.data||[]; inventory=(i.data||[]).filter(isActive); ubicMap=new Map((u.data||[]).map(x=>[x.id,x]));
+ refs=r.data||[];deletionEnabled=!r.error&&refs.length>0&&refs.every(row=>Object.prototype.hasOwnProperty.call(row,'id_vinculo'));$('#deletionAvailability').textContent=deletionEnabled?'':'Eliminar está preparado, pero falta habilitar el permiso en la base de datos. La creación y consulta de hojas siguen disponibles.';$('#deletionAvailability').className=deletionEnabled?'msg':'msg show info no-print';$('#btnDeleteCurrent').disabled=!deletionEnabled; inventory=(i.data||[]).filter(isActive); ubicMap=new Map((u.data||[]).map(x=>[x.id,x]));
  fillDatalists(); renderSearch(); renderInventory(); renderClone();
 }
 function fillDatalists(){const clients=[...new Set(refs.map(x=>x.cliente).filter(Boolean))].sort();const resp=[...new Set(refs.map(x=>x.responsable).filter(Boolean))].sort();$('#clientesList').innerHTML=clients.map(x=>`<option value="${esc(x)}">`).join('');$('#responsablesList').innerHTML=resp.map(x=>`<option value="${esc(x)}">`).join('');
@@ -190,8 +202,8 @@ function revisionOf(r){return r?.revision||extractRevision(r?.observaciones)||r?
 function extractRevision(obs){const m=String(obs||"").match(/(?:REV(?:ISI[ÓO]N)?|REV\.)\s*[:\-]?\s*([^|;\n]+)/i);return m?m[1].trim():""}
 function equipmentLabel(e){return e.medio_control||e.descripcion_equipo||"Equipo sin descripción"}
 
-function renderSearch(){const q=norm($('#searchRef').value),rev=$('#searchRevision').value,cl=$('#searchClient').value;const filtered=refs.filter(r=>(!q||norm([r.referencia,r.pieza,r.cliente,r.observaciones,r.version].join(' ')).includes(q))&&(!rev||revisionOf(r)===rev)&&(!cl||r.cliente===cl));$('#searchCount').textContent=`${filtered.length} hoja${filtered.length===1?'':'s'}`;$('#searchResults').innerHTML=filtered.length?filtered.slice(0,150).map(r=>{const eq=Array.isArray(r.equipos)?r.equipos:[];return `<article class="ref-card"><div class="ref-top"><div><div class="ref-code">${esc(r.referencia||'—')}</div><div class="ref-meta">Rev. ${esc(revisionOf(r)||'—')} · ${esc(r.version||'sin versión')} · ${esc(r.fecha||'sin fecha')}</div></div><span class="chip blue">${eq.length} medios</span></div><div class="ref-eq">${esc(r.pieza||'Sin descripción')}</div><div class="ref-meta">${esc(r.cliente||'Sin cliente')} · ${esc(r.responsable||'Sin responsable')}</div><div class="ref-actions"><button class="btn small primary" data-open="${esc(r.id)}">Abrir</button><button class="btn small" data-prepare="${esc(r.id)}">Preparar equipos</button><button class="btn small" data-qr="${esc(r.id)}">QR montaje</button><button class="btn small" data-newrev="${esc(r.id)}">Nueva revisión</button></div></article>`}).join(''):'<div class="empty" style="grid-column:1/-1">No hay hojas que coincidan.</div>';
- $$('[data-open]').forEach(b=>b.onclick=()=>openRecord(b.dataset.open,false));$$('[data-newrev]').forEach(b=>b.onclick=()=>openRecord(b.dataset.newrev,true));$$('[data-prepare]').forEach(b=>b.onclick=()=>openChecklistById(b.dataset.prepare));$$('[data-qr]').forEach(b=>b.onclick=()=>{const r=refs.find(x=>String(x.id)===String(b.dataset.qr));if(r){openRecord(r.id,false);setTimeout(()=>$('#btnPrint').click(),50)}});}
+function renderSearch(){const q=norm($('#searchRef').value),rev=$('#searchRevision').value,cl=$('#searchClient').value;const filtered=refs.filter(r=>(!q||norm([r.referencia,r.pieza,r.cliente,r.observaciones,r.version].join(' ')).includes(q))&&(!rev||revisionOf(r)===rev)&&(!cl||r.cliente===cl));$('#searchCount').textContent=`${filtered.length} hoja${filtered.length===1?'':'s'}`;$('#searchResults').innerHTML=filtered.length?filtered.slice(0,150).map(r=>{const eq=Array.isArray(r.equipos)?r.equipos:[];return `<article class="ref-card"><div class="ref-top"><div><div class="ref-code">${esc(r.referencia||'—')}</div><div class="ref-meta">Rev. ${esc(revisionOf(r)||'—')} · ${esc(r.version||'sin versión')} · ${esc(r.fecha||'sin fecha')}</div></div><span class="chip blue">${eq.length} medios</span></div><div class="ref-eq">${esc(r.pieza||'Sin descripción')}</div><div class="ref-meta">${esc(r.cliente||'Sin cliente')} · ${esc(r.responsable||'Sin responsable')}</div><div class="ref-actions"><button class="btn small primary" data-open="${esc(r.id)}">Abrir</button><button class="btn small" data-prepare="${esc(r.id)}">Preparar equipos</button><button class="btn small" data-qr="${esc(r.id)}">QR montaje</button><button class="btn small" data-newrev="${esc(r.id)}">Nueva revisión</button><button class="btn small danger" data-delete-sheet="${esc(r.id)}" ${deletionEnabled?'':'disabled title="Permiso de eliminación pendiente de habilitar"'}>Eliminar</button></div></article>`}).join(''):'<div class="empty" style="grid-column:1/-1">No hay hojas que coincidan.</div>';
+ $$('[data-delete-sheet]').forEach(b=>b.onclick=()=>requestSheetDeletion(b.dataset.deleteSheet));$$('[data-open]').forEach(b=>b.onclick=()=>openRecord(b.dataset.open,false));$$('[data-newrev]').forEach(b=>b.onclick=()=>openRecord(b.dataset.newrev,true));$$('[data-prepare]').forEach(b=>b.onclick=()=>openChecklistById(b.dataset.prepare));$$('[data-qr]').forEach(b=>b.onclick=()=>{const r=refs.find(x=>String(x.id)===String(b.dataset.qr));if(r){openRecord(r.id,false);setTimeout(()=>$('#btnPrint').click(),50)}});}
 ['searchRef','searchRevision','searchClient'].forEach(id=>$('#'+id).addEventListener(id==='searchRef'?'input':'change',renderSearch));$('#btnNew').onclick=()=>{resetForm();switchTab('editar')};
 
 function legacyEquipmentText(data={}){const d=data.medio_control||data.descripcion_equipo||'';const spec=data.especificacion||data.caracteristica||'';return [d,spec].filter(Boolean).join(spec&&d&&!norm(d).includes(norm(spec))?' · ':'')}
@@ -242,10 +254,61 @@ function buildPrintSheet(record=null){const r=record||printDataRecord(),eq=Array
 function printCurrentSheet(){buildPrintSheet();document.body.dataset.print='sheet';setTimeout(()=>window.print(),60)}
 window.addEventListener('afterprint',()=>{delete document.body.dataset.print});
 
-function resetForm(){currentId=null;currentRecord=null;renderQr(null);loadMountHistory(null);$('#referencia').value='';$('#revision').value='';$('#pieza').value='';$('#cliente').value='';$('#responsable').value='';$('#fecha').value=today();$('#version').value='';$('#observaciones').value='';$('#rows').innerHTML='';setPiecePhoto('');makeRow();$('#modeBadge').textContent='NUEVA';$('#btnSaveCurrent').style.display='none';setDirty(false)}
-function openRecord(id,newRevision){const r=refs.find(x=>String(x.id)===String(id));if(!r)return;currentRecord=r;currentId=newRevision?null:r.id;$('#referencia').value=r.referencia||'';$('#revision').value=revisionOf(r)||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=newRevision?today():(r.fecha||today());$('#version').value=newRevision?'':(r.version||'');$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(Array.isArray(r.equipos)?r.equipos:[]).forEach(makeRow);if(!$('#rows').children.length)makeRow();$('#modeBadge').textContent=newRevision?'NUEVA REVISIÓN':(r.version||'EDITANDO');$('#btnSaveCurrent').style.display=newRevision?'none':'inline-flex';setDirty(false);renderQr(newRevision?null:r);loadMountHistory(newRevision?null:r.id);switchTab('editar')}
+function resetForm(){currentId=null;currentRecord=null;renderQr(null);loadMountHistory(null);$('#referencia').value='';$('#revision').value='';$('#pieza').value='';$('#cliente').value='';$('#responsable').value='';$('#fecha').value=today();$('#version').value='';$('#observaciones').value='';$('#rows').innerHTML='';setPiecePhoto('');makeRow();$('#modeBadge').textContent='NUEVA';$('#btnSaveCurrent').style.display='none';$('#btnDeleteCurrent').style.display='none';setDirty(false)}
+function openRecord(id,newRevision){const r=refs.find(x=>String(x.id)===String(id));if(!r)return;currentRecord=r;currentId=newRevision?null:r.id;$('#referencia').value=r.referencia||'';$('#revision').value=revisionOf(r)||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=newRevision?today():(r.fecha||today());$('#version').value=newRevision?'':(r.version||'');$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(Array.isArray(r.equipos)?r.equipos:[]).forEach(makeRow);if(!$('#rows').children.length)makeRow();$('#modeBadge').textContent=newRevision?'NUEVA REVISIÓN':(r.version||'EDITANDO');$('#btnSaveCurrent').style.display=newRevision?'none':'inline-flex';$('#btnDeleteCurrent').style.display=newRevision?'none':'inline-flex';setDirty(false);renderQr(newRevision?null:r);loadMountHistory(newRevision?null:r.id);switchTab('editar')}
 
 function buildPayload(){const ref=$('#referencia').value.trim();if(!ref){showMsg('La referencia es obligatoria.','err');return null}const rows=attachPhoto(allRows());if(!rows.length){showMsg('Añade al menos un equipo o medio de control.','err');return null}if(rows.some(x=>!x.medio_control&&!x.codigo_equipo)){showMsg('Hay líneas sin equipo definido.','err');return null}const rev=$('#revision').value.trim();let obs=$('#observaciones').value.trim();if(rev&&!/REV/i.test(obs))obs=`REVISION: ${rev}${obs?` | ${obs}`:''}`;return {referencia:ref,pieza:$('#pieza').value.trim()||null,cliente:$('#cliente').value.trim()||null,responsable:$('#responsable').value.trim()||null,fecha:$('#fecha').value||null,version:$('#version').value.trim()||null,observaciones:obs||null,equipos:rows}}
+// HEC-01: delete exactly one reviewed sheet/version; mounting history is protected server-side.
+let deletionReview=null,deletionBusy=false,deletionSequence=0;
+function sheetActionMessage(text,type='info'){const node=$('#sheetActionMsg');node.textContent=text;node.className='msg show '+type;}
+function closeDeletion(){if(deletionBusy)return;deletionSequence++;deletionReview=null;$('#deleteSheetDialog').close();}
+$('#cancelDeleteSheet').onclick=closeDeletion;
+$('#deleteSheetDialog').addEventListener('cancel',event=>{event.preventDefault();closeDeletion();});
+async function requestSheetDeletion(id){
+ if(!deletionEnabled){sheetActionMessage('La eliminación todavía no está habilitada en la base de datos.','info');return;}
+ if(deletionBusy)return;const sequence=++deletionSequence;deletionReview=null;
+ $('#deleteDraftNotice').hidden=!(dirty&&String(currentId)===String(id));$('#deleteSheetDetails').textContent='Comprobando la hoja y sus montajes…';$('#deleteSheetError').textContent='';$('#confirmDeleteSheet').disabled=true;$('#deleteSheetDialog').showModal();
+ try{
+  const [sheet,mounts]=await Promise.all([
+   sb.from('control_metrologico').select('*').eq('id',id).maybeSingle(),
+   sb.from('control_montajes').select('id',{count:'exact',head:true}).eq('hoja_id',String(id))
+  ]);
+  if(sequence!==deletionSequence)return;
+  if(sheet.error)throw sheet.error;if(!sheet.data)throw Error('Esta hoja ya no está disponible. Actualiza la búsqueda.');
+  const r=sheet.data,lines=Array.isArray(r.equipos)?r.equipos.length:0;
+  $('#deleteSheetDetails').innerHTML=`<p><b>Referencia:</b> ${esc(r.referencia)}<br><b>Revisión:</b> ${esc(revisionOf(r)||'—')}<br><b>Versión:</b> ${esc(r.version||'—')}<br><b>Identificador de hoja:</b> ${esc(r.id)}<br><b>Pieza:</b> ${esc(r.pieza||'—')}<br><b>Cliente:</b> ${esc(r.cliente||'—')}<br><b>Fecha:</b> ${esc(r.fecha||'—')}<br><b>Elementos:</b> ${lines}</p>`;
+  if(mounts.error)throw Error('No se pudieron comprobar los montajes vinculados. No se permite borrar hasta comprobarlos.');
+  if(!Number.isInteger(mounts.count)||mounts.count<0)throw Error('No se ha podido confirmar el número de montajes vinculados.');
+  if(mounts.count>0)throw Error(`Esta hoja tiene ${mounts.count} montaje(s) registrado(s). Se conserva para mantener su historial. Puedes eliminar la copia duplicada que no tenga montajes.`);
+  deletionReview=structuredClone(r);$('#confirmDeleteSheet').disabled=false;
+ }catch(e){if(sequence===deletionSequence)$('#deleteSheetError').textContent=e.message||String(e);}
+}
+$('#btnDeleteCurrent').onclick=()=>{if(currentId!==null)requestSheetDeletion(currentId);};
+$('#confirmDeleteSheet').onclick=async()=>{
+ if(deletionBusy||!deletionReview)return;const r=structuredClone(deletionReview);deletionBusy=true;$('#confirmDeleteSheet').disabled=true;$('#cancelDeleteSheet').disabled=true;$('#deleteSheetError').textContent='Eliminando la hoja seleccionada…';
+ try{
+  // The primary-key filter is mandatory. Content filters reject a sheet changed since review.
+  let query=sb.from('control_metrologico').delete().eq('id',r.id);
+  for(const key of ['referencia','pieza','cliente','responsable','fecha','version','observaciones','creado_en'])query=r[key]==null?query.is(key,null):query.eq(key,r[key]);
+  query=query.eq('equipos',JSON.stringify(r.equipos));
+  const {data,error}=await query.select('id');
+  if(error){if(error.code==='23503')throw Error('La hoja tiene un montaje vinculado y se conserva su historial.');throw error;}
+  if(!Array.isArray(data)||data.length!==1||String(data[0].id)!==String(r.id))throw Error('No se ha confirmado la eliminación. La hoja puede haber cambiado o la operación no está autorizada. Actualiza la búsqueda antes de volver a intentarlo.');
+  refs=refs.filter(item=>String(item.id)!==String(r.id));
+  if(String(currentId)===String(r.id)){resetForm();switchTab('buscar');}
+  else if(String(currentRecord?.id)===String(r.id)){currentRecord=null;renderQr(null);loadMountHistory(null);}
+  if(String(activeChecklistRecord?.id)===String(r.id)){if($('#checkDialog').open)$('#checkDialog').close();activeChecklistRecord=null;activeMountSession=null;activeChecklistItems=[];}
+  sessionStorage.removeItem(`tmp_montaje_${r.id}`);
+  try{const cached=JSON.parse(localStorage.getItem('editarReferencia')||'null');if(String(cached?.id)===String(r.id))localStorage.removeItem('editarReferencia');}catch{}
+  const revisionFilter=$('#searchRevision').value,clientFilter=$('#searchClient').value;fillDatalists();
+  if([...$('#searchRevision').options].some(x=>x.value===revisionFilter))$('#searchRevision').value=revisionFilter;
+  if([...$('#searchClient').options].some(x=>x.value===clientFilter))$('#searchClient').value=clientFilter;
+  renderSearch();renderClone();sheetActionMessage(`Hoja eliminada: ${r.referencia} · ${r.version||'sin versión'} · ID ${r.id}.`,'ok');
+  deletionReview=null;deletionSequence++;$('#deleteSheetDialog').close();
+ }catch(e){$('#deleteSheetError').textContent='No se ha confirmado el borrado: '+(e.message||String(e));sheetActionMessage('No se ha confirmado la eliminación. La hoja permanece visible hasta comprobar el resultado.','err');deletionReview=null;}
+ finally{deletionBusy=false;$('#cancelDeleteSheet').disabled=false;$('#confirmDeleteSheet').disabled=!deletionReview;}
+};
+
 async function nextVersion(ref){const list=refs.filter(r=>r.referencia===ref);let m=0;list.forEach(r=>{const n=String(r.version||'').match(/(\d+)/);if(n)m=Math.max(m,+n[1])});return `V${m+1}`}
 $('#btnSaveCurrent').onclick=async()=>{if(!currentId)return;const p=buildPayload();if(!p)return;if(!confirm('¿Guardar cambios sobre esta versión?'))return;const {error}=await sb.from('control_metrologico').update(p).eq('id',currentId);if(error)return showMsg(error.message,'err');showMsg('Hoja actualizada correctamente.','ok');setDirty(false);await loadData()}
 $('#btnSaveVersion').onclick=async()=>{const p=buildPayload();if(!p)return;p.version=await nextVersion(p.referencia);if(!confirm(`Se creará ${p.referencia} · ${p.version}. ¿Continuar?`))return;const {data,error}=await sb.from('control_metrologico').insert(p).select('*').single();if(error)return showMsg(error.message,'err');showMsg(`Hoja guardada como ${p.version}.`,'ok');setDirty(false);await loadData();if(data)openRecord(data.id,false)}
@@ -271,7 +334,7 @@ $('#btnChecklist').onclick=()=>openChecklist();$('#btnPrintChecklist').onclick=(
 $$('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).close());
 ['referencia','revision','pieza','cliente','responsable','fecha','observaciones'].forEach(id=>$('#'+id).addEventListener('input',()=>setDirty()));window.addEventListener('beforeunload',e=>{if(!dirty)return;e.preventDefault();e.returnValue=''})
 
-const params=new URLSearchParams(location.search);const editRaw=localStorage.getItem('editarReferencia');resetForm();loadData().then(async()=>{const hoja=params.get('hoja');if(hoja&&params.get('modo')==='montaje'){const r=refs.find(x=>String(x.id)===String(hoja));if(r){openRecord(r.id,false);await openChecklist(r);return}else showMsg('No se encontró la hoja asociada al QR.','err')}if(params.get('modo')==='editar'&&editRaw){try{const r=JSON.parse(editRaw);refs.unshift(r);openRecord(r.id||'',false);if(!r.id){currentRecord=r;currentId=null;$('#referencia').value=r.referencia||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=r.fecha||today();$('#version').value=r.version||'';$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(r.equipos||[]).forEach(makeRow);switchTab('editar')}}catch(e){console.warn(e)}}});
+const params=new URLSearchParams(location.search);const editRaw=localStorage.getItem('editarReferencia');resetForm();loadData().then(async()=>{const hoja=params.get('hoja');if(hoja&&params.get('modo')==='montaje'){const r=refs.find(x=>String(x.id)===String(hoja));if(r){openRecord(r.id,false);await openChecklist(r);return}else showMsg('No se encontró la hoja asociada al QR.','err')}if(params.get('modo')==='editar'&&editRaw){try{let r=JSON.parse(editRaw);if(r.id!=null){const fresh=await sb.from('control_metrologico').select('*').eq('id',r.id).maybeSingle();if(fresh.error||!fresh.data){localStorage.removeItem('editarReferencia');sheetActionMessage('La hoja que se intentaba editar ya no está disponible. Busca la referencia de nuevo.','err');return;}r=fresh.data;}if(!refs.some(x=>String(x.id)===String(r.id)))refs.unshift(r);openRecord(r.id||'',false);if(!r.id){currentRecord=r;currentId=null;$('#referencia').value=r.referencia||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=r.fecha||today();$('#version').value=r.version||'';$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(r.equipos||[]).forEach(makeRow);switchTab('editar')}}catch(e){console.warn(e)}}});
 </script>
 </body>
 </html>
