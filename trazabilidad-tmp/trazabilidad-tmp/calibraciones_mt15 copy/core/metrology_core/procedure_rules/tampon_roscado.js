@@ -1,21 +1,12 @@
 import { createPoint, parseNum } from "./shared.js";
 
 export const TAMPON_ROSCADO_PROCEDURE_VERSION =
-  "TMP_TAMPON_ROSCADO_PROCEDURE_V3_20260925_TMP_WIRE_TABLE";
-
-const TMP_METRIC_WIRE_BY_PITCH_MM = Object.freeze({
-  "0.25":0.170, "0.30":0.170, "0.35":0.220, "0.40":0.250,
-  "0.45":0.290, "0.50":0.290, "0.60":0.335, "0.70":0.455,
-  "0.80":0.455, "0.90":0.530, "1.00":0.620, "1.25":0.725,
-  "1.50":0.895, "1.75":1.100, "2.00":1.350, "2.50":1.650,
-  "3.00":2.050, "3.50":2.050, "4.00":2.550, "4.50":2.550,
-  "5.00":3.200, "5.50":3.200
-});
+  "TMP_TAMPON_ROSCADO_PROCEDURE_V2_20260630_GUIDED_KNOWLEDGE";
 
 function rodilloMetricoISO(paso) {
   const p = parseNum(paso);
   if (!p) return null;
-  return TMP_METRIC_WIRE_BY_PITCH_MM[p.toFixed(2)] ?? null;
+  return Math.round((0.57735026919 * p) * 1000) / 1000;
 }
 
 function parseThreadFromText(text = "") {
@@ -203,4 +194,78 @@ export function buildTamponRoscadoProcedure(ctx = {}) {
       ? []
       : ["No se pudo calcular rodillo recomendado. Revisar tipo de rosca/paso."]
   };
+}
+// MT16 periodic verification. No calibration dates or initial certificates are changed.
+export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_VERIFICACION_20261105';
+export function evaluateMT16PeriodicVerification(form = {}) {
+  const number = value => value === null || value === undefined || String(value).trim() === '' ? null : Number(String(value).trim().replace(',', '.'));
+  const missing = [], failures = [], points = [];
+  const required = {operario:'Referencia del operario',certificado_inicial:'Certificado inicial',banco:'Banco utilizado',certificado_banco:'Certificado del banco',accesorios:'Accesorios y montaje utilizados',metodo:'Método de medida documentado',criterio:'Documento del criterio de aceptación'};
+  for (const [key,label] of Object.entries(required)) if (!String(form[key] || '').trim()) missing.push(label);
+  if (!form.metodo_confirmado) missing.push('Confirmar que las lecturas y referencias corresponden a la misma magnitud y método');
+  for (const [key,label] of [['identificacion','Identificación'],['limpieza','Limpieza y estado de superficies'],['integridad','Ausencia de daños'],['trazabilidad','Certificado del banco vigente y aplicable']]) {
+    if (form[key] === 'NOK') failures.push(label + ': no conforme');
+    else if (form[key] !== 'OK') missing.push(label);
+  }
+  for (const key of ['PASA','NO_PASA']) {
+    const p = form.puntos?.[key] || {}, label = key === 'PASA' ? 'PASA' : 'NO PASA';
+    const baseline=number(p.referencia), min=number(p.min), max=number(p.max), U=number(p.U);
+    const readings = Array.isArray(p.lecturas) ? p.lecturas.map(number) : [];
+    const problems=[];
+    for (const [v,name] of [[baseline,'referencia inicial'],[min,'variación mínima admitida'],[max,'variación máxima admitida']]) if (v === null || !Number.isFinite(v)) problems.push(name);
+    if (U === null || !Number.isFinite(U) || U <= 0) problems.push('incertidumbre expandida de la comparación, mayor que cero');
+    if (readings.length !== 5 || readings.some(v=>v === null || !Number.isFinite(v))) problems.push('cinco lecturas numéricas');
+    if (min !== null && max !== null && min > max) problems.push('límites ordenados de menor a mayor');
+    if (problems.length) {
+      missing.push(...problems.map(s=>label+': '+s));
+      points.push({lado:key,resultado:'PENDIENTE',media:null,variacion:null});
+      continue;
+    }
+    const avg=readings.reduce((a,b)=>a+b,0)/5, delta=avg-baseline;
+    const accepted=delta-U>=min-1e-12 && delta+U<=max+1e-12;
+    const item={lado:key,resultado:accepted?'OK':'NOK',media:avg,referencia:baseline,variacion:delta,min,max,U,
+      regla:'Aceptar si [variación − U, variación + U] está completamente dentro de [mínimo, máximo]',
+      lectura_magnitud:form.magnitud || 'INDICACION_TRIMOS',unidad:'mm'};
+    points.push(item);
+    if(!accepted) failures.push(label+': no cumple la regla de aceptación con incertidumbre');
+  }
+  const result=failures.length?'NOK':missing.length?'PENDIENTE':'OK';
+  return {tipo:'VERIFICACION_PERIODICA',version:MT16_PERIODIC_VERIFICATION_VERSION,resultado:result,
+    puntos:points,faltantes:missing,motivos:failures,
+    criterio_origen:'INTRODUCIDO_POR_OPERARIO_CON_REFERENCIA_DOCUMENTAL',
+    alcance:'Verificación frente a una referencia inicial y un criterio documentado. No declara validación automática ISO 1502 ni sustituye el certificado inicial.'};
+}
+
+// Reuse existing MT16 parser, wire selection and certificate readers.
+export async function resolveMT16VerificationAutomation(client, equipment, family) {
+  const [{parseThreadDesignation},{calculateBestWire},trace] = await Promise.all([
+    import('../thread/core/thread_parser.js'), import('../thread/core/trimos_engine.js'),
+    import('../thread/core/thread_traceability_engine.js')
+  ]);
+  const clean=value=>{const s=String(value??'').trim();return /^(null|undefined|-|n\/a)$/i.test(s)?'':s;};
+  const parsed=parseThreadDesignation(equipment.rango || equipment.descripcion || '');
+  const ring=family==='ANILLO_ROSCADO';
+  const wire=!ring && parsed.ok && parsed.angle_deg===60 ? calculateBestWire(parsed) : null;
+  const result={parsed,wire,bank:null,certificate:clean(equipment.informe_calibracion_url),messages:[...(parsed.warnings||[])],sources:[]};
+  const bankRequest=client.from('v_patron_valores_activos').select('*').eq('codigo','1288').limit(100);
+  const refRequest=client.from('calibraciones').select('id,certificado_url,fecha_ultima,procedimiento_codigo').eq('instrumento_id',equipment.id).order('fecha_ultima',{ascending:false,nullsFirst:false}).limit(50);
+  const responses=await Promise.allSettled([bankRequest,refRequest]);
+  const bankResponse=responses[0].status==='fulfilled'?responses[0].value:null;
+  if(bankResponse && !bankResponse.error){
+    const groups=trace.groupRows(bankResponse.data||[]);
+    if(groups.length===1){
+      const g=groups[0],length=parsed.ok?parsed.nominal_mm:null;
+      result.bank={codigo:'1288',descripcion:g.descripcion,certificado:g.certificado,vencimiento:g.vencimiento,
+        vigente:g.vigente,U:trace.getExpandedU(g.row,length),correccion:trace.getCorrection(g.row,length),longitud_referencia:length,k:trace.getK(g.row)};
+      result.sources.push('v_patron_valores_activos / 1288');
+    }else result.messages.push(groups.length?'Banco 1288: hay varios certificados activos; requiere seleccionar el aplicable.':'Banco 1288: no hay certificado disponible en la vista activa.');
+  }else result.messages.push('No se pudo recuperar el certificado del banco 1288.');
+  const refsResponse=responses[1].status==='fulfilled'?responses[1].value:null;
+  if(!result.certificate && refsResponse && !refsResponse.error){
+    const ref=(refsResponse.data||[]).find(c=>!String(c.procedimiento_codigo||'').startsWith('MT16')&&clean(c.certificado_url));
+    if(ref){result.certificate=clean(ref.certificado_url);result.sources.push('calibraciones / certificado de referencia existente');}
+  }
+  if(!result.certificate)result.messages.push('Este equipo no tiene certificado inicial enlazado en la ficha ni en el historial consultado.');
+  if(ring)result.messages.push('Anillo: montaje interior; no se propone el rodillo exterior de un tampón.');
+  return result;
 }
