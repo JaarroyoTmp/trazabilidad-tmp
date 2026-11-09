@@ -1,468 +1,338 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>TMP · Crear/Editar Tabla de Equipos</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-
-  <link rel="icon" href="img/tmp-quality.png" />
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TMP · Hojas de equipos de control</title>
+  <!-- Build HEC-02 · 2026-11-09: eliminación individual de hoja/version con protección de montajes -->
   <style>
-    :root{
-      --bg0:#050b16;
-      --bg1:#071324;
-      --card:#0f1f33;
-      --border:#203552;
-      --txt:#f2f6fb;
-      --muted:#9fb3ca;
-      --accent:#3ea8ff;
-      --bad:#ff6b6b;
+    :root{--bg:#eef5fb;--panel:#fff;--ink:#102a43;--muted:#627d98;--line:#d8e5f0;--blue:#2563eb;--blue2:#1d4ed8;--green:#16a34a;--orange:#d97706;--red:#dc2626;--shadow:0 12px 34px rgba(15,45,75,.09);--radius:18px}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#edf5fd,#f8fbfe);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    button,input,select,textarea{font:inherit} .wrap{max-width:1680px;margin:auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}.brand{display:flex;align-items:center;gap:11px}.brand img{width:46px;height:46px;object-fit:contain;background:white;border-radius:12px;padding:4px;border:1px solid var(--line)}.brand h1{font-size:22px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{border:1px solid #cbddeb;background:#fff;color:#173d63;border-radius:11px;padding:9px 13px;font-weight:850;font-size:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}.btn:hover{background:#f6faff}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn.primary:hover{background:var(--blue2)}.btn.green{background:#16a34a;color:white;border-color:#16a34a}.btn.danger{color:var(--red);border-color:#fecaca;background:#fff7f7}.btn.small{padding:6px 9px;font-size:11px}
+    .tabs{display:flex;gap:8px;margin-bottom:12px}.tab{padding:10px 15px;border-radius:12px;border:1px solid var(--line);background:white;font-weight:900;color:#31516e;cursor:pointer}.tab.active{background:#eaf2ff;border-color:#93b7ef;color:#174ea6}.view{display:none}.view.active{display:block}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:15px;min-width:0}.full{grid-column:1/-1}.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}.title{font-size:16px;font-weight:950}.sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.35}.chip{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;border:1px solid var(--line);font-size:10px;font-weight:900;background:#f8fbff;white-space:nowrap}.chip.ok{background:#ecfdf3;border-color:#bbf7d0;color:#15803d}.chip.warn{background:#fff7ed;border-color:#fed7aa;color:#c2410c}.chip.bad{background:#fff1f2;border-color:#fecdd3;color:#be123c}.chip.blue{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+    .form-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field.span2{grid-column:span 2}.field.span3{grid-column:span 3}.field.span6{grid-column:1/-1}.field label{font-size:10px;font-weight:900;color:#54708a;text-transform:uppercase;letter-spacing:.04em}.field input,.field select,.field textarea{width:100%;border:1px solid #cbddeb;border-radius:10px;background:white;padding:9px 10px;color:var(--ink);outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#7aa7e8;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.field textarea{min-height:64px;resize:vertical}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar .grow{flex:1;min-width:220px}.toolbar input,.toolbar select{border:1px solid #cbddeb;border-radius:10px;padding:8px 10px;background:#fff;outline:none}.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}.stat{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:#fbfdff}.stat b{display:block;font-size:20px;color:#173d63}.stat span{font-size:10px;color:var(--muted);font-weight:800}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px;background:white}.tbl{width:100%;border-collapse:collapse;font-size:11px}.tbl th,.tbl td{padding:8px;border-bottom:1px solid #eaf1f7;text-align:left;vertical-align:middle}.tbl th{background:#f4f8fc;color:#48637d;font-size:10px;text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0;z-index:2}.tbl tr:last-child td{border-bottom:0}.tbl input,.tbl select{width:100%;min-width:90px;border:1px solid #d4e1ed;border-radius:8px;padding:7px 8px;background:white}.tbl .qty{width:64px;min-width:64px;text-align:center}.tbl .code{min-width:115px}.tbl .desc{min-width:210px}.tbl .spec{min-width:160px}.tbl .type{min-width:140px}.tbl .note{min-width:160px}
+    .state-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}.s-ok{background:#22c55e}.s-warn{background:#f59e0b}.s-bad{background:#ef4444}.s-neutral{background:#94a3b8}
+    .search-box{display:grid;grid-template-columns:minmax(260px,1fr) 180px 140px auto;gap:8px;margin-bottom:12px}.search-box input,.search-box select{border:1px solid #cbddeb;border-radius:10px;padding:10px;background:#fff}.results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ref-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px;display:flex;flex-direction:column;gap:8px}.ref-card:hover{border-color:#9fc3ef;box-shadow:0 8px 22px rgba(15,56,93,.08)}.ref-top{display:flex;justify-content:space-between;gap:10px}.ref-code{font-size:16px;font-weight:950;color:#153d63}.ref-meta{font-size:11px;color:var(--muted);line-height:1.4}.ref-eq{font-size:12px;font-weight:850;color:#254f72}.ref-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed #cbddeb;border-radius:12px;background:#fbfdff}
+    .checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.check-item{border:1px solid var(--line);border-radius:12px;padding:10px;background:white;display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center}.check-item input{width:18px;height:18px}.check-main b{display:block}.check-main span{font-size:11px;color:var(--muted)}
+    dialog::backdrop{background:rgba(15,35,55,.38)} dialog{border:1px solid var(--line);border-radius:18px;padding:16px;width:min(96vw,1200px);max-height:92vh;overflow:auto;box-shadow:0 24px 80px rgba(10,35,60,.25)}.dialog-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}
+    .msg{display:none;padding:10px 12px;border-radius:10px;margin-top:10px;font-size:12px;font-weight:800}.msg.show{display:block}.msg.ok{background:#ecfdf3;color:#166534;border:1px solid #bbf7d0}.msg.err{background:#fff1f2;color:#991b1b;border:1px solid #fecaca}.msg.info{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+    @media(max-width:1100px){.form-grid{grid-template-columns:repeat(2,1fr)}.field.span2,.field.span3{grid-column:span 1}.field.span6{grid-column:1/-1}.results{grid-template-columns:repeat(2,1fr)}.search-box{grid-template-columns:1fr 1fr}.summary{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:700px){.wrap{padding:10px}.grid{grid-template-columns:1fr}.results{grid-template-columns:1fr}.search-box{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.span2,.field.span3,.field.span6{grid-column:auto}.summary{grid-template-columns:repeat(2,1fr)}.checklist{grid-template-columns:1fr}}
+    @media print{.no-print,.tabs,.top-actions,.toolbar,.ref-actions{display:none!important}.wrap{max-width:none;padding:0}.card{box-shadow:none;border:0;padding:0}.view{display:block!important}.view:not(.print-target){display:none!important}.tbl th,.tbl td{font-size:10px}.top{margin-bottom:8px}}
+  
+    .sheet-head{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:stretch}.piece-photo{border:2px dashed #bfd1e3;border-radius:16px;background:#f8fbff;min-height:190px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.piece-photo img{width:100%;height:100%;max-height:250px;object-fit:contain;background:#fff}.photo-empty{text-align:center;color:var(--muted);font-size:12px;padding:24px}.photo-actions{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}.control-title{text-align:center;font-size:22px;font-weight:1000;letter-spacing:.06em;margin:4px 0 14px;color:#153e67}.tbl.elements th:nth-child(1),.tbl.elements td:nth-child(1){width:72px;text-align:center}.tbl.elements th:nth-child(2){width:48%}.tbl.elements input{min-width:140px}.tbl.elements .equipment{font-weight:800}.photo-input{display:none}
+    .equipment-photo-cell{width:112px;min-width:112px;text-align:center}.equipment-photo-wrap{width:92px;height:70px;margin:auto;border:1px dashed #bfd1e3;border-radius:10px;background:#f8fbff;display:grid;place-items:center;overflow:hidden;position:relative}.equipment-photo-wrap img{width:100%;height:100%;object-fit:contain;background:#fff}.equipment-photo-empty{font-size:9px;color:var(--muted);line-height:1.15;padding:5px}.equipment-photo-actions{display:flex;gap:4px;justify-content:center;margin-top:5px;flex-wrap:wrap}.equipment-photo-input{display:none}.check-thumb{width:64px;height:52px;border-radius:8px;border:1px solid #d8e5f0;object-fit:contain;background:#fff;flex:0 0 auto}.print-eq-img{width:62px;height:48px;object-fit:contain;display:block;margin:auto}.print-img-cell{width:76px;text-align:center}
+
+    @media(max-width:900px){.sheet-head{grid-template-columns:1fr}.piece-photo{min-height:150px}.form-grid{grid-template-columns:repeat(2,1fr)}.field.span2,.field.span3{grid-column:span 2}}
+    @media print{.piece-photo{border:1px solid #bbb;min-height:150px}.photo-actions{display:none!important}.control-title{font-size:18px}.tbl.elements input{border:0!important;background:transparent!important;padding:2px!important}}
+
+    /* V3 · Impresión robusta + QR + trazabilidad de montaje */
+    .qr-panel{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#f8fbff,#fff);padding:11px;display:grid;grid-template-columns:112px 1fr;gap:12px;align-items:center}
+    .qr-box{width:104px;height:104px;border:1px solid #d4e1ed;border-radius:10px;background:#fff;display:grid;place-items:center;overflow:hidden}.qr-box img{max-width:96px;max-height:96px}.qr-placeholder{font-size:10px;color:var(--muted);text-align:center;padding:8px}.qr-meta b{display:block;font-size:12px;color:#173d63}.qr-meta span{display:block;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.35}.qr-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .history{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}.history-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.history-card{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fbfdff}.history-card b{display:block;font-size:11px}.history-card span{display:block;font-size:9.5px;color:var(--muted);margin-top:3px}.mount-state{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:11px;padding:9px 11px;margin-bottom:10px}.mount-state strong{font-size:12px}.mount-state span{font-size:10px;color:#4b6580}.mount-time{font-size:9px;color:#15803d;font-weight:850;margin-top:3px}.check-item.done{border-color:#86efac;background:#f0fdf4}.check-item.done .chip{background:#dcfce7;border-color:#86efac;color:#166534}
+    #printSheet,#printChecklist{display:none}.print-page{font-family:Arial,sans-serif;color:#111;background:#fff}.print-header{display:grid;grid-template-columns:1fr 190px;gap:14px;border:2px solid #111;padding:10px}.print-logo-title{font-size:20px;font-weight:900}.print-fields{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}.print-field{border:1px solid #888;padding:5px 7px;font-size:10px}.print-field b{font-size:8px;text-transform:uppercase;display:block;color:#555}.print-photo{height:150px;border:1px solid #888;display:grid;place-items:center;overflow:hidden}.print-photo img{max-width:100%;max-height:100%;object-fit:contain}.print-title{text-align:center;font-size:18px;font-weight:900;letter-spacing:.08em;margin:14px 0 8px}.print-table{width:100%;border-collapse:collapse;font-size:11px}.print-table th,.print-table td{border:1px solid #333;padding:7px}.print-table th{background:#eee}.print-qr-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:12px}.print-qr{width:125px;text-align:center}.print-qr img{width:115px;height:115px}.print-foot{font-size:9px;color:#555;max-width:70%}.print-check{display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid #555;margin-bottom:6px}.print-check img{width:64px;height:52px;object-fit:contain;border:1px solid #aaa;background:#fff;border-radius:5px}.print-box{width:16px;height:16px;border:2px solid #111;flex:0 0 auto}.print-check b{font-size:11px}.print-check span{font-size:9px;color:#444;display:block;margin-top:2px}
+    @media(max-width:700px){.qr-panel{grid-template-columns:1fr}.qr-box{margin:auto}.history-grid{grid-template-columns:1fr 1fr}}
+    @media print{
+      @page{size:A4 portrait;margin:12mm}
+      body[data-print="sheet"]>*:not(#printSheet),body[data-print="checklist"]>*:not(#printChecklist){display:none!important}
+      body[data-print="sheet"] #printSheet,body[data-print="checklist"] #printChecklist{display:block!important}
+      body[data-print="sheet"],body[data-print="checklist"]{background:#fff!important}
     }
 
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body {
-      font-family:"Inter",sans-serif;
-      background:
-        radial-gradient(circle at 0% 0%,#182f55 0,transparent 55%),
-        radial-gradient(circle at 100% 0%,#1a3b64 0,transparent 55%),
-        linear-gradient(180deg,var(--bg1),var(--bg0));
-      color:var(--txt);
-      -webkit-font-smoothing:antialiased;
-    }
-
-    .app{max-width:1100px;margin:16px auto 32px;padding:0 14px 40px;}
-
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-    .brand{display:flex;align-items:center;gap:10px;}
-    .brand-logo{height:34px;width:auto;}
-    .brand-text-title{font-size:17px;font-weight:700;}
-    .brand-text-sub{font-size:12px;color:var(--muted);}
-
-    .btn{
-      border:none;
-      border-radius:999px;
-      padding:10px 16px;
-      font-size:13px;
-      font-weight:600;
-      cursor:pointer;
-      background:var(--accent);
-      color:#031321;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      transition:.12s;
-    }
-
-    .btn:hover{transform:translateY(-1px);}
-    .btn.secondary{
-      background:transparent;
-      color:var(--muted);
-      border:1px solid var(--border);
-    }
-
-    .card{
-      border-radius:16px;
-      background:linear-gradient(135deg,#0f1f33,#0a1625);
-      border:1px solid rgba(62,168,255,.45);
-      box-shadow:0 18px 40px rgba(0,0,0,.5);
-      padding:16px;
-      margin-bottom:20px;
-    }
-
-    .card-header{display:flex;justify-content:space-between;margin-bottom:8px;}
-    .card-title{font-size:15px;font-weight:600;}
-    .card-sub{font-size:12px;color:var(--muted);}
-
-    label{
-      font-size:11px;
-      color:var(--muted);
-      margin-bottom:4px;
-      display:block;
-    }
-
-    input,textarea{
-      background:#050d1a;
-      border:1px solid #253954;
-      border-radius:10px;
-      padding:9px 11px;
-      color:var(--txt);
-      width:100%;
-      font-size:13px;
-      outline:none;
-    }
-    textarea{min-height:70px;resize:vertical;}
-
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-    @media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr);}}
-    @media(max-width:600px){.grid{grid-template-columns:1fr;}}
-
-    .alert{
-      padding:8px 10px;
-      border-radius:10px;
-      margin-top:10px;
-      display:none;
-    }
-    .alert.ok{
-      display:block;
-      background:rgba(22,101,52,.5);
-      border:1px solid #4ade80;
-      color:#dcfce7;
-    }
-    .alert.error{
-      display:block;
-      background:rgba(127,29,29,.4);
-      border:1px solid #ff6b6b;
-      color:#fecaca;
-    }
-
-    .table-wrap{
-      border-radius:12px;
-      overflow:auto;
-      border:1px solid var(--border);
-      max-height:300px;
-    }
-
-    table{width:100%;border-collapse:collapse;font-size:12px;}
-    th,td{
-      padding:6px;
-      border-bottom:1px solid #1f3046;
-      white-space:nowrap;
-    }
-    th{
-      background:#0c1929;
-      text-transform:uppercase;
-      font-size:11px;
-      color:var(--muted);
-      position:sticky;top:0;
-    }
-
-    .btn-row{
-      background:var(--bad);
-      padding:3px 8px;
-      border:none;
-      border-radius:6px;
-      color:white;
-      cursor:pointer;
-    }
-  </style>
+</style>
 </head>
-
 <body>
-<div class="app">
-
-<header>
-  <div class="brand">
-    <img src="img/tmp-quality.png" class="brand-logo">
-    <div>
-      <div class="brand-text-title">TMP · Crear / Editar Tabla de Equipos</div>
-      <div class="brand-text-sub">Gestión de equipos por referencia</div>
-    </div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><img src="img/tmp-quality.png" alt="TMP"><div><h1>Hojas de equipos de control</h1><span class="chip blue no-print" id="sheetBuild">HEC-02 · 09/11/2026</span><p>Qué medios debe preparar Calidad para cada referencia mecanizada</p></div></div>
+    <div class="top-actions no-print"><a class="btn" href="home.html">Inicio</a><a class="btn" href="equipos-referencia-consulta.html">Equipos / Buscar</a></div>
   </div>
-  <button class="btn secondary" onclick="location.href='home.html'">← Volver</button>
-</header>
 
-<main>
+  <div class="tabs no-print">
+    <button class="tab active" data-tab="buscar">Buscar hojas</button>
+    <button class="tab" data-tab="editar">Crear / editar hoja</button>
+  </div>
 
-  <!-- DATOS GENERALES -->
-  <section class="card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">Datos de la referencia</div>
-        <div class="card-sub">Crear o editar una tabla de equipos</div>
+  <div id="deletionAvailability" class="msg show info no-print" role="status">Comprobando disponibilidad de eliminación…</div>
+  <div id="sheetActionMsg" class="msg" role="status" aria-live="polite"></div>
+  <section id="view-buscar" class="view active">
+    <div class="card">
+      <div class="card-head"><div><div class="title">Buscar hojas ya creadas</div><div class="sub">El operario busca una referencia y obtiene inmediatamente los equipos que debe preparar.</div></div><span class="chip blue" id="searchCount">0 hojas</span></div>
+      <div class="search-box no-print">
+        <input id="searchRef" placeholder="Referencia, pieza, cliente o descripción..." autofocus>
+        <select id="searchRevision"><option value="">Todas las revisiones</option></select>
+        <select id="searchClient"><option value="">Todos los clientes</option></select>
+        <button class="btn primary" id="btnNew">＋ Nueva hoja</button>
       </div>
+      <div id="searchResults" class="results"></div>
     </div>
+  </section>
 
+  <section id="view-editar" class="view">
     <div class="grid">
-      <div>
-        <label>Referencia</label>
-        <input id="referencia">
+      <div class="card full">
+        <div class="card-head"><div><div class="title">Definición de la hoja</div><div class="sub">Una referencia + revisión = una hoja de equipos de control. El histórico se conserva por versiones.</div></div><span class="chip blue" id="modeBadge">NUEVA</span></div>
+        <div class="sheet-head">
+          <div class="form-grid">
+            <div class="field span2"><label>Referencia *</label><input id="referencia" autocomplete="off" placeholder="Ej. CE38127"></div>
+            <div class="field"><label>Revisión</label><input id="revision" placeholder="Ej. D.2 / Rev C"></div>
+            <div class="field span2"><label>Descripción / pieza</label><input id="pieza" placeholder="Descripción de la pieza"></div>
+            <div class="field"><label>Cliente</label><input id="cliente" list="clientesList" placeholder="Ej. John Deere"><datalist id="clientesList"></datalist></div>
+            <div class="field"><label>Responsable TMP</label><input id="responsable" list="responsablesList" placeholder="Calidad"><datalist id="responsablesList"></datalist></div>
+            <div class="field"><label>Fecha</label><input id="fecha" type="date"></div>
+            <div class="field"><label>Versión interna</label><input id="version" placeholder="V1" readonly></div>
+            <div class="field span3"><label>Observaciones generales</label><input id="observaciones" placeholder="Notas generales de la hoja..."></div>
+          </div>
+          <div class="piece-photo" id="piecePhotoBox">
+            <div class="photo-empty" id="photoEmpty"><b>IMAGEN DE LA PIEZA</b><br><br>Sube una foto, captura o recorte para identificarla visualmente.</div>
+            <img id="piecePhoto" alt="Imagen de la pieza" style="display:none">
+            <div class="photo-actions no-print"><button class="btn small primary" id="btnPhoto" type="button">Añadir imagen</button><button class="btn small danger" id="btnRemovePhoto" type="button" style="display:none">Quitar</button></div>
+            <input class="photo-input" id="photoInput" type="file" accept="image/*">
+          </div>
+        </div>
+        <div class="qr-panel no-print" id="qrPanel">
+          <div class="qr-box" id="qrBox"><div class="qr-placeholder">Guarda la hoja para generar su QR</div></div>
+          <div class="qr-meta"><b>QR de montaje de equipos</b><span id="qrHelp">Al escanearlo desde el laboratorio se abre directamente la checklist de esta referencia.</span><div class="qr-actions"><button class="btn small" type="button" id="btnCopyQr" disabled>Copiar enlace</button><button class="btn small" type="button" id="btnPrintQr" disabled>Imprimir hoja + QR</button></div></div>
+        </div>
+        <div class="history no-print"><div class="card-head" style="margin-bottom:8px"><div><div class="title">Historial de montajes</div><div class="sub">Últimas preparaciones registradas para esta hoja.</div></div><span class="chip" id="mountHistoryCount">0 registros</span></div><div id="mountHistory" class="history-grid"><div class="empty" style="grid-column:1/-1;padding:12px">Guarda o abre una hoja para ver su seguimiento.</div></div></div>
       </div>
-      <div>
-        <label>Pieza</label>
-        <input id="pieza">
-      </div>
-      <div>
-        <label>Cliente</label>
-        <input id="cliente">
-      </div>
-      <div>
-        <label>Responsable</label>
-        <input id="responsable">
-      </div>
-      <div>
-        <label>Fecha</label>
-        <input type="date" id="fecha">
-      </div>
-      <div>
-        <label>Versión</label>
-        <input id="version">
+
+      <div class="card full">
+        <div class="control-title">ELEMENTOS DE CONTROL</div>
+        <div class="card-head"><div><div class="title">Equipos que hay que preparar</div><div class="sub">Numera los elementos y escribe exactamente el equipo que Calidad debe montar. Usa Observaciones solo cuando necesites aclarar algo.</div></div><span class="chip" id="lineCount">0 elementos</span></div>
+        <div class="toolbar no-print">
+          <button class="btn primary" id="btnAdd">＋ Añadir elemento</button>
+          <button class="btn" id="btnInventory">Seleccionar del inventario</button>
+          <button class="btn" id="btnClone">Clonar otra referencia</button>
+          <button class="btn" id="btnChecklist">Vista de preparación</button>
+          <button class="btn" id="btnPrint">Imprimir hoja</button>
+          <input class="grow" id="rowSearch" placeholder="Filtrar elementos de esta hoja...">
+        </div>
+        <div class="summary">
+          <div class="stat"><b id="sumLines">0</b><span>elementos de control</span></div>
+          <div class="stat"><b id="sumUnits">0</b><span>equipos a preparar</span></div>
+          <div class="stat"><b id="sumLinked">0</b><span>vinculados a inventario</span></div>
+          <div class="stat"><b id="sumGeneric">0</b><span>definidos por descripción</span></div>
+          <div class="stat"><b id="sumAlerts">0</b><span>avisos metrológicos</span></div>
+        </div>
+        <div class="table-wrap">
+          <table class="tbl elements">
+            <thead><tr><th>Nº</th><th>Imagen</th><th>Equipo</th><th>Observaciones</th><th class="no-print">Acciones</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div id="msg" class="msg"></div>
+        <div class="toolbar no-print" style="justify-content:flex-end;margin-top:12px">
+          <button class="btn danger" id="btnDeleteCurrent" type="button" style="display:none">Eliminar esta hoja</button>
+          <button class="btn" id="btnCancel">Cancelar / limpiar</button>
+          <button class="btn" id="btnSaveCurrent" style="display:none">Guardar cambios</button>
+          <button class="btn green" id="btnSaveVersion">Guardar como nueva revisión/versión</button>
+        </div>
       </div>
     </div>
-
-    <label style="margin-top:12px;">Observaciones</label>
-    <textarea id="observaciones"></textarea>
-
-    <div id="alertBox" class="alert"></div>
   </section>
-
-  <!-- TABLA DE EQUIPOS -->
-  <section class="card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">Equipos necesarios</div>
-        <div class="card-sub">Añadir equipos para esta referencia</div>
-      </div>
-      <button class="btn" id="btnAddEquipo">+ Añadir equipo</button>
-    </div>
-
-    <div class="table-wrap">
-      <table id="tablaEquipos">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Código equipo</th>
-            <th>Descripción</th>
-            <th>Cantidad</th>
-            <th>Tipo medida</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-  <!-- BOTONES DE GUARDADO -->
-  <section class="card">
-    <div class="card-header">
-      <div class="card-title">Acciones de guardado</div>
-    </div>
-
-    <div style="display:flex; flex-wrap:wrap; gap:10px;">
-      <button class="btn" id="btnGuardar">💾 Guardar cambios</button>
-      <button class="btn secondary" id="btnGuardarNueva">📘 Guardar como nueva versión</button>
-    </div>
-
-    <p class="helper-text" style="margin-top:10px;">
-      • <b>Guardar cambios:</b> sobrescribe esta versión.<br>
-      • <b>Guardar como nueva versión:</b> duplica la tabla creando una versión nueva (V2, V3…).
-    </p>
-
-  </section>
-
-</main>
 </div>
 
-<!-- SUPABASE -->
+<dialog id="deleteSheetDialog" aria-labelledby="deleteSheetTitle" style="max-width:650px">
+  <div class="dialog-head"><div><div class="title" id="deleteSheetTitle">Eliminar esta hoja / versión</div><div class="sub">Comprueba el identificador para elegir la copia duplicada correcta.</div></div></div>
+  <div id="deleteSheetDetails"></div>
+  <p>Se eliminará definitivamente esta hoja y sus elementos. Las otras hojas y versiones de la referencia se conservan. Los instrumentos del inventario no se eliminan.</p>
+  <p id="deleteDraftNotice" class="sub" hidden>Los cambios sin guardar de esta hoja se descartarán al eliminarla.</p>
+  <p id="deleteSheetError" role="status" aria-live="polite" style="color:#b91c1c"></p>
+  <div class="toolbar" style="justify-content:flex-end"><button type="button" class="btn" id="cancelDeleteSheet">Cancelar</button><button type="button" class="btn danger" id="confirmDeleteSheet" disabled>Eliminar definitivamente</button></div>
+</dialog>
+<dialog id="inventoryDialog">
+  <div class="dialog-head"><div><div class="title">Seleccionar equipo del inventario</div><div class="sub">Úsalo cuando la hoja requiera un instrumento concreto. Si solo necesitas “1 pie de rey”, no hace falta vincular código.</div></div><button class="btn" data-close="inventoryDialog">Cerrar</button></div>
+  <div class="toolbar"><input class="grow" id="inventorySearch" placeholder="Código, descripción, familia o ubicación..."><select id="inventoryStatus"><option value="">Todos</option><option value="OK">OK</option><option value="PRÓXIMO">Próximo</option><option value="FUERA">Fuera</option><option value="SIN FECHA">Sin fecha</option></select></div>
+  <div class="table-wrap" style="margin-top:10px;max-height:62vh"><table class="tbl"><thead><tr><th></th><th>Código</th><th>Descripción</th><th>Ubicación</th><th>Calibración</th><th>Próxima</th></tr></thead><tbody id="inventoryBody"></tbody></table></div>
+  <div class="toolbar" style="justify-content:flex-end;margin-top:10px"><button class="btn primary" id="btnAddSelectedInventory">Añadir seleccionados</button></div>
+</dialog>
+
+<dialog id="cloneDialog">
+  <div class="dialog-head"><div><div class="title">Clonar hoja existente</div><div class="sub">Copia sus equipos a la hoja actual. Después cambia referencia/revisión antes de guardar.</div></div><button class="btn" data-close="cloneDialog">Cerrar</button></div>
+  <input id="cloneSearch" style="width:100%;padding:10px;border:1px solid #cbddeb;border-radius:10px" placeholder="Buscar referencia, pieza o cliente...">
+  <div id="cloneList" class="results" style="margin-top:10px"></div>
+</dialog>
+
+<dialog id="checkDialog">
+  <div class="dialog-head"><div><div class="title" id="checkTitle">Preparación de equipos</div><div class="sub" id="checkSub"></div></div><button class="btn" data-close="checkDialog">Cerrar</button></div>
+  <div class="mount-state"><div><strong id="mountStatusTitle">Preparación sin iniciar</strong><span id="mountStatusSub">La primera marca iniciará un registro con fecha, hora y operario.</span></div><span class="chip blue" id="mountProgress">0 / 0</span></div>
+  <div id="checkList" class="checklist"></div>
+  <div class="toolbar no-print" style="justify-content:space-between;margin-top:12px"><span class="sub" id="mountSessionInfo"></span><button class="btn" id="btnPrintChecklist">Imprimir checklist</button></div>
+</dialog>
+
+<section id="printSheet" class="print-page"></section>
+<section id="printChecklist" class="print-page"></section>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script type="module" src="config.mjs"></script>
-
 <script type="module">
-const sb = window.supabase;
-const $ = s => document.querySelector(s);
+const sb=window.supabase; const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"','&quot;');
+const norm=v=>String(v??"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+let deletionEnabled=false;
+let refs=[], inventory=[], ubicMap=new Map(), currentId=null, currentRecord=null, dirty=false;
+let qrMountUrl='', activeMountSession=null, activeChecklistRecord=null, activeChecklistItems=[];
 
-const tablaBody = $("#tablaEquipos tbody");
-const alertBox = $("#alertBox");
+function showMsg(t,type="info"){const e=$("#msg");e.textContent=t;e.className=`msg show ${type}`;setTimeout(()=>{if(e.textContent===t)e.className="msg"},5000)}
+function today(){return new Date().toISOString().slice(0,10)}
+function calibrationState(i){const raw=i.fecha_proxima_calibracion||i.proxima_calibracion;if(!raw)return {t:"SIN FECHA",c:"warn"};const d=new Date(raw);if(isNaN(d))return {t:"SIN FECHA",c:"warn"};const h=new Date();h.setHours(0,0,0,0);d.setHours(0,0,0,0);if(d<h)return {t:"FUERA",c:"bad"};const p30=new Date(h.getTime()+30*86400000);if(d<=p30)return {t:"PRÓXIMO",c:"warn"};return {t:"OK",c:"ok"}}
+function isActive(i){const s=String(i.estado||"").trim().toUpperCase(),u=String(i.ubicacion_actual||"").trim().toUpperCase();return !["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(s)&&u!=="RETIRADO"}
+function locationName(i){const u=ubicMap.get(i.ubicacion_id);return u?.nombre||i.ubicacion_actual||i.ubicacion||"—"}
+function setDirty(v=true){dirty=v}
 
-/* ===========================================================
-   FUNCIONES UTILIDAD
-   =========================================================== */
-function msg(text, type="error") {
-  alertBox.textContent = text;
-  alertBox.className = "alert " + type;
-  alertBox.style.display = "block";
+function switchTab(name){$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));$$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`))}
+$$('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+
+async function loadData(){if(!sb){showMsg("Supabase no disponible.","err");return} const [r,i,u]=await Promise.all([
+  sb.from('control_metrologico').select('*').order('fecha',{ascending:false}).limit(3000),
+  sb.from('instrumentos').select('id,codigo,descripcion,estado,ubicacion_id,ubicacion_actual,ubicacion,fecha_proxima_calibracion,proxima_calibracion,familia_id').limit(5000),
+  sb.from('ubicaciones').select('id,nombre,tipo,activo')
+]);
+ if(r.error)console.warn(r.error); if(i.error)console.warn(i.error); if(u.error)console.warn(u.error);
+ refs=r.data||[];deletionEnabled=!r.error&&refs.length>0&&refs.every(row=>Object.prototype.hasOwnProperty.call(row,'id_vinculo'));$('#deletionAvailability').textContent=deletionEnabled?'':'Eliminar está preparado, pero falta habilitar el permiso en la base de datos. La creación y consulta de hojas siguen disponibles.';$('#deletionAvailability').className=deletionEnabled?'msg':'msg show info no-print';$('#btnDeleteCurrent').disabled=!deletionEnabled; inventory=(i.data||[]).filter(isActive); ubicMap=new Map((u.data||[]).map(x=>[x.id,x]));
+ fillDatalists(); renderSearch(); renderInventory(); renderClone();
 }
+function fillDatalists(){const clients=[...new Set(refs.map(x=>x.cliente).filter(Boolean))].sort();const resp=[...new Set(refs.map(x=>x.responsable).filter(Boolean))].sort();$('#clientesList').innerHTML=clients.map(x=>`<option value="${esc(x)}">`).join('');$('#responsablesList').innerHTML=resp.map(x=>`<option value="${esc(x)}">`).join('');
+ const rev=[...new Set(refs.map(x=>revisionOf(x)).filter(Boolean))].sort();$('#searchRevision').innerHTML='<option value="">Todas las revisiones</option>'+rev.map(x=>`<option>${esc(x)}</option>`).join('');$('#searchClient').innerHTML='<option value="">Todos los clientes</option>'+clients.map(x=>`<option>${esc(x)}</option>`).join('')}
+function revisionOf(r){return r?.revision||extractRevision(r?.observaciones)||r?.version||""}
+function extractRevision(obs){const m=String(obs||"").match(/(?:REV(?:ISI[ÓO]N)?|REV\.)\s*[:\-]?\s*([^|;\n]+)/i);return m?m[1].trim():""}
+function equipmentLabel(e){return e.medio_control||e.descripcion_equipo||"Equipo sin descripción"}
 
-function clearMsg() {
-  alertBox.textContent = "";
-  alertBox.className = "alert";
-  alertBox.style.display = "none";
+function renderSearch(){const q=norm($('#searchRef').value),rev=$('#searchRevision').value,cl=$('#searchClient').value;const filtered=refs.filter(r=>(!q||norm([r.referencia,r.pieza,r.cliente,r.observaciones,r.version].join(' ')).includes(q))&&(!rev||revisionOf(r)===rev)&&(!cl||r.cliente===cl));$('#searchCount').textContent=`${filtered.length} hoja${filtered.length===1?'':'s'}`;$('#searchResults').innerHTML=filtered.length?filtered.slice(0,150).map(r=>{const eq=Array.isArray(r.equipos)?r.equipos:[];return `<article class="ref-card"><div class="ref-top"><div><div class="ref-code">${esc(r.referencia||'—')}</div><div class="ref-meta">Rev. ${esc(revisionOf(r)||'—')} · ${esc(r.version||'sin versión')} · ${esc(r.fecha||'sin fecha')}</div></div><span class="chip blue">${eq.length} medios</span></div><div class="ref-eq">${esc(r.pieza||'Sin descripción')}</div><div class="ref-meta">${esc(r.cliente||'Sin cliente')} · ${esc(r.responsable||'Sin responsable')}</div><div class="ref-actions"><button class="btn small primary" data-open="${esc(r.id)}">Abrir</button><button class="btn small" data-prepare="${esc(r.id)}">Preparar equipos</button><button class="btn small" data-qr="${esc(r.id)}">QR montaje</button><button class="btn small" data-newrev="${esc(r.id)}">Nueva revisión</button><button class="btn small danger" data-delete-sheet="${esc(r.id)}" ${deletionEnabled?'':'disabled title="Permiso de eliminación pendiente de habilitar"'}>Eliminar</button></div></article>`}).join(''):'<div class="empty" style="grid-column:1/-1">No hay hojas que coincidan.</div>';
+ $$('[data-delete-sheet]').forEach(b=>b.onclick=()=>requestSheetDeletion(b.dataset.deleteSheet));$$('[data-open]').forEach(b=>b.onclick=()=>openRecord(b.dataset.open,false));$$('[data-newrev]').forEach(b=>b.onclick=()=>openRecord(b.dataset.newrev,true));$$('[data-prepare]').forEach(b=>b.onclick=()=>openChecklistById(b.dataset.prepare));$$('[data-qr]').forEach(b=>b.onclick=()=>{const r=refs.find(x=>String(x.id)===String(b.dataset.qr));if(r){openRecord(r.id,false);setTimeout(()=>$('#btnPrint').click(),50)}});}
+['searchRef','searchRevision','searchClient'].forEach(id=>$('#'+id).addEventListener(id==='searchRef'?'input':'change',renderSearch));$('#btnNew').onclick=()=>{resetForm();switchTab('editar')};
+
+function legacyEquipmentText(data={}){const d=data.medio_control||data.descripcion_equipo||'';const spec=data.especificacion||data.caracteristica||'';return [d,spec].filter(Boolean).join(spec&&d&&!norm(d).includes(norm(spec))?' · ':'')}
+function equipmentImageOf(data={}){return data._imagen_equipo||data.imagen_equipo||''}
+function setRowEquipmentImage(tr,src=''){
+  tr._equipmentImage=src||'';
+  const img=tr.querySelector('.equipment-photo-img'),empty=tr.querySelector('.equipment-photo-empty'),remove=tr.querySelector('[data-img-remove]');
+  if(img){img.src=tr._equipmentImage;img.style.display=tr._equipmentImage?'block':'none'}
+  if(empty)empty.style.display=tr._equipmentImage?'none':'block';
+  if(remove)remove.style.display=tr._equipmentImage?'inline-flex':'none';
 }
-
-/* ===========================================================
-   TABLA DINÁMICA DE EQUIPOS
-   =========================================================== */
-function addRow(data = {}) {
-  const tr = document.createElement("tr");
-
-  tr.innerHTML = `
-    <td class="idx"></td>
-    <td><input value="${data.codigo_equipo || ""}"></td>
-    <td><input value="${data.descripcion_equipo || ""}"></td>
-    <td><input type="number" min="1" value="${data.cantidad || 1}"></td>
-    <td><input value="${data.tipo_medida || ""}"></td>
-    <td><button class="btn-row">X</button></td>
-  `;
-
-  tr.querySelector(".btn-row").onclick = () => {
-    tr.remove();
-    reorder();
-  };
-
-  tablaBody.appendChild(tr);
-  reorder();
+function compressImageFile(file,max=900,quality=.78){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const im=new Image();im.onerror=reject;im.onload=()=>{const scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',quality))};im.src=reader.result};reader.readAsDataURL(file)})}
+function makeRow(data={}){
+  const preserved={...data};const tr=document.createElement('tr');tr._preserved=preserved;tr._equipmentImage=equipmentImageOf(data);
+  const desc=legacyEquipmentText(data);const note=data.observacion||data.nota||'';
+  tr.innerHTML=`<td class="idx"></td><td class="equipment-photo-cell"><div class="equipment-photo-wrap"><div class="equipment-photo-empty">Sin imagen</div><img class="equipment-photo-img" alt="Imagen del equipo" style="display:none"></div><div class="equipment-photo-actions no-print"><button type="button" class="btn small" data-img-add>Imagen</button><button type="button" class="btn small danger" data-img-remove style="display:none">Quitar</button></div><input class="equipment-photo-input" type="file" accept="image/*"></td><td><input class="equipment" value="${esc(desc)}" placeholder="Ej. Alexómetro Ø158 / Pie de rey 150 / Tampón P/NP M8"></td><td><input class="note" value="${esc(note)}" placeholder="Ej. Reloj centesimal / condición especial"></td><td class="no-print"><button class="btn small" data-dup>Duplicar</button> <button class="btn small danger" data-del>Quitar</button></td>`;
+  $('#rows').appendChild(tr);setRowEquipmentImage(tr,tr._equipmentImage);
+  tr.querySelector('[data-del]').onclick=()=>{tr.remove();renumber();setDirty();updateSummary()};
+  tr.querySelector('[data-dup]').onclick=()=>{makeRow(readRow(tr));setDirty();updateSummary()};
+  const fileInput=tr.querySelector('.equipment-photo-input');
+  tr.querySelector('[data-img-add]').onclick=()=>fileInput.click();
+  tr.querySelector('[data-img-remove]').onclick=()=>{setRowEquipmentImage(tr,'');setDirty();updateSummary()};
+  fileInput.onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{setRowEquipmentImage(tr,await compressImageFile(f));setDirty();updateSummary()}catch(err){console.warn(err);showMsg('No se pudo procesar la imagen del equipo.','err')}e.target.value=''};
+  tr.querySelectorAll('input:not(.equipment-photo-input)').forEach(e=>e.addEventListener('input',()=>{setDirty();updateSummary()}));renumber();updateSummary();return tr
 }
+function renumber(){[...$('#rows').children].forEach((r,i)=>r.querySelector('.idx').textContent=i+1);$('#lineCount').textContent=`${$('#rows').children.length} elemento${$('#rows').children.length===1?'':'s'}`}
+function readRow(tr){const base={...(tr._preserved||{})};const text=tr.querySelector('.equipment').value.trim();base.cantidad=1;base.medio_control=text;base.descripcion_equipo=text;base.observacion=tr.querySelector('.note').value.trim();if(tr._equipmentImage)base._imagen_equipo=tr._equipmentImage;else{delete base._imagen_equipo;delete base.imagen_equipo}return base}
+function allRows(){return [...$('#rows').children].map(readRow).filter(x=>x.medio_control||x.codigo_equipo)}
+function updateSummary(){const rows=allRows();$('#sumLines').textContent=rows.length;$('#sumUnits').textContent=rows.length;let linked=0,alerts=0;rows.forEach(r=>{if(r.codigo_equipo){const i=inventory.find(x=>String(x.codigo||'').trim()===String(r.codigo_equipo||'').trim());if(i){linked++;if(calibrationState(i).t!=='OK')alerts++}else alerts++}});$('#sumLinked').textContent=linked;$('#sumGeneric').textContent=rows.length-linked;$('#sumAlerts').textContent=alerts;renumber()}
+$('#btnAdd').onclick=()=>{makeRow();setDirty()};$('#rowSearch').oninput=()=>{const q=norm($('#rowSearch').value);[...$('#rows').children].forEach(r=>r.style.display=!q||norm(JSON.stringify(readRow(r))).includes(q)?'':'none')};
 
-function reorder() {
-  [...tablaBody.querySelectorAll("tr")].forEach((tr, i) => {
-    tr.querySelector(".idx").textContent = i + 1;
-  });
+let piecePhotoData='';
+function setPiecePhoto(src=''){piecePhotoData=src||'';$('#piecePhoto').src=piecePhotoData;$('#piecePhoto').style.display=piecePhotoData?'block':'none';$('#photoEmpty').style.display=piecePhotoData?'none':'block';$('#btnRemovePhoto').style.display=piecePhotoData?'inline-flex':'none'}
+$('#btnPhoto').onclick=()=>$('#photoInput').click();$('#btnRemovePhoto').onclick=()=>{setPiecePhoto('');setDirty()};
+$('#photoInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{const im=new Image();im.onload=()=>{const max=1100,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);setPiecePhoto(c.toDataURL('image/jpeg',.78));setDirty()};im.src=reader.result};reader.readAsDataURL(f);e.target.value=''};
+function photoFromRecord(r){const eq=Array.isArray(r?.equipos)?r.equipos:[];return eq.find(x=>x&&x._imagen_pieza)?._imagen_pieza||''}
+function attachPhoto(rows){if(rows.length&&piecePhotoData)rows[0]._imagen_pieza=piecePhotoData;else rows.forEach(x=>{if(x&&x._imagen_pieza)delete x._imagen_pieza});return rows}
+
+
+function mountUrlFor(id){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('hoja',id);u.searchParams.set('modo','montaje');return u.toString()}
+function qrImgHtml(url,scale=4,margin=2){if(!url||typeof qrcode==='undefined')return '';try{const qr=qrcode(0,'M');qr.addData(url);qr.make();return qr.createImgTag(scale,margin)}catch(e){console.warn('QR',e);return ''}}
+function renderQr(record=null){const r=record||currentRecord;const box=$('#qrBox'),copy=$('#btnCopyQr'),pr=$('#btnPrintQr');if(!r?.id){qrMountUrl='';box.innerHTML='<div class="qr-placeholder">Guarda la hoja para generar su QR</div>';copy.disabled=true;pr.disabled=true;return}qrMountUrl=mountUrlFor(r.id);box.innerHTML=qrImgHtml(qrMountUrl,4,2)||'<div class="qr-placeholder">No se pudo generar el QR</div>';copy.disabled=false;pr.disabled=false;$('#qrHelp').textContent=`QR permanente · ${r.referencia||''} · Rev. ${revisionOf(r)||'—'}`}
+$('#btnCopyQr').onclick=async()=>{if(!qrMountUrl)return;try{await navigator.clipboard.writeText(qrMountUrl);showMsg('Enlace de montaje copiado.','ok')}catch{prompt('Copia este enlace:',qrMountUrl)}};
+$('#btnPrintQr').onclick=()=>printCurrentSheet();
+async function loadMountHistory(hojaId){const host=$('#mountHistory'),count=$('#mountHistoryCount');if(!hojaId){host.innerHTML='<div class="empty" style="grid-column:1/-1;padding:12px">Guarda o abre una hoja para ver su seguimiento.</div>';count.textContent='0 registros';return}const {data,error}=await sb.from('control_montajes').select('id,iniciado_en,completado_en,estado,preparado_por,items').eq('hoja_id',hojaId).order('iniciado_en',{ascending:false}).limit(12);if(error){host.innerHTML='<div class="empty" style="grid-column:1/-1;padding:12px">Activa la tabla control_montajes para registrar el seguimiento.</div>';count.textContent='Sin tabla';return}count.textContent=`${data.length} registro${data.length===1?'':'s'}`;host.innerHTML=data.length?data.map(x=>{const n=Array.isArray(x.items)?x.items.filter(i=>i.marcado_en).length:0,tot=Array.isArray(x.items)?x.items.length:0;return `<div class="history-card"><b>${esc(new Date(x.iniciado_en).toLocaleString('es-ES'))}</b><span>${esc(x.preparado_por||'Sin operario')} · ${esc(x.estado||'')}</span><span>${n}/${tot} elementos${x.completado_en?' · completado':''}</span></div>`}).join(''):'<div class="empty" style="grid-column:1/-1;padding:12px">Todavía no hay montajes registrados.</div>'}
+function printDataRecord(){return {id:currentId||currentRecord?.id||null,referencia:$('#referencia').value,revision:$('#revision').value,pieza:$('#pieza').value,cliente:$('#cliente').value,responsable:$('#responsable').value,fecha:$('#fecha').value,version:$('#version').value,observaciones:$('#observaciones').value,equipos:attachPhoto(allRows())}}
+function buildPrintSheet(record=null){const r=record||printDataRecord(),eq=Array.isArray(r.equipos)?r.equipos:allRows(),photo=photoFromRecord(r)||piecePhotoData,url=r.id?mountUrlFor(r.id):(currentId?mountUrlFor(currentId):'');$('#printSheet').innerHTML=`<div class="print-header"><div><div class="print-logo-title">TMP · ELEMENTOS DE CONTROL</div><div class="print-fields"><div class="print-field"><b>Referencia</b>${esc(r.referencia||'—')}</div><div class="print-field"><b>Revisión</b>${esc(revisionOf(r)||$('#revision').value||'—')}</div><div class="print-field"><b>Pieza</b>${esc(r.pieza||'—')}</div><div class="print-field"><b>Cliente</b>${esc(r.cliente||'—')}</div><div class="print-field"><b>Responsable</b>${esc(r.responsable||'—')}</div><div class="print-field"><b>Fecha / versión</b>${esc(r.fecha||'—')} · ${esc(r.version||'—')}</div></div></div><div class="print-photo">${photo?`<img src="${photo}">`:'SIN IMAGEN'}</div></div><div class="print-title">ELEMENTOS DE CONTROL</div><table class="print-table"><thead><tr><th style="width:48px">Nº</th><th style="width:76px">Imagen</th><th>Equipo</th><th>Observaciones</th></tr></thead><tbody>${eq.map((e,i)=>`<tr><td style="text-align:center"><b>${i+1}</b></td><td class="print-img-cell">${equipmentImageOf(e)?`<img class="print-eq-img" src="${equipmentImageOf(e)}">`:'—'}</td><td>${esc(legacyEquipmentText(e)||'')}</td><td>${esc(e.observacion||e.nota||'')}</td></tr>`).join('')}</tbody></table><div class="print-qr-row"><div class="print-foot"><b>Uso:</b> Escanear el QR al volver al laboratorio. Se abrirá directamente la checklist de preparación y cada elemento marcado quedará registrado con fecha/hora.</div><div class="print-qr">${url?qrImgHtml(url,5,2):'<div>Guardar para generar QR</div>'}<div style="font-size:8px;margin-top:3px">QR MONTAJE</div></div></div>`}
+function printCurrentSheet(){buildPrintSheet();document.body.dataset.print='sheet';setTimeout(()=>window.print(),60)}
+window.addEventListener('afterprint',()=>{delete document.body.dataset.print});
+
+function resetForm(){currentId=null;currentRecord=null;renderQr(null);loadMountHistory(null);$('#referencia').value='';$('#revision').value='';$('#pieza').value='';$('#cliente').value='';$('#responsable').value='';$('#fecha').value=today();$('#version').value='';$('#observaciones').value='';$('#rows').innerHTML='';setPiecePhoto('');makeRow();$('#modeBadge').textContent='NUEVA';$('#btnSaveCurrent').style.display='none';$('#btnDeleteCurrent').style.display='none';setDirty(false)}
+function openRecord(id,newRevision){const r=refs.find(x=>String(x.id)===String(id));if(!r)return;currentRecord=r;currentId=newRevision?null:r.id;$('#referencia').value=r.referencia||'';$('#revision').value=revisionOf(r)||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=newRevision?today():(r.fecha||today());$('#version').value=newRevision?'':(r.version||'');$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(Array.isArray(r.equipos)?r.equipos:[]).forEach(makeRow);if(!$('#rows').children.length)makeRow();$('#modeBadge').textContent=newRevision?'NUEVA REVISIÓN':(r.version||'EDITANDO');$('#btnSaveCurrent').style.display=newRevision?'none':'inline-flex';$('#btnDeleteCurrent').style.display=newRevision?'none':'inline-flex';setDirty(false);renderQr(newRevision?null:r);loadMountHistory(newRevision?null:r.id);switchTab('editar')}
+
+function buildPayload(){const ref=$('#referencia').value.trim();if(!ref){showMsg('La referencia es obligatoria.','err');return null}const rows=attachPhoto(allRows());if(!rows.length){showMsg('Añade al menos un equipo o medio de control.','err');return null}if(rows.some(x=>!x.medio_control&&!x.codigo_equipo)){showMsg('Hay líneas sin equipo definido.','err');return null}const rev=$('#revision').value.trim();let obs=$('#observaciones').value.trim();if(rev&&!/REV/i.test(obs))obs=`REVISION: ${rev}${obs?` | ${obs}`:''}`;return {referencia:ref,pieza:$('#pieza').value.trim()||null,cliente:$('#cliente').value.trim()||null,responsable:$('#responsable').value.trim()||null,fecha:$('#fecha').value||null,version:$('#version').value.trim()||null,observaciones:obs||null,equipos:rows}}
+// HEC-02: delete exactly one reviewed sheet/version; mounting history is protected server-side.
+let deletionReview=null,deletionBusy=false,deletionSequence=0;
+function sheetActionMessage(text,type='info'){const node=$('#sheetActionMsg');node.textContent=text;node.className='msg show '+type;}
+function closeDeletion(){if(deletionBusy)return;deletionSequence++;deletionReview=null;$('#deleteSheetDialog').close();}
+$('#cancelDeleteSheet').onclick=closeDeletion;
+$('#deleteSheetDialog').addEventListener('cancel',event=>{event.preventDefault();closeDeletion();});
+async function requestSheetDeletion(id){
+ if(!deletionEnabled){sheetActionMessage('La eliminación todavía no está habilitada en la base de datos.','info');return;}
+ if(deletionBusy)return;const sequence=++deletionSequence;deletionReview=null;
+ $('#deleteDraftNotice').hidden=!(dirty&&String(currentId)===String(id));$('#deleteSheetDetails').textContent='Comprobando la hoja y sus montajes…';$('#deleteSheetError').textContent='';$('#confirmDeleteSheet').disabled=true;$('#deleteSheetDialog').showModal();
+ try{
+  const [sheet,mounts]=await Promise.all([
+   sb.rpc('preparar_eliminacion_hoja',{p_id:id}),
+   sb.from('control_montajes').select('id',{count:'exact',head:true}).eq('hoja_id',String(id))
+  ]);
+  if(sequence!==deletionSequence)return;
+  if(sheet.error)throw sheet.error;if(!sheet.data?.hoja)throw Error('Esta hoja ya no está disponible. Actualiza la búsqueda.');
+  if(!/^[a-f0-9]{32}$/.test(sheet.data.huella||''))throw Error('No se ha podido comprobar la versión actual de la hoja.');
+  const r=sheet.data.hoja,lines=Array.isArray(r.equipos)?r.equipos.length:0;
+  $('#deleteSheetDetails').innerHTML=`<p><b>Referencia:</b> ${esc(r.referencia)}<br><b>Revisión:</b> ${esc(revisionOf(r)||'—')}<br><b>Versión:</b> ${esc(r.version||'—')}<br><b>Identificador de hoja:</b> ${esc(r.id)}<br><b>Pieza:</b> ${esc(r.pieza||'—')}<br><b>Cliente:</b> ${esc(r.cliente||'—')}<br><b>Fecha:</b> ${esc(r.fecha||'—')}<br><b>Elementos:</b> ${lines}</p>`;
+  if(mounts.error)throw Error('No se pudieron comprobar los montajes vinculados. No se permite borrar hasta comprobarlos.');
+  if(!Number.isInteger(mounts.count)||mounts.count<0)throw Error('No se ha podido confirmar el número de montajes vinculados.');
+  if(mounts.count>0)throw Error(`Esta hoja tiene ${mounts.count} montaje(s) registrado(s). Se conserva para mantener su historial. Puedes eliminar la copia duplicada que no tenga montajes.`);
+  deletionReview={...structuredClone(r),_huella_revision:sheet.data.huella};$('#confirmDeleteSheet').disabled=false;
+ }catch(e){if(sequence===deletionSequence)$('#deleteSheetError').textContent=(e.code?'['+e.code+'] ':'')+(e.message||String(e));}
 }
+$('#btnDeleteCurrent').onclick=()=>{if(currentId!==null)requestSheetDeletion(currentId);};
+$('#confirmDeleteSheet').onclick=async()=>{
+ if(deletionBusy||!deletionReview)return;const r=structuredClone(deletionReview);deletionBusy=true;$('#confirmDeleteSheet').disabled=true;$('#cancelDeleteSheet').disabled=true;$('#deleteSheetError').textContent='Eliminando la hoja seleccionada…';
+ try{
+  // Short POST body: never put images/equipment JSON in URL filters.
+  const {data,error}=await sb.rpc('eliminar_hoja_revisada',{p_id:r.id,p_huella:r._huella_revision});
+  if(error){if(error.code==='23503')throw Error('La hoja tiene un montaje vinculado y se conserva su historial.');throw error;}
+  if(!Array.isArray(data)||data.length!==1||String(data[0].id)!==String(r.id))throw Error('No se ha confirmado la eliminación. La hoja puede haber cambiado o la operación no está autorizada. Actualiza la búsqueda antes de volver a intentarlo.');
+  refs=refs.filter(item=>String(item.id)!==String(r.id));
+  if(String(currentId)===String(r.id)){resetForm();switchTab('buscar');}
+  else if(String(currentRecord?.id)===String(r.id)){currentRecord=null;renderQr(null);loadMountHistory(null);}
+  if(String(activeChecklistRecord?.id)===String(r.id)){if($('#checkDialog').open)$('#checkDialog').close();activeChecklistRecord=null;activeMountSession=null;activeChecklistItems=[];}
+  sessionStorage.removeItem(`tmp_montaje_${r.id}`);
+  try{const cached=JSON.parse(localStorage.getItem('editarReferencia')||'null');if(String(cached?.id)===String(r.id))localStorage.removeItem('editarReferencia');}catch{}
+  const revisionFilter=$('#searchRevision').value,clientFilter=$('#searchClient').value;fillDatalists();
+  if([...$('#searchRevision').options].some(x=>x.value===revisionFilter))$('#searchRevision').value=revisionFilter;
+  if([...$('#searchClient').options].some(x=>x.value===clientFilter))$('#searchClient').value=clientFilter;
+  renderSearch();renderClone();sheetActionMessage(`Hoja eliminada: ${r.referencia} · ${r.version||'sin versión'} · ID ${r.id}.`,'ok');
+  deletionReview=null;deletionSequence++;$('#deleteSheetDialog').close();
+ }catch(e){$('#deleteSheetError').textContent='No se ha confirmado el borrado: '+((e.code?'['+e.code+'] ':'')+(e.message||String(e)));sheetActionMessage('No se ha confirmado la eliminación. La hoja permanece visible hasta comprobar el resultado.','err');deletionReview=null;}
+ finally{deletionBusy=false;$('#cancelDeleteSheet').disabled=false;$('#confirmDeleteSheet').disabled=!deletionReview;}
+};
 
-// Fila inicial
-addRow();
-$("#btnAddEquipo").onclick = () => addRow();
+async function nextVersion(ref){const list=refs.filter(r=>r.referencia===ref);let m=0;list.forEach(r=>{const n=String(r.version||'').match(/(\d+)/);if(n)m=Math.max(m,+n[1])});return `V${m+1}`}
+$('#btnSaveCurrent').onclick=async()=>{if(!currentId)return;const p=buildPayload();if(!p)return;if(!confirm('¿Guardar cambios sobre esta versión?'))return;const {error}=await sb.from('control_metrologico').update(p).eq('id',currentId);if(error)return showMsg(error.message,'err');showMsg('Hoja actualizada correctamente.','ok');setDirty(false);await loadData()}
+$('#btnSaveVersion').onclick=async()=>{const p=buildPayload();if(!p)return;p.version=await nextVersion(p.referencia);if(!confirm(`Se creará ${p.referencia} · ${p.version}. ¿Continuar?`))return;const {data,error}=await sb.from('control_metrologico').insert(p).select('*').single();if(error)return showMsg(error.message,'err');showMsg(`Hoja guardada como ${p.version}.`,'ok');setDirty(false);await loadData();if(data)openRecord(data.id,false)}
+$('#btnCancel').onclick=()=>{if(dirty&&!confirm('Hay cambios sin guardar. ¿Limpiar igualmente?'))return;resetForm();switchTab('buscar')}
 
-/* ===========================================================
-   MODO EDICIÓN: CARGAR DATOS DESDE CONSULTA
-   =========================================================== */
+function renderInventory(){const q=norm($('#inventorySearch')?.value),fs=$('#inventoryStatus')?.value||'';const list=inventory.filter(i=>{const s=calibrationState(i).t;return(!q||norm([i.codigo,i.descripcion,locationName(i)].join(' ')).includes(q))&&(!fs||s===fs)}).slice(0,400);$('#inventoryBody').innerHTML=list.map(i=>{const s=calibrationState(i);const p=i.fecha_proxima_calibracion||i.proxima_calibracion||'—';return `<tr><td><input type="checkbox" data-inv="${esc(i.id)}"></td><td><b>${esc(i.codigo||'')}</b></td><td>${esc(i.descripcion||'')}</td><td>${esc(locationName(i))}</td><td><span class="chip ${s.c}">${s.t}</span></td><td>${esc(p)}</td></tr>`}).join('')}
+$('#btnInventory').onclick=()=>{$('#inventoryDialog').showModal();renderInventory()};$('#inventorySearch').oninput=renderInventory;$('#inventoryStatus').onchange=renderInventory;$('#btnAddSelectedInventory').onclick=()=>{const ids=$$('#inventoryBody [data-inv]:checked').map(x=>x.dataset.inv);ids.forEach(id=>{const i=inventory.find(x=>String(x.id)===String(id));if(i)makeRow({codigo_equipo:i.codigo,descripcion_equipo:i.descripcion,medio_control:i.descripcion,cantidad:1})});$('#inventoryDialog').close();setDirty()};
 
-let modoEdicion = false;
-let idRegistroEditar = null;
+function renderClone(){const q=norm($('#cloneSearch')?.value);const list=refs.filter(r=>!q||norm([r.referencia,r.pieza,r.cliente,r.version].join(' ')).includes(q)).slice(0,120);$('#cloneList').innerHTML=list.map(r=>`<article class="ref-card"><div class="ref-code">${esc(r.referencia||'—')}</div><div class="ref-meta">${esc(revisionOf(r)||r.version||'')} · ${esc(r.pieza||'')} · ${(r.equipos||[]).length} medios</div><button class="btn small" data-clone="${esc(r.id)}">Clonar equipos</button></article>`).join('')||'<div class="empty" style="grid-column:1/-1">Sin resultados.</div>';$$('[data-clone]').forEach(b=>b.onclick=()=>{const r=refs.find(x=>String(x.id)===String(b.dataset.clone));if(!r)return;$('#rows').innerHTML='';(r.equipos||[]).forEach(makeRow);if(!$('#rows').children.length)makeRow();$('#cloneDialog').close();setDirty();updateSummary()})}
+$('#btnClone').onclick=()=>{$('#cloneDialog').showModal();renderClone()};$('#cloneSearch').oninput=renderClone;
 
-function cargarModoEdicion() {
-  const params = new URLSearchParams(window.location.search);
-  const modo = params.get("modo");
+function openChecklistById(id){const r=refs.find(x=>String(x.id)===String(id));if(r)openChecklist(r)}
+function checklistRecordId(ref){return ref?.id||currentId||null}
+function getOperator(){let n=localStorage.getItem('tmp_operario_montaje')||'';if(!n)n=(prompt('Nombre del operario que prepara los equipos:')||'').trim();if(n)localStorage.setItem('tmp_operario_montaje',n);return n}
+async function recoverSession(hojaId){const sid=sessionStorage.getItem(`tmp_montaje_${hojaId}`);if(!sid)return null;const {data,error}=await sb.from('control_montajes').select('*').eq('id',sid).maybeSingle();if(error||!data||data.estado==='COMPLETADO'){sessionStorage.removeItem(`tmp_montaje_${hojaId}`);return null}return data}
+async function startMountSession(ref){const hojaId=checklistRecordId(ref);if(!hojaId){showMsg('Guarda primero la hoja para registrar el montaje.','err');return null}let existing=await recoverSession(hojaId);if(existing)return existing;const op=getOperator();if(!op){showMsg('Indica un operario para iniciar el seguimiento.','err');return null}const base=activeChecklistItems.map((e,i)=>({numero:i+1,equipo:legacyEquipmentText(e)||'Equipo',observaciones:e.observacion||e.nota||'',marcado_en:null}));const payload={hoja_id:hojaId,referencia:ref.referencia||'',revision:revisionOf(ref)||'',version:ref.version||'',estado:'EN_PREPARACION',preparado_por:op,items:base,eventos:[{tipo:'INICIO',fecha:new Date().toISOString(),operario:op}]};const {data,error}=await sb.from('control_montajes').insert(payload).select('*').single();if(error){showMsg(`No se pudo iniciar el seguimiento: ${error.message}`,'err');return null}sessionStorage.setItem(`tmp_montaje_${hojaId}`,data.id);return data}
+function updateMountUi(){const total=activeChecklistItems.length,checked=$$('#checkList input[type="checkbox"]:checked').length;$('#mountProgress').textContent=`${checked} / ${total}`;if(activeMountSession){$('#mountStatusTitle').textContent=checked===total&&total?'Montaje completado':'Montaje en curso';$('#mountStatusSub').textContent=`Registro iniciado ${new Date(activeMountSession.iniciado_en).toLocaleString('es-ES')} · ${activeMountSession.preparado_por||''}`;$('#mountSessionInfo').textContent=`Registro: ${activeMountSession.id.slice(0,8)}…`}else{$('#mountStatusTitle').textContent='Preparación sin iniciar';$('#mountStatusSub').textContent='La primera marca iniciará un registro con fecha, hora y operario.';$('#mountSessionInfo').textContent=''}}
+async function onMountToggle(input,index){const ref=activeChecklistRecord;if(!ref)return;if(!activeMountSession){activeMountSession=await startMountSession(ref);if(!activeMountSession){input.checked=false;return}}const now=new Date().toISOString();let items=Array.isArray(activeMountSession.items)?structuredClone(activeMountSession.items):[];while(items.length<activeChecklistItems.length){const i=items.length,e=activeChecklistItems[i];items.push({numero:i+1,equipo:legacyEquipmentText(e)||'Equipo',observaciones:e.observacion||'',marcado_en:null})}items[index].marcado_en=input.checked?now:null;items[index].marcado_por=input.checked?(activeMountSession.preparado_por||''):null;let eventos=Array.isArray(activeMountSession.eventos)?structuredClone(activeMountSession.eventos):[];eventos.push({tipo:input.checked?'MONTADO':'DESMARCADO',numero:index+1,equipo:items[index].equipo,fecha:now,operario:activeMountSession.preparado_por||''});const complete=items.length>0&&items.every(x=>x.marcado_en);const patch={items,eventos,estado:complete?'COMPLETADO':'EN_PREPARACION',completado_en:complete?now:null,actualizado_en:now};const {data,error}=await sb.from('control_montajes').update(patch).eq('id',activeMountSession.id).select('*').single();if(error){showMsg(`No se pudo registrar: ${error.message}`,'err');input.checked=!input.checked;return}activeMountSession=data;const label=input.closest('.check-item');label.classList.toggle('done',input.checked);const mt=label.querySelector('.mount-time');mt.textContent=input.checked?`Montado · ${new Date(now).toLocaleString('es-ES')}`:'';updateMountUi();if(complete){sessionStorage.removeItem(`tmp_montaje_${checklistRecordId(ref)}`);showMsg('Montaje completado y registrado.','ok');loadMountHistory(checklistRecordId(ref))}}
+async function openChecklist(r=null){const ref=r||buildPayload();if(!ref)return;activeChecklistRecord=ref;activeChecklistItems=Array.isArray(ref.equipos)?ref.equipos:allRows();activeMountSession=null;const hojaId=checklistRecordId(ref);if(hojaId)activeMountSession=await recoverSession(hojaId);$('#checkTitle').textContent=`Preparar equipos · ${ref.referencia||$('#referencia').value}`;$('#checkSub').textContent=`Rev. ${revisionOf(ref)||$('#revision').value||'—'} · ${ref.pieza||$('#pieza').value||''}`;const saved=Array.isArray(activeMountSession?.items)?activeMountSession.items:[];$('#checkList').innerHTML=activeChecklistItems.map((e,i)=>{const label=legacyEquipmentText(e)||'Equipo',done=Boolean(saved[i]?.marcado_en);return `<label class="check-item${done?' done':''}"><input type="checkbox" data-mount-index="${i}" ${done?'checked':''}>${equipmentImageOf(e)?`<img class="check-thumb" src="${equipmentImageOf(e)}" alt="${esc(label)}">`:''}<div class="check-main"><b>${i+1}. ${esc(label)}</b><span>${e.observacion?esc(e.observacion):''}</span><div class="mount-time">${done?`Montado · ${esc(new Date(saved[i].marcado_en).toLocaleString('es-ES'))}`:''}</div></div><span class="chip">${i+1}</span></label>`}).join('');$$('#checkList [data-mount-index]').forEach(inp=>inp.addEventListener('change',()=>onMountToggle(inp,+inp.dataset.mountIndex)));updateMountUi();$('#checkDialog').showModal()}
+function buildPrintChecklist(){const ref=activeChecklistRecord||printDataRecord(),eq=activeChecklistItems.length?activeChecklistItems:(Array.isArray(ref.equipos)?ref.equipos:allRows());$('#printChecklist').innerHTML=`<div class="print-logo-title">TMP · PREPARACIÓN DE EQUIPOS</div><div style="font-size:11px;margin:5px 0 12px"><b>${esc(ref.referencia||'')}</b> · Rev. ${esc(revisionOf(ref)||'—')} · ${esc(ref.pieza||'')}</div>${eq.map((e,i)=>`<div class="print-check"><div class="print-box"></div>${equipmentImageOf(e)?`<img src="${equipmentImageOf(e)}">`:''}<div><b>${i+1}. ${esc(legacyEquipmentText(e)||'Equipo')}</b><span>${esc(e.observacion||e.nota||'')}</span></div></div>`).join('')}`}
+$('#btnChecklist').onclick=()=>openChecklist();$('#btnPrintChecklist').onclick=()=>{buildPrintChecklist();document.body.dataset.print='checklist';setTimeout(()=>window.print(),60)};$('#btnPrint').onclick=()=>printCurrentSheet();
 
-  if (modo !== "editar") return;
+$$('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).close());
+['referencia','revision','pieza','cliente','responsable','fecha','observaciones'].forEach(id=>$('#'+id).addEventListener('input',()=>setDirty()));window.addEventListener('beforeunload',e=>{if(!dirty)return;e.preventDefault();e.returnValue=''})
 
-  const data = localStorage.getItem("editarReferencia");
-  if (!data) return;
-
-  modoEdicion = true;
-
-  const rec = JSON.parse(data);
-
-  // Guardamos ID para UPDATE
-  idRegistroEditar = rec.id;
-
-  // Cargar datos generales
-  $("#referencia").value = rec.referencia || "";
-  $("#pieza").value = rec.pieza || "";
-  $("#cliente").value = rec.cliente || "";
-  $("#responsable").value = rec.responsable || "";
-  $("#fecha").value = rec.fecha || "";
-  $("#version").value = rec.version || "";
-  $("#observaciones").value = rec.observaciones || "";
-
-  // Cargar equipos
-  tablaBody.innerHTML = "";
-  (rec.equipos || []).forEach(eq => addRow(eq));
-
-  msg("Modo edición: estás editando la versión " + (rec.version || ""), "ok");
-}
-
-cargarModoEdicion();
-
-/* ===========================================================
-   RECOPILAR DATOS DEL FORMULARIO
-   =========================================================== */
-
-function recogerPayload() {
-  const referencia = $("#referencia").value.trim();
-  if (!referencia) {
-    msg("La referencia es obligatoria.");
-    return null;
-  }
-
-  const equipos = [];
-
-  [...tablaBody.querySelectorAll("tr")].forEach(tr => {
-    const inputs = tr.querySelectorAll("input");
-    const [codigo, desc, cant, tipo] = inputs;
-
-    if (!codigo.value.trim() && !desc.value.trim()) return;
-
-    equipos.push({
-      codigo_equipo: codigo.value.trim(),
-      descripcion_equipo: desc.value.trim(),
-      cantidad: parseInt(cant.value || "1"),
-      tipo_medida: tipo.value.trim()
-    });
-  });
-
-  if (equipos.length === 0) {
-    msg("Debes añadir al menos un equipo.");
-    return null;
-  }
-
-  return {
-    referencia,
-    pieza: $("#pieza").value.trim() || null,
-    cliente: $("#cliente").value.trim() || null,
-    responsable: $("#responsable").value.trim() || null,
-    fecha: $("#fecha").value || null,
-    version: $("#version").value.trim() || null,
-    observaciones: $("#observaciones").value.trim() || null,
-    equipos
-  };
-}
-
-/* ===========================================================
-   GUARDAR CAMBIOS (UPDATE)
-   =========================================================== */
-async function guardarCambios() {
-  if (!modoEdicion || !idRegistroEditar) {
-    msg("No estás en modo edición.");
-    return;
-  }
-
-  const payload = recogerPayload();
-  if (!payload) return;
-
-  try {
-    const { error } = await sb
-      .from("control_metrologico")
-      .update(payload)
-      .eq("id", idRegistroEditar);
-
-    if (error) {
-      msg("Error al guardar cambios: " + error.message);
-      return;
-    }
-
-    msg("Versión actualizada correctamente.", "ok");
-
-  } catch (e) {
-    msg("Error inesperado: " + e.message);
-  }
-}
-
-/* ===========================================================
-   GUARDAR NUEVA VERSIÓN (INSERT)
-   =========================================================== */
-async function guardarNuevaVersion() {
-  const payload = recogerPayload();
-  if (!payload) return;
-
-  // QUITAMOS versión si está vacía para que el trigger genere V2/V3
-  if (!payload.version || payload.version === "") {
-    delete payload.version;
-  }
-
-  try {
-    const { error } = await sb
-      .from("control_metrologico")
-      .insert(payload);
-
-    if (error) {
-      msg("Error al crear nueva versión: " + error.message);
-      return;
-    }
-
-    msg("Nueva versión creada correctamente.", "ok");
-
-  } catch (e) {
-    msg("Error inesperado: " + e.message);
-  }
-}
-
-/* ===========================================================
-   EVENTOS DE BOTONES
-   =========================================================== */
-$("#btnGuardar").onclick = guardarCambios;
-$("#btnGuardarNueva").onclick = guardarNuevaVersion;
-
+const params=new URLSearchParams(location.search);const editRaw=localStorage.getItem('editarReferencia');resetForm();loadData().then(async()=>{const hoja=params.get('hoja');if(hoja&&params.get('modo')==='montaje'){const r=refs.find(x=>String(x.id)===String(hoja));if(r){openRecord(r.id,false);await openChecklist(r);return}else showMsg('No se encontró la hoja asociada al QR.','err')}if(params.get('modo')==='editar'&&editRaw){try{let r=JSON.parse(editRaw);if(r.id!=null){const fresh=await sb.from('control_metrologico').select('*').eq('id',r.id).maybeSingle();if(fresh.error||!fresh.data){localStorage.removeItem('editarReferencia');sheetActionMessage('La hoja que se intentaba editar ya no está disponible. Busca la referencia de nuevo.','err');return;}r=fresh.data;}if(!refs.some(x=>String(x.id)===String(r.id)))refs.unshift(r);openRecord(r.id||'',false);if(!r.id){currentRecord=r;currentId=null;$('#referencia').value=r.referencia||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=r.fecha||today();$('#version').value=r.version||'';$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(r.equipos||[]).forEach(makeRow);switchTab('editar')}}catch(e){console.warn(e)}}});
 </script>
-
 </body>
 </html>

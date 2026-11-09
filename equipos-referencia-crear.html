@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TMP · Hojas de equipos de control</title>
-  <!-- Build HEC-01 · 2026-11-09: eliminación individual de hoja/version con protección de montajes -->
+  <!-- Build HEC-02 · 2026-11-09: eliminación individual de hoja/version con protección de montajes -->
   <style>
     :root{--bg:#eef5fb;--panel:#fff;--ink:#102a43;--muted:#627d98;--line:#d8e5f0;--blue:#2563eb;--blue2:#1d4ed8;--green:#16a34a;--orange:#d97706;--red:#dc2626;--shadow:0 12px 34px rgba(15,45,75,.09);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#edf5fd,#f8fbfe);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
@@ -48,7 +48,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="brand"><img src="img/tmp-quality.png" alt="TMP"><div><h1>Hojas de equipos de control</h1><span class="chip blue no-print" id="sheetBuild">HEC-01 · 09/11/2026</span><p>Qué medios debe preparar Calidad para cada referencia mecanizada</p></div></div>
+    <div class="brand"><img src="img/tmp-quality.png" alt="TMP"><div><h1>Hojas de equipos de control</h1><span class="chip blue no-print" id="sheetBuild">HEC-02 · 09/11/2026</span><p>Qué medios debe preparar Calidad para cada referencia mecanizada</p></div></div>
     <div class="top-actions no-print"><a class="btn" href="home.html">Inicio</a><a class="btn" href="equipos-referencia-consulta.html">Equipos / Buscar</a></div>
   </div>
 
@@ -258,7 +258,7 @@ function resetForm(){currentId=null;currentRecord=null;renderQr(null);loadMountH
 function openRecord(id,newRevision){const r=refs.find(x=>String(x.id)===String(id));if(!r)return;currentRecord=r;currentId=newRevision?null:r.id;$('#referencia').value=r.referencia||'';$('#revision').value=revisionOf(r)||'';$('#pieza').value=r.pieza||'';$('#cliente').value=r.cliente||'';$('#responsable').value=r.responsable||'';$('#fecha').value=newRevision?today():(r.fecha||today());$('#version').value=newRevision?'':(r.version||'');$('#observaciones').value=r.observaciones||'';setPiecePhoto(photoFromRecord(r));$('#rows').innerHTML='';(Array.isArray(r.equipos)?r.equipos:[]).forEach(makeRow);if(!$('#rows').children.length)makeRow();$('#modeBadge').textContent=newRevision?'NUEVA REVISIÓN':(r.version||'EDITANDO');$('#btnSaveCurrent').style.display=newRevision?'none':'inline-flex';$('#btnDeleteCurrent').style.display=newRevision?'none':'inline-flex';setDirty(false);renderQr(newRevision?null:r);loadMountHistory(newRevision?null:r.id);switchTab('editar')}
 
 function buildPayload(){const ref=$('#referencia').value.trim();if(!ref){showMsg('La referencia es obligatoria.','err');return null}const rows=attachPhoto(allRows());if(!rows.length){showMsg('Añade al menos un equipo o medio de control.','err');return null}if(rows.some(x=>!x.medio_control&&!x.codigo_equipo)){showMsg('Hay líneas sin equipo definido.','err');return null}const rev=$('#revision').value.trim();let obs=$('#observaciones').value.trim();if(rev&&!/REV/i.test(obs))obs=`REVISION: ${rev}${obs?` | ${obs}`:''}`;return {referencia:ref,pieza:$('#pieza').value.trim()||null,cliente:$('#cliente').value.trim()||null,responsable:$('#responsable').value.trim()||null,fecha:$('#fecha').value||null,version:$('#version').value.trim()||null,observaciones:obs||null,equipos:rows}}
-// HEC-01: delete exactly one reviewed sheet/version; mounting history is protected server-side.
+// HEC-02: delete exactly one reviewed sheet/version; mounting history is protected server-side.
 let deletionReview=null,deletionBusy=false,deletionSequence=0;
 function sheetActionMessage(text,type='info'){const node=$('#sheetActionMsg');node.textContent=text;node.className='msg show '+type;}
 function closeDeletion(){if(deletionBusy)return;deletionSequence++;deletionReview=null;$('#deleteSheetDialog').close();}
@@ -270,28 +270,26 @@ async function requestSheetDeletion(id){
  $('#deleteDraftNotice').hidden=!(dirty&&String(currentId)===String(id));$('#deleteSheetDetails').textContent='Comprobando la hoja y sus montajes…';$('#deleteSheetError').textContent='';$('#confirmDeleteSheet').disabled=true;$('#deleteSheetDialog').showModal();
  try{
   const [sheet,mounts]=await Promise.all([
-   sb.from('control_metrologico').select('*').eq('id',id).maybeSingle(),
+   sb.rpc('preparar_eliminacion_hoja',{p_id:id}),
    sb.from('control_montajes').select('id',{count:'exact',head:true}).eq('hoja_id',String(id))
   ]);
   if(sequence!==deletionSequence)return;
-  if(sheet.error)throw sheet.error;if(!sheet.data)throw Error('Esta hoja ya no está disponible. Actualiza la búsqueda.');
-  const r=sheet.data,lines=Array.isArray(r.equipos)?r.equipos.length:0;
+  if(sheet.error)throw sheet.error;if(!sheet.data?.hoja)throw Error('Esta hoja ya no está disponible. Actualiza la búsqueda.');
+  if(!/^[a-f0-9]{32}$/.test(sheet.data.huella||''))throw Error('No se ha podido comprobar la versión actual de la hoja.');
+  const r=sheet.data.hoja,lines=Array.isArray(r.equipos)?r.equipos.length:0;
   $('#deleteSheetDetails').innerHTML=`<p><b>Referencia:</b> ${esc(r.referencia)}<br><b>Revisión:</b> ${esc(revisionOf(r)||'—')}<br><b>Versión:</b> ${esc(r.version||'—')}<br><b>Identificador de hoja:</b> ${esc(r.id)}<br><b>Pieza:</b> ${esc(r.pieza||'—')}<br><b>Cliente:</b> ${esc(r.cliente||'—')}<br><b>Fecha:</b> ${esc(r.fecha||'—')}<br><b>Elementos:</b> ${lines}</p>`;
   if(mounts.error)throw Error('No se pudieron comprobar los montajes vinculados. No se permite borrar hasta comprobarlos.');
   if(!Number.isInteger(mounts.count)||mounts.count<0)throw Error('No se ha podido confirmar el número de montajes vinculados.');
   if(mounts.count>0)throw Error(`Esta hoja tiene ${mounts.count} montaje(s) registrado(s). Se conserva para mantener su historial. Puedes eliminar la copia duplicada que no tenga montajes.`);
-  deletionReview=structuredClone(r);$('#confirmDeleteSheet').disabled=false;
- }catch(e){if(sequence===deletionSequence)$('#deleteSheetError').textContent=e.message||String(e);}
+  deletionReview={...structuredClone(r),_huella_revision:sheet.data.huella};$('#confirmDeleteSheet').disabled=false;
+ }catch(e){if(sequence===deletionSequence)$('#deleteSheetError').textContent=(e.code?'['+e.code+'] ':'')+(e.message||String(e));}
 }
 $('#btnDeleteCurrent').onclick=()=>{if(currentId!==null)requestSheetDeletion(currentId);};
 $('#confirmDeleteSheet').onclick=async()=>{
  if(deletionBusy||!deletionReview)return;const r=structuredClone(deletionReview);deletionBusy=true;$('#confirmDeleteSheet').disabled=true;$('#cancelDeleteSheet').disabled=true;$('#deleteSheetError').textContent='Eliminando la hoja seleccionada…';
  try{
-  // The primary-key filter is mandatory. Content filters reject a sheet changed since review.
-  let query=sb.from('control_metrologico').delete().eq('id',r.id);
-  for(const key of ['referencia','pieza','cliente','responsable','fecha','version','observaciones','creado_en'])query=r[key]==null?query.is(key,null):query.eq(key,r[key]);
-  query=query.eq('equipos',JSON.stringify(r.equipos));
-  const {data,error}=await query.select('id');
+  // Short POST body: never put images/equipment JSON in URL filters.
+  const {data,error}=await sb.rpc('eliminar_hoja_revisada',{p_id:r.id,p_huella:r._huella_revision});
   if(error){if(error.code==='23503')throw Error('La hoja tiene un montaje vinculado y se conserva su historial.');throw error;}
   if(!Array.isArray(data)||data.length!==1||String(data[0].id)!==String(r.id))throw Error('No se ha confirmado la eliminación. La hoja puede haber cambiado o la operación no está autorizada. Actualiza la búsqueda antes de volver a intentarlo.');
   refs=refs.filter(item=>String(item.id)!==String(r.id));
@@ -305,7 +303,7 @@ $('#confirmDeleteSheet').onclick=async()=>{
   if([...$('#searchClient').options].some(x=>x.value===clientFilter))$('#searchClient').value=clientFilter;
   renderSearch();renderClone();sheetActionMessage(`Hoja eliminada: ${r.referencia} · ${r.version||'sin versión'} · ID ${r.id}.`,'ok');
   deletionReview=null;deletionSequence++;$('#deleteSheetDialog').close();
- }catch(e){$('#deleteSheetError').textContent='No se ha confirmado el borrado: '+(e.message||String(e));sheetActionMessage('No se ha confirmado la eliminación. La hoja permanece visible hasta comprobar el resultado.','err');deletionReview=null;}
+ }catch(e){$('#deleteSheetError').textContent='No se ha confirmado el borrado: '+((e.code?'['+e.code+'] ':'')+(e.message||String(e)));sheetActionMessage('No se ha confirmado la eliminación. La hoja permanece visible hasta comprobar el resultado.','err');deletionReview=null;}
  finally{deletionBusy=false;$('#cancelDeleteSheet').disabled=false;$('#confirmDeleteSheet').disabled=!deletionReview;}
 };
 
