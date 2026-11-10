@@ -196,11 +196,23 @@ export function buildTamponRoscadoProcedure(ctx = {}) {
   };
 }
 // MT16 periodic verification. No calibration dates or initial certificates are changed.
-export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_AUTO03_20261109';
+export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_AUTO05_20261109';
 export function evaluateMT16PeriodicVerification(form = {}) {
+  form=structuredClone(form);
+  const conversionIssues=[];
+  if(form.adquisicion==='M3_HILOS'){
+    if(form.modo_evaluacion!=='DIMENSION_ACTUAL'||!form.conversion?.montaje_confirmado)conversionIssues.push('Confirmar medición absoluta exterior sobre tres hilos; no admite desplazamientos respecto a cero ni anillos');
+    for(const side of ['PASA','NO_PASA']){
+      const point=form.puntos?.[side];if(!point)continue;
+      point.lecturas_originales=[...(point.lecturas||[])];
+      point.conversiones=(point.lecturas||[]).map(M=>convertMT16ThreeWireReading(M,form.conversion));
+      if(point.conversiones.some(v=>!v.ok))conversionIssues.push(side+': '+[...new Set(point.conversiones.filter(v=>!v.ok).map(v=>v.error))].join('; '));
+      point.lecturas=point.conversiones.map(v=>v.ok?v.d2_mm:null);
+    }
+  }else if(form.adquisicion&&!['D2','INDICACION_TRIMOS'].includes(form.adquisicion))conversionIssues.push('Modo de adquisición desconocido');
   const number = value => value === null || value === undefined || String(value).trim() === '' ? null : Number(String(value).trim().replace(',', '.'));
   const text = value => {const s=String(value??'').trim();return /^(null|undefined|-|n\/a)$/i.test(s)?'':s;};
-  const missing = [], failures = [], points = [];
+  const missing = [...conversionIssues], failures = [], points = [];
   // Missing mode in earlier snapshots means the original historical-comparison model.
   const mode=form.modo_evaluacion||'VARIACION_HISTORICA',absolute=mode==='DIMENSION_ACTUAL';
   if(!['DIMENSION_ACTUAL','VARIACION_HISTORICA'].includes(mode))missing.push('Modo de evaluación válido');
@@ -210,6 +222,7 @@ export function evaluateMT16PeriodicVerification(form = {}) {
   if(!['PAUTA','REGISTRO_INTERNO','CERTIFICADO'].includes(origin))missing.push('Origen del criterio de referencia');
   if(origin==='CERTIFICADO'&&!text(form.certificado_inicial))missing.push('Certificado elegido como origen de referencia');
   if(absolute&&form.magnitud!=='D2')missing.push('Diámetro de flancos D2 obtenido con el método documentado');
+  if(form.criterio_configurado===false)missing.push('Configuración técnica del criterio pendiente; no requiere buscar el histórico del equipo');
   if (!form.metodo_confirmado) missing.push('Confirmar que las lecturas y referencias corresponden a la misma magnitud y método');
   for (const [key,label] of [['identificacion','Identificación'],['limpieza','Limpieza y estado de superficies'],['integridad','Ausencia de daños'],['trazabilidad','Vigencia del certificado del banco']]) {
     if (form[key] === 'NOK') failures.push(label + ': no conforme');
@@ -237,7 +250,7 @@ export function evaluateMT16PeriodicVerification(form = {}) {
     const intervalLow=(absolute?low:delta)-U,intervalHigh=(absolute?high:delta)+U;
     const accepted=intervalLow>=min-1e-12 && intervalHigh<=max+1e-12;
     points.push({lado:key,resultado:accepted?'OK':'NOK',modo:mode,media:avg,referencia:absolute?null:baseline,variacion:delta,min,max,U,
-      minimo_medido:low,maximo_medido:high,intervalo_evaluado:{min:intervalLow,max:intervalHigh},
+      lecturas_d2:absolute?readings:null,lecturas_originales:p.lecturas_originales||null,conversiones:p.conversiones||null,minimo_medido:low,maximo_medido:high,intervalo_evaluado:{min:intervalLow,max:intervalHigh},
       regla:absolute?'Aceptar si todas las lecturas D2 ± U están dentro de los límites documentados':'Aceptar si [variación − U, variación + U] está completamente dentro de [mínimo, máximo]',
       lectura_magnitud:form.magnitud || 'INDICACION_TRIMOS',unidad:'mm'});
     if(!accepted) failures.push(label+': no cumple la regla de aceptación con incertidumbre');
@@ -245,7 +258,7 @@ export function evaluateMT16PeriodicVerification(form = {}) {
   const result=failures.length?'NOK':missing.length?'PENDIENTE':'OK';
   return {tipo:'VERIFICACION_PERIODICA',version:MT16_PERIODIC_VERIFICATION_VERSION,modo:mode,resultado:result,
     puntos:points,faltantes:missing,motivos:failures,criterio_origen:origin||null,documento_criterio:text(form.criterio),
-    alcance:absolute?'Verificación del diámetro de flancos frente a límites documentados. No determina desgaste histórico sin medidas anteriores ni valida automáticamente tablas normativas.':'Comparación con una referencia anterior de la misma magnitud y montaje, frente a límites de variación documentados. No sustituye una comprobación dimensional actual.'};
+    alcance:absolute?'Verificación del diámetro simple de flancos frente a los límites indicados. No determina el desgaste histórico sin medidas anteriores ni verifica por sí sola el paso, el ángulo, la forma o el funcionamiento completo del calibre.':'Comparación con una referencia anterior de la misma magnitud y montaje, frente a límites de variación documentados. No sustituye una comprobación dimensional actual.'};
 }
 
 // Reuse existing MT16 parser, wire selection and certificate readers.
@@ -277,7 +290,67 @@ export async function resolveMT16VerificationAutomation(client, equipment, famil
     const ref=(refsResponse.data||[]).find(c=>!String(c.procedimiento_codigo||'').startsWith('MT16')&&clean(c.certificado_url));
     if(ref){result.certificate=clean(ref.certificado_url);result.sources.push('calibraciones / certificado de referencia existente');}
   }
-  if(!result.certificate)result.messages.push('No hay certificado del equipo enlazado. Es opcional: identifica el procedimiento o registro interno que aporta el criterio de aceptación.');
+  if(!result.certificate)result.messages.push('El certificado del equipo es opcional. No es necesario recuperar su informe de compra para configurar el criterio aplicable.');
   if(ring)result.messages.push('Anillo: montaje interior; no se propone el rodillo exterior de un tampón.');
   return result;
+}
+
+// One configuration per exact gauge family/designation; no factory measurement is inferred.
+export function resolveMT16CriterionIdentity(equipment, family, parsed) {
+  if(!parsed?.ok)return {key:null,reason:'La designación de rosca no se ha podido identificar.'};
+  const raw=String(equipment.rango||equipment.descripcion||'');
+  let cls=String(parsed.tolerance_class||'');
+  if(parsed.thread_system==='METRIC_ISO'){
+    const matches=[...raw.matchAll(/\b([1-9][HhGg]|[HhGg][1-9])\b/g)].map(m=>m[1]);
+    const classes=[...new Set(matches.map(s=>/^[HhGg]/.test(s)?s[1]+s[0]:s))];
+    if(classes.length!==1)return {key:null,reason:'La clase de tolerancia debe figurar inequívocamente en la ficha. No se presupone 6H.'};
+    cls=classes[0];
+  }
+  if(!cls && !parsed.tpi)return {key:null,reason:'Falta la clase o serie necesaria para asociar una pauta.'};
+  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,'D2','DIMENSION_ACTUAL'].join('|');
+  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls};
+}
+export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
+  const issues=[],text=v=>{const s=String(v??'').trim();return /^(null|undefined|n\/a|-)$/i.test(s)?'':s;};
+  const num=v=>text(v)===''?NaN:Number(String(v).replace(',','.'));
+  if(!identity?.key||config?.key!==identity.key)issues.push('La pauta no corresponde a la familia y designación exactas.');
+  if(config?.version!==1||config?.modo_evaluacion!=='DIMENSION_ACTUAL'||config?.magnitud!=='D2')issues.push('Formato o modo de pauta no compatible.');
+  for(const field of ['criterio','metodo','accesorios'])if(!text(config?.[field]))issues.push('Falta '+({criterio:'el documento/revisión del criterio',metodo:'el método documentado',accesorios:'el montaje de medida'}[field])+'.');
+  if(!text(bankCertificate)||!text(config?.bank_certificate)||config.bank_certificate!==bankCertificate)issues.push('La pauta debe revisarse para el certificado actual del banco.');
+  for(const side of ['PASA','NO_PASA']){const p=config?.puntos?.[side]||{},min=num(p.min),max=num(p.max),U=num(p.U);if(![min,max,U].every(Number.isFinite)||min<=0||max<=0||U<=0||min>max)issues.push(side+': límites D2 e incertidumbre del método incompletos o incoherentes.');}
+  const norm=resolveMT16ServiceLimits(identity);
+  if(norm)for(const side of ['PASA','NO_PASA'])for(const k of ['min','max'])if(Math.abs(num(config?.puntos?.[side]?.[k])-norm.puntos[side][k])>1e-9)issues.push('Los límites de '+side+' deben coincidir con los límites de servicio incorporados en AUTO-05.');
+  if(config?.adquisicion==='M3_HILOS'){
+    const c=config.conversion||{},check=convertMT16ThreeWireReading(100,{...c,family:identity?.family,system:identity?.system,angle_deg:identity?.angle,pitch_mm:identity?.pitch});
+    if(!check.ok)issues.push(check.error);
+  }else if(config?.adquisicion&&config.adquisicion!=='D2')issues.push('Adquisición incompatible con una pauta dimensional.');
+  return {ok:issues.length===0,issues};
+}
+
+
+// Independently checked scope: this exact ISO 965-2:1998 table 3 row only.
+// ISO 1502:1996 tables 4, 5 and 12; dimensions in mm.
+export function resolveMT16ServiceLimits(identity){
+  if(!identity?.key||identity.family!=='TAMPON_ROSCADO_PNP'||identity.system!=='METRIC_ISO'||identity.tolerance_class!=='6H'||identity.nominal!==12||identity.pitch!==1.25||identity.angle!==60)return null;
+  const workMin=11.188,workMax=11.368,Z=0.012,T=0.011,Wgo=0.0175,Wng=0.0115;
+  const r=v=>Number(v.toFixed(7));
+  const point=(center,W)=>({center:r(center),new_min:r(center-T/2),new_max:r(center+T/2),wear_min:r(center-W),min:r(center-W),max:r(center+T/2)});
+  return {version:'MT16_LIMITS_75148_20261109',designation:'M12x1.25 · 6H',
+    criterio:'ISO 1502:1996 · tablas 4, 5 y 12; ISO 965-2:1998 · tabla 3; servicio: desgaste mínimo a máximo de fabricación',
+    sources:['https://law.resource.org/pub/in/bis/S01/is.2334.2001.pdf','https://law.resource.org/pub/in/bis/S01/is.14962.2.2001.pdf'],
+    workpiece:{min:workMin,max:workMax},parameters:{ZPL:Z,TPL:T,WGO:Wgo,WNG:Wng},
+    puntos:{PASA:point(workMin+Z,Wgo),NO_PASA:point(workMax+T/2,Wng)}};
+}
+
+// EURAMET cg-10 v2.1, equation 14. All corrections must be supplied by
+// the documented method. In particular a blank force correction is not zero.
+// This function is restricted to an exterior, single-start metric plug setup.
+export function convertMT16ThreeWireReading(reading,config={}){
+  const n=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(String(v).replace(',','.'));
+  const M=n(reading),P=n(config.pitch_mm),w=n(config.wire_mm),A1=n(config.rake_mm),A2=n(config.force_mm),B=n(config.bank_correction_mm);
+  if(config.family!=='TAMPON_ROSCADO_PNP'||config.system!=='METRIC_ISO'||config.angle_deg!==60||config.montaje_confirmado!==true)return {ok:false,error:'Montaje exterior de tres hilos no confirmado o no compatible'};
+  if(![M,P,w,A1,A2,B].every(Number.isFinite)||M<=0||P<=0||w<=0||A1<0||A2<0)return {ok:false,error:'Faltan lectura absoluta, diámetro real de hilo o correcciones documentadas de hélice, fuerza y banco'};
+  const geometry=3*w-Math.sqrt(3)*P/2,d2=M-geometry-A1+A2+B;
+  if(d2<=0)return {ok:false,error:'Lectura incompatible con un diámetro absoluto positivo'};
+  return {ok:true,d2_mm:d2,raw_mm:M,wire_mm:w,pitch_mm:P,geometry_mm:geometry,rake_mm:A1,force_mm:A2,bank_correction_mm:B,formula:'D2 = M − 3w + (√3/2)P − A1 + A2 + δB',source:'EURAMET cg-10 v2.1 (12/2012), ecuación 14'};
 }
