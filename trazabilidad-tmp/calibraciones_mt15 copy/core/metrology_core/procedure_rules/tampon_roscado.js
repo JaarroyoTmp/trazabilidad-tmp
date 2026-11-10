@@ -196,7 +196,7 @@ export function buildTamponRoscadoProcedure(ctx = {}) {
   };
 }
 // MT16 periodic verification. No calibration dates or initial certificates are changed.
-export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_AUTO05_20261109';
+export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_AUTO06_20261110';
 export function evaluateMT16PeriodicVerification(form = {}) {
   form=structuredClone(form);
   const conversionIssues=[];
@@ -212,6 +212,15 @@ export function evaluateMT16PeriodicVerification(form = {}) {
   }else if(form.adquisicion&&!['D2','INDICACION_TRIMOS'].includes(form.adquisicion))conversionIssues.push('Modo de adquisición desconocido');
   const number = value => value === null || value === undefined || String(value).trim() === '' ? null : Number(String(value).trim().replace(',', '.'));
   const text = value => {const s=String(value??'').trim();return /^(null|undefined|-|n\/a)$/i.test(s)?'':s;};
+  const uncertaintyResults={};
+  if(form.incertidumbre_automatica&&form.modo_evaluacion==='DIMENSION_ACTUAL'){
+    for(const side of ['PASA','NO_PASA']){
+      const point=form.puntos?.[side];if(!point)continue;
+      const u=calculateMT16AutomaticUncertainty({readings:point.lecturas,rawReadings:point.lecturas_originales||point.lecturas,acquisition:form.adquisicion,bank:form.banco_datos,budget:form.presupuesto_incertidumbre});
+      uncertaintyResults[side]=u;point.U=u.complete?u.U_mm:null;
+      conversionIssues.push(...u.missing.map(x=>side+': '+x));
+    }
+  }
   const missing = [...conversionIssues], failures = [], points = [];
   // Missing mode in earlier snapshots means the original historical-comparison model.
   const mode=form.modo_evaluacion||'VARIACION_HISTORICA',absolute=mode==='DIMENSION_ACTUAL';
@@ -235,7 +244,7 @@ export function evaluateMT16PeriodicVerification(form = {}) {
     const problems=[];
     const fields=absolute?[[min,'límite inferior del diámetro de flancos'],[max,'límite superior del diámetro de flancos']]:[[baseline,'referencia anterior'],[min,'variación mínima admitida'],[max,'variación máxima admitida']];
     for (const [v,name] of fields) if (v === null || !Number.isFinite(v)) problems.push(name);
-    if (U === null || !Number.isFinite(U) || U <= 0) problems.push('incertidumbre expandida del método, mayor que cero');
+    if (U === null || !Number.isFinite(U) || U <= 0) problems.push(form.incertidumbre_automatica?'cálculo automático de U pendiente':'incertidumbre expandida del método, mayor que cero');
     if (readings.length !== 5 || readings.some(v=>v === null || !Number.isFinite(v))) problems.push('cinco lecturas numéricas');
     if (min !== null && max !== null && min > max) problems.push('límites ordenados de menor a mayor');
     if(absolute&&[min,max,...readings].some(v=>Number.isFinite(v)&&v<=0))problems.push('diámetros de flancos y límites mayores que cero');
@@ -257,7 +266,7 @@ export function evaluateMT16PeriodicVerification(form = {}) {
   }
   const result=failures.length?'NOK':missing.length?'PENDIENTE':'OK';
   return {tipo:'VERIFICACION_PERIODICA',version:MT16_PERIODIC_VERIFICATION_VERSION,modo:mode,resultado:result,
-    puntos:points,faltantes:missing,motivos:failures,criterio_origen:origin||null,documento_criterio:text(form.criterio),
+    incertidumbres:uncertaintyResults,puntos:points,faltantes:missing,motivos:failures,criterio_origen:origin||null,documento_criterio:text(form.criterio),
     alcance:absolute?'Verificación del diámetro simple de flancos frente a los límites indicados. No determina el desgaste histórico sin medidas anteriores ni verifica por sí sola el paso, el ángulo, la forma o el funcionamiento completo del calibre.':'Comparación con una referencia anterior de la misma magnitud y montaje, frente a límites de variación documentados. No sustituye una comprobación dimensional actual.'};
 }
 
@@ -314,10 +323,11 @@ export function validateMT16CriterionConfiguration(config, identity, bankCertifi
   const issues=[],text=v=>{const s=String(v??'').trim();return /^(null|undefined|n\/a|-)$/i.test(s)?'':s;};
   const num=v=>text(v)===''?NaN:Number(String(v).replace(',','.'));
   if(!identity?.key||config?.key!==identity.key)issues.push('La pauta no corresponde a la familia y designación exactas.');
-  if(config?.version!==1||config?.modo_evaluacion!=='DIMENSION_ACTUAL'||config?.magnitud!=='D2')issues.push('Formato o modo de pauta no compatible.');
+  if(![1,2].includes(config?.version)||config?.modo_evaluacion!=='DIMENSION_ACTUAL'||config?.magnitud!=='D2')issues.push('Formato o modo de pauta no compatible.');
   for(const field of ['criterio','metodo','accesorios'])if(!text(config?.[field]))issues.push('Falta '+({criterio:'el documento/revisión del criterio',metodo:'el método documentado',accesorios:'el montaje de medida'}[field])+'.');
   if(!text(bankCertificate)||!text(config?.bank_certificate)||config.bank_certificate!==bankCertificate)issues.push('La pauta debe revisarse para el certificado actual del banco.');
-  for(const side of ['PASA','NO_PASA']){const p=config?.puntos?.[side]||{},min=num(p.min),max=num(p.max),U=num(p.U);if(![min,max,U].every(Number.isFinite)||min<=0||max<=0||U<=0||min>max)issues.push(side+': límites D2 e incertidumbre del método incompletos o incoherentes.');}
+  for(const side of ['PASA','NO_PASA']){const p=config?.puntos?.[side]||{},min=num(p.min),max=num(p.max),U=num(p.U);if(![min,max].every(Number.isFinite)||min<=0||max<=0||min>max||(!config?.presupuesto_incertidumbre&&(!Number.isFinite(U)||U<=0)))issues.push(side+': límites D2 e incertidumbre del método incompletos o incoherentes.');}
+  if(config?.version===2){const b=config.presupuesto_incertidumbre||{};if(!String(b.documento||'').trim()||b.confirmado!==true||!(num(b.resolucion_mm)>0)||!(num(b.cota_restante_mm)>0)||(config.adquisicion!=='M3_HILOS'&&!(num(b.longitud_max_mm)>0)))issues.push('Falta comprobar el presupuesto del método: resolución, cota de efectos restantes, documento y longitud de medida máxima para D2.');}
   const norm=resolveMT16ServiceLimits(identity);
   if(norm)for(const side of ['PASA','NO_PASA'])for(const k of ['min','max'])if(Math.abs(num(config?.puntos?.[side]?.[k])-norm.puntos[side][k])>1e-9)issues.push('Los límites de '+side+' deben coincidir con los límites de servicio incorporados en AUTO-05.');
   if(config?.adquisicion==='M3_HILOS'){
@@ -353,4 +363,36 @@ export function convertMT16ThreeWireReading(reading,config={}){
   const geometry=3*w-Math.sqrt(3)*P/2,d2=M-geometry-A1+A2+B;
   if(d2<=0)return {ok:false,error:'Lectura incompatible con un diámetro absoluto positivo'};
   return {ok:true,d2_mm:d2,raw_mm:M,wire_mm:w,pitch_mm:P,geometry_mm:geometry,rake_mm:A1,force_mm:A2,bank_correction_mm:B,formula:'D2 = M − 3w + (√3/2)P − A1 + A2 + δB',source:'EURAMET cg-10 v2.1 (12/2012), ecuación 14'};
+}
+
+
+// AUTO-06: uncertainty of each individual reading (not of the mean).
+// The remaining-method bound is an explicitly validated aggregate Type-B bound
+// expressed at D2, excluding bank, resolution and the repeatability measured here.
+export function calculateMT16AutomaticUncertainty({readings=[],rawReadings=[],acquisition='D2',bank,budget={}}={}){
+  const n=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(String(v).replace(',','.'));
+  const missing=[],xs=readings.map(n),raw=rawReadings.map(n);
+  if(xs.length!==5||xs.some(x=>!Number.isFinite(x)||x<=0))missing.push('Completar las cinco lecturas válidas para calcular la repetibilidad');
+  const valid=xs.length===5&&xs.every(x=>Number.isFinite(x)&&x>0);
+  const mean=valid?xs.reduce((a,b)=>a+b,0)/5:null;
+  const repeat=valid?Math.sqrt(xs.reduce((a,b)=>a+(b-mean)**2,0)/4):null;
+  const resolution=n(budget.resolucion_mm),bound=n(budget.cota_restante_mm);
+  if(!(resolution>0))missing.push('Resolución del banco pendiente en la configuración del método');
+  if(!(bound>0)||budget.confirmado!==true||!String(budget.documento||'').trim())missing.push('Configurar una vez la cota documentada de los efectos restantes del montaje (hilos, temperatura, fuerza y modelo)');
+  const length=acquisition==='M3_HILOS'&&raw.length===5&&raw.every(x=>Number.isFinite(x)&&x>0)?Math.max(...raw):n(budget.longitud_max_mm);
+  if(!(length>0))missing.push('Longitud máxima de medida del montaje pendiente');
+  if(acquisition==='D2'&&valid&&Number.isFinite(length)&&length<Math.max(...xs))missing.push('La longitud máxima configurada no cubre los diámetros introducidos');
+  let bankU=n(bank?.U),bankK=n(bank?.k);
+  if(bank?.certificado==='C-11377.00002')bankU=length>0&&length<=300?(1.1+.031*length)/1000:NaN;
+  else bankU=NaN; // A new certificate needs its own reviewed length-dependent model.
+  if(!bank?.vigente||!(bankU>0)||!(bankK>0))missing.push('Certificado vigente del banco con U y k aplicables a esta longitud');
+  const parts={banco_standard_mm:bankU>0&&bankK>0?bankU/bankK:null,repetibilidad_standard_mm:repeat,resolucion_standard_mm:resolution>0?resolution/Math.sqrt(6):null,resto_metodo_standard_mm:bound>0?bound/Math.sqrt(3):null};
+  const known=Object.values(parts).filter(x=>Number.isFinite(x));
+  const combined=known.length?Math.hypot(...known):null;
+  // Fixed conservative t_0.975,4 instead of assuming k=2 with only five readings.
+  const k=2.7764451051977987,U=combined===null?null:k*combined;
+  return {version:'MT16_U_AUTO06_20261110',complete:missing.length===0,U_mm:missing.length?null:U,U_parcial_mm:valid?U:null,u_combinada_mm:combined,k,componentes:parts,longitud_banco_mm:Number.isFinite(length)?length:null,media_mm:mean,missing,
+    regla:'U = 2.776445105 × √[(Ubanco/kbanco)² + s² + (resolución/√6)² + (cota restante/√3)²]',
+    modelo:'Cada lectura individual; s muestral de cinco repeticiones, no s/√5. Dos cuantizaciones independientes del desplazamiento. Cota agregada tipo B documentada y expresada en D2 para los efectos restantes; sin duplicar los tres componentes calculados.',
+    documento:budget.documento||null,certificado_banco:bank?.certificado||null};
 }
