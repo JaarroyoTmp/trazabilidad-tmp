@@ -196,8 +196,9 @@ export function buildTamponRoscadoProcedure(ctx = {}) {
   };
 }
 // MT16 periodic verification. No calibration dates or initial certificates are changed.
-export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_AUTO07_20261113';
+export const MT16_PERIODIC_VERIFICATION_VERSION = 'MT16_AUTO08_20261113';
 export function evaluateMT16PeriodicVerification(form = {}) {
+  if(form.regla_decision==='INTERNA_EXCEL')return evaluateMT16InternalVerification(form);
   form=structuredClone(form);
   const conversionIssues=[];
   if(form.adquisicion==='M3_HILOS'){
@@ -329,6 +330,19 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls};
 }
 export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
+  if(config?.regla_decision==='INTERNA_EXCEL'){
+    const issues=[],num=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(String(v).replace(',','.'));
+    if(!identity?.key||config.key!==identity.key)issues.push('Pauta de otra familia/designación');
+    if(config.modo_evaluacion!=='DIMENSION_ACTUAL'||config.magnitud!=='D2'||config.adquisicion!=='M3_HILOS')issues.push('La pauta interna utiliza M y D2 actual');
+    for(const k of ['metodo','criterio','accesorios'])if(!String(config[k]||'').trim())issues.push('Falta '+k);
+    if(!bankCertificate||config.bank_certificate!==bankCertificate)issues.push('Revisar certificado del banco');
+    const scope=resolveMT16ThreeWireScope({family:identity?.family,system:identity?.system,angle_deg:identity?.angle});if(!scope.supported)issues.push(scope.reason);
+    const g=calculateMT16WireGeometry({...config.conversion,pitch_mm:identity?.pitch,angle_deg:identity?.angle});if(!g.ok)issues.push(g.error);
+    const norm=resolveMT16ServiceLimits(identity);
+    for(const side of ['PASA','NO_PASA']){const p=config.puntos?.[side]||{},lo=num(p.min),hi=num(p.max);if(!Number.isFinite(lo)||!Number.isFinite(hi)||lo<=0||lo>hi)issues.push(side+': límites de servicio incompletos');if(norm&&(['min','max'].some(k=>Math.abs(num(p[k])-norm.puntos[side][k])>1e-9)))issues.push(side+': límites diferentes de la pauta incorporada');}
+    return {ok:issues.length===0,issues};
+  }
+
   const issues=[],text=v=>{const s=String(v??'').trim();return /^(null|undefined|n\/a|-)$/i.test(s)?'':s;};
   const num=v=>text(v)===''?NaN:Number(String(v).replace(',','.'));
   if(!identity?.key||config?.key!==identity.key)issues.push('La pauta no corresponde a la familia y designación exactas.');
@@ -439,4 +453,53 @@ export function reproduceMT16ExcelGeometry({reading,pitch_mm,angle_deg,wire_mm}=
   const half=3.141592*a/180/2;
   const C=w*(1+1/Math.sin(half))-P/(2*Math.tan(half));
   return {ok:true,reading_mm:M,correction_mm:C,d2_mm:M-C,source:'Reproducción aritmética de G13 y lectura−G13 del Excel suministrado',pi_legacy:3.141592,setup_validated:false};
+}
+
+// Internal verification expressly selected by TMP. Geometric Excel model,
+// direct acceptance limits, no guard band and no claimed full method U.
+export function evaluateMT16InternalVerification(input={}){
+  const f=structuredClone(input),missing=[],failures=[],points=[];
+  const text=v=>{const s=String(v??'').trim();return /^(null|undefined|n\/a|-)$/i.test(s)?'':s;};
+  const n=v=>!text(v)?NaN:Number(String(v).replace(',','.'));
+  const scope=resolveMT16ThreeWireScope(f.conversion);
+  if(!scope.supported)missing.push(scope.reason);
+  if(f.adquisicion!=='M3_HILOS'||f.modo_evaluacion!=='DIMENSION_ACTUAL'||f.magnitud!=='D2')missing.push('La pauta interna utiliza lecturas absolutas M y comparación de D2 actual');
+  if(!f.metodo_confirmado||!f.conversion?.montaje_confirmado)missing.push('Confirmar reglaje de referencia M, montaje y criterio de esta verificación');
+  for(const [k,label]of Object.entries({operario:'Operario',banco:'Banco patrón',certificado_banco:'Certificado del banco',accesorios:'Juego de hilos y montaje',metodo:'Método',criterio:'Límites y documento del criterio'}))if(!text(f[k]))missing.push(label);
+  if(f.criterio_configurado===false)missing.push('Configurar los límites de servicio para esta designación');
+  if(!f.banco_datos?.vigente||f.banco_datos.certificado!==f.certificado_banco)missing.push('Recuperar certificado vigente y concordante del banco');
+  const B=n(f.banco_datos?.correccion);
+  if(!Number.isFinite(B))missing.push('Corrección aplicable del banco no disponible');
+  for(const [k,label]of Object.entries({identificacion:'Identificación',limpieza:'Limpieza',integridad:'Ausencia de daños',trazabilidad:'Vigencia del banco'})){
+    if(f[k]==='NOK')failures.push(label+': no conforme');else if(f[k]!=='OK')missing.push(label);
+  }
+  const g=calculateMT16WireGeometry(f.conversion);
+  if(!g.ok)missing.push(g.error);
+  for(const side of ['PASA','NO_PASA']){
+    const p=f.puntos?.[side]||{},raw=Array.isArray(p.lecturas)?p.lecturas:[],xs=raw.map(n),min=n(p.min),max=n(p.max),problems=[];
+    if(xs.length!==5||xs.some(x=>!Number.isFinite(x)||x<=0))problems.push('cinco lecturas M positivas');
+    if(![min,max].every(Number.isFinite)||min<=0||max<=0||min>max)problems.push('límites D2 de servicio positivos y ordenados');
+    const conversions=raw.map(M=>{
+      const value=n(M);if(!scope.supported||!g.ok||!Number.isFinite(value)||value<=0||!Number.isFinite(B))return {ok:false,error:'Datos de conversión incompletos'};
+      const d2=value-g.geometry_mm+B;
+      return {ok:d2>0,complete:d2>0,raw_mm:value,d2_mm:d2,...g,bank_correction_mm:B,modelo:'GEOMETRIA_EXCEL',rake_mm:null,force_mm:null,
+        efectos_no_evaluados:['Hélice','Deformación por fuerza','Desviaciones de paso y ángulo respecto al perfil nominal'],
+        formula:'D2 = M − C + δB; C = w(1 + 1/sen(α/2)) − P/(2tan(α/2))',estado:'MODELO_INTERNO_GEOMETRICO'};
+    });
+    if(conversions.some(c=>!c.ok))problems.push('conversión M a D2 válida');
+    const valid=conversions.length===5&&conversions.every(c=>c.ok),ds=valid?conversions.map(c=>c.d2_mm):null;
+    const mean=valid?ds.reduce((a,b)=>a+b,0)/5:null,low=valid?Math.min(...ds):null,high=valid?Math.max(...ds):null;
+    const sd=valid?Math.sqrt(ds.reduce((sum,x)=>sum+(x-mean)**2,0)/4):null;
+    const accepted=problems.length===0&&low>=min-1e-12&&high<=max+1e-12;
+    const result=problems.length?'PENDIENTE':accepted?'OK':'NOK';
+    if(result==='NOK')failures.push(side+': al menos una lectura D2 está fuera de los límites de servicio');
+    missing.push(...problems.map(x=>side+': '+x));
+    points.push({lado:side,resultado:result,modo:'DIMENSION_ACTUAL',lecturas_originales:raw,lecturas_d2:ds,conversiones:conversions,media:mean,minimo_medido:low,maximo_medido:high,desviacion_tipica_mm:sd,min,max,U:null,
+      intervalo_evaluado:valid?{min:low,max:high}:null,pendientes:problems,regla:'Todas las lecturas D2 dentro de límites de servicio, sin banda de guarda por incertidumbre',unidad:'mm'});
+  }
+  const result=failures.length?'NOK':missing.length?'PENDIENTE':'OK';
+  return {tipo:'VERIFICACION_PERIODICA',version:MT16_PERIODIC_VERIFICATION_VERSION,modo:'DIMENSION_ACTUAL',regla_decision:'INTERNA_EXCEL',modelo:'GEOMETRIA_EXCEL',resultado:result,
+    puntos:points,incertidumbres:{},faltantes:[...new Set(missing)],motivos:failures,documento_criterio:text(f.criterio),criterio_origen:'PAUTA',
+    declaracion:'Decisión interna por comparación directa con límites, sin banda de guarda. No se ha determinado la incertidumbre completa del método ni se aplican correcciones de hélice o deformación por fuerza. Riesgo de aceptación en los límites no cuantificado.',
+    alcance:'Verificación interna del diámetro simple de flancos mediante perfil nominal y tres hilos, con comprobaciones físicas declaradas. No es un certificado de calibración ni demuestra por sí sola paso, ángulo, forma y funcionamiento completos.'};
 }
