@@ -791,6 +791,7 @@
 <script type="module" src="../config.mjs"></script>
 
 <script type="module">
+import {showLocalMT16} from "../mt16_equipo_local.js";
   const supa = window.supabase;
 
   let codigo = new URLSearchParams(window.location.search).get("codigo");
@@ -913,7 +914,8 @@
     setText("heroOperativo", operativo);
 
     // estado
-    const prox = inst.fecha_proxima_calibracion || null;
+    const prox = inst.fecha_proxima_calibracion || inst.proxima_calibracion || null;
+    const ultima = inst.fecha_calibracion || inst.fecha_ultima_calibracion;
     const est = computeEstado(prox);
     const pill = document.getElementById("heroStatusPill");
     pill.className = "pill " + est.clase;
@@ -944,7 +946,7 @@
     setText("sumResponsable", ultimoMov?.responsable || "—");
     setText("sumOperario1", ultimoMov?.operario1 || "—");
     setText("sumOperario2", ultimoMov?.operario2 || "—");
-    setText("sumProxima", inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "—");
+    setText("sumProxima", prox ? fDateShort(prox) : "—");
     setText("sumDias", est.dias === null ? "Sin planificación" : (est.dias < 0 ? `Vencida hace ${Math.abs(est.dias)} días` : `Faltan ${est.dias} días`));
     setText("sumTipoCal", inst.tipo_calibracion || "—");
 
@@ -965,10 +967,13 @@
       <div class="item"><span class="label">Propiedad</span><span class="value">${propietarioNombre || "PARAMIO"}</span></div>
       <div class="item"><span class="label">Estado operativo</span><span class="value">${operativo || "-"}</span></div>
       <div class="item"><span class="label">Estado calibración</span><span class="value">${est.texto} · ${est.detalle}</span></div>
-      <div class="item"><span class="label">Última calibración</span><span class="value">${inst.fecha_ultima_calibracion ? fDateShort(inst.fecha_ultima_calibracion) : "-"}</span></div>
-      <div class="item"><span class="label">Próxima calibración</span><span class="value">${inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "-"}</span></div>
+      <div class="item"><span class="label">Última calibración</span><span class="value">${ultima ? fDateShort(ultima) : "-"}</span></div>
+      <div class="item"><span class="label">Próxima calibración</span><span class="value">${prox ? fDateShort(prox) : "-"}</span></div>
+      <div class="item" id="mt16-equipo-local" hidden></div>
       <div class="item"><span class="label">Observaciones</span><span class="value">${(inst.observaciones && inst.observaciones.trim()) ? inst.observaciones : "Propiedad de Talleres Mecánicos Paramio"}</span></div>
     `;
+
+    showLocalMT16(document.getElementById("mt16-equipo-local"), inst.id);
 
     // trazabilidad
     const { data: movList } = await supa

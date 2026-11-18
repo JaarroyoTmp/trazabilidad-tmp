@@ -49,7 +49,7 @@
     <div class="brand"><div class="logo">TMP</div><div><h1>Informes y Certificados</h1><div class="subtitle">Control documental real · trazabilidad · consulta · auditoría</div></div></div>
     <div class="top-actions">
       <a class="btn" href="home.html">← Inicio</a>
-      <a class="btn" href="calibraciones.historial.html">Histórico calibraciones</a>
+      <a class="btn" href="#mt16">Verificaciones MT16</a><a class="btn" href="calibraciones.historial.html">Histórico calibraciones</a>
       <a class="btn btn-primary" href="calibraciones.html">Centro calibración</a>
     </div>
   </div>
@@ -151,7 +151,7 @@
   }
   function certNumber(c){ return c.numero || c.numero_certificado || c.codigo || c.id || ""; }
   function certPdf(c){ return c.certificado_pdf_url || c.pdf_url || c.certificado_url || ""; }
-  function certDate(c){ return c.fecha_creado || c.creado_en || c.fecha || c.fecha_emision || ""; }
+  function certDate(c){ return c.generado_en || c.fecha_creado || c.creado_en || c.fecha || c.fecha_emision || ""; }
 
   async function load(){
     const sb=window.supabase;
@@ -159,7 +159,7 @@
     $("#load-status").textContent="Consultando certificados, calibraciones e instrumentos…";
 
     const [cr,ca,ir]=await Promise.all([
-      sb.from("certificados").select("*").order("fecha_creado",{ascending:false}).limit(1000),
+      sb.from("certificados").select("*").order("generado_en",{ascending:false}).limit(1000),
       sb.from("calibraciones").select("*").order("creado_en",{ascending:false}).limit(1000),
       sb.from("instrumentos").select("id,codigo,descripcion,estado,ubicacion_actual").limit(1500)
     ]);
@@ -267,6 +267,5 @@
   $("#btn-export").addEventListener("click",exportCsv); $("#dlg-close").addEventListener("click",()=>$("#detail-dialog").close());
   load();
 </script>
-<script type="module" src="mt16_documents.js"></script>
-<script type="module" src="mt16_auth.js"></script></body>
+<script type="module" src="mt16_documents_local.js"></script></body>
 </html>

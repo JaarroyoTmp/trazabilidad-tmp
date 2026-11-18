@@ -33,9 +33,10 @@ export async function listLocalVerifications(instrumentId) {
   const database = await openDatabase();
   return new Promise((resolve, reject) => {
     const transaction = database.transaction('verificaciones', 'readonly');
-    const index = transaction.objectStore('verificaciones').index('equipo_fecha');
-    const range = IDBKeyRange.bound([instrumentId, ''], [instrumentId, '\uffff']);
-    const request = index.openCursor(range, 'prev');
+    const store = transaction.objectStore('verificaciones');
+    const request = instrumentId === undefined
+      ? store.openCursor()
+      : store.index('equipo_fecha').openCursor(IDBKeyRange.bound([instrumentId, ''], [instrumentId, '\uffff']), 'prev');
     const records = [];
     request.onsuccess = () => {
       const cursor = request.result;
