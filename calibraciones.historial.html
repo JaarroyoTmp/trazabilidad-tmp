@@ -11,6 +11,9 @@
   <main class="max-w-6xl mx-auto">
 
     <h1 class="text-2xl font-semibold mb-6">Historial Profesional de Calibraciones</h1>
+<section id="mt16" class="box" style="margin:1rem auto; padding:1rem; max-width:1200px; border:1px solid #8b94a6; border-radius:12px">
+  <div id="mt16-register"></div>
+</section>
 
     <!-- ======================= -->
     <!-- FILTROS                 -->
@@ -75,6 +78,7 @@
             </tr>
           </thead>
 
+          <caption>Ejemplos de calibraciones</caption>
           <tbody id="tablaHistorial" class="divide-y divide-slate-700">
             <!-- Aquí se cargan las filas dinámicamente -->
             <tr>
@@ -92,7 +96,8 @@
 
 
   <!-- ====================================== -->
-  <!-- SCRIPT PARA DATOS DINÁMICOS / FUTURO   -->
+  
+<!-- SCRIPT PARA DATOS DINÁMICOS / FUTURO   -->
   <!-- ====================================== -->
   <script>
     // Simulación (cuando conectemos Supabase esto se reemplaza):
@@ -145,5 +150,6 @@
     function limpiarFiltros() { location.reload(); }
   </script>
 
+<script type="module" src="mt16_documents_local.js"></script>
 </body>
 </html>

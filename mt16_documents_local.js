@@ -5,7 +5,7 @@ const box = document.getElementById('mt16-register');
 box.innerHTML = `
   <div class="head">
     <div><h2>Verificaciones MT16 de este navegador</h2>
-    <p>Consulta los informes guardados en esta dirección.</p></div>
+    <p>Informes de las verificaciones guardadas en este navegador y en esta dirección.</p></div>
     <button id="mt16-reload" class="btn" type="button">Actualizar</button>
   </div>
   <div class="filters">
@@ -28,6 +28,16 @@ const filter = el('mt16-filter');
 const result = el('mt16-result');
 const reload = el('mt16-reload');
 let records = [];
+const params = new URLSearchParams(location.search);
+const initialCode = params.get('codigo')?.trim() || '';
+const equipmentInput = document.getElementById(box.dataset.equipmentInput || '');
+filter.value = initialCode;
+if (equipmentInput) {
+  equipmentInput.addEventListener('change', () => {
+    filter.value = equipmentInput.value.trim();
+    render();
+  });
+}
 
 function downloadReport(record) {
   const html = record.informe_html || buildFormalMT16Report(record);
@@ -69,9 +79,13 @@ function render() {
     row.insertCell().append(button);
   }
 
-  status.textContent = records.length
-    ? `${filtered.length} de ${records.length} verificaciones guardadas en este navegador.`
-    : 'No hay verificaciones guardadas aquí. Abre la misma dirección y usa el navegador donde pulsaste «Guardar en este navegador».';
+  if (!filtered.length) {
+    status.textContent = records.length
+      ? 'Ninguna verificación coincide con el filtro. Borra el filtro para ver todos los informes guardados aquí.'
+      : 'No hay verificaciones guardadas aquí. Abre la misma dirección y usa el navegador donde pulsaste «Guardar en este navegador».';
+    return;
+  }
+  status.textContent = `${filtered.length} de ${records.length} verificaciones guardadas en este navegador.`;
 }
 
 async function load() {

@@ -37,7 +37,10 @@
   <main class="grid">
     <section class="hero"><div><h2>Calibración guiada por familia</h2><p>El Home gestiona el laboratorio. Este centro decide qué módulo abrir según el tipo de instrumento.</p><span class="tag">MT15 · Lisos</span><span class="tag">MT16 · Roscados</span><span class="tag">Futuros módulos</span><span class="tag">Sistema experto TMP</span></div><div class="hero-panel"><small>Flujo recomendado</small><br><strong>Buscar equipo → detectar familia → abrir módulo correcto</strong><p>Evita que el operario tenga que saber qué procedimiento corresponde.</p></div></section>
     <section class="box"><label>Código del equipo / QR</label><div class="row"><input id="equipmentCode" placeholder="Ej. 75148, 40205, M12 x 1.25..."><button class="btn primary" id="btnSearch">Detectar módulo</button><button class="btn" id="btnDemoThread">Demo roscado</button><button class="btn" id="btnDemoPlain">Demo liso</button><a class="btn" href="home.html">Volver al Home</a></div><div id="searchResult" class="result"></div></section>
-    <h2 class="h2">Familias disponibles</h2>
+    <section id="mt16" class="box" style="margin:1rem auto; padding:1rem; max-width:1200px; border:1px solid #8b94a6; border-radius:12px">
+  <div id="mt16-register"></div>
+</section>
+<h2 class="h2">Familias disponibles</h2>
     <section class="families">
       <a class="card" href="mt16.html"><div class="head"><div class="icon blue">◎</div><span class="chip">Activo</span></div><h3>MT16 · Roscados P/NP</h3><p>Tampones roscados, anillos roscados y verificación con banco Trimos.</p><div class="meta"><span>ISO 1502</span><span>ISO 965</span><span>Trimos</span><span>ILAC-G8</span></div><div class="action">Abrir MT16 →</div></a>
       <a class="card" href="mt15.html"><div class="head"><div class="icon green">▭</div><span class="chip">Activo</span></div><h3>MT15 · Lisos / Dimensionales</h3><p>Tampones lisos P/NP, patrones dimensionales y calibraciones base.</p><div class="meta"><span>ISO 286</span><span>ISO 1938</span><span>ILAC-G8</span></div><div class="action">Abrir MT15 →</div></a>
@@ -90,5 +93,6 @@ $("#btnDemoThread").addEventListener("click",()=>{const i={codigo:"75148",descri
 $("#btnDemoPlain").addEventListener("click",()=>{const i={codigo:"40205",descripcion:"Tampón liso P/NP",rango:"Ø 8.5 H8"};$("#equipmentCode").value=i.codigo;render(i,classify(i),"Demo MT15.")});
 document.querySelectorAll(".disabled").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();$("#searchResult").classList.add("show");$("#searchResult").innerHTML="<strong>Módulo pendiente.</strong><br><span style='color:#66809a;font-size:13px'>Esta familia se añadirá después usando la misma arquitectura.</span>";window.scrollTo({top:0,behavior:"smooth"})}));
 </script>
+<script type="module" src="mt16_documents_local.js"></script>
 </body>
 </html>
