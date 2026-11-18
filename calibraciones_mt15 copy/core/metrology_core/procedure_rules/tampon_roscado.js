@@ -1,3 +1,4 @@
+import {MT16_CATALOGUE} from './mt16_catalogue.js';
 import { createPoint, parseNum } from "./shared.js";
 
 export const TAMPON_ROSCADO_PROCEDURE_VERSION =
@@ -326,8 +327,9 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
     cls=classes[0];
   }
   if(!cls && !parsed.tpi)return {key:null,reason:'Falta la clase o serie necesaria para asociar una pauta.'};
-  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,'D2','DIMENSION_ACTUAL'].join('|');
-  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls};
+  const direction=/IZQ|LEFT|\bLH\b/i.test([equipment.rango,equipment.descripcion].filter(Boolean).join(' '))?'IZQUIERDA':'DERECHA';
+  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL'].join('|');
+  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls};
 }
 export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
   if(config?.regla_decision==='INTERNA_EXCEL'){
@@ -364,6 +366,8 @@ export function validateMT16CriterionConfiguration(config, identity, bankCertifi
 // Independently checked scope: this exact ISO 965-2:1998 table 3 row only.
 // ISO 1502:1996 tables 4, 5 and 12; dimensions in mm.
 export function resolveMT16ServiceLimits(identity){
+  const row=MT16_CATALOGUE.find(r=>identity?.key&&r.family===identity.family&&r.system===identity.system&&r.tolerance_class===identity.tolerance_class&&r.nominal===identity.nominal&&r.pitch===identity.pitch&&r.angle===identity.angle&&r.direction===(identity.direction||'DERECHA'));
+  if(row)return {...structuredClone(row),version:'MT16_CATALOGUE_20261117',criterio:row.criterion+' · '+row.source_file.split('/').pop(),sources:[{file:row.source_file,sha256:row.source_sha256}]};
   if(!identity?.key||identity.family!=='TAMPON_ROSCADO_PNP'||identity.system!=='METRIC_ISO'||identity.tolerance_class!=='6H'||identity.nominal!==12||identity.pitch!==1.25||identity.angle!==60)return null;
   const workMin=11.188,workMax=11.368,Z=0.012,T=0.011,Wgo=0.0175,Wng=0.0115;
   const r=v=>Number(v.toFixed(7));

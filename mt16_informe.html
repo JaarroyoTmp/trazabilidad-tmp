@@ -1,0 +1,21 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Informe MT16 · Paramio</title><style>body{margin:0;background:#edf2f7;color:#173653;font:15px Arial}header{padding:15px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}a{color:#173653}button{padding:10px;border:0;border-radius:5px;background:#173653;color:white;cursor:pointer}iframe{display:block;width:100%;height:calc(100vh - 100px);border:0;background:white}#status{padding:0 15px}@media print{header,#status{display:none}iframe{height:100vh}}</style></head><body><header><a href="certificados.html#mt16">Volver a Informes</a><button id="print" disabled>Imprimir / Guardar PDF</button><button id="json" disabled>Descargar registro JSON</button><button id="html" disabled>Descargar informe</button></header><p id="status" role="status">Recuperando el informe guardado…</p><iframe id="document" title="Informe de verificación MT16" sandbox="allow-same-origin allow-modals"></iframe><script type="module" src="config.mjs"></script><script type="module">
+import "./config.mjs";
+import {buildFormalMT16Report} from './mt16_report.js';
+let loadFailed=false;window.addEventListener('mt16-auth-changed',event=>{if(event.detail.signedIn&&loadFailed)location.reload();if(!event.detail.signedIn){$('document').srcdoc='';for(const id of ['print','json','html'])$(id).disabled=true;loadFailed=true;$('status').textContent='Inicia sesión para consultar el informe.';}});
+const $=id=>document.getElementById(id),id=new URLSearchParams(location.search).get('id');
+const guard='<meta http-equiv="Content-Security-Policy" content="default-src &apos;none&apos;; img-src data:; style-src &apos;unsafe-inline&apos;; script-src &apos;none&apos;; base-uri &apos;none&apos;; form-action &apos;none&apos;">';
+function download(text,type,name){const u=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+try{
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id||''))throw Error('Identificador de informe no válido.');
+ if(!window.supabase)throw Error('Conexión no disponible.');
+ const {data:r,error}=await window.supabase.from('verificaciones_mt16').select('*').eq('id',id).single();if(error)throw error;if(!r)throw Error('Informe no encontrado.');
+ const html=r.informe_html||buildFormalMT16Report(r),safeHTML='<!doctype html>'+guard+html;
+ const name='MT16_'+String(r.equipo_snapshot?.codigo||'equipo').replace(/[^a-z0-9_-]/gi,'_')+'_'+id;
+ $('document').onload=()=>{$('print').disabled=false;};$('document').srcdoc=safeHTML;
+ $('status').textContent='Informe guardado · '+(r.equipo_snapshot?.codigo||'')+' · '+(r.datos?.formulario?.fecha||'')+' · '+(r.resultado==='OK'?'APTO':'NO APTO');
+ $('print').onclick=()=>{$('document').contentWindow.focus();$('document').contentWindow.print();};
+ $('json').disabled=false;$('html').disabled=false;
+ $('json').onclick=()=>download(JSON.stringify(r,null,2),'application/json',name+'.json');
+ $('html').onclick=()=>download(safeHTML,'text/html;charset=utf-8',name+'.html');
+}catch(e){loadFailed=true;$('status').textContent='No se pudo abrir el informe: '+(e.message||String(e));}
+</script><script type="module" src="mt16_auth.js"></script></body></html>

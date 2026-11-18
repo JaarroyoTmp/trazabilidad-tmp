@@ -118,7 +118,8 @@
     </aside>
   </section>
 
-  <div class="footer">TMP · Sistema de Trazabilidad Metrológica · Los indicadores de esta pantalla describen los datos registrados, no sustituyen la validación técnica del certificado.</div>
+  <section class="panel" id="mt16"><div id="mt16-register"></div></section>
+<div class="footer">TMP · Sistema de Trazabilidad Metrológica · Los indicadores de esta pantalla describen los datos registrados, no sustituyen la validación técnica del certificado.</div>
 </div>
 
 <dialog id="detail-dialog">
@@ -266,5 +267,6 @@
   $("#btn-export").addEventListener("click",exportCsv); $("#dlg-close").addEventListener("click",()=>$("#detail-dialog").close());
   load();
 </script>
-</body>
+<script type="module" src="mt16_documents.js"></script>
+<script type="module" src="mt16_auth.js"></script></body>
 </html>
