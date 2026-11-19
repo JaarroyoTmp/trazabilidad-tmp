@@ -916,7 +916,8 @@ import {showLocalMT16} from "../mt16_equipo_local.js";
     // estado
     const prox = inst.fecha_proxima_calibracion || inst.proxima_calibracion || null;
     const ultima = inst.fecha_calibracion || inst.fecha_ultima_calibracion;
-    const est = computeEstado(prox);
+    const noApto = String(operativo).trim().toUpperCase() === "NO APTO";
+    const est = noApto ? {clase:"bad", texto:"NO APTO", detalle:"Equipo no apto para uso", icono:"⛔", dias:null} : computeEstado(prox);
     const pill = document.getElementById("heroStatusPill");
     pill.className = "pill " + est.clase;
     document.getElementById("heroStatusLabel").textContent = `${est.icono} ${est.texto}`;
@@ -931,7 +932,7 @@ import {showLocalMT16} from "../mt16_equipo_local.js";
     setText("calBoxTitle", `${est.icono} ${est.texto}`);
     setText(
       "calBoxText",
-      est.dias === null
+      noApto ? "Equipo no apto para uso." : est.dias === null
         ? "No hay fecha de próxima calibración registrada."
         : (est.dias < 0
             ? `Calibración vencida hace ${Math.abs(est.dias)} días.`
