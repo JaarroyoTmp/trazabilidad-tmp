@@ -2,15 +2,22 @@ import {mt16Access} from './mt16_cloud.js';
 
 const host = document.getElementById('mt16-cloud-access');
 if (host) {
+  const redirect = new URL(location.pathname, location.origin);
+  const callbackError = new URLSearchParams(location.hash.slice(1)).get('error_code');
   host.innerHTML = `
     <strong>Acceso de Calidad al registro compartido</strong>
     <p role="status" data-access-status>Comprobando sesión…</p>
     <form hidden>
       <label>Correo de Calidad <input type="email" required autocomplete="email"></label>
       <button class="btn" type="submit">Enviar enlace de acceso</button>
+      <p>Dirección de retorno autorizada en Supabase</p>
+      <input data-return-address type="url" readonly aria-label="Dirección de retorno de MT16">
     </form>`;
   const form = host.querySelector('form');
-  const input = form.querySelector('input');
+  const input = form.querySelector('input[type=email]');
+  const returnAddress = form.querySelector('[data-return-address]');
+  returnAddress.value = redirect.href;
+  returnAddress.onclick = () => returnAddress.select();
   const status = host.querySelector('[data-access-status]');
   const auth = window.supabase.auth;
   let generation = 0;
@@ -22,7 +29,9 @@ if (host) {
       const user = await mt16Access();
       if (request !== generation) return;
       form.hidden = !!user;
-      status.textContent = user ? 'Acceso al registro compartido activo.' : 'Usa tu correo de Calidad para entrar sin contraseña.';
+      status.textContent = user ? 'Acceso al registro compartido activo.' : callbackError === 'otp_expired'
+        ? 'El enlace no es válido o ha caducado. Pide uno nuevo.'
+        : 'Usa tu correo de Calidad para entrar sin contraseña.';
       const userId = user?.id || null;
       if (active !== userId) {
         active = userId;
@@ -37,13 +46,12 @@ if (host) {
     const button = form.querySelector('button');
     button.disabled = true;
     try {
-      const redirect = new URL(location.pathname + location.search, location.origin);
       const {error} = await auth.signInWithOtp({
         email: input.value.trim(),
         options: {shouldCreateUser:false,emailRedirectTo:redirect.href}
       });
       if (error) throw error;
-      status.textContent = 'Abre el enlace que recibas en este mismo navegador y vuelve a la verificación.';
+      status.textContent = 'Abre el enlace más reciente en este mismo navegador. Si dejaste un guardado pendiente, MT16 lo retomará al volver.';
     } catch (error) {
       status.textContent = 'No se pudo enviar el enlace. ' + (error.message || '');
     } finally {

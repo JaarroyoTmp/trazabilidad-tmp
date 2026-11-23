@@ -31,22 +31,41 @@ export async function loadCloudMT16(id) {
   return data;
 }
 
+async function readEquipment(id) {
+  const {data, error} = await window.supabase.from('instrumentos')
+    .select('id,codigo,estado,frecuencia_calibracion_meses,fecha_calibracion,fecha_ultima_verificacion,fecha_proxima_verificacion,fecha_proxima_calibracion')
+    .eq('id', id).single();
+  if (error) throw error;
+  return data;
+}
+
+function sameVerification(stored, local) {
+  return stored?.instrumento_id === local.instrumento_id &&
+    stored?.resultado === local.resultado &&
+    stored?.datos?.emitido_en === local.datos?.emitido_en;
+}
+
+async function confirmPublication(local) {
+  const verification = await loadCloudMT16(local.id);
+  if (!sameVerification(verification, local) || !verification.informe_html) {
+    throw Error('Aún no se pudo confirmar la lectura del informe en Supabase. Vuelve a verificar el estado desde el historial.');
+  }
+  try {
+    return {...verification, agenda: await readEquipment(local.instrumento_id)};
+  } catch {
+    return {...verification, agenda:null};
+  }
+}
+
 export async function publishMT16(local) {
   if (!await mt16Access()) {
     window.dispatchEvent(new Event('mt16-request-login'));
     throw Error('Accede con tu correo de Calidad. La verificación sigue guardada en este navegador.');
   }
   const previous = await loadCloudMT16(local.id);
-  if (previous) {
-    if (previous.instrumento_id !== local.instrumento_id || previous.resultado !== local.resultado ||
-        previous.datos?.emitido_en !== local.datos?.emitido_en) throw Error('La referencia del informe ya está en uso.');
-    return previous;
-  }
+  if (previous) return confirmPublication(local);
   const client = window.supabase;
-  const {data: equipment, error: equipmentError} = await client.from('instrumentos')
-    .select('id,codigo,frecuencia_calibracion_meses,fecha_calibracion,fecha_ultima_verificacion')
-    .eq('id', local.instrumento_id).single();
-  if (equipmentError) throw equipmentError;
+  const equipment = await readEquipment(local.instrumento_id);
   if (String(equipment.codigo) !== String(local.equipo_snapshot?.codigo)) throw Error('El código actual del equipo no coincide con el informe.');
   const plan = planMT16Control(equipment, local.datos.formulario.fecha, local.resultado);
   if (plan.accion === 'FRECUENCIA_PENDIENTE') throw Error('Configura la frecuencia en la ficha antes de publicar el APTO.');
@@ -58,12 +77,10 @@ export async function publishMT16(local) {
     datos: {...local.datos, modo_guardado:'SUPABASE', control_fechas:plan}
   };
   record.informe_html = buildFormalMT16Report(record);
-  const {data, error} = await client.from('verificaciones_mt16').insert(record).select('id,datos').single();
+  const {error} = await client.from('verificaciones_mt16').insert(record);
   if (error) {
     const recovered = await loadCloudMT16(record.id);
-    if (recovered?.datos?.emitido_en === record.datos.emitido_en &&
-        recovered?.instrumento_id === record.instrumento_id && recovered?.resultado === record.resultado) return recovered;
-    throw error;
+    if (!sameVerification(recovered, record)) throw error;
   }
-  return data;
+  return confirmPublication(local);
 }
