@@ -92,7 +92,7 @@ function render() {
       const publish = document.createElement('button');
       publish.type = 'button';
       publish.className = 'btn';
-      publish.textContent = 'Publicar en Supabase';
+      publish.textContent = 'Reintentar guardado';
       publish.onclick = async () => {
         publish.disabled = true;
         try {

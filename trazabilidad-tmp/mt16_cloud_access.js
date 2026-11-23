@@ -9,9 +9,9 @@ if (host) {
     <p role="status" data-access-status>Comprobando sesión…</p>
     <form hidden>
       <label>Correo de Calidad <input type="email" required autocomplete="email"></label>
-      <button class="btn" type="submit">Enviar enlace de acceso</button>
-      <p>Dirección de retorno autorizada en Supabase</p>
-      <input data-return-address type="url" readonly aria-label="Dirección de retorno de MT16">
+      <button class="btn" type="submit">Solicitar enlace para iniciar sesión</button>
+      <details><summary>Configuración del enlace</summary><p>Dirección de retorno para autorizar en Supabase</p>
+      <input data-return-address type="url" readonly aria-label="Dirección de retorno de MT16"></details>
     </form>`;
   const form = host.querySelector('form');
   const input = form.querySelector('input[type=email]');
@@ -22,6 +22,8 @@ if (host) {
   const auth = window.supabase.auth;
   let generation = 0;
   let active;
+  const onSave = host.hasAttribute('data-on-save');
+  let accessRequested = !!callbackError;
 
   async function refresh() {
     const request = ++generation;
@@ -29,9 +31,10 @@ if (host) {
       const user = await mt16Access();
       if (request !== generation) return;
       form.hidden = !!user;
+      if (onSave) host.hidden = !!user || !accessRequested;
       status.textContent = user ? 'Acceso al registro compartido activo.' : callbackError === 'otp_expired'
         ? 'El enlace no es válido o ha caducado. Pide uno nuevo.'
-        : 'Usa tu correo de Calidad para entrar sin contraseña.';
+        : 'Usa el correo de Calidad solo para iniciar sesión. Con la sesión activa, Guardar verificación guarda directamente en Supabase.';
       const userId = user?.id || null;
       if (active !== userId) {
         active = userId;
@@ -60,6 +63,8 @@ if (host) {
   };
   auth.onAuthStateChange(() => setTimeout(refresh, 0));
   window.addEventListener('mt16-request-login', () => {
+    accessRequested = true;
+    host.hidden = false;
     host.scrollIntoView({block:'center'});
     input.focus();
   });
