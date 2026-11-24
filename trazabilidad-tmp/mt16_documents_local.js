@@ -133,7 +133,7 @@ async function load() {
   });
   render();
   const accessHint = document.getElementById('mt16-cloud-access')
-    ? ' Introduce la clave de Calidad para consultar los informes.'
+    ? ' Activa este navegador para consultar los informes.'
     : ' Abre Informes MT16 para acceder al registro compartido.';
   if (cloud.status === 'rejected') status.textContent += ' Supabase no disponible.';
   else if (cloud.value === null) status.textContent += accessHint;

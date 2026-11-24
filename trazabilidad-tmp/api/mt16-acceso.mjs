@@ -1,3 +1,5 @@
+import {createHash, timingSafeEqual} from 'node:crypto';
+
 const tokenEndpoint = 'https://uukxdslfmxesufuxjzvt.supabase.co/auth/v1/token?grant_type=password';
 
 export default async function handler(request, response) {
@@ -12,14 +14,22 @@ export default async function handler(request, response) {
   if (request.headers['content-type']?.split(';')[0] !== 'application/json') {
     return response.status(415).json({error: 'Formato no admitido.'});
   }
-  const email = process.env.MT16_CALIDAD_EMAIL;
+  const email = process.env.MT16_CALIDAD_EMAIL?.trim().toLowerCase();
   const apiKey = process.env.MT16_SUPABASE_PUBLIC_KEY;
-  if (!email || !apiKey) {
-    return response.status(503).json({error: 'El acceso de Calidad todavía está por configurar.'});
+  const password = process.env.MT16_CALIDAD_PASSWORD;
+  const allowed = (process.env.MT16_ACTIVATION_SHA256 || '').split(',')
+    .map(hash => hash.trim()).filter(hash => /^[a-f0-9]{64}$/i.test(hash))
+    .map(hash => Buffer.from(hash, 'hex'));
+  if (!email || !apiKey || !password || !allowed.length) {
+    return response.status(503).json({error: 'Falta configurar la activación de los ordenadores de Calidad.'});
   }
-  const password = request.body?.clave;
-  if (typeof password !== 'string' || !password || password.length > 256) {
-    return response.status(400).json({error: 'Introduce una clave de Calidad válida.'});
+  const enrollment = request.body?.activacion;
+  if (typeof enrollment !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(enrollment)) {
+    return response.status(400).json({error: 'Abre el enlace de activación facilitado por Calidad.'});
+  }
+  const digest = createHash('sha256').update(enrollment).digest();
+  if (!allowed.some(hash => timingSafeEqual(hash, digest))) {
+    return response.status(403).json({error: 'El enlace de activación no está autorizado.'});
   }
   try {
     const result = await fetch(tokenEndpoint, {
@@ -32,7 +42,7 @@ export default async function handler(request, response) {
       return response.status(429).json({error: 'Demasiados intentos. Espera antes de volver a probar.'});
     }
     if ([400, 401, 403].includes(result.status)) {
-      return response.status(401).json({error: 'La clave de Calidad no es válida o la cuenta no está habilitada.'});
+      return response.status(401).json({error: 'La cuenta de Calidad configurada en el servidor no ha podido iniciar sesión.'});
     }
     if (result.ok) {
       const {access_token, refresh_token} = await result.json();

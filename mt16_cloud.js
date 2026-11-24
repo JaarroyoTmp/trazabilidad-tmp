@@ -60,7 +60,7 @@ async function confirmPublication(local) {
 export async function publishMT16(local) {
   if (!await mt16Access()) {
     window.dispatchEvent(new Event('mt16-request-login'));
-    throw Error('Introduce la clave de Calidad. La verificación sigue guardada en este navegador.');
+    throw Error('Activa este navegador con el enlace de Calidad. La verificación sigue guardada en este navegador.');
   }
   const previous = await loadCloudMT16(local.id);
   if (previous) return confirmPublication(local);
