@@ -15,14 +15,27 @@ export default async function handler(request, response) {
     return response.status(415).json({error: 'Formato no admitido.'});
   }
   const email = process.env.MT16_CALIDAD_EMAIL?.trim().toLowerCase();
-  const apiKey = process.env.MT16_SUPABASE_PUBLIC_KEY;
+  const apiKey = process.env.MT16_SUPABASE_PUBLIC_KEY?.trim();
   const password = process.env.MT16_CALIDAD_PASSWORD;
-  const allowed = (process.env.MT16_ACTIVATION_SHA256 || '').split(',')
-    .map(hash => hash.trim()).filter(hash => /^[a-f0-9]{64}$/i.test(hash))
-    .map(hash => Buffer.from(hash, 'hex'));
-  if (!email || !apiKey || !password || !allowed.length) {
-    return response.status(503).json({error: 'Falta configurar la activación de los ordenadores de Calidad.'});
+  const rawFingerprints = process.env.MT16_ACTIVATION_SHA256?.trim();
+  const fingerprints = rawFingerprints?.split(',').map(hash => hash.trim()) || [];
+  const missing = [
+    !email && 'MT16_CALIDAD_EMAIL',
+    !apiKey && 'MT16_SUPABASE_PUBLIC_KEY',
+    !password && 'MT16_CALIDAD_PASSWORD',
+    !rawFingerprints && 'MT16_ACTIVATION_SHA256'
+  ].filter(Boolean);
+  if (missing.length) {
+    return response.status(503).json({
+      error: `Vercel no ha cargado estas variables en este despliegue: ${missing.join(', ')}.`
+    });
   }
+  if (fingerprints.some(hash => !/^[a-f0-9]{64}$/i.test(hash))) {
+    return response.status(503).json({
+      error: 'MT16_ACTIVATION_SHA256 tiene un formato incorrecto. Cada huella debe contener 64 caracteres hexadecimales.'
+    });
+  }
+  const allowed = fingerprints.map(hash => Buffer.from(hash, 'hex'));
   const enrollment = request.body?.activacion;
   if (typeof enrollment !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(enrollment)) {
     return response.status(400).json({error: 'Abre el enlace de activación facilitado por Calidad.'});
