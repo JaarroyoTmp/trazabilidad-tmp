@@ -640,7 +640,7 @@
   <section id="stepResumen" class="card fade-in" style="display:none">
     <h2 class="title">Situación actual del instrumento</h2>
     <div class="sub">
-      Vista rápida para taller, calidad y auditoría: ubicación oficial, propiedad, calibración vigente y último movimiento.
+      Vista rápida para taller, Calidad y auditoría: ubicación, calibración, verificación MT16 y movimientos.
     </div>
 
     <div id="calBox" class="cal-box info">
@@ -697,6 +697,18 @@
         <div class="s" id="sumDias">—</div>
       </div>
 
+      <div class="summary-card" id="sumMT16Card" hidden>
+        <div class="k">Última verificación MT16</div>
+        <div class="v" id="sumUltimaMT16">—</div>
+        <div class="s" id="sumResultadoMT16" hidden></div>
+      </div>
+
+      <div class="summary-card" id="sumProximaMT16Card" hidden>
+        <div class="k">Próxima verificación MT16</div>
+        <div class="v" id="sumProximaMT16">—</div>
+        <a class="s" id="sumInformesMT16">Ver informes MT16</a>
+      </div>
+
       <div class="summary-card">
         <div class="k">Tipo calibración</div>
         <div class="v" id="sumTipoCal">—</div>
@@ -710,6 +722,18 @@
     <h2 class="title">Ficha completa del instrumento</h2>
     <div class="sub">Información detallada leída desde Supabase a través del QR.</div>
     <div id="infoBody"></div>
+    <div id="fichaMT16" class="summary-grid" style="display:none">
+      <div class="summary-card">
+        <div class="k">Última verificación MT16</div>
+        <div class="v" id="fichaUltimaMT16">—</div>
+        <div class="s" id="fichaResultadoMT16" hidden></div>
+      </div>
+      <div class="summary-card">
+        <div class="k">Próxima verificación MT16</div>
+        <div class="v" id="fichaProximaMT16">—</div>
+        <a class="s" id="fichaInformesMT16">Ver informes MT16</a>
+      </div>
+    </div>
 
     <div class="btn-row">
       <button class="btn secondary" id="btnBack1">← Volver</button>
@@ -878,6 +902,44 @@
     return inst.estado || inst.estado_actual || "Sin estado operativo";
   }
 
+  async function mostrarResultadoMT16(instrumentoId, fecha) {
+    try {
+      const {data: sesion} = await supa.auth.getSession();
+      if (!sesion?.session) return;
+      const {data, error} = await supa.from("verificaciones_mt16")
+        .select("resultado")
+        .eq("instrumento_id", instrumentoId)
+        .eq("datos->formulario->>fecha", fecha)
+        .order("fecha", {ascending:false})
+        .order("id", {ascending:false})
+        .limit(1);
+      const resultado = {OK:"APTO", NOK:"NO APTO"}[data?.[0]?.resultado];
+      if (error || !resultado) return;
+      for (const id of ["sumResultadoMT16", "fichaResultadoMT16"]) {
+        setText(id, resultado);
+        document.getElementById(id).hidden = false;
+      }
+    } catch {
+      // La ficha y las fechas se pueden consultar aunque falle el historial de Calidad.
+    }
+  }
+
+  function mostrarFechasMT16(inst) {
+    const ultima = inst.fecha_ultima_verificacion;
+    const proxima = inst.fecha_proxima_verificacion;
+    if (!ultima && !proxima) return;
+    for (const prefijo of ["sum", "ficha"]) {
+      setText(prefijo + "UltimaMT16", fDateShort(ultima));
+      setText(prefijo + "ProximaMT16", fDateShort(proxima));
+      document.getElementById(prefijo + "InformesMT16").href =
+        "../certificados.html?codigo=" + encodeURIComponent(codigo) + "#mt16";
+    }
+    document.getElementById("sumMT16Card").hidden = false;
+    document.getElementById("sumProximaMT16Card").hidden = false;
+    document.getElementById("fichaMT16").style.display = "grid";
+    if (ultima) void mostrarResultadoMT16(inst.id, ultima);
+  }
+
   async function main(){
     if (!codigo) return showError("No se indicó código.");
 
@@ -947,6 +1009,7 @@
     setText("sumProxima", inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "—");
     setText("sumDias", est.dias === null ? "Sin planificación" : (est.dias < 0 ? `Vencida hace ${Math.abs(est.dias)} días` : `Faltan ${est.dias} días`));
     setText("sumTipoCal", inst.tipo_calibracion || "—");
+    mostrarFechasMT16(inst);
 
     document.getElementById("stepResumen").style.display="block";
 
