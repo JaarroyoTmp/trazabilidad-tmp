@@ -425,12 +425,14 @@
     .status-ok{background:#22c55e}.status-prox{background:#f59e0b}.status-fuera{background:#ef4444}.status-sin{background:#94a3b8}
     .status-legend{margin-top:8px}
 
-    /* Calibraciones reales por mes */
+    /* Actividad metrológica mensual */
     .month-bars{height:210px;display:grid;grid-template-columns:repeat(12,1fr);gap:8px;align-items:end;padding-top:12px;border-bottom:1px solid #dbe7f2}
     .month-col{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:0}
     .month-value{font-size:10px;font-weight:900;color:#3d5873;min-height:14px}
     .month-bar-wrap{height:150px;width:100%;display:flex;align-items:flex-end;justify-content:center}
     .month-bar{width:min(28px,75%);min-height:2px;background:#2563eb;border-radius:8px 8px 2px 2px;transition:height .25s ease}
+    .month-bar{display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:#edf2f8}
+    .month-cal{background:#2563eb}.month-mt16{background:#0f766e}
     .month-label{font-size:10px;color:#667f97;font-weight:800}
 
     .quick-access .quick-title{font-size:15px;font-weight:900;color:#0d2b50;margin-bottom:12px}
@@ -790,8 +792,12 @@
       </section>
 
       <section class="chart-card2 panel">
-        <div class="panel-head"><div><h2 class="section-title">Calibraciones por mes</h2><p class="muted">Registros reales guardados en Supabase durante <span id="month-year-label"></span>.</p></div><span class="badge badge-soft" id="month-total">–</span></div>
+        <div class="panel-head"><div><h2 class="section-title">Calibraciones y verificaciones MT16 por mes</h2><p class="muted">Registros reales guardados en Supabase durante <span id="month-year-label"></span>.</p></div><span class="badge badge-soft" id="month-total">–</span></div>
         <div id="month-bars" class="month-bars"></div>
+        <div class="legend status-legend">
+          <div><span><span class="sq month-cal"></span>Calibraciones</span><strong id="month-cal-total">–</strong></div>
+          <div><span><span class="sq month-mt16"></span>Verificaciones MT16</span><strong id="month-mt16-total">–</strong></div>
+        </div>
       </section>
 
       <footer>Talleres Mecánicos Paramio · Sistema de Trazabilidad Metrológica · 2026</footer>
@@ -1099,45 +1105,47 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
     if (legendSinFecha) legendSinFecha.textContent = sinFecha;
   }
 
-  async function cargarCalibracionesMes() {
+  async function cargarActividadMetrologicaMes() {
     if (!supabase || !monthBars) return;
-    const year = new Date().getFullYear();
-    if (monthYearLabel) monthYearLabel.textContent = year;
-    const desde = `${year}-01-01T00:00:00`;
-    const hasta = `${year+1}-01-01T00:00:00`;
 
-    let data = null;
-    let error = null;
-    ({data,error} = await supabase.from("calibraciones")
-      .select("fecha_calibracion,fecha_ultima,creado_en")
-      .gte("creado_en", desde)
-      .lt("creado_en", hasta)
-      .order("creado_en", {ascending:true}));
-
-    if (error) {
-      console.warn("No se pudo cargar calibraciones por mes:", error);
-      monthBars.innerHTML = '<div style="grid-column:1/-1;align-self:center;text-align:center;color:#667f97;font-size:12px;">No se pudieron cargar las calibraciones.</div>';
+    const {data, error} = await supabase.rpc("actividad_metrologica_anual");
+    const calTotal = document.getElementById("month-cal-total");
+    const mt16Total = document.getElementById("month-mt16-total");
+    if (error || data?.length !== 12) {
+      monthBars.innerHTML = '<div style="grid-column:1/-1;align-self:center;text-align:center;color:#667f97;font-size:12px;">No se pudo cargar la actividad de calibración y verificación.</div>';
       if (monthTotal) monthTotal.textContent = "Sin datos";
+      calTotal.textContent = "–";
+      mt16Total.textContent = "–";
       return;
     }
 
-    const counts = Array(12).fill(0);
-    (data || []).forEach(c => {
-      const d = parseDate(c.fecha_calibracion) || parseDate(c.fecha_ultima) || parseDate(c.creado_en);
-      if (d && d.getFullYear() === year) counts[d.getMonth()]++;
+    if (monthYearLabel) monthYearLabel.textContent = data[0].anio;
+    const meses = [...data].sort((a,b) => a.mes - b.mes).map(m => {
+      const cal = Number(m.calibraciones);
+      const mt16 = Number(m.verificaciones);
+      return {cal, mt16, total:cal+mt16};
     });
-    const total = counts.reduce((a,b)=>a+b,0);
-    const max = Math.max(...counts,1);
+    const totalCal = meses.reduce((sum,m) => sum + m.cal, 0);
+    const totalMT16 = meses.reduce((sum,m) => sum + m.mt16, 0);
+    const max = Math.max(...meses.map(m => m.total), 1);
     const labels = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-    monthBars.innerHTML = counts.map((n,i)=>{
-      const h = n ? Math.max(6, Math.round((n/max)*145)) : 2;
-      return `<div class="month-col" title="${labels[i]}: ${n}">
-        <div class="month-value">${n}</div>
-        <div class="month-bar-wrap"><div class="month-bar" style="height:${h}px"></div></div>
+    monthBars.innerHTML = meses.map(({cal, mt16, total},i) => {
+      const h = total ? Math.max(6, Math.round(total/max*145)) : 2;
+      const calShare = total ? cal/total*100 : 0;
+      const mt16Share = total ? mt16/total*100 : 0;
+      const detail = `${labels[i]}: ${cal} calibraciones, ${mt16} verificaciones MT16`;
+      return `<div class="month-col" title="${detail}">
+        <div class="month-value" aria-label="${detail}">${total}</div>
+        <div class="month-bar-wrap" aria-hidden="true"><div class="month-bar" style="height:${h}px">
+          <span class="month-mt16" style="height:${mt16Share}%"></span>
+          <span class="month-cal" style="height:${calShare}%"></span>
+        </div></div>
         <div class="month-label">${labels[i]}</div>
       </div>`;
     }).join("");
-    if (monthTotal) monthTotal.textContent = `${total} calibraciones`;
+    if (monthTotal) monthTotal.textContent = `${totalCal + totalMT16} registros`;
+    calTotal.textContent = totalCal;
+    mt16Total.textContent = totalMT16;
   }
 
   // ====== EQUIPOS POR MAQUINA ======
@@ -1478,13 +1486,13 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
   // Cargar al inicio + refresco periódico
   cargarDashboard();
   cargarMovimientos();
-  cargarCalibracionesMes();
+  cargarActividadMetrologicaMes();
 
   setInterval(() => {
     cargarDashboard();
     cargarMovimientos();
   }, 30000);
-  setInterval(cargarCalibracionesMes, 120000);
+  setInterval(cargarActividadMetrologicaMes, 120000);
 </script>
 
 
