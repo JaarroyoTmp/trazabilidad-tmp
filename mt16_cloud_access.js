@@ -1,72 +1,88 @@
 import {mt16Access} from './mt16_cloud.js';
 
 const host = document.getElementById('mt16-cloud-access');
-const activation = new URLSearchParams(location.hash.slice(1)).get('mt16-activar');
 
 if (host) {
-  if (activation) {
-    const url = new URL(location.href);
-    url.searchParams.delete('activar');
-    url.hash = '';
-    window.history.replaceState(null, '', url);
-  }
-
   host.innerHTML = `
     <strong>Acceso de Calidad</strong>
-    <p role="status" data-access-status>Comprobando acceso…</p>`;
+    <p role="status" data-access-status>Comprobando acceso…</p>
+    <form hidden>
+      <label>Correo de Calidad
+        <input type="email" name="email" autocomplete="username" required>
+      </label>
+      <label>Contraseña de Supabase
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit">Autorizar este navegador</button>
+    </form>`;
+
+  const form = host.querySelector('form');
+  const email = form.elements.namedItem('email');
+  const password = form.elements.namedItem('password');
+  const button = form.querySelector('button');
   const status = host.querySelector('[data-access-status]');
   const auth = window.supabase.auth;
   const onSave = host.hasAttribute('data-on-save');
-  const needsActivation = 'Este navegador necesita el enlace de activación de Calidad.';
-  let accessRequested = Boolean(activation);
-  let active;
-  let activating = Boolean(activation);
+  let accessRequested = false;
+  let userId = null;
+  let signingIn = false;
+
+  function showAccess() {
+    host.hidden = onSave && (Boolean(userId) || !accessRequested);
+    form.hidden = Boolean(userId);
+  }
 
   async function refresh() {
     try {
       const user = await mt16Access();
-      if (onSave) host.hidden = !accessRequested || (Boolean(user) && !activation);
-      status.textContent = user ? 'Acceso de Calidad activo.' : needsActivation;
-      const userId = user?.id || null;
-      if (active !== userId) {
-        active = userId;
-        window.dispatchEvent(new Event('mt16-cloud-session'));
-      }
+      const nextId = user?.id || null;
+      status.textContent = nextId
+        ? 'Acceso de Calidad activo.'
+        : 'Autoriza este navegador para guardar y consultar los informes MT16.';
+      const changed = userId !== nextId;
+      userId = nextId;
+      showAccess();
+      if (changed) window.dispatchEvent(new Event('mt16-cloud-session'));
     } catch {
-      status.textContent = 'No se pudo comprobar el acceso de Calidad.';
+      status.textContent = 'No se pudo comprobar el acceso de Calidad. Puedes volver a intentarlo.';
+      showAccess();
     }
   }
 
   auth.onAuthStateChange(() => setTimeout(() => {
-    if (!activating) refresh();
+    if (!signingIn) refresh();
   }, 0));
-  window.addEventListener('mt16-request-login', () => {
+
+  window.addEventListener('mt16-request-login', event => {
     accessRequested = true;
-    host.hidden = false;
-    host.scrollIntoView({block:'center'});
+    showAccess();
+    if (!event.detail?.quiet && !host.hidden) host.scrollIntoView({block:'center'});
   });
 
-  if (activation) {
-    host.hidden = false;
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (signingIn) return;
+    signingIn = true;
+    button.disabled = true;
+    status.textContent = 'Comprobando acceso de Calidad…';
+    const credentials = {email:email.value.trim(), password:password.value};
+    password.value = '';
     try {
-      const response = await fetch(new URL('./api/mt16-acceso', location.href), {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({activacion: activation}),
-        cache: 'no-store'
-      });
-      if (response.status === 404) throw Error('La función de activación aún no está instalada.');
-      const session = await response.json();
-      if (!response.ok) throw Error(session.error || 'No se pudo activar este navegador.');
-      const {error} = await auth.setSession(session);
-      if (error) throw Error('No se pudo abrir la sesión en este navegador.');
+      const {error} = await auth.signInWithPassword(credentials);
+      if (error) {
+        status.textContent = error.code === 'invalid_credentials'
+          ? 'Supabase no ha aceptado el correo o la contraseña de Calidad.'
+          : 'No se pudo iniciar sesión en Supabase. El informe pendiente se conserva en este navegador.';
+        return;
+      }
       await refresh();
-    } catch (error) {
-      status.textContent = error instanceof SyntaxError ? 'No se pudo activar este navegador.' : error.message;
+    } catch {
+      status.textContent = 'No se pudo conectar con Supabase. El informe pendiente se conserva en este navegador.';
     } finally {
-      activating = false;
+      signingIn = false;
+      button.disabled = false;
     }
-  } else {
-    await refresh();
-  }
+  });
+
+  await refresh();
 }

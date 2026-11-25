@@ -196,6 +196,9 @@ async function history(request=searchVersion) {
     + rows.map((row,index) => `<tr><td>${esc(row.datos.formulario.fecha)}</td><td>${row.resultado==='NOK'?'NO APTO':'APTO'}</td><td><button type="button" data-history="${index}">Descargar informe</button> ${row.shared?"Guardado en Supabase":`<span>Pendiente de guardar en Supabase</span> <button type="button" data-publish="${index}">Reintentar guardado</button> <details><summary>Copia técnica</summary><button type="button" data-backup-row="${index}">Descargar copia JSON</button></details>`}</td></tr>`).join('')
     + '</tbody></table>'
   : 'No se han encontrado verificaciones en el historial disponible de este equipo.';
+ if (cloud.status === 'fulfilled' && cloud.value === null && rows.some(row => !row.shared)) {
+  window.dispatchEvent(new CustomEvent('mt16-request-login', {detail:{quiet:true}}));
+ }
  if (cloud.status === 'rejected') $('history').append(document.createTextNode(' No se pudo consultar Supabase.'));
  for (const button of $('history').querySelectorAll('[data-history]')) {
   button.onclick = async () => {
@@ -290,8 +293,8 @@ async function save(archived) {
    }
    window.dispatchEvent(new Event('mt16-request-login'));
    throw Error(queued
-    ? 'Abre el enlace de activación de Calidad en este navegador para completar el guardado.'
-    : 'Activa este navegador y vuelve a pulsar Guardar en esta pestaña.');
+    ? 'Autoriza este navegador en Acceso de Calidad para completar el guardado.'
+    : 'Autoriza este navegador en Acceso de Calidad y vuelve a pulsar Guardar en esta pestaña.');
   }
   $('status').textContent = 'Guardando el informe y actualizando la agenda en Supabase…';
   const stored = await publishMT16(record);
