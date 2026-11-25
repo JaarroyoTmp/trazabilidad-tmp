@@ -691,7 +691,7 @@
         </div>
         <div class="kpi-card" id="kpi-card-fuera">
           <div class="kpi-icon i-red">△</div>
-          <div><div class="kpi-label">Fuera de calibración</div><div class="kpi-value" id="kpi-fuera">–</div><div class="kpi-extra" id="kpi-fuera-extra"></div></div>
+          <div><div class="kpi-label">Fuera de plazo o NO APTO</div><div class="kpi-value" id="kpi-fuera">–</div><div class="kpi-extra" id="kpi-fuera-extra"></div></div>
         </div>
         <a href="listado_instrumentos.html?filtro=laboratorio" class="kpi-link">
           <div class="kpi-card" id="kpi-card-lab">
@@ -732,7 +732,7 @@
         <div id="machine-empty" class="machine-empty">Selecciona una máquina para ver los equipos que tiene actualmente.</div>
         <table class="mini-table" id="table-machine-equipment" style="display:none;">
           <thead>
-            <tr><th>Código</th><th>Descripción</th><th>Calibración</th><th>Próxima calibración</th><th>Acciones</th></tr>
+            <tr><th>Código</th><th>Descripción</th><th>Vigencia</th><th>Próximo control</th><th>Acciones</th></tr>
           </thead>
           <tbody id="tbody-machine-equipment"></tbody>
         </table>
@@ -745,7 +745,7 @@
         </div>
         <div class="dialog-table-wrap">
           <table class="dialog-table">
-            <thead><tr><th>Código</th><th>Descripción</th><th>Calibración</th><th>Próxima calibración</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Código</th><th>Descripción</th><th>Vigencia</th><th>Próximo control</th><th>Acciones</th></tr></thead>
             <tbody id="machine-dialog-body"></tbody>
           </table>
         </div>
@@ -778,13 +778,13 @@
 
 
       <section class="chart-card panel">
-        <div class="panel-head"><div><h2 class="section-title">Estado general de calibración</h2><p class="muted">Distribución real de los equipos activos según su próxima calibración.</p></div></div>
+        <div class="panel-head"><div><h2 class="section-title">Estado general de vigencia</h2><p class="muted">Vigencia según la calibración o la verificación MT16 de cada equipo.</p></div></div>
         <div id="status-total" class="status-total">– equipos activos</div>
         <div id="status-stack" class="status-stack" aria-label="Estado general"></div>
         <div class="legend status-legend">
           <div><span><span class="sq" style="background:#22c55e"></span>OK &gt;30 días</span><strong id="legend-ok">–</strong></div>
           <div><span><span class="sq" style="background:#f59e0b"></span>Próximos &lt;30 días</span><strong id="legend-prox">–</strong></div>
-          <div><span><span class="sq" style="background:#ef4444"></span>Fuera de calibración</span><strong id="legend-fuera">–</strong></div>
+          <div><span><span class="sq" style="background:#ef4444"></span>Fuera de plazo o NO APTO</span><strong id="legend-fuera">–</strong></div>
           <div><span><span class="sq" style="background:#94a3b8"></span>Sin fecha</span><strong id="legend-sin-fecha">–</strong></div>
         </div>
       </section>
@@ -810,6 +810,7 @@
 <!-- SCRIPT PRINCIPAL DASHBOARD (KPIs + MOVIMIENTOS) -->
 <script type="module">
 import { loadAllInstruments } from "./instrumentos_loader.mjs";
+import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigencia_instrumento.mjs";
   const supabase = window.supabase;
 
 
@@ -1002,7 +1003,7 @@ import { loadAllInstruments } from "./instrumentos_loader.mjs";
     }
 
     const [{ data: instrumentos, error }, { data: ubicaciones, error: errUbic }] = await Promise.all([
-      loadAllInstruments(supabase, "codigo, descripcion, estado, ubicacion_id, ubicacion_actual, ubicacion, fecha_proxima_calibracion, proxima_calibracion"),
+      loadAllInstruments(supabase, "codigo, descripcion, estado, ubicacion_id, ubicacion_actual, ubicacion, fecha_proxima_calibracion, proxima_calibracion, familia_id, fecha_proxima_verificacion"),
       supabase.from("ubicaciones").select("id,nombre,tipo,activo")
     ]);
 
@@ -1045,8 +1046,10 @@ import { loadAllInstruments } from "./instrumentos_loader.mjs";
       if (tipo === "laboratorio" || (!tipo && (ubicActual === "laboratorio" || ubicTexto === "laboratorio"))) enLab++;
       else if (tipo === "taller" || ubicTexto === "taller") enTaller++;
 
-      const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
-      if (!prox) {
+      const prox = parseDate(fechaVigenciaInstrumento(inst));
+      if (esNoAptoMT16(inst)) {
+        fueraLista.push(inst);
+      } else if (!prox) {
         sinFecha++;
       } else {
         prox.setHours(0,0,0,0);
@@ -1194,12 +1197,12 @@ import { loadAllInstruments } from "./instrumentos_loader.mjs";
   function machineRowHtml(inst){
     const cal = estadoCalibracionFromInstrumento(inst);
     const chip = `<span class="calib-chip ${cal.clase}">${escapeHome(cal.estado)}</span>`;
-    const prox = inst.fecha_proxima_calibracion || inst.proxima_calibracion;
+    const prox = fechaVigenciaInstrumento(inst);
     return `<tr>
       <td><strong>${escapeHome(inst.codigo || "")}</strong></td>
       <td title="${escapeHome(inst.descripcion || "-")}">${escapeHome(inst.descripcion || "-")}</td>
       <td>${chip}</td>
-      <td>${formatDateOnly(prox)}</td>
+      <td>${formatDateOnly(prox)}${controlaPorMT16(inst) ? " · MT16" : ""}</td>
       <td><a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(inst.codigo || "")}">Ver ficha</a></td>
     </tr>`;
   }
@@ -1275,7 +1278,9 @@ import { loadAllInstruments } from "./instrumentos_loader.mjs";
 
   function estadoCalibracionFromInstrumento(inst){
     const hoy = new Date();
-    const prox = parseDate(inst?.fecha_proxima_calibracion) || parseDate(inst?.proxima_calibracion);
+    if (esNoAptoMT16(inst)) return {estado:"NO APTO", clase:"calib-bad"};
+    const prox = parseDate(fechaVigenciaInstrumento(inst));
+    hoy.setHours(0,0,0,0);
     if (!prox) return {estado:"SIN FECHA", clase:"calib-warn"};
 
     if (prox < hoy) return {estado:"FUERA", clase:"calib-bad"};
@@ -1417,7 +1422,7 @@ import { loadAllInstruments } from "./instrumentos_loader.mjs";
     if (codigos.length > 0){
       const { data: insts, error: errInst } = await supabase
         .from("instrumentos")
-        .select("codigo, fecha_proxima_calibracion, proxima_calibracion")
+        .select("codigo, estado, fecha_proxima_calibracion, proxima_calibracion, familia_id, fecha_proxima_verificacion")
         .in("codigo", codigos);
 
       if (!errInst && insts){

@@ -89,7 +89,7 @@
         <th>Código</th>
         <th>Ubicación</th>
         <th>Estado</th>
-        <th>Próxima calibración</th>
+        <th>Próximo control</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -102,6 +102,7 @@
 
 <script type="module">
 import { loadAllInstruments } from "./instrumentos_loader.mjs";
+import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigencia_instrumento.mjs";
 
 const supabase = window.supabase;
 
@@ -118,7 +119,7 @@ let textoFiltro = "";
 switch(filtro){
   case "uso": textoFiltro = "Instrumentos fuera de laboratorio (En uso)"; break;
   case "laboratorio": textoFiltro = "Instrumentos que están actualmente en el laboratorio"; break;
-  case "calibrados": textoFiltro = "Instrumentos dentro del periodo de vigencia de calibración"; break;
+  case "calibrados": textoFiltro = "Instrumentos con la calibración o la verificación MT16 vigente"; break;
   default: textoFiltro = "Mostrando todos los instrumentos";
 }
 
@@ -144,7 +145,7 @@ function formatDate(d){
 // Cargar instrumentos
 // ==========================
 async function cargar(){
-  const { data, error } = await loadAllInstruments(supabase, "codigo, ubicacion_actual, estado, fecha_proxima_calibracion, proxima_calibracion");
+  const { data, error } = await loadAllInstruments(supabase, "codigo, ubicacion_actual, estado, fecha_proxima_calibracion, proxima_calibracion, familia_id, fecha_proxima_verificacion");
 
   if(error){
     console.error("Error cargando instrumentos:", error);
@@ -152,19 +153,20 @@ async function cargar(){
   }
 
   const hoy = new Date();
+  hoy.setHours(0,0,0,0);
   const cuerpo = document.getElementById("tbody");
   cuerpo.innerHTML = "";
 
   data.forEach(inst => {
 
     const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
-    const prox = parseDate(inst.fecha_proxima_calibracion) || parseDate(inst.proxima_calibracion);
+    const prox = parseDate(fechaVigenciaInstrumento(inst));
 
     let mostrar = false;
 
     if(filtro === "uso" && ubic !== "laboratorio") mostrar = true;
     else if(filtro === "laboratorio" && ubic === "laboratorio") mostrar = true;
-    else if(filtro === "calibrados" && prox && prox >= hoy) mostrar = true;
+    else if(filtro === "calibrados" && !esNoAptoMT16(inst) && prox && prox >= hoy) mostrar = true;
     else if(!filtro) mostrar = true;
 
     if(mostrar){
@@ -174,7 +176,7 @@ async function cargar(){
         <td>${inst.codigo}</td>
         <td>${inst.ubicacion_actual || "—"}</td>
         <td>${inst.estado || "—"}</td>
-        <td>${formatDate(prox)}</td>
+        <td>${formatDate(prox)}${controlaPorMT16(inst) ? " · MT16" : ""}</td>
       `;
 
       cuerpo.appendChild(tr);

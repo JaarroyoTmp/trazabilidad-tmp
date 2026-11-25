@@ -269,7 +269,7 @@
         <option value="">Todos</option>
         <option value="ok">En regla</option>
         <option value="warn">Próxima ≤ 30 días</option>
-        <option value="bad">Fuera de calibración</option>
+        <option value="bad">Fuera de plazo o NO APTO</option>
         <option value="nodata">Sin fecha</option>
       </select>
 
@@ -287,8 +287,8 @@
         <option value="codigo_desc">Código Z→A</option>
         <option value="rango_asc">Rango A→Z</option>
         <option value="rango_desc">Rango Z→A</option>
-        <option value="prox_asc">Próxima calibración antes</option>
-        <option value="prox_desc">Próxima calibración después</option>
+        <option value="prox_asc">Fecha de calibración registrada ↑</option>
+        <option value="prox_desc">Fecha de calibración registrada ↓</option>
       </select>
 
       <label for="limit">Resultados por página</label>
@@ -337,6 +337,7 @@
 <script type="module" src="./config.mjs"></script>
 
 <script type="module">
+  import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigencia_instrumento.mjs";
   const supabase = window.supabase;
 
   const el = (id) => document.getElementById(id);
@@ -399,10 +400,11 @@
   }
 
   function fechaProxima(inst){
-    return inst.fecha_proxima_calibracion || null;
+    return fechaVigenciaInstrumento(inst);
   }
 
   function estadoKey(inst){
+    if(esNoAptoMT16(inst)) return 'bad';
     const prox = fechaProxima(inst);
     if(!prox) return 'nodata';
 
@@ -410,6 +412,8 @@
     const d = new Date(prox);
     if(Number.isNaN(d.getTime())) return 'nodata';
 
+    hoy.setHours(0,0,0,0);
+    d.setHours(0,0,0,0);
     const diff = (d - hoy) / (1000*60*60*24);
     if(diff < 0) return 'bad';
     if(diff <= 30) return 'warn';
@@ -419,7 +423,7 @@
   function estadoTag(inst){
     const k = estadoKey(inst);
     if(k === 'nodata') return "<span class='tag info'>Sin fecha</span>";
-    if(k === 'bad') return "<span class='tag bad'>Fuera calibración</span>";
+    if(k === 'bad') return "<span class='tag bad'>" + (esNoAptoMT16(inst) ? 'NO APTO' : controlaPorMT16(inst) ? 'Verificación vencida' : 'Calibración vencida') + "</span>";
     if(k === 'warn') return "<span class='tag warn'>Próxima</span>";
     return "<span class='tag ok'>En regla</span>";
   }
@@ -502,7 +506,7 @@
             <span class="chip">🔧 ${escapeHTML(estOp)}</span>
             <span class="chip">Rango: ${escapeHTML(inst.rango || '-')}</span>
             <span class="chip">Tipo: ${escapeHTML(inst.tipo_calibracion || '-')}</span>
-            <span class="chip">Próx.: ${formatDate(prox)}</span>
+            <span class="chip">${controlaPorMT16(inst) ? "Próx. verificación MT16" : "Próx. calibración"}: ${formatDate(prox)}</span>
           </div>
         </div>
       `;
@@ -632,7 +636,10 @@
         propietario_id,
         estado,
         tipo_calibracion,
-        fecha_proxima_calibracion
+        fecha_proxima_calibracion,
+        proxima_calibracion,
+        familia_id,
+        fecha_proxima_verificacion
       `, { count: "exact" });
 
     const gt = q.value.trim();
@@ -720,7 +727,7 @@
       "ubicacion",
       "estado_operativo",
       "tipo_calibracion",
-      "fecha_proxima_calibracion"
+      "fecha_proximo_control"
     ];
 
     const esc = (v) => {

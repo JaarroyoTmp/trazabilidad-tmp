@@ -815,6 +815,7 @@
 <script type="module" src="../config.mjs"></script>
 
 <script type="module">
+  import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "../vigencia_instrumento.mjs";
   const supa = window.supabase;
 
   let codigo = new URLSearchParams(window.location.search).get("codigo");
@@ -927,7 +928,7 @@
   function mostrarFechasMT16(inst) {
     const ultima = inst.fecha_ultima_verificacion;
     const proxima = inst.fecha_proxima_verificacion;
-    if (!ultima && !proxima) return;
+    if (!ultima && !proxima && !controlaPorMT16(inst)) return;
     for (const prefijo of ["sum", "ficha"]) {
       setText(prefijo + "UltimaMT16", fDateShort(ultima));
       setText(prefijo + "ProximaMT16", fDateShort(proxima));
@@ -975,13 +976,17 @@
     setText("heroOperativo", operativo);
 
     // estado
-    const prox = inst.fecha_proxima_calibracion || null;
-    const est = computeEstado(prox);
+    const mt16 = controlaPorMT16(inst);
+    const tipoControl = mt16 ? "Verificación MT16" : "Calibración";
+    const prox = mt16 ? fechaVigenciaInstrumento(inst) : inst.fecha_proxima_calibracion;
+    const est = esNoAptoMT16(inst)
+      ? {clase:"bad", texto:"NO APTO", detalle:tipoControl, icono:"⛔", dias:null}
+      : computeEstado(prox);
     const pill = document.getElementById("heroStatusPill");
     pill.className = "pill " + est.clase;
     document.getElementById("heroStatusLabel").textContent = `${est.icono} ${est.texto}`;
     document.getElementById("heroStatusCaption").textContent =
-      est.detalle +
+      (mt16 ? tipoControl + " · " : "") + est.detalle +
       (est.dias!==null ? (est.dias<0 ? ` · hace ${Math.abs(est.dias)} días` : ` · en ${est.dias} días`) : "");
 
     // resumen actual directo
@@ -991,11 +996,10 @@
     setText("calBoxTitle", `${est.icono} ${est.texto}`);
     setText(
       "calBoxText",
-      est.dias === null
-        ? "No hay fecha de próxima calibración registrada."
-        : (est.dias < 0
-            ? `Calibración vencida hace ${Math.abs(est.dias)} días.`
-            : `Calibración vigente. Próxima calibración en ${est.dias} días.`)
+      esNoAptoMT16(inst) ? "Verificación MT16 con resultado NO APTO."
+        : est.dias === null ? `${tipoControl} sin fecha de próximo control.`
+        : est.dias < 0 ? `${tipoControl} vencida hace ${Math.abs(est.dias)} días.`
+        : `${tipoControl} vigente. Próximo control en ${est.dias} días.`
     );
 
     setText("sumUbicacion", ubic);
@@ -1009,6 +1013,9 @@
     setText("sumProxima", inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "—");
     setText("sumDias", est.dias === null ? "Sin planificación" : (est.dias < 0 ? `Vencida hace ${Math.abs(est.dias)} días` : `Faltan ${est.dias} días`));
     setText("sumTipoCal", inst.tipo_calibracion || "—");
+    if (mt16) {
+      document.getElementById("sumProxima").closest(".summary-card").hidden = true;
+    }
     mostrarFechasMT16(inst);
 
     document.getElementById("stepResumen").style.display="block";
@@ -1027,9 +1034,9 @@
       <div class="item"><span class="label">Ubicación actual</span><span class="value">${ubic || "-"}</span></div>
       <div class="item"><span class="label">Propiedad</span><span class="value">${propietarioNombre || "PARAMIO"}</span></div>
       <div class="item"><span class="label">Estado operativo</span><span class="value">${operativo || "-"}</span></div>
-      <div class="item"><span class="label">Estado calibración</span><span class="value">${est.texto} · ${est.detalle}</span></div>
+      <div class="item"><span class="label">${mt16 ? "Estado verificación MT16" : "Estado calibración"}</span><span class="value">${est.texto} · ${est.detalle}</span></div>
       <div class="item"><span class="label">Última calibración</span><span class="value">${inst.fecha_ultima_calibracion ? fDateShort(inst.fecha_ultima_calibracion) : "-"}</span></div>
-      <div class="item"><span class="label">Próxima calibración</span><span class="value">${inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "-"}</span></div>
+      <div class="item"><span class="label">${mt16 ? "Vencimiento de calibración anterior" : "Próxima calibración"}</span><span class="value">${inst.fecha_proxima_calibracion ? fDateShort(inst.fecha_proxima_calibracion) : "-"}</span></div>
       <div class="item"><span class="label">Observaciones</span><span class="value">${(inst.observaciones && inst.observaciones.trim()) ? inst.observaciones : "Propiedad de Talleres Mecánicos Paramio"}</span></div>
     `;
 
