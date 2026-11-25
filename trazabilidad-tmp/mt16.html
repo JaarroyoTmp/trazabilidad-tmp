@@ -301,7 +301,7 @@ async function save(archived) {
    if (!stored.agenda) {
     $('status').textContent = 'Informe confirmado en Supabase. Aún no se pudo consultar la fecha actual de la ficha.';
    } else if (plan.accion === 'RENOVAR') {
-    const due = stored.agenda.fecha_proxima_calibracion;
+    const due = stored.agenda.fecha_proxima_verificacion;
     if (due && due === plan.proxima_fecha &&
         stored.agenda.fecha_ultima_verificacion === plan.fecha_verificacion &&
         String(stored.agenda.estado || '').trim().toUpperCase() !== 'NO APTO') {
