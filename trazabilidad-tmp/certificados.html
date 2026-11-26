@@ -1,276 +1,111 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TMP · Informes y Certificados</title>
-  <style>
-    :root{
-      --bg:#eef6ff; --bg2:#f8fbff; --ink:#0d2340; --muted:#647d96;
-      --panel:#fff; --line:#dbe7f2; --line2:#c9dceb; --blue:#2563eb;
-      --blue2:#0ea5e9; --green:#16a34a; --orange:#f59e0b; --red:#ef4444;
-      --purple:#7c3aed; --shadow:0 14px 34px rgba(15,45,75,.09);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 15% -5%,rgba(37,99,235,.13),transparent 25%),linear-gradient(180deg,var(--bg),var(--bg2));min-height:100vh}
-    .shell{max-width:1600px;margin:0 auto;padding:18px 22px 36px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}
-    .brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;display:grid;place-items:center;font-weight:950;box-shadow:0 10px 24px rgba(37,99,235,.22)}
-    h1{margin:0;font-size:25px;letter-spacing:-.035em}.subtitle{font-size:12px;color:var(--muted);margin-top:3px;font-weight:700}
-    .top-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .btn{border:1px solid var(--line2);background:#fff;color:#173d63;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:850;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-    .btn:hover{box-shadow:0 7px 18px rgba(15,45,75,.09);transform:translateY(-1px)}.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn-soft{background:#edf5ff;border-color:#bfd8f5;color:#1d4ed8}.btn-danger{background:#fff3f3;border-color:#fecaca;color:#dc2626}
-    .panel{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);padding:14px}
-    .hero{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.55fr);gap:12px;margin-bottom:12px}
-    .hero-main{padding:18px 20px;background:linear-gradient(135deg,#0b315b,#0d477b);color:#fff;border:0;position:relative;overflow:hidden}
-    .hero-main:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-120px;background:rgba(255,255,255,.08)}
-    .hero-main h2{margin:0;font-size:21px}.hero-main p{margin:7px 0 0;color:#dcecff;font-size:12px;line-height:1.55;max-width:90ch}
-    .lookup{display:flex;gap:7px;margin-top:14px;max-width:700px}.lookup input{flex:1;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:10px;padding:9px 11px;outline:0}.lookup input::placeholder{color:#d5e5f7}
-    .hero-side{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mini{padding:12px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}.mini .k{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:900}.mini .v{font-size:22px;font-weight:950;margin-top:3px;color:#0d2b50}.mini .d{font-size:10px;color:var(--muted);margin-top:2px}
-    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}.kpi{padding:12px 13px;display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:center}.ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;font-weight:900}.ib{background:#e8f1ff;color:#2563eb}.ig{background:#eafaf0;color:#16a34a}.ir{background:#fff0f0;color:#ef4444}.io{background:#fff7e9;color:#f59e0b}.ip{background:#f1ecff;color:#7c3aed}.klabel{font-size:10px;color:var(--muted);font-weight:850}.kvalue{font-size:21px;font-weight:950;color:#0d2b50;line-height:1.05}.kextra{font-size:9px;color:#7890a8;margin-top:2px}
-    .workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px}
-    .head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}.head h2{margin:0;font-size:16px}.head p{margin:3px 0 0;font-size:11px;color:var(--muted)}
-    .filters{display:grid;grid-template-columns:minmax(220px,1.6fr) repeat(3,minmax(130px,.7fr)) auto;gap:7px;margin-bottom:10px}.filters input,.filters select{border:1px solid var(--line2);border-radius:9px;padding:8px 10px;background:#fff;color:var(--ink);font-size:11px;outline:0}.filters input:focus,.filters select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
-    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:570px}.table{width:100%;border-collapse:collapse;font-size:11px;min-width:900px}.table th{position:sticky;top:0;background:#f3f8fd;color:#415f7c;font-size:10px;text-align:left;padding:8px;border-bottom:1px solid var(--line);z-index:1}.table td{padding:8px;border-bottom:1px solid #eaf1f7;vertical-align:middle}.table tr:hover td{background:#fbfdff}.code{font-weight:900;color:#133b61}.muted{color:var(--muted)}
-    .chip{display:inline-flex;align-items:center;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:900;border:1px solid;white-space:nowrap}.c-ok{color:#15803d;background:#ecfdf3;border-color:#bbf7d0}.c-bad{color:#dc2626;background:#fff1f2;border-color:#fecdd3}.c-pend{color:#b45309;background:#fff7ed;border-color:#fed7aa}.c-info{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}.c-neutral{color:#64748b;background:#f8fafc;border-color:#e2e8f0}
-    .row-actions{display:flex;gap:5px;white-space:nowrap}.row-actions .btn{padding:5px 7px;font-size:9px;border-radius:8px}
-    .side{display:grid;gap:10px;align-content:start}.side h3{margin:0 0 7px;font-size:13px}.audit-grid{display:grid;gap:7px}.audit-item{border:1px solid var(--line);border-radius:11px;padding:9px 10px;background:#fbfdff;display:flex;justify-content:space-between;gap:10px;align-items:center}.audit-item span{font-size:10px;color:var(--muted)}.audit-item strong{font-size:13px;color:#0d2b50}.warnbox{border:1px solid #fed7aa;background:#fffaf0;color:#92400e;border-radius:11px;padding:10px;font-size:10px;line-height:1.5}.okbox{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:11px;padding:10px;font-size:10px;line-height:1.5}
-    .quick{display:grid;grid-template-columns:1fr 1fr;gap:7px}.quick .btn{min-height:48px;flex-direction:column;font-size:10px}
-    .empty{padding:35px;text-align:center;color:var(--muted);font-size:12px}
-    dialog{border:1px solid var(--line);border-radius:18px;padding:0;width:min(780px,95vw);box-shadow:0 30px 80px rgba(15,45,75,.25)}dialog::backdrop{background:rgba(9,30,55,.38)}.dlg-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start}.dlg-body{padding:14px 16px;max-height:70vh;overflow:auto}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.detail{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fbfdff}.detail label{display:block;font-size:9px;color:var(--muted);font-weight:850;text-transform:uppercase}.detail div{font-size:12px;font-weight:750;margin-top:3px;word-break:break-word}.dlg-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-    .status-line{font-size:10px;color:var(--muted);margin-top:8px}.footer{text-align:center;color:#7890a8;font-size:9px;margin-top:12px}
-    @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.workspace{grid-template-columns:1fr}.side{grid-template-columns:repeat(3,1fr)}.hero{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}}
-    @media(max-width:700px){.shell{padding:10px}.topbar{align-items:flex-start;flex-direction:column}.kpis{grid-template-columns:1fr 1fr}.hero-side{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.side{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TMP · Informes y certificados</title>
+<style>
+  :root{color-scheme:light;--back:#edf2f7;--paper:#fff;--ink:#152c45;--muted:#52667b;--line:#d9e2ec;--blue:#1659a4;--navy:#102b48}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--back);color:var(--ink);font:15px/1.45 system-ui,Segoe UI,sans-serif}
+  [hidden]{display:none!important}
+  .page{max-width:1360px;margin:auto;padding:24px clamp(14px,3vw,40px) 38px}
+  .top,.section-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .mark{display:grid;place-items:center;width:44px;height:38px;border-radius:8px;background:var(--navy);color:white;font-size:13px;letter-spacing:.06em}
+  nav,.actions{display:flex;flex-wrap:wrap;gap:8px}
+  h1,h2,p{margin:0} h1{font-size:clamp(29px,5vw,44px);letter-spacing:-.035em;line-height:1.12} h2{font-size:21px;letter-spacing:-.02em}
+  .intro{margin:18px 0 14px;border-radius:14px;padding:clamp(20px,4vw,36px);background:var(--navy);color:white}
+  .intro p{margin-top:8px;color:#d6e5f6}
+  .access{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px}
+  .access [data-access-status]{color:var(--muted);margin:4px 0}
+  .access form{display:flex;align-items:end;gap:9px;flex-wrap:wrap;margin-top:8px}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .metric,.record{background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  .metric{padding:12px 16px;color:var(--muted);font-size:13px}
+  .metric strong{display:block;color:var(--ink);font-size:26px;font-variant-numeric:tabular-nums}
+  .record{padding:clamp(13px,2vw,22px)}
+  .filters{display:grid;grid-template-columns:minmax(190px,2fr) repeat(3,minmax(120px,1fr)) auto;gap:9px;align-items:end;margin:15px 0 12px}
+  label{display:grid;gap:4px;font-size:13px;font-weight:650}
+  input,select,button,a.btn{font:inherit}
+  input,select,.btn,button{border:1px solid var(--line);border-radius:7px;min-height:38px;padding:7px 10px;background:white;color:var(--ink)}
+  input,select{width:100%}
+  button,.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;font-weight:650;cursor:pointer;white-space:nowrap}
+  button:disabled{opacity:.55;cursor:default}
+  .primary,.access button{background:var(--blue);border-color:var(--blue);color:white}
+  button:hover:not(:disabled),.btn:hover{box-shadow:0 2px 6px #14395627}
+  :focus-visible{outline:3px solid #89bafe;outline-offset:2px}
+  .status{color:var(--muted);min-height:24px;font-size:13px;margin-bottom:5px}
+  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:9px}
+  table{border-collapse:collapse;width:100%;min-width:780px;text-align:left;font-size:14px}
+  th{background:#f0f4f9;color:#405773;font-size:12px}
+  th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  .sub{display:block;margin-top:2px;color:var(--muted);font-size:12px}
+  .badge{display:inline-block;padding:3px 8px;border-radius:999px;white-space:nowrap;font-size:12px;font-weight:750;background:#edf2f7}
+  .badge.ok{background:#e2f5e9;color:#16653b}.badge.nok{background:#fde8e8;color:#982829}.badge.pending{background:#fff1d8;color:#804600}
+  .badge.quality{background:#e3edf9;color:#1e538e}
+  .empty{padding:25px 12px;text-align:center;color:var(--muted)}
+  dialog{border:1px solid var(--line);border-radius:12px;color:var(--ink);width:min(520px,92vw);padding:20px}
+  dialog::backdrop{background:#102b4877}
+  dl{display:grid;grid-template-columns:110px 1fr;gap:7px 12px}dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
+  footer{margin-top:16px;color:var(--muted);text-align:center;font-size:12px}
+  @media(max-width:850px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.filters label:first-child{grid-column:1/-1}}
+  @media(max-width:520px){.metrics{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start}}
+  @media print{.access,nav,button,.actions,.filters,footer,th:last-child,td:last-child{display:none!important}.page{padding:0}.intro{color:black;background:white;padding:0}.intro p{color:black}table{min-width:0}}
+</style>
+<script type="module" src="./registro_documental.js?v=20261126"></script>
+<script type="module" src="./mt16_cloud_access.js"></script>
 </head>
 <body>
-<div class="shell">
-  <div class="topbar">
-    <div class="brand"><div class="logo">TMP</div><div><h1>Informes y Certificados</h1><div class="subtitle">Control documental real · trazabilidad · consulta · auditoría</div></div></div>
-    <div class="top-actions">
-      <a class="btn" href="home.html">← Inicio</a>
-      <a class="btn" href="calibraciones.historial.html">Histórico calibraciones</a>
-      <a class="btn btn-primary" href="calibraciones.html">Centro calibración</a>
-    </div>
-  </div>
-
-  <section class="hero">
-    <div class="panel hero-main">
-      <h2>Consulta documental y control de certificados emitidos</h2>
-      <p>Esta pantalla trabaja sobre los registros reales de Supabase. Permite localizar un certificado, comprobar si tiene documento PDF, revisar su decisión y relacionarlo con la calibración y el equipo cuando existe vínculo disponible.</p>
-      <div class="lookup"><input id="cert-direct" placeholder="Número de certificado · Ej. CC-2026-0001"><button class="btn" id="btn-direct">Abrir certificado</button></div>
-      <div class="status-line" id="load-status">Preparando consulta documental…</div>
-    </div>
-    <div class="hero-side">
-      <div class="mini"><div class="k">Fuente principal</div><div class="v">Supabase</div><div class="d">certificados + calibraciones + instrumentos</div></div>
-      <div class="mini"><div class="k">Regla registrada</div><div class="v">ILAC-G8</div><div class="d">Se muestra la regla guardada en cada certificado</div></div>
-      <div class="mini"><div class="k">Documento</div><div class="v" id="hero-pdf">—</div><div class="d">certificados con PDF enlazado</div></div>
-      <div class="mini"><div class="k">Cobertura</div><div class="v" id="hero-link">—</div><div class="d">certificados vinculados a calibración/equipo</div></div>
-    </div>
+<main class="page">
+  <header class="top">
+    <div class="brand"><span class="mark">TMP</span> Trazabilidad Metrológica</div>
+    <nav aria-label="Navegación">
+      <a class="btn" href="./home.html">Inicio</a>
+      <a class="btn" href="./calibraciones.html">Centro de calibración</a>
+      <a class="btn" href="./mt16.html">Verificación MT16</a>
+    </nav>
+  </header>
+  <section class="intro">
+    <h1>Informes y certificados</h1>
+    <p>Consulta las calibraciones y verificaciones MT16 registradas, con su resultado y documento.</p>
   </section>
-
-  <section class="kpis">
-    <div class="panel kpi"><div class="ico ib">▤</div><div><div class="klabel">Certificados</div><div class="kvalue" id="k-total">—</div><div class="kextra">registros localizados</div></div></div>
-    <div class="panel kpi"><div class="ico ig">✓</div><div><div class="klabel">APTO / OK</div><div class="kvalue" id="k-ok">—</div><div class="kextra" id="k-ok-extra"></div></div></div>
-    <div class="panel kpi"><div class="ico ir">!</div><div><div class="klabel">NO APTO / NOK</div><div class="kvalue" id="k-nok">—</div><div class="kextra" id="k-nok-extra"></div></div></div>
-    <div class="panel kpi"><div class="ico io">?</div><div><div class="klabel">Pendiente / Indeterm.</div><div class="kvalue" id="k-pend">—</div><div class="kextra">requieren revisión documental</div></div></div>
-    <div class="panel kpi"><div class="ico ip">PDF</div><div><div class="klabel">Con documento</div><div class="kvalue" id="k-pdf">—</div><div class="kextra" id="k-pdf-extra"></div></div></div>
-    <div class="panel kpi"><div class="ico ib">↔</div><div><div class="klabel">Vinculados</div><div class="kvalue" id="k-linked">—</div><div class="kextra">con calibración/equipo resoluble</div></div></div>
+  <section id="mt16-cloud-access" class="access" aria-label="Acceso de Calidad"></section>
+  <section class="metrics" aria-label="Resumen del registro">
+    <div class="metric">Calibraciones<strong id="total-cal">—</strong></div>
+    <div class="metric">Verificaciones MT16<strong id="total-mt16">—</strong></div>
+    <div class="metric">Aptos<strong id="total-apto">—</strong></div>
+    <div class="metric">No aptos<strong id="total-no-apto">—</strong></div>
   </section>
-
-  <section class="workspace">
-    <div class="panel">
-      <div class="head"><div><h2>Registro documental</h2><p>Filtra, revisa y abre certificados emitidos sin perder el contexto del equipo y de la calibración.</p></div><button class="btn btn-soft" id="btn-export">Exportar CSV filtrado</button></div>
-      <div class="filters">
-        <input id="f-search" placeholder="Buscar certificado, equipo, descripción, regla…">
-        <select id="f-decision"><option value="">Todas las decisiones</option><option value="OK">APTO / OK</option><option value="NOK">NO APTO / NOK</option><option value="PEND">Pendiente / Indeterminado</option><option value="OTHER">Otros</option></select>
-        <select id="f-doc"><option value="">Con y sin PDF</option><option value="pdf">Con PDF</option><option value="nopdf">Sin PDF</option></select>
-        <select id="f-year"><option value="">Todos los años</option></select>
-        <button class="btn" id="btn-clear">Limpiar</button>
+  <section class="record" aria-labelledby="record-title" id="mt16">
+    <header class="section-head">
+      <h2 id="record-title">Registro oficial</h2>
+      <div class="actions">
+        <button id="refresh" type="button">Actualizar</button>
+        <button id="csv" type="button" disabled>Exportar CSV</button>
       </div>
-      <div class="table-wrap">
-        <table class="table">
-          <thead><tr><th>Certificado</th><th>Equipo</th><th>Descripción</th><th>Fecha</th><th>Decisión</th><th>Regla</th><th>PDF</th><th>Acciones</th></tr></thead>
-          <tbody id="cert-body"><tr><td colspan="8" class="empty">Cargando certificados…</td></tr></tbody>
-        </table>
-      </div>
-      <div class="status-line" id="result-info">—</div>
+    </header>
+    <div class="filters">
+      <label>Buscar <input type="search" id="search" placeholder="Equipo, informe u operario"></label>
+      <label>Tipo <select id="type"><option value="">Todos</option><option value="CALIBRACION">Calibración</option><option value="VERIFICACION">Verificación MT16</option></select></label>
+      <label>Resultado <select id="result"><option value="">Todos</option><option value="APTO">Apto</option><option value="NO APTO">No apto</option><option value="INDETERMINADO">Indeterminado</option><option value="SIN DECISIÓN">Sin decisión</option></select></label>
+      <label>Año <select id="year"><option value="">Todos</option></select></label>
+      <button id="reset" type="button">Limpiar filtros</button>
     </div>
-
-    <aside class="side">
-      <div class="panel"><h3>Control documental</h3><div class="audit-grid">
-        <div class="audit-item"><span>Con PDF</span><strong id="a-pdf">—</strong></div>
-        <div class="audit-item"><span>Sin PDF</span><strong id="a-nopdf">—</strong></div>
-        <div class="audit-item"><span>Con número</span><strong id="a-num">—</strong></div>
-        <div class="audit-item"><span>Sin número</span><strong id="a-nonum">—</strong></div>
-        <div class="audit-item"><span>Con regla de decisión</span><strong id="a-rule">—</strong></div>
-        <div class="audit-item"><span>Sin regla registrada</span><strong id="a-norule">—</strong></div>
-      </div></div>
-
-      <div class="panel"><h3>Diagnóstico de auditoría</h3><div id="audit-message" class="warnbox">Analizando la consistencia documental…</div></div>
-
-      <div class="panel"><h3>Accesos relacionados</h3><div class="quick">
-        <a class="btn" href="calibraciones.historial.html">Histórico</a>
-        <a class="btn" href="criterios.html">Criterios</a>
-        <a class="btn" href="App_Patrones_TMP.html">Patrones</a>
-        <a class="btn" href="alcance_kpi.html">KPIs</a>
-      </div></div>
-    </aside>
+    <p id="status" class="status" role="status">Consultando registro…</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Fecha</th><th scope="col">Equipo</th><th scope="col">Tipo</th><th scope="col">Resultado</th><th scope="col">Informe</th><th scope="col">Acciones</th></tr></thead>
+        <tbody id="records"></tbody>
+      </table>
+    </div>
   </section>
-
-  <div class="footer">TMP · Sistema de Trazabilidad Metrológica · Los indicadores de esta pantalla describen los datos registrados, no sustituyen la validación técnica del certificado.</div>
-</div>
-
-<dialog id="detail-dialog">
-  <div class="dlg-head"><div><strong id="dlg-title">Detalle certificado</strong><div class="subtitle" id="dlg-sub"></div></div><button class="btn" id="dlg-close">Cerrar</button></div>
-  <div class="dlg-body"><div class="detail-grid" id="dlg-grid"></div><div class="dlg-actions" id="dlg-actions"></div></div>
+  <footer>Talleres Mecánicos Paramio · Trazabilidad Metrológica</footer>
+</main>
+<dialog id="detail">
+  <header class="section-head"><h2>Detalle del registro</h2><form method="dialog"><button>Cerrar</button></form></header>
+  <dl id="detail-fields"></dl>
 </dialog>
-
-<script type="module" src="config.mjs"></script>
-<script type="module">
-  const $ = s => document.querySelector(s);
-  const esc = v => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-  const safe = v => v == null || v === "" ? "—" : String(v);
-  const pct = (a,b) => b ? `${Math.round(a*100/b)}%` : "0%";
-  const dateVal = v => { if(!v) return null; const d=new Date(v); return isNaN(d)?null:d; };
-  const dateTxt = v => { const d=dateVal(v); return d ? d.toLocaleDateString("es-ES") : "—"; };
-
-  let certs=[], calibraciones=[], instrumentos=[], rows=[];
-
-  function decisionClass(v){
-    const s=String(v||"").trim().toUpperCase();
-    if(["APTO","OK","CONFORME"].includes(s)) return "OK";
-    if(["NO APTO","NOK","NO_CONFORME","NO CONFORME"].includes(s)) return "NOK";
-    if(s.includes("INDETER") || s.includes("PEND") || s.includes("NO EVALUABLE")) return "PEND";
-    return s ? "OTHER" : "PEND";
-  }
-  function chipDecision(v){
-    const c=decisionClass(v); const cls=c==="OK"?"c-ok":c==="NOK"?"c-bad":c==="PEND"?"c-pend":"c-neutral";
-    return `<span class="chip ${cls}">${esc(v||"SIN DECISIÓN")}</span>`;
-  }
-  function certNumber(c){ return c.numero || c.numero_certificado || c.codigo || c.id || ""; }
-  function certPdf(c){ return c.certificado_pdf_url || c.pdf_url || c.certificado_url || ""; }
-  function certDate(c){ return c.fecha_creado || c.creado_en || c.fecha || c.fecha_emision || ""; }
-
-  async function load(){
-    const sb=window.supabase;
-    if(!sb){ $("#load-status").textContent="Supabase no está disponible en esta sesión."; return; }
-    $("#load-status").textContent="Consultando certificados, calibraciones e instrumentos…";
-
-    const [cr,ca,ir]=await Promise.all([
-      sb.from("certificados").select("*").order("fecha_creado",{ascending:false}).limit(1000),
-      sb.from("calibraciones").select("*").order("creado_en",{ascending:false}).limit(1000),
-      sb.from("instrumentos").select("id,codigo,descripcion,estado,ubicacion_actual").limit(1500)
-    ]);
-
-    if(cr.error){
-      console.error(cr.error); $("#load-status").textContent=`Error leyendo certificados: ${cr.error.message||cr.error}`;
-      $("#cert-body").innerHTML='<tr><td colspan="8" class="empty">No se pudo consultar la tabla certificados.</td></tr>'; return;
-    }
-    certs=cr.data||[]; calibraciones=ca.error?[]:(ca.data||[]); instrumentos=ir.error?[]:(ir.data||[]);
-    if(ca.error) console.warn("calibraciones:",ca.error); if(ir.error) console.warn("instrumentos:",ir.error);
-    buildRows(); buildYearFilter(); updateKpis(); applyFilters();
-    $("#load-status").textContent=`Datos actualizados · ${new Date().toLocaleString("es-ES")}`;
-  }
-
-  function buildRows(){
-    const calById=new Map(calibraciones.map(c=>[String(c.id),c]));
-    const instById=new Map(instrumentos.map(i=>[String(i.id),i]));
-    const instByCode=new Map(instrumentos.map(i=>[String(i.codigo||"").toUpperCase(),i]));
-
-    rows=certs.map(c=>{
-      const calId=c.calibracion_id || c.calibracion_uid || c.calibracionId;
-      const cal=calId ? calById.get(String(calId)) : null;
-      const code=cal?.codigo || cal?.codigo_instrumento || c.codigo_instrumento || c.datos?.instrumento?.codigo || c.datos?.codigo || "";
-      const inst=(cal?.instrumento_id && instById.get(String(cal.instrumento_id))) || instByCode.get(String(code).toUpperCase()) || null;
-      const num=certNumber(c);
-      const pdf=certPdf(c) || cal?.certificado_url || cal?.pdf_url || "";
-      const decision=c.decision_global || cal?.decision_global || cal?.resultado || cal?.estado_final || c.datos?.decision_global || "";
-      const regla=c.regla_decision || c.datos?.regla_decision || cal?.regla_decision || "";
-      const fecha=certDate(c) || cal?.fecha_calibracion || cal?.fecha_ultima || cal?.creado_en || "";
-      return {c,cal,inst,num,pdf,decision,regla,fecha,code:inst?.codigo||code,desc:inst?.descripcion||c.datos?.instrumento?.descripcion||"",linked:Boolean(cal||inst)};
-    });
-  }
-
-  function buildYearFilter(){
-    const years=[...new Set(rows.map(r=>dateVal(r.fecha)?.getFullYear()).filter(Boolean))].sort((a,b)=>b-a);
-    $("#f-year").innerHTML='<option value="">Todos los años</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');
-  }
-
-  function updateKpis(){
-    const total=rows.length, ok=rows.filter(r=>decisionClass(r.decision)==="OK").length, nok=rows.filter(r=>decisionClass(r.decision)==="NOK").length;
-    const pend=rows.filter(r=>decisionClass(r.decision)==="PEND").length, pdf=rows.filter(r=>r.pdf).length, linked=rows.filter(r=>r.linked).length;
-    $("#k-total").textContent=total; $("#k-ok").textContent=ok; $("#k-nok").textContent=nok; $("#k-pend").textContent=pend; $("#k-pdf").textContent=pdf; $("#k-linked").textContent=linked;
-    $("#k-ok-extra").textContent=pct(ok,total); $("#k-nok-extra").textContent=pct(nok,total); $("#k-pdf-extra").textContent=pct(pdf,total);
-    $("#hero-pdf").textContent=pct(pdf,total); $("#hero-link").textContent=pct(linked,total);
-    const withNum=rows.filter(r=>r.num).length, withRule=rows.filter(r=>r.regla).length;
-    $("#a-pdf").textContent=pdf; $("#a-nopdf").textContent=total-pdf; $("#a-num").textContent=withNum; $("#a-nonum").textContent=total-withNum; $("#a-rule").textContent=withRule; $("#a-norule").textContent=total-withRule;
-    const issues=[]; if(total-pdf) issues.push(`${total-pdf} sin PDF`); if(total-withNum) issues.push(`${total-withNum} sin número`); if(total-withRule) issues.push(`${total-withRule} sin regla registrada`); if(pend) issues.push(`${pend} con decisión pendiente/indeterminada`);
-    const box=$("#audit-message");
-    if(!issues.length){ box.className="okbox"; box.innerHTML="No se detectan carencias documentales básicas en los certificados cargados."; }
-    else { box.className="warnbox"; box.innerHTML=`Revisar: <strong>${issues.join(" · ")}</strong>. Esto es un diagnóstico de datos registrados; no altera certificados ni decisiones.`; }
-  }
-
-  function filtered(){
-    const q=$("#f-search").value.trim().toLowerCase(), dec=$("#f-decision").value, doc=$("#f-doc").value, year=$("#f-year").value;
-    return rows.filter(r=>{
-      if(q && ![r.num,r.code,r.desc,r.decision,r.regla].some(v=>String(v||"").toLowerCase().includes(q))) return false;
-      if(dec && decisionClass(r.decision)!==dec) return false;
-      if(doc==="pdf" && !r.pdf) return false; if(doc==="nopdf" && r.pdf) return false;
-      if(year && String(dateVal(r.fecha)?.getFullYear()||"")!==year) return false;
-      return true;
-    });
-  }
-
-  function applyFilters(){
-    const list=filtered();
-    $("#result-info").textContent=`Mostrando ${list.length} de ${rows.length} certificados`;
-    if(!list.length){ $("#cert-body").innerHTML='<tr><td colspan="8" class="empty">No hay certificados que coincidan con los filtros.</td></tr>'; return; }
-    $("#cert-body").innerHTML=list.map((r,i)=>`<tr>
-      <td><span class="code">${esc(r.num||"SIN NÚMERO")}</span></td>
-      <td>${esc(r.code||"—")}</td>
-      <td>${esc(r.desc||"—")}</td>
-      <td>${dateTxt(r.fecha)}</td>
-      <td>${chipDecision(r.decision)}</td>
-      <td>${r.regla?`<span class="chip c-info">${esc(r.regla)}</span>`:'<span class="chip c-neutral">SIN REGLA</span>'}</td>
-      <td>${r.pdf?'<span class="chip c-ok">PDF</span>':'<span class="chip c-pend">FALTA</span>'}</td>
-      <td><div class="row-actions"><button class="btn" data-detail="${rows.indexOf(r)}">Detalle</button>${r.num?`<a class="btn btn-soft" href="certificados.ver.html?id=${encodeURIComponent(r.num)}">Ver</a>`:''}${r.pdf?`<a class="btn" href="${esc(r.pdf)}" target="_blank" rel="noopener">PDF</a>`:''}</div></td>
-    </tr>`).join('');
-    document.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>openDetail(rows[Number(b.dataset.detail)])));
-  }
-
-  function openDetail(r){
-    if(!r) return;
-    $("#dlg-title").textContent=r.num||"Certificado sin número"; $("#dlg-sub").textContent=[r.code,r.desc].filter(Boolean).join(" · ");
-    const pairs=[
-      ["Número",r.num],["Equipo",r.code],["Descripción",r.desc],["Fecha",dateTxt(r.fecha)],["Decisión",r.decision],["Regla",r.regla],["PDF",r.pdf?"Disponible":"No registrado"],
-      ["Calibración vinculada",r.cal?.id||r.c.calibracion_id||r.c.calibracion_uid],["Resultado calibración",r.cal?.resultado||r.cal?.decision_global||r.cal?.estado_final],["Operador",r.cal?.operador||r.cal?.usuario],["Laboratorio",r.cal?.laboratorio],["Ubicación actual",r.inst?.ubicacion_actual]
-    ];
-    $("#dlg-grid").innerHTML=pairs.map(([k,v])=>`<div class="detail"><label>${esc(k)}</label><div>${esc(safe(v))}</div></div>`).join('');
-    $("#dlg-actions").innerHTML=`${r.num?`<a class="btn btn-primary" href="certificados.ver.html?id=${encodeURIComponent(r.num)}">Ver certificado oficial</a>`:''}${r.pdf?`<a class="btn" href="${esc(r.pdf)}" target="_blank" rel="noopener">Abrir PDF</a>`:''}${r.code?`<a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(r.code)}">Ficha equipo</a>`:''}`;
-    $("#detail-dialog").showModal();
-  }
-
-  function openDirect(){ const id=$("#cert-direct").value.trim(); if(!id){alert("Introduce un número de certificado.");return;} location.href=`certificados.ver.html?id=${encodeURIComponent(id)}`; }
-  function exportCsv(){
-    const list=filtered(); if(!list.length){alert("No hay registros para exportar.");return;}
-    const headers=["certificado","codigo_equipo","descripcion","fecha","decision","regla_decision","pdf_url","calibracion_id"];
-    const quote=v=>'"'+String(v??'').replaceAll('"','""')+'"';
-    const lines=[headers.join(',')].concat(list.map(r=>[r.num,r.code,r.desc,dateTxt(r.fecha),r.decision,r.regla,r.pdf,r.cal?.id||r.c.calibracion_id||r.c.calibracion_uid||''].map(quote).join(',')));
-    const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`TMP_certificados_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
-  }
-
-  ["#f-search","#f-decision","#f-doc","#f-year"].forEach(s=>$(s).addEventListener(s==="#f-search"?"input":"change",applyFilters));
-  $("#btn-clear").addEventListener("click",()=>{ $("#f-search").value=""; $("#f-decision").value=""; $("#f-doc").value=""; $("#f-year").value=""; applyFilters(); });
-  $("#btn-direct").addEventListener("click",openDirect); $("#cert-direct").addEventListener("keydown",e=>{if(e.key==="Enter")openDirect();});
-  $("#btn-export").addEventListener("click",exportCsv); $("#dlg-close").addEventListener("click",()=>$("#detail-dialog").close());
-  load();
-</script>
-  <section id="mt16" class="panel">
-    <div id="mt16-cloud-access"></div>
-    <div id="mt16-register"></div>
-  </section>
-  <script type="module" src="mt16_documents_local.js"></script>
-  <script type="module" src="mt16_cloud_access.js"></script>
 </body>
 </html>
