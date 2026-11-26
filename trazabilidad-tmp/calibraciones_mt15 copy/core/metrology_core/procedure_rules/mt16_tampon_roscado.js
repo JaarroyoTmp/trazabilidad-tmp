@@ -352,9 +352,10 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   let cls=String(parsed.tolerance_class||'');
   if(parsed.thread_system==='METRIC_ISO'){
     const matches=[...raw.matchAll(/\b([1-9][HhGg]|[HhGg][1-9])\b/g)].map(m=>m[1]);
-    const classes=[...new Set(matches.map(s=>/^[HhGg]/.test(s)?s[1]+s[0]:s))];
-    if(classes.length!==1)return {key:null,reason:'La clase de tolerancia debe figurar inequívocamente en la ficha. No se presupone 6H.'};
-    cls=classes[0];
+    const recordedClasses=matches.map(s=>/^[HhGg]/.test(s)?s[1]+s[0]:s);
+    const classes=new Set(family==='TAMPON_ROSCADO_PNP'?recordedClasses.map(s=>s.toUpperCase()):recordedClasses);
+    if(classes.size!==1)return {key:null,reason:'La clase de tolerancia debe figurar inequívocamente en la ficha. No se presupone 6H.'};
+    cls=recordedClasses[0];
   }
   if(!cls && !parsed.tpi)return {key:null,reason:'Falta la clase o serie necesaria para asociar una pauta.'};
   const direction=/IZQ|LEFT|\bLH\b/i.test([equipment.rango,equipment.descripcion].filter(Boolean).join(' '))?'IZQUIERDA':'DERECHA';
@@ -488,9 +489,13 @@ export function resolveMT16ServiceLimits(identity){
       }
     }
   }
-  const row=MT16_CATALOGUE.find(r=>identity?.key&&r.family===identity.family&&r.system===identity.system&&r.tolerance_class===identity.tolerance_class&&r.nominal===identity.nominal&&r.pitch===identity.pitch&&r.angle===identity.angle&&r.direction===(identity.direction||'DERECHA'));
+  // Case-insensitive catalogue lookup for metric plug gauges. Keep the original
+  // class in the identity key so previously saved configurations remain reachable.
+  const metricPlug=identity?.family==='TAMPON_ROSCADO_PNP'&&identity.system==='METRIC_ISO';
+  const catalogueClass=metricPlug?identity.tolerance_class?.toUpperCase():identity?.tolerance_class;
+  const row=MT16_CATALOGUE.find(r=>identity?.key&&r.family===identity.family&&r.system===identity.system&&r.tolerance_class===catalogueClass&&r.nominal===identity.nominal&&r.pitch===identity.pitch&&r.angle===identity.angle&&r.direction===(identity.direction||'DERECHA'));
   if(row)return {...structuredClone(row),version:'MT16_CATALOGUE_20261117',criterio:row.criterion+' · '+row.source_file.split('/').pop(),sources:[{file:row.source_file,sha256:row.source_sha256}]};
-  if(!identity?.key||identity.family!=='TAMPON_ROSCADO_PNP'||identity.system!=='METRIC_ISO'||identity.tolerance_class!=='6H'||identity.nominal!==12||identity.pitch!==1.25||identity.angle!==60)return null;
+  if(!identity?.key||!metricPlug||catalogueClass!=='6H'||identity.nominal!==12||identity.pitch!==1.25||identity.angle!==60)return null;
   const workMin=11.188,workMax=11.368,Z=0.012,T=0.011,Wgo=0.0175,Wng=0.0115;
   const r=v=>Number(v.toFixed(7));
   const point=(center,W)=>({center:r(center),new_min:r(center-T/2),new_max:r(center+T/2),wear_min:r(center-W),min:r(center-W),max:r(center+T/2)});
