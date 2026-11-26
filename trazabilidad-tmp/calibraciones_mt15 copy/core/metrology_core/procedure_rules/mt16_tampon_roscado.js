@@ -1,5 +1,6 @@
 import {MT16_CATALOGUE} from './mt16_catalogue.js?v=20261126';
 import { createPoint, parseNum } from "./shared.js";
+import { BSP_THREAD_TABLE, parseThreadDesignation } from '../thread/core/thread_parser.js';
 
 export const TAMPON_ROSCADO_PROCEDURE_VERSION =
   "TMP_TAMPON_ROSCADO_PROCEDURE_V2_20260630_GUIDED_KNOWLEDGE";
@@ -281,12 +282,12 @@ export function evaluateMT16PeriodicVerification(form = {}) {
 
 // Reuse existing MT16 parser, wire selection and certificate readers.
 export async function resolveMT16VerificationAutomation(client, equipment, family) {
-  const [{parseThreadDesignation},{calculateBestWire},trace] = await Promise.all([
-    import('../thread/core/thread_parser.js'), import('../thread/core/trimos_engine.js'),
+  const [{calculateBestWire},trace] = await Promise.all([
+    import('../thread/core/trimos_engine.js'),
     import('../thread/core/mt16_thread_traceability_engine.js')
   ]);
   const clean=value=>{const s=String(value??'').trim();return /^(null|undefined|-|n\/a)$/i.test(s)?'':s;};
-  const parsed=parseThreadDesignation(equipment.rango || equipment.descripcion || '');
+  const parsed=parseMT16VerificationDesignation(equipment.rango || equipment.descripcion || '');
   if(parsed.ok&&Number.isFinite(parsed.tpi)&&parsed.tpi>0)parsed.pitch_mm=25.4/parsed.tpi;
   const ring=family==='ANILLO_ROSCADO';
   const scope=resolveMT16ThreeWireScope({family,system:parsed.thread_system,angle_deg:parsed.angle_deg});
@@ -315,9 +316,38 @@ export async function resolveMT16VerificationAutomation(client, equipment, famil
   return result;
 }
 
+export function parseMT16VerificationDesignation(raw) {
+  const designation = String(raw || '').toUpperCase()
+    .replace(/\b(\d+)\.\s+(?=\d+\/\d+)/g, '$1 ')
+    .replace(/[\\"'“”″]+/g, ' ')
+    .replace(/\bGAS\s+CIL[IÍ]NDRIC[AO]\b/g, 'G')
+    .replace(/\b(UNF|UNC|UNEF|UN|UNS)\s*(?=[123][AB]\b)/g, '$1 - ')
+    .replace(/(\d)\s*X\s*(\d+)\s*-?\s*(?=UN(?:[CFJS]|EF)?\b)/g, '$1-$2 ')
+    .replace(/\b(BSW|BSF)\s+(?=NORMAL\b|MED(?:IA|IUM)?\b)/g, '$1 - ');
+  const bsw = designation.match(/\b(1\/4|5\/16|3\/8|1\/2|5\/8|3\/4)\s+BSW\b/);
+  const size = bsw && WHITWORTH_BSW[bsw[1]];
+  const normalized = size ? designation.replace(bsw[0], `${bsw[1]}-${size.tpi} BSW`) : designation;
+  const result = parseThreadDesignation(normalized);
+  if (result.thread_system === 'BSPP_ISO228') {
+    const gaugeSize = result.nominal_label?.replace(/^G /, '');
+    const row = BSP_THREAD_TABLE[gaugeSize];
+    const externalClass = /\b(?:G|BSPP)\s*(?:\d+\s+)?(?:\d+\/\d+|\d+)\s*(?:-\s*\d+\s*)?-?\s*[AB]\b/.test(normalized);
+    if (externalClass || /\b(?:BSPT|R[CP]?)\b/.test(normalized)) {
+      return {...result,ok:false,warnings:['El marcado combina G con una clase exterior o con una designación de rosca para estanqueidad. Comprueba el calibre.']};
+    }
+    if (row && result.tpi !== row.tpi) {
+      return {...result,ok:false,warnings:[`El paso indicado no corresponde a G ${gaugeSize} según ISO 228-1.`]};
+    }
+  }
+  if (!result.ok && /\bBSP\b|\bGAS\b/.test(designation)) {
+    return {...result, warnings:['La ficha dice BSP o GAS. Identifica si el calibre es G cilíndrico o R/Rc/Rp según el marcado.']};
+  }
+  return result;
+}
+
 // One configuration per exact gauge family/designation; no factory measurement is inferred.
 export function resolveMT16CriterionIdentity(equipment, family, parsed) {
-  if(!parsed?.ok)return {key:null,reason:'La designación de rosca no se ha podido identificar.'};
+  if(!parsed?.ok)return {key:null,reason:parsed?.warnings?.[0]||'La designación de rosca no se ha podido identificar.'};
   const raw=String(equipment.rango||equipment.descripcion||'');
   let cls=String(parsed.tolerance_class||'');
   if(parsed.thread_system==='METRIC_ISO'){
@@ -329,7 +359,9 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   if(!cls && !parsed.tpi)return {key:null,reason:'Falta la clase o serie necesaria para asociar una pauta.'};
   const direction=/IZQ|LEFT|\bLH\b/i.test([equipment.rango,equipment.descripcion].filter(Boolean).join(' '))?'IZQUIERDA':'DERECHA';
   const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL'].join('|');
-  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls};
+  const reason=!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
+    !cls&&parsed.thread_system==='BSW_BS84'?'Falta identificar la clase de rosca Whitworth, por ejemplo Normal o Media.':null;
+  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,reason};
 }
 export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
   if(config?.regla_decision==='INTERNA_EXCEL'){
@@ -363,9 +395,99 @@ export function validateMT16CriterionConfiguration(config, identity, bankCertifi
 }
 
 
+// ISO 228-2:1987, Figure 7 and Table 5. Values in µm by internal TD2.
+const BSPP_PLUG_TOLERANCES = {
+  107:{ZPL:8,TPL:10,WGO:14,WNG:10},
+  125:{ZPL:8,TPL:10,WGO:14,WNG:10},
+  142:{ZPL:13,TPL:12,WGO:19,WNG:13},
+  180:{ZPL:13,TPL:12,WGO:19,WNG:13},
+  217:{ZPL:18,TPL:16,WGO:23,WNG:17}
+};
+
+function resolveBSPPPlugLimits(identity) {
+  if(identity.system!=='BSPP_ISO228'||identity.tolerance_class!=='G_INTERNAL'||identity.angle!==55)return null;
+  const row=BSP_THREAD_TABLE[identity.size?.replace(/^G /,'')];
+  if(!row||row.d!==identity.nominal||row.tpi!==identity.tpi)return null;
+  const workMin=Math.round(row.d2*1000),td2=Math.round(row.td2_int*1000),workMax=workMin+td2;
+  const tolerance=BSPP_PLUG_TOLERANCES[td2];
+  if(!tolerance)return null;
+  const {ZPL,TPL,WGO,WNG}=tolerance;
+  const point=(center,wear)=>({center:center/1000,new_min:(center-TPL/2)/1000,new_max:(center+TPL/2)/1000,min:(center-wear)/1000,max:(center+TPL/2)/1000,wear_min:(center-wear)/1000});
+  return {version:'MT16_BSPP_ISO228',standard:'ISO 228-2:1987',designation:identity.label,
+    criterio:'ISO 228-2:1987 · figura 7 y tabla 5; ISO 228-1:2000 · tabla 1; límites D2 de tapones en servicio',
+    sources:['https://www.iso.org/standard/4104.html','https://law.resource.org/pub/in/bis/S01/is.2643.2005.pdf'],
+    workpiece:{min:workMin/1000,max:workMax/1000},parameters:{ZPL:ZPL/1000,TPL:TPL/1000,WGO:WGO/1000,WNG:WNG/1000},
+    puntos:{PASA:point(workMin+ZPL,WGO),NO_PASA:point(workMax+TPL/2,WNG)}};
+}
+
+// Swanson 2025-1 table of threaded plug gages, Class 2B and 3B, X tolerance.
+// Integer units of 0.0001 in. Scope: the unified sizes in TMP's inventory.
+const UNIFIED_PLUG_X = {
+  'UNC 1/4':{tpi:20,go:2175,noGo2B:2224,noGo3B:2211,x:3},
+  'UNC 5/16':{tpi:18,go:2764,noGo2B:2817,noGo3B:2803,x:3},
+  'UNC 3/8':{tpi:16,go:3344,noGo2B:3401,noGo3B:3387,x:3},
+  'UNC 1/2':{tpi:13,go:4500,noGo2B:4565,noGo3B:4548,x:3},
+  'UNC 5/8':{tpi:11,go:5660,noGo2B:5732,noGo3B:5714,x:3},
+  'UNC 3/4':{tpi:10,go:6850,noGo2B:6927,noGo3B:6907,x:3},
+  'UNF 9/16':{tpi:18,go:5264,noGo2B:5323,noGo3B:5308,x:3},
+  'UNF 3/4':{tpi:16,go:7094,noGo2B:7159,noGo3B:7143,x:3},
+  'UNF 7/8':{tpi:14,go:8286,noGo2B:8356,noGo3B:8339,x:3},
+  'UNF 1':{tpi:12,go:9459,noGo2B:9535,noGo3B:9516,x:3},
+  'UNF 1 1/4':{tpi:12,go:11959,noGo2B:12039,noGo3B:12019,x:3}
+};
+
+// BS 84:2007, internal BSW medium (Table 3) and normal (Table 5).
+// BS 919-2:2007, Tables 1 and 3, simple effective diameter of General plugs.
+const WHITWORTH_BSW = {
+  '1/4':{tpi:20,low:2180,medium:2219,normal:2238},
+  '5/16':{tpi:18,low:2769,medium:2811,normal:2832},
+  '3/8':{tpi:16,low:3350,medium:3395,normal:3418},
+  '1/2':{tpi:12,low:4466,medium:4518,normal:4543},
+  '5/8':{tpi:11,low:5668,medium:5724,normal:5752},
+  '3/4':{tpi:10,low:6860,medium:6920,normal:6950}
+};
+
+// Reference figures for checking the documented criterion of a specific plug.
+// They are never passed to the evaluator as incorporated service limits.
+export function resolveMT16PlugLimitReference(identity) {
+  if(!identity?.key||identity.family!=='TAMPON_ROSCADO_PNP')return null;
+  const mm=units=>Number((units*0.00254).toFixed(6));
+  const limits=(min,max)=>({min:mm(min),max:mm(max)});
+  if(identity.system==='UN_ASME_B1_1'&&identity.angle===60){
+    const row=UNIFIED_PLUG_X[identity.size],cls=identity.tolerance_class;
+    if(!row||row.tpi!==identity.tpi||!['2B','3B'].includes(cls))return null;
+    const upper=row['noGo'+cls];
+    return {standard:'Swanson 2025-1 · tapón unificado clase X',note:'Contrasta la edición aplicable y los límites en servicio del calibre antes de usar estas cifras para decidir.',puntos:{PASA:limits(row.go,row.go+row.x),NO_PASA:limits(upper-row.x,upper)}};
+  }
+  if(identity.system==='BSW_BS84'&&identity.series==='BSW_THREAD'&&identity.angle===55){
+    const row=WHITWORTH_BSW[identity.size?.replace(/^BSW /,'')],cls=identity.tolerance_class;
+    if(!row||row.tpi!==identity.tpi||!['NORMAL','MED','MEDIA','MEDIUM'].includes(cls))return null;
+    const upper=cls==='NORMAL'?row.normal:row.medium;
+    const small=identity.nominal<=12.7,goTol=small?6:7,noGoTol=small?4:5;
+    return {standard:'BS 84:2007 y BS 919-2:2007 · tapón General',note:'Límites de fabricación del diámetro simple. Para la decisión en servicio, confirma el tipo de calibre y el criterio de desgaste.',puntos:{PASA:limits(row.low+2,row.low+goTol),NO_PASA:limits(upper,upper+noGoTol)}};
+  }
+  return null;
+}
+
 // Independently checked scope: this exact ISO 965-2:1998 table 3 row only.
 // ISO 1502:1996 tables 4, 5 and 12; dimensions in mm.
 export function resolveMT16ServiceLimits(identity){
+  if(identity?.key&&identity.family==='TAMPON_ROSCADO_PNP'){
+    const bspp=resolveBSPPPlugLimits(identity);
+    if(bspp)return bspp;
+    // TMP worksheet explicitly uses these bounds in service. Its designation,
+    // angle, pitch and all four bounds agree with the independent class X table.
+    if(identity.system==='UN_ASME_B1_1'&&identity.size==='UNF 3/4'&&identity.tolerance_class==='2B'&&identity.direction==='DERECHA'){
+      const reference=resolveMT16PlugLimitReference(identity);
+      if(reference){
+        const file='ROSCAS UNC-UNF/3%4 - 16 UNF 2B -.xlsm';
+        const puntos=Object.fromEntries(Object.entries(reference.puntos).map(([side,p])=>[side,{...p,new_min:p.min,new_max:p.max}]));
+        return {version:'MT16_UNF_TMP',standard:'Pauta interna TMP / clase X',designation:identity.label,
+          criterio:'Pauta TMP de servicio · '+file+' · límites D2 comprobados con Swanson 2025-1, clase X',
+          sources:[{file,sha256:'b0bf2353dc75a95f6fc562239ccb909ef20e4faea9663546e7c891c486c5d5d0'}],puntos};
+      }
+    }
+  }
   const row=MT16_CATALOGUE.find(r=>identity?.key&&r.family===identity.family&&r.system===identity.system&&r.tolerance_class===identity.tolerance_class&&r.nominal===identity.nominal&&r.pitch===identity.pitch&&r.angle===identity.angle&&r.direction===(identity.direction||'DERECHA'));
   if(row)return {...structuredClone(row),version:'MT16_CATALOGUE_20261117',criterio:row.criterion+' · '+row.source_file.split('/').pop(),sources:[{file:row.source_file,sha256:row.source_sha256}]};
   if(!identity?.key||identity.family!=='TAMPON_ROSCADO_PNP'||identity.system!=='METRIC_ISO'||identity.tolerance_class!=='6H'||identity.nominal!==12||identity.pitch!==1.25||identity.angle!==60)return null;
