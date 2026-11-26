@@ -537,6 +537,18 @@
     #machine-all-dialog{max-width:1180px;width:min(96vw,1180px)}
     #machine-all-dialog .dialog-table-wrap{max-height:66vh}
 
+    .chart-card2 .section-title{font-size:17px}
+    .chart-card2 .muted{font-size:12px}
+    .chart-card2 .month-bars{height:auto;grid-template-columns:repeat(12,minmax(38px,1fr));gap:6px;min-width:0;overflow:auto;padding:5px 0}
+    .chart-card2 .month-col{display:grid;grid-template-rows:18px clamp(54px,9vh,105px) 16px;justify-items:center;gap:3px;min-height:0;height:auto}
+    .chart-card2 .month-bar-wrap{align-self:stretch;height:100%;background:#f3f6fa;border-bottom:1px solid #d9e4f0;border-radius:5px 5px 0 0}
+    .chart-card2 .month-bar{width:min(30px,65%);max-height:100%;min-height:0}
+    .chart-card2 .month-value,.chart-card2 .month-label{font-size:11px;color:#203c5d}
+    .month-summary,.month-summary div,.month-summary span{display:flex;align-items:center;gap:6px}
+    .month-summary{flex-wrap:wrap;gap:8px 16px;margin-top:6px;font-size:12px;color:#203c5d}
+    .month-summary strong{font-size:14px}
+    .month-summary .sq,.status-legend .sq{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;flex:none}
+    .status-legend>div{display:flex;justify-content:space-between;gap:8px}
     /* Una sola fuente de verdad para el mosaico de maquinas. */
     #machine-overview-grid{
       display:grid!important;
@@ -689,7 +701,7 @@
         </a>
         <div class="kpi-card" id="kpi-card-prox">
           <div class="kpi-icon i-orange">◷</div>
-          <div><div class="kpi-label">Próximos &lt; 30 días</div><div class="kpi-value" id="kpi-proximos">–</div><div class="kpi-extra" id="kpi-proximos-extra"></div></div>
+          <div><div class="kpi-label">Próximos ≤ 30 días</div><div class="kpi-value" id="kpi-proximos">–</div><div class="kpi-extra" id="kpi-proximos-extra"></div></div>
         </div>
         <div class="kpi-card" id="kpi-card-fuera">
           <div class="kpi-icon i-red">△</div>
@@ -769,7 +781,7 @@
           </div>
         </div>
         <table class="mini-table" id="table-movimientos">
-          <thead><tr><th>Fecha</th><th>Código</th><th>Tipo</th><th>Operario 1</th><th>Operario 2</th><th>Destino</th><th>Responsable</th><th>Calibración</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Código</th><th>Tipo</th><th>Operario 1</th><th>Operario 2</th><th>Destino</th><th>Responsable</th><th>Vigencia</th><th>Acciones</th></tr></thead>
           <tbody id="tbody-movimientos"><tr><td colspan="9">Cargando movimientos...</td></tr></tbody>
         </table>
         <div class="mov-pagination">
@@ -780,23 +792,22 @@
 
 
       <section class="chart-card panel">
-        <div class="panel-head"><div><h2 class="section-title">Estado general de vigencia</h2><p class="muted">Vigencia según la calibración o la verificación MT16 de cada equipo.</p></div></div>
+        <div class="panel-head"><div><h2 class="section-title">Estado general de vigencia</h2><p class="muted">Vigencia según el próximo control de cada equipo.</p></div></div>
         <div id="status-total" class="status-total">– equipos activos</div>
         <div id="status-stack" class="status-stack" aria-label="Estado general"></div>
         <div class="legend status-legend">
-          <div><span><span class="sq" style="background:#22c55e"></span>OK &gt;30 días</span><strong id="legend-ok">–</strong></div>
-          <div><span><span class="sq" style="background:#f59e0b"></span>Próximos &lt;30 días</span><strong id="legend-prox">–</strong></div>
+          <div><span><span class="sq" style="background:#22c55e"></span>Equipos OK, incluidos los próximos</span><strong id="legend-ok">–</strong></div>
           <div><span><span class="sq" style="background:#ef4444"></span>Fuera de plazo o NO APTO</span><strong id="legend-fuera">–</strong></div>
-          <div><span><span class="sq" style="background:#94a3b8"></span>Sin fecha</span><strong id="legend-sin-fecha">–</strong></div>
+          <div><span>De los equipos fuera, sin fecha</span><strong id="legend-sin-fecha">–</strong></div>
         </div>
       </section>
 
       <section class="chart-card2 panel">
-        <div class="panel-head"><div><h2 class="section-title">Calibraciones y verificaciones MT16 por mes</h2><p class="muted">Registros reales guardados en Supabase durante <span id="month-year-label"></span>.</p></div><span class="badge badge-soft" id="month-total">–</span></div>
+        <div class="panel-head"><div><h2 class="section-title">Actividad metrológica mensual</h2><p class="muted">Controles registrados durante <span id="month-year-label"></span>.</p></div><span class="badge badge-soft" id="month-total">–</span></div>
         <div id="month-bars" class="month-bars"></div>
-        <div class="legend status-legend">
+        <div class="month-summary">
           <div><span><span class="sq month-cal"></span>Calibraciones</span><strong id="month-cal-total">–</strong></div>
-          <div><span><span class="sq month-mt16"></span>Verificaciones MT16</span><strong id="month-mt16-total">–</strong></div>
+          <div><span><span class="sq month-mt16"></span>Verificaciones</span><strong id="month-mt16-total">–</strong></div>
         </div>
       </section>
 
@@ -816,7 +827,7 @@
 <!-- SCRIPT PRINCIPAL DASHBOARD (KPIs + MOVIMIENTOS) -->
 <script type="module">
 import { loadAllInstruments } from "./instrumentos_loader.mjs";
-import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigencia_instrumento.mjs";
+import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, tipoUbicacionEquipo } from "./vigencia_instrumento.mjs?v=20261126-inventario";
   const supabase = window.supabase;
 
 
@@ -961,7 +972,6 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
   const machineDialogClose = document.getElementById("machine-dialog-close");
   const statusStack = document.getElementById("status-stack");
   const statusTotal = document.getElementById("status-total");
-  const legendSinFecha = document.getElementById("legend-sin-fecha");
   const monthBars = document.getElementById("month-bars");
   const monthTotal = document.getElementById("month-total");
   const monthYearLabel = document.getElementById("month-year-label");
@@ -1009,7 +1019,7 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
     }
 
     const [{ data: instrumentos, error }, { data: ubicaciones, error: errUbic }] = await Promise.all([
-      loadAllInstruments(supabase, "codigo, descripcion, estado, ubicacion_id, ubicacion_actual, ubicacion, fecha_proxima_calibracion, proxima_calibracion, familia_id, fecha_proxima_verificacion"),
+      loadAllInstruments(supabase, CAMPOS_INVENTARIO),
       supabase.from("ubicaciones").select("id,nombre,tipo,activo")
     ]);
 
@@ -1021,88 +1031,63 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
 
     cacheUbicacionesHome = new Map((ubicaciones || []).map(u => [u.id, u]));
 
-    const esBajaDefinitiva = inst => {
-      const estado = String(inst?.estado || "").trim().toUpperCase();
-      const ubic = String(inst?.ubicacion_actual || "").trim().toUpperCase();
-      return ["BAJA DEFINITIVA","BAJA TÉCNICA","RETIRADO"].includes(estado) || ubic === "RETIRADO";
-    };
-
-    const instrumentosActivos = (instrumentos || []).filter(inst => !esBajaDefinitiva(inst));
+    const instrumentosActivos = (instrumentos || []).filter(inst => !esEquipoRetirado(inst));
     const totalBajas = (instrumentos || []).length - instrumentosActivos.length;
     cacheInstrumentosHome = instrumentosActivos;
 
     const total = instrumentosActivos.length;
     const hoy = new Date();
-    hoy.setHours(0,0,0,0);
-    const mas30 = new Date(hoy.getTime() + 30*86400000);
-
     let enLab = 0;
     let enTaller = 0;
-    let calibrados = 0;
+    let vigentes = 0;
+    let proximos = 0;
+    let fuera = 0;
     let sinFecha = 0;
-    const fueraLista = [];
-    const proxLista = [];
 
     instrumentosActivos.forEach(inst => {
-      const u = cacheUbicacionesHome.get(inst.ubicacion_id);
-      const tipo = String(u?.tipo || "").trim().toLowerCase();
-      const ubicActual = String(inst.ubicacion_actual || "").trim().toLowerCase();
-      const ubicTexto = String(inst.ubicacion || "").trim().toLowerCase();
+      const tipoUbicacion = tipoUbicacionEquipo(inst, cacheUbicacionesHome.get(inst.ubicacion_id));
+      if (tipoUbicacion === "laboratorio") enLab++;
+      if (tipoUbicacion === "taller") enTaller++;
 
-      if (tipo === "laboratorio" || (!tipo && (ubicActual === "laboratorio" || ubicTexto === "laboratorio"))) enLab++;
-      else if (tipo === "taller" || ubicTexto === "taller") enTaller++;
-
-      const prox = parseDate(fechaVigenciaInstrumento(inst));
-      if (esNoAptoMT16(inst)) {
-        fueraLista.push(inst);
-      } else if (!prox) {
-        sinFecha++;
-      } else {
-        prox.setHours(0,0,0,0);
-        if (prox < hoy) fueraLista.push(inst);
-        else if (prox <= mas30) proxLista.push(inst);
-        else calibrados++;
-      }
+      const estado = estadoVigencia(inst,hoy);
+      if (estado.key === "FUERA") fuera++;
+      else vigentes++;
+      if (estado.key === "PROXIMA") proximos++;
+      if (estado.motivo === "SIN_FECHA") sinFecha++;
     });
 
     kpi_total.textContent = total;
     kpi_uso.textContent = enTaller;
     kpi_lab.textContent = enLab;
-    kpi_calibrados.textContent = calibrados;
-    kpi_proximos.textContent = proxLista.length;
-    kpi_fuera.textContent = fueraLista.length;
+    kpi_calibrados.textContent = vigentes;
+    kpi_proximos.textContent = proximos;
+    kpi_fuera.textContent = fuera;
 
     kpi_total_extra.textContent = totalBajas ? `${totalBajas} retirado${totalBajas === 1 ? "" : "s"} en histórico` : "Sin equipos retirados";
     kpi_uso_extra.textContent = total ? `${pct(enTaller,total)} del total` : "";
     kpi_lab_extra.textContent = total ? `${pct(enLab,total)} del total` : "";
-    kpi_calibrados_extra.textContent = total ? `${pct(calibrados,total)} con >30 días de vigencia` : "";
-    kpi_proximos_extra.textContent = total ? `${pct(proxLista.length,total)} del total` : "";
-    kpi_fuera_extra.textContent = total ? `${pct(fueraLista.length,total)} del total` : "";
+    kpi_calibrados_extra.textContent = total ? `${pct(vigentes,total)} del total · incluye próximos` : "";
+    kpi_proximos_extra.textContent = total ? `${proximos} incluidos en Equipos OK` : "";
+    kpi_fuera_extra.textContent = total ? `${sinFecha} sin fecha · ${pct(fuera,total)} del total` : "";
 
     [kpi_card_total,kpi_card_uso,kpi_card_lab,kpi_card_cal,kpi_card_prox,kpi_card_fuera].forEach(animateCard);
 
-    renderEstadoGeneral({ total, calibrados, proximos: proxLista.length, fuera: fueraLista.length, sinFecha });
+    renderEstadoGeneral({total, vigentes, fuera, sinFecha});
     refrescarSelectorMaquinas();
     renderMachineOverview();
     renderEquiposMaquina();
   }
 
-  function renderEstadoGeneral({total, calibrados, proximos, fuera, sinFecha}) {
-    const safeTotal = Math.max(total || 0, 1);
-    const pctNum = v => (100 * (v || 0) / safeTotal);
-    if (statusTotal) statusTotal.textContent = `${total || 0} equipos activos`;
-    if (statusStack) {
-      statusStack.innerHTML = `
-        <div class="status-seg status-ok" style="width:${pctNum(calibrados)}%" title="OK: ${calibrados}"></div>
-        <div class="status-seg status-prox" style="width:${pctNum(proximos)}%" title="Próximos: ${proximos}"></div>
-        <div class="status-seg status-fuera" style="width:${pctNum(fuera)}%" title="Fuera: ${fuera}"></div>
-        <div class="status-seg status-sin" style="width:${pctNum(sinFecha)}%" title="Sin fecha: ${sinFecha}"></div>`;
-    }
-    const setText=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
-    setText("legend-ok", calibrados);
-    setText("legend-prox", proximos);
+  function renderEstadoGeneral({total, vigentes, fuera, sinFecha}) {
+    const pctNum = value => 100 * value / Math.max(total, 1);
+    const setText = (id,value) => { document.getElementById(id).textContent=value; };
+    statusTotal.textContent = `${total} equipos activos`;
+    statusStack.innerHTML = `
+      <div class="status-seg status-ok" style="width:${pctNum(vigentes)}%" title="Equipos OK: ${vigentes}"></div>
+      <div class="status-seg status-fuera" style="width:${pctNum(fuera)}%" title="Fuera de plazo o NO APTO: ${fuera}"></div>`;
+    setText("legend-ok", vigentes);
     setText("legend-fuera", fuera);
-    if (legendSinFecha) legendSinFecha.textContent = sinFecha;
+    setText("legend-sin-fecha", sinFecha);
   }
 
   async function cargarActividadMetrologicaMes() {
@@ -1130,13 +1115,13 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
     const max = Math.max(...meses.map(m => m.total), 1);
     const labels = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
     monthBars.innerHTML = meses.map(({cal, mt16, total},i) => {
-      const h = total ? Math.max(6, Math.round(total/max*145)) : 2;
+      const h = total ? Math.max(4,total/max*100) : 0;
       const calShare = total ? cal/total*100 : 0;
       const mt16Share = total ? mt16/total*100 : 0;
-      const detail = `${labels[i]}: ${cal} calibraciones, ${mt16} verificaciones MT16`;
+      const detail = `${labels[i]}: ${cal} calibraciones, ${mt16} verificaciones`;
       return `<div class="month-col" title="${detail}">
         <div class="month-value" aria-label="${detail}">${total}</div>
-        <div class="month-bar-wrap" aria-hidden="true"><div class="month-bar" style="height:${h}px">
+        <div class="month-bar-wrap" aria-hidden="true"><div class="month-bar" style="height:${h}%">
           <span class="month-mt16" style="height:${mt16Share}%"></span>
           <span class="month-cal" style="height:${calShare}%"></span>
         </div></div>
@@ -1205,7 +1190,7 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
   function machineRowHtml(inst){
     const cal = estadoCalibracionFromInstrumento(inst);
     const chip = `<span class="calib-chip ${cal.clase}">${escapeHome(cal.estado)}</span>`;
-    const prox = fechaVigenciaInstrumento(inst);
+    const prox = estadoVigencia(inst).fecha;
     return `<tr>
       <td><strong>${escapeHome(inst.codigo || "")}</strong></td>
       <td title="${escapeHome(inst.descripcion || "-")}">${escapeHome(inst.descripcion || "-")}</td>
@@ -1285,18 +1270,9 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
   // ====== LÓGICA ÚLTIMOS MOVIMIENTOS ======
 
   function estadoCalibracionFromInstrumento(inst){
-    const hoy = new Date();
-    if (esNoAptoMT16(inst)) return {estado:"NO APTO", clase:"calib-bad"};
-    const prox = parseDate(fechaVigenciaInstrumento(inst));
-    hoy.setHours(0,0,0,0);
-    if (!prox) return {estado:"SIN FECHA", clase:"calib-warn"};
-
-    if (prox < hoy) return {estado:"FUERA", clase:"calib-bad"};
-
-    const mas30 = new Date(hoy.getTime() + 30*86400000);
-    if (prox <= mas30) return {estado:"PRÓXIMA", clase:"calib-warn"};
-
-    return {estado:"OK", clase:"calib-ok"};
+    const estado = estadoVigencia(inst);
+    const clases = {OK:"calib-ok", PROXIMA:"calib-warn", FUERA:"calib-bad"};
+    return {estado:estado.texto, clase:clases[estado.key]};
   }
 
   function aplicarFiltrosMovimientos(){
@@ -1493,6 +1469,18 @@ import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigen
     cargarMovimientos();
   }, 30000);
   setInterval(cargarActividadMetrologicaMes, 120000);
+  window.addEventListener("pageshow", event => {
+    if (event.persisted) {
+      cargarDashboard();
+      cargarActividadMetrologicaMes();
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      cargarDashboard();
+      cargarActividadMetrologicaMes();
+    }
+  });
 </script>
 
 

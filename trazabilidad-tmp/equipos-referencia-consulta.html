@@ -57,21 +57,21 @@
         <div class="kpi"><div class="kpi-label">Activos</div><div class="kpi-value" id="kpi-activos">–</div><div class="kpi-extra">Excluye bajas y retirados</div></div>
         <div class="kpi"><div class="kpi-label">Laboratorio</div><div class="kpi-value" id="kpi-lab">–</div><div class="kpi-extra">Ubicación tipo Laboratorio</div></div>
         <div class="kpi"><div class="kpi-label">Taller / producción</div><div class="kpi-value" id="kpi-taller">–</div><div class="kpi-extra">Ubicación tipo Taller</div></div>
-        <div class="kpi"><div class="kpi-label">Fuera calibración</div><div class="kpi-value" id="kpi-fuera">–</div><div class="kpi-extra">Fecha vencida</div></div>
-        <div class="kpi"><div class="kpi-label">Sin fecha</div><div class="kpi-value" id="kpi-sinfecha">–</div><div class="kpi-extra">Requiere revisión</div></div>
+        <div class="kpi"><div class="kpi-label">Fuera de plazo o NO APTO</div><div class="kpi-value" id="kpi-fuera">–</div><div class="kpi-extra" id="kpi-fuera-nota">Incluye los equipos sin fecha</div></div>
+        <div class="kpi"><div class="kpi-label">Equipos OK</div><div class="kpi-value" id="kpi-ok">–</div><div class="kpi-extra">Incluye los próximos a vencer</div></div>
       </div>
 
       <div class="searchbar no-print">
         <div class="field"><label>Buscar equipo activo</label><input id="equipment-search" list="equipment-options" placeholder="Código o descripción..."><datalist id="equipment-options"></datalist></div>
         <div class="field"><label>Ubicación</label><select id="filter-location"><option value="">Todas</option></select></div>
-        <div class="field"><label>Estado calibración</label><select id="filter-cal"><option value="">Todos</option><option value="OK">OK</option><option value="PROXIMA">Próxima &lt;30 días</option><option value="FUERA">Fuera</option><option value="SIN_FECHA">Sin fecha</option></select></div>
+        <div class="field"><label>Vigencia del control</label><select id="filter-cal"><option value="">Todos</option><option value="OK">OK, incluidos próximos</option><option value="PROXIMA">Próxima ≤ 30 días</option><option value="FUERA">Fuera de plazo o NO APTO</option><option value="SIN_FECHA">Sin fecha</option></select></div>
         <button class="btn btn-soft" id="clear-filters">Limpiar</button>
       </div>
     </section>
 
     <section class="panel">
       <div class="section-head"><div><div class="section-title">Resultados</div><div class="section-sub" id="results-info">Cargando inventario...</div></div></div>
-      <div class="table-wrap"><table><thead><tr><th>Código</th><th>Descripción</th><th>Estado</th><th>Ubicación</th><th>Tipo</th><th>Calibración</th><th>Próxima</th><th>Acción</th></tr></thead><tbody id="equipment-body"><tr><td colspan="8">Cargando...</td></tr></tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>Código</th><th>Descripción</th><th>Estado</th><th>Ubicación</th><th>Tipo</th><th>Vigencia</th><th>Próximo control</th><th>Acción</th></tr></thead><tbody id="equipment-body"><tr><td colspan="8">Cargando...</td></tr></tbody></table></div>
       <div id="equipment-detail" class="detail" style="display:none"></div>
     </section>
   </div>
@@ -103,47 +103,77 @@
 </div>
 <script type="module" src="config.mjs"></script>
 <script type="module">
+import { loadAllInstruments } from "./instrumentos_loader.mjs";
+import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, tipoUbicacionEquipo } from "./vigencia_instrumento.mjs?v=20261126-inventario";
 const sb = window.supabase;
 const $ = s => document.querySelector(s);
 let activos = [], ubicMap = new Map(), registros = [], idx = 0;
+$('#equipment-search').value = new URLSearchParams(location.search).get('codigo') || '';
 
 function norm(v){return String(v ?? '').trim().toLowerCase()}
 function esc(v){return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
 function parseDate(v){if(!v)return null;const d=new Date(String(v).replace(/_/g,'-'));return isNaN(d)?null:d}
 function fmtDate(v){const d=parseDate(v);return d?d.toLocaleDateString('es-ES'):'—'}
-function esBaja(i){const e=String(i?.estado||'').trim().toUpperCase(),u=String(i?.ubicacion_actual||'').trim().toUpperCase();return ['BAJA DEFINITIVA','BAJA TÉCNICA','RETIRADO'].includes(e)||u==='RETIRADO'}
-function ubicInfo(i){const u=ubicMap.get(i.ubicacion_id);return {nombre:String(u?.nombre||i.ubicacion_actual||i.ubicacion||'').trim()||'—',tipo:String(u?.tipo||'').trim()||'—'} }
-function calStatus(i){const prox=parseDate(i.fecha_proxima_calibracion)||parseDate(i.proxima_calibracion);if(!prox)return {key:'SIN_FECHA',txt:'SIN FECHA',cls:'neutral'};const hoy=new Date();hoy.setHours(0,0,0,0);prox.setHours(0,0,0,0);if(prox<hoy)return {key:'FUERA',txt:'FUERA',cls:'bad'};const d=(prox-hoy)/86400000;if(d<=30)return {key:'PROXIMA',txt:'PRÓXIMA',cls:'warn'};return {key:'OK',txt:'OK',cls:'ok'}}
+function ubicInfo(i){
+  const u=ubicMap.get(i.ubicacion_id);
+  const tipo=tipoUbicacionEquipo(i,u);
+  return {nombre:String(u?.nombre||i.ubicacion_actual||i.ubicacion||'').trim()||'—',tipo:tipo==='laboratorio'?'Laboratorio':tipo==='taller'?'Taller':u?.tipo||'—'};
+}
+function calStatus(i){
+  const estado=estadoVigencia(i);
+  const cls={OK:'ok',PROXIMA:'warn',FUERA:'bad'};
+  return {...estado,txt:estado.texto,cls:cls[estado.key]};
+}
 
 // Tabs
 $('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${b.dataset.view}`));});
 
+let cargandoEquipos=false;
 async function cargarEquipos(){
   if(!sb){$('#equipment-body').innerHTML='<tr><td colspan="8">Supabase no disponible.</td></tr>';return}
-  const [{data:inst,error},{data:ubs,error:eu}] = await Promise.all([
-    sb.from('instrumentos').select('id,codigo,descripcion,estado,ubicacion_id,ubicacion_actual,ubicacion,fecha_proxima_calibracion,proxima_calibracion,familia_id,tipo_calibracion,fecha_calibracion'),
+  if(cargandoEquipos)return;
+  cargandoEquipos=true;
+  try {
+  const ubicacionSeleccionada = $('#filter-location').value;
+  const [{data:inst,error},{data:ubs}] = await Promise.all([
+    loadAllInstruments(sb,CAMPOS_INVENTARIO),
     sb.from('ubicaciones').select('id,nombre,tipo,activo')
   ]);
   if(error){$('#equipment-body').innerHTML='<tr><td colspan="8">Error cargando instrumentos.</td></tr>';return}
   ubicMap=new Map((ubs||[]).map(u=>[u.id,u]));
-  activos=(inst||[]).filter(i=>!esBaja(i));
+  activos=(inst||[]).filter(i=>!esEquipoRetirado(i));
   const locs=[...new Set(activos.map(i=>ubicInfo(i).nombre).filter(x=>x&&x!=='—'))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
   $('#filter-location').innerHTML='<option value="">Todas</option>'+locs.map(x=>`<option>${esc(x)}</option>`).join('');
+  if(locs.includes(ubicacionSeleccionada)) $('#filter-location').value=ubicacionSeleccionada;
   $('#equipment-options').innerHTML=activos.slice().sort((a,b)=>String(a.codigo||'').localeCompare(String(b.codigo||''),'es',{numeric:true})).map(i=>`<option value="${esc(i.codigo||'')}">${esc(i.descripcion||'')}</option>`).join('');
-  let lab=0,taller=0,fuera=0,sin=0;
-  activos.forEach(i=>{const ui=ubicInfo(i);if(norm(ui.tipo)==='laboratorio')lab++;else if(norm(ui.tipo)==='taller')taller++;const c=calStatus(i);if(c.key==='FUERA')fuera++;if(c.key==='SIN_FECHA')sin++;});
-  $('#kpi-activos').textContent=activos.length;$('#kpi-lab').textContent=lab;$('#kpi-taller').textContent=taller;$('#kpi-fuera').textContent=fuera;$('#kpi-sinfecha').textContent=sin;
+  let lab=0,taller=0,fuera=0,sinFecha=0;
+  const hoy=new Date();
+  for (const i of activos) {
+    const tipo=tipoUbicacionEquipo(i,ubicMap.get(i.ubicacion_id));
+    if(tipo==='laboratorio')lab++;
+    if(tipo==='taller')taller++;
+    const estado=estadoVigencia(i,hoy);
+    if(estado.key==='FUERA')fuera++;
+    if(estado.motivo==='SIN_FECHA')sinFecha++;
+  }
+  $('#kpi-activos').textContent=activos.length;
+  $('#kpi-lab').textContent=lab;
+  $('#kpi-taller').textContent=taller;
+  $('#kpi-fuera').textContent=fuera;
+  $('#kpi-fuera-nota').textContent=`${sinFecha} sin fecha`;
+  $('#kpi-ok').textContent=activos.length-fuera;
   $('#last-update').textContent=`Actualizado ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
   renderEquipos();
+  } finally { cargandoEquipos=false; }
 }
 
-function filtrados(){const q=norm($('#equipment-search').value),loc=$('#filter-location').value,cf=$('#filter-cal').value;return activos.filter(i=>{const ui=ubicInfo(i),c=calStatus(i);if(loc&&ui.nombre!==loc)return false;if(cf&&c.key!==cf)return false;if(q&&!norm(`${i.codigo} ${i.descripcion} ${i.estado} ${ui.nombre} ${ui.tipo}`).includes(q))return false;return true})}
-function renderEquipos(){const rows=filtrados();$('#results-info').textContent=`${rows.length} de ${activos.length} equipos activos`;const body=$('#equipment-body');if(!rows.length){body.innerHTML='<tr><td colspan="8">No hay equipos que coincidan con los filtros.</td></tr>';$('#equipment-detail').style.display='none';return}
-  body.innerHTML=rows.slice(0,250).map(i=>{const ui=ubicInfo(i),c=calStatus(i),prox=i.fecha_proxima_calibracion||i.proxima_calibracion;return `<tr data-code="${esc(i.codigo)}"><td><strong>${esc(i.codigo)}</strong></td><td>${esc(i.descripcion||'—')}</td><td>${esc(i.estado||'—')}</td><td>${esc(ui.nombre)}</td><td>${esc(ui.tipo)}</td><td><span class="chip ${c.cls}">${c.txt}</span></td><td>${fmtDate(prox)}</td><td><button class="btn btn-soft" data-detail="${esc(i.codigo)}">Detalle</button> <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ficha</a></td></tr>`}).join('');
+function filtrados(){const q=norm($('#equipment-search').value),loc=$('#filter-location').value,cf=$('#filter-cal').value;return activos.filter(i=>{const ui=ubicInfo(i),c=calStatus(i);if(loc&&ui.nombre!==loc)return false;if(cf==='SIN_FECHA' && c.motivo!=='SIN_FECHA')return false;if(cf==='OK' && c.key==='FUERA')return false;if(cf && !['SIN_FECHA','OK'].includes(cf) && c.key!==cf)return false;if(q&&!norm(`${i.codigo} ${i.descripcion} ${i.estado} ${ui.nombre} ${ui.tipo}`).includes(q))return false;return true})}
+function renderEquipos(){const rows=filtrados();$('#results-info').textContent=`${rows.length} de ${activos.length} equipos activos${rows.length>250 ? " · Se muestran 250. Filtra para acotar la lista." : ""}`;const body=$('#equipment-body');if(!rows.length){body.innerHTML='<tr><td colspan="8">No hay equipos que coincidan con los filtros.</td></tr>';$('#equipment-detail').style.display='none';return}
+  body.innerHTML=rows.slice(0,250).map(i=>{const ui=ubicInfo(i),c=calStatus(i),prox=c.fecha;return `<tr data-code="${esc(i.codigo)}"><td><strong>${esc(i.codigo)}</strong></td><td>${esc(i.descripcion||'—')}</td><td>${esc(i.estado||'—')}</td><td>${esc(ui.nombre)}</td><td>${esc(ui.tipo)}</td><td><span class="chip ${c.cls}">${c.txt}</span></td><td>${fmtDate(prox)}</td><td><button class="btn btn-soft" data-detail="${esc(i.codigo)}">Detalle</button> <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ficha</a></td></tr>`}).join('');
   body.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>mostrarDetalle(b.dataset.detail)));
   const exact=rows.find(i=>norm(i.codigo)===norm($('#equipment-search').value));if(exact)mostrarDetalle(exact.codigo);
 }
-function mostrarDetalle(codigo){const i=activos.find(x=>String(x.codigo)===String(codigo));if(!i)return;const ui=ubicInfo(i),c=calStatus(i),prox=i.fecha_proxima_calibracion||i.proxima_calibracion,d=$('#equipment-detail');d.style.display='grid';d.innerHTML=`<div class="detail-card"><div class="section-title">${esc(i.codigo)} · ${esc(i.descripcion||'')}</div><div class="detail-grid"><div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value">${esc(i.estado||'—')}</div></div><div class="detail-item"><div class="detail-label">Ubicación</div><div class="detail-value">${esc(ui.nombre)}</div></div><div class="detail-item"><div class="detail-label">Tipo ubicación</div><div class="detail-value">${esc(ui.tipo)}</div></div><div class="detail-item"><div class="detail-label">Calibración</div><div class="detail-value"><span class="chip ${c.cls}">${c.txt}</span></div></div><div class="detail-item"><div class="detail-label">Última calibración</div><div class="detail-value">${fmtDate(i.fecha_calibracion)}</div></div><div class="detail-item"><div class="detail-label">Próxima</div><div class="detail-value">${fmtDate(prox)}</div></div></div></div><div class="detail-card"><div class="section-title">Acciones</div><div class="section-sub">Accesos sin duplicar pantallas.</div><div class="actions"><a class="btn btn-primary" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ver ficha completa</a><a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(i.codigo||'')}">Alta / Edición</a><a class="btn" href="movimiento.html?codigo=${encodeURIComponent(i.codigo||'')}">Registrar movimiento</a></div></div>`}
+function mostrarDetalle(codigo){const i=activos.find(x=>String(x.codigo)===String(codigo));if(!i)return;const ui=ubicInfo(i),c=calStatus(i),prox=c.fecha,d=$('#equipment-detail');d.style.display='grid';d.innerHTML=`<div class="detail-card"><div class="section-title">${esc(i.codigo)} · ${esc(i.descripcion||'')}</div><div class="detail-grid"><div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value">${esc(i.estado||'—')}</div></div><div class="detail-item"><div class="detail-label">Ubicación</div><div class="detail-value">${esc(ui.nombre)}</div></div><div class="detail-item"><div class="detail-label">Tipo ubicación</div><div class="detail-value">${esc(ui.tipo)}</div></div><div class="detail-item"><div class="detail-label">Vigencia del control</div><div class="detail-value"><span class="chip ${c.cls}">${c.txt}</span></div></div><div class="detail-item"><div class="detail-label">${controlaPorMT16(i) ? "Última verificación" : "Última calibración"}</div><div class="detail-value">${fmtDate(controlaPorMT16(i) ? i.fecha_ultima_verificacion : i.fecha_calibracion)}</div></div><div class="detail-item"><div class="detail-label">${controlaPorMT16(i) ? "Próxima verificación" : "Próxima calibración"}</div><div class="detail-value">${fmtDate(prox)}</div></div></div></div><div class="detail-card"><div class="section-title">Acciones</div><div class="section-sub">Accesos sin duplicar pantallas.</div><div class="actions"><a class="btn btn-primary" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ver ficha completa</a><a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(i.codigo||'')}">Alta / Edición</a><a class="btn" href="movimiento.html?codigo=${encodeURIComponent(i.codigo||'')}">Registrar movimiento</a></div></div>`}
 ['equipment-search','filter-location','filter-cal'].forEach(id=>$('#'+id).addEventListener(id==='equipment-search'?'input':'change',renderEquipos));
 $('#equipment-search').addEventListener('change',renderEquipos);$('#clear-filters').addEventListener('click',()=>{$('#equipment-search').value='';$('#filter-location').value='';$('#filter-cal').value='';$('#equipment-detail').style.display='none';renderEquipos()});
 
@@ -155,6 +185,9 @@ async function buscarRef(){const ref=$('#refInput').value.trim();if(!ref)return 
 $('#btnBuscar').addEventListener('click',buscarRef);$('#refInput').addEventListener('keydown',e=>{if(e.key==='Enter')buscarRef()});$('#versionSelect').addEventListener('change',e=>{idx=parseInt(e.target.value)||0;if(registros[idx])mostrarRegistro(registros[idx])});$('#btnEditarVersion').addEventListener('click',()=>{if(!registros[idx])return alert('Primero busca una referencia.');localStorage.setItem('editarReferencia',JSON.stringify(registros[idx]));location.href='equipos-referencia-crear.html?modo=editar'});
 
 cargarEquipos();
+setInterval(()=>{if(!document.hidden)cargarEquipos();},30000);
+window.addEventListener("pageshow", event=>{if(event.persisted)cargarEquipos();});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)cargarEquipos();});
 </script>
 </body>
 </html>

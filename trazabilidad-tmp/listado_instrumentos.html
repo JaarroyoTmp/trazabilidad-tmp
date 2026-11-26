@@ -102,7 +102,7 @@
 
 <script type="module">
 import { loadAllInstruments } from "./instrumentos_loader.mjs";
-import { controlaPorMT16, fechaVigenciaInstrumento, esNoAptoMT16 } from "./vigencia_instrumento.mjs";
+import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, tipoUbicacionEquipo } from "./vigencia_instrumento.mjs?v=20261126-inventario";
 
 const supabase = window.supabase;
 
@@ -145,7 +145,11 @@ function formatDate(d){
 // Cargar instrumentos
 // ==========================
 async function cargar(){
-  const { data, error } = await loadAllInstruments(supabase, "codigo, ubicacion_actual, estado, fecha_proxima_calibracion, proxima_calibracion, familia_id, fecha_proxima_verificacion");
+  const [{ data, error }, { data: ubicaciones }] = await Promise.all([
+    loadAllInstruments(supabase, CAMPOS_INVENTARIO),
+    supabase.from("ubicaciones").select("id,tipo")
+  ]);
+  const ubicMap = new Map((ubicaciones || []).map(u => [u.id,u]));
 
   if(error){
     console.error("Error cargando instrumentos:", error);
@@ -153,20 +157,20 @@ async function cargar(){
   }
 
   const hoy = new Date();
-  hoy.setHours(0,0,0,0);
   const cuerpo = document.getElementById("tbody");
   cuerpo.innerHTML = "";
 
-  data.forEach(inst => {
+  data.filter(inst => !esEquipoRetirado(inst)).forEach(inst => {
 
-    const ubic = (inst.ubicacion_actual || "").trim().toLowerCase();
-    const prox = parseDate(fechaVigenciaInstrumento(inst));
+    const ubic = tipoUbicacionEquipo(inst,ubicMap.get(inst.ubicacion_id));
+    const estado = estadoVigencia(inst,hoy);
+    const prox = parseDate(estado.fecha);
 
     let mostrar = false;
 
-    if(filtro === "uso" && ubic !== "laboratorio") mostrar = true;
+    if(filtro === "uso" && ubic === "taller") mostrar = true;
     else if(filtro === "laboratorio" && ubic === "laboratorio") mostrar = true;
-    else if(filtro === "calibrados" && !esNoAptoMT16(inst) && prox && prox >= hoy) mostrar = true;
+    else if(filtro === "calibrados" && estado.key !== "FUERA") mostrar = true;
     else if(!filtro) mostrar = true;
 
     if(mostrar){
