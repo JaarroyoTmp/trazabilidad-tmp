@@ -1,4 +1,4 @@
-import {MT16_CATALOGUE} from './mt16_catalogue.js';
+import {MT16_CATALOGUE} from './mt16_catalogue.js?v=20261126';
 import { createPoint, parseNum } from "./shared.js";
 
 export const TAMPON_ROSCADO_PROCEDURE_VERSION =

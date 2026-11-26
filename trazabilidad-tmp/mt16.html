@@ -18,7 +18,7 @@ import {mt16Access,publishMT16,listCloudMT16,loadCloudMT16} from "./mt16_cloud.j
 import {listLocalVerifications, saveLocalVerification} from "./mt16_local.js";
 import {planMT16Control} from "./mt16_control.js";
 import {buildFormalMT16Report} from "./mt16_report.js";
-import {evaluateMT16PeriodicVerification,resolveMT16VerificationAutomation,resolveMT16CriterionIdentity,validateMT16CriterionConfiguration,resolveMT16ServiceLimits,calculateMT16AutomaticUncertainty,calculateMT16WireGeometry} from './calibraciones_mt15%20copy/core/metrology_core/procedure_rules/mt16_tampon_roscado.js?v=AUTO-09.14';
+import {evaluateMT16PeriodicVerification,resolveMT16VerificationAutomation,resolveMT16CriterionIdentity,validateMT16CriterionConfiguration,resolveMT16ServiceLimits,calculateMT16AutomaticUncertainty,calculateMT16WireGeometry} from './calibraciones_mt15%20copy/core/metrology_core/procedure_rules/mt16_tampon_roscado.js?v=AUTO-09.14-catalogo-20261126';
 import {resolveFamily} from './calibraciones_mt15%20copy/core/metrology_core/mt16_family_resolver.js';
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const checkNames={identificacion:'Identificación y marcado',limpieza:'Limpieza y superficies de contacto',integridad:'Integridad · sin daños',trazabilidad:'Vigencia del certificado del banco'};
