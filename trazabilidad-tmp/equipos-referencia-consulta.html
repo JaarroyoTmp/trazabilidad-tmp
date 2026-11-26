@@ -34,6 +34,10 @@
     @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.searchbar{grid-template-columns:1fr 1fr}.detail{grid-template-columns:1fr}.ref-info{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:700px){.app{padding:10px}.kpis{grid-template-columns:1fr 1fr}.searchbar,.ref-search{grid-template-columns:1fr}.ref-info,.detail-grid{grid-template-columns:1fr}.brand-title{font-size:18px}}
     @media print{header,.tabs,.no-print,#view-equipos{display:none!important}body{background:#fff}.panel{box-shadow:none;border:1px solid #aaa}.table-wrap{max-height:none;overflow:visible}th{position:static}}
+    .attention{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+    .attention[hidden]{display:none}
+    .attention .btn[aria-pressed="true"]{color:#fff;background:#244f86;border-color:#244f86}
+    .priority-note{display:block;color:#496681;font-size:11px;margin-top:3px}
   </style>
 </head>
 <body>
@@ -64,8 +68,14 @@
       <div class="searchbar no-print">
         <div class="field"><label>Buscar equipo activo</label><input id="equipment-search" list="equipment-options" placeholder="Código o descripción..."><datalist id="equipment-options"></datalist></div>
         <div class="field"><label>Ubicación</label><select id="filter-location"><option value="">Todas</option></select></div>
-        <div class="field"><label>Vigencia del control</label><select id="filter-cal"><option value="">Todos</option><option value="OK">OK, incluidos próximos</option><option value="PROXIMA">Próxima ≤ 30 días</option><option value="FUERA">Fuera de plazo o NO APTO</option><option value="SIN_FECHA">Sin fecha</option></select></div>
+        <div class="field"><label>Vigencia del control</label><select id="filter-cal"><option value="">Todos</option><option value="OK">OK, incluidos próximos</option><option value="PROXIMA">Próxima ≤ 30 días</option><option value="FUERA">Fuera de plazo o NO APTO</option><option value="VENCIDO">Vencidos</option><option value="SIN_FECHA">Sin fecha</option><option value="NO_APTO">No aptos</option></select></div>
         <button class="btn btn-soft" id="clear-filters">Limpiar</button>
+      </div>
+      <div class="attention" id="attention-filters" role="group" aria-label="Motivo de fuera de plazo" hidden>
+        <button class="btn" type="button" data-attention="FUERA">Todos los avisos</button>
+        <button class="btn" type="button" data-attention="VENCIDO">Vencidos</button>
+        <button class="btn" type="button" data-attention="SIN_FECHA">Sin fecha</button>
+        <button class="btn" type="button" data-attention="NO_APTO">No aptos</button>
       </div>
     </section>
 
@@ -108,7 +118,19 @@ import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, t
 const sb = window.supabase;
 const $ = s => document.querySelector(s);
 let activos = [], ubicMap = new Map(), registros = [], idx = 0;
-$('#equipment-search').value = new URLSearchParams(location.search).get('codigo') || '';
+const params = new URLSearchParams(location.search);
+const filtroVigencia = $('#filter-cal');
+const filtrosAvisos = new Set(['FUERA','VENCIDO','SIN_FECHA','NO_APTO']);
+const filtroInicial = params.get('vigencia');
+$('#equipment-search').value = params.get('codigo') || '';
+if([...filtroVigencia.options].some(option=>option.value===filtroInicial)) filtroVigencia.value=filtroInicial;
+
+$('#attention-filters').addEventListener('click',event=>{
+  const boton = event.target.closest('[data-attention]');
+  if(!boton)return;
+  filtroVigencia.value = boton.dataset.attention;
+  filtroVigencia.dispatchEvent(new Event('change'));
+});
 
 function norm(v){return String(v ?? '').trim().toLowerCase()}
 function esc(v){return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
@@ -167,14 +189,48 @@ async function cargarEquipos(){
   } finally { cargandoEquipos=false; }
 }
 
-function filtrados(){const q=norm($('#equipment-search').value),loc=$('#filter-location').value,cf=$('#filter-cal').value;return activos.filter(i=>{const ui=ubicInfo(i),c=calStatus(i);if(loc&&ui.nombre!==loc)return false;if(cf==='SIN_FECHA' && c.motivo!=='SIN_FECHA')return false;if(cf==='OK' && c.key==='FUERA')return false;if(cf && !['SIN_FECHA','OK'].includes(cf) && c.key!==cf)return false;if(q&&!norm(`${i.codigo} ${i.descripcion} ${i.estado} ${ui.nombre} ${ui.tipo}`).includes(q))return false;return true})}
-function renderEquipos(){const rows=filtrados();$('#results-info').textContent=`${rows.length} de ${activos.length} equipos activos${rows.length>250 ? " · Se muestran 250. Filtra para acotar la lista." : ""}`;const body=$('#equipment-body');if(!rows.length){body.innerHTML='<tr><td colspan="8">No hay equipos que coincidan con los filtros.</td></tr>';$('#equipment-detail').style.display='none';return}
+function filtrados(){
+  const q=norm($('#equipment-search').value), loc=$('#filter-location').value, cf=filtroVigencia.value;
+  const hoy=new Date();
+  const rows=activos.filter(i=>{
+    const ui=ubicInfo(i), estado=estadoVigencia(i,hoy);
+    const coincideVigencia=!cf
+      || (cf==='OK' ? estado.key!=='FUERA' : estado.key===cf || estado.motivo===cf);
+    return (!loc||ui.nombre===loc) && coincideVigencia
+      && (!q||norm(`${i.codigo} ${i.descripcion} ${i.estado} ${ui.nombre} ${ui.tipo}`).includes(q));
+  });
+  if(filtrosAvisos.has(cf)||cf==='PROXIMA'){
+    const prioridad=i=>tipoUbicacionEquipo(i,ubicMap.get(i.ubicacion_id))==='taller'?0:1;
+    rows.sort((a,b)=>prioridad(a)-prioridad(b)||String(a.codigo).localeCompare(String(b.codigo),'es',{numeric:true}));
+  }
+  return rows;
+}
+function renderEquipos(){
+  const cf=filtroVigencia.value;
+  const avisos=$('#attention-filters');
+  avisos.hidden=!filtrosAvisos.has(cf);
+  for(const b of avisos.querySelectorAll('[data-attention]')) b.setAttribute('aria-pressed',String(b.dataset.attention===cf));
+  const rows=filtrados();
+  const info=$('#results-info');
+  info.textContent=`${rows.length} de ${activos.length} equipos activos${rows.length>250 ? " · Se muestran 250. Filtra para acotar la lista." : ""}`;
+  if(filtrosAvisos.has(cf)||cf==='PROXIMA'){
+    const nota=document.createElement('span');
+    nota.className='priority-note';
+    nota.textContent='Primero los equipos de taller y producción.';
+    info.append(nota);
+  }
+  const body=$('#equipment-body');
+  if(!rows.length){body.innerHTML='<tr><td colspan="8">No hay equipos que coincidan con los filtros.</td></tr>';$('#equipment-detail').style.display='none';return}
   body.innerHTML=rows.slice(0,250).map(i=>{const ui=ubicInfo(i),c=calStatus(i),prox=c.fecha;return `<tr data-code="${esc(i.codigo)}"><td><strong>${esc(i.codigo)}</strong></td><td>${esc(i.descripcion||'—')}</td><td>${esc(i.estado||'—')}</td><td>${esc(ui.nombre)}</td><td>${esc(ui.tipo)}</td><td><span class="chip ${c.cls}">${c.txt}</span></td><td>${fmtDate(prox)}</td><td><button class="btn btn-soft" data-detail="${esc(i.codigo)}">Detalle</button> <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ficha</a></td></tr>`}).join('');
   body.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>mostrarDetalle(b.dataset.detail)));
   const exact=rows.find(i=>norm(i.codigo)===norm($('#equipment-search').value));if(exact)mostrarDetalle(exact.codigo);
 }
 function mostrarDetalle(codigo){const i=activos.find(x=>String(x.codigo)===String(codigo));if(!i)return;const ui=ubicInfo(i),c=calStatus(i),prox=c.fecha,d=$('#equipment-detail');d.style.display='grid';d.innerHTML=`<div class="detail-card"><div class="section-title">${esc(i.codigo)} · ${esc(i.descripcion||'')}</div><div class="detail-grid"><div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value">${esc(i.estado||'—')}</div></div><div class="detail-item"><div class="detail-label">Ubicación</div><div class="detail-value">${esc(ui.nombre)}</div></div><div class="detail-item"><div class="detail-label">Tipo ubicación</div><div class="detail-value">${esc(ui.tipo)}</div></div><div class="detail-item"><div class="detail-label">Vigencia del control</div><div class="detail-value"><span class="chip ${c.cls}">${c.txt}</span></div></div><div class="detail-item"><div class="detail-label">${controlaPorMT16(i) ? "Última verificación" : "Última calibración"}</div><div class="detail-value">${fmtDate(controlaPorMT16(i) ? i.fecha_ultima_verificacion : i.fecha_calibracion)}</div></div><div class="detail-item"><div class="detail-label">${controlaPorMT16(i) ? "Próxima verificación" : "Próxima calibración"}</div><div class="detail-value">${fmtDate(prox)}</div></div></div></div><div class="detail-card"><div class="section-title">Acciones</div><div class="section-sub">Accesos sin duplicar pantallas.</div><div class="actions"><a class="btn btn-primary" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(i.codigo||'')}">Ver ficha completa</a><a class="btn" href="alta_instrumento.html?codigo=${encodeURIComponent(i.codigo||'')}">Alta / Edición</a><a class="btn" href="movimiento.html?codigo=${encodeURIComponent(i.codigo||'')}">Registrar movimiento</a></div></div>`}
-['equipment-search','filter-location','filter-cal'].forEach(id=>$('#'+id).addEventListener(id==='equipment-search'?'input':'change',renderEquipos));
+['equipment-search','filter-location'].forEach(id=>$('#'+id).addEventListener(id==='equipment-search'?'input':'change',renderEquipos));
+filtroVigencia.addEventListener('change',()=>{
+  $('#equipment-detail').style.display='none';
+  renderEquipos();
+});
 $('#equipment-search').addEventListener('change',renderEquipos);$('#clear-filters').addEventListener('click',()=>{$('#equipment-search').value='';$('#filter-location').value='';$('#filter-cal').value='';$('#equipment-detail').style.display='none';renderEquipos()});
 
 // Referencias: conserva la lógica existente

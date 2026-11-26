@@ -630,6 +630,25 @@
     .chat-home-toast span{font-size:11px;color:#dbeafe;line-height:1.35}
     .chat-home-toast button{margin-left:auto;border:0;background:transparent;color:#fff;font-size:16px;cursor:pointer}
 
+    .kpi-link{display:block;min-width:0;border-radius:12px}
+    .kpi-link:hover .kpi-card{border-color:#2563eb;box-shadow:0 3px 12px #1659a420}
+    .kpi-link:focus-visible{outline:3px solid #2d6dc3;outline-offset:2px}
+    #machine-overview-grid[hidden],.machine-list[hidden],#machine-clear[hidden],#machine-view-all[hidden]{display:none!important}
+    .machine-list{overflow:auto;min-height:0;max-height:360px;border:1px solid #dbe7f2;border-radius:9px}
+    .machine-list th{position:sticky;top:0;z-index:1;background:#eff5fb}
+    .machine-list #table-machine-equipment{margin:0}
+    .machine-list .mini-table td{padding:7px 8px;font-size:12px}
+    #table-movimientos .mov-fecha,#table-movimientos .mov-dato{font-size:12px;color:#123858;line-height:1.35}
+    #table-movimientos .mov-dato{font-weight:750}
+    .mov-fecha span{display:block;color:#526c86;font-size:10px}
+    .chart-card2 .month-value{font-size:13px;font-weight:900}
+    .chart-card2 .month-label{font-size:12px}
+    .month-summary{padding-top:5px;gap:10px 18px}
+    @media (min-width:1500px) and (min-height:800px){
+      .machine-list{flex:1;max-height:none}
+      .machine-list td .btn{padding:4px 7px;font-size:10px}
+      #table-movimientos th:nth-child(3){min-width:85px}
+    }
   </style>
 </head>
 
@@ -693,20 +712,24 @@
           <div class="kpi-icon i-blue">▧</div>
           <div><div class="kpi-label">Equipos activos</div><div class="kpi-value" id="kpi-total">–</div><div class="kpi-extra" id="kpi-total-extra"></div></div>
         </div>
-        <a href="listado_instrumentos.html?filtro=calibrados" class="kpi-link">
+        <a href="equipos-referencia-consulta.html?vigencia=OK" class="kpi-link">
           <div class="kpi-card" id="kpi-card-cal">
             <div class="kpi-icon i-green">✓</div>
             <div><div class="kpi-label">Equipos OK</div><div class="kpi-value" id="kpi-calibrados">–</div><div class="kpi-extra" id="kpi-calibrados-extra"></div></div>
           </div>
         </a>
+        <a href="equipos-referencia-consulta.html?vigencia=PROXIMA" class="kpi-link">
         <div class="kpi-card" id="kpi-card-prox">
           <div class="kpi-icon i-orange">◷</div>
           <div><div class="kpi-label">Próximos ≤ 30 días</div><div class="kpi-value" id="kpi-proximos">–</div><div class="kpi-extra" id="kpi-proximos-extra"></div></div>
         </div>
+        </a>
+        <a href="equipos-referencia-consulta.html?vigencia=FUERA" class="kpi-link">
         <div class="kpi-card" id="kpi-card-fuera">
           <div class="kpi-icon i-red">△</div>
           <div><div class="kpi-label">Fuera de plazo o NO APTO</div><div class="kpi-value" id="kpi-fuera">–</div><div class="kpi-extra" id="kpi-fuera-extra"></div></div>
         </div>
+        </a>
         <a href="listado_instrumentos.html?filtro=laboratorio" class="kpi-link">
           <div class="kpi-card" id="kpi-card-lab">
             <div class="kpi-icon i-purple">⚗</div>
@@ -738,18 +761,18 @@
         <div class="machine-summary">
           <span class="machine-count" id="machine-count">Selecciona una máquina</span>
           <span class="badge badge-soft" id="machine-status">Ubicación actual de instrumentos</span>
-        </div>
-        <div id="machine-more-row" class="machine-more-row" style="display:none;">
-          <span id="machine-more-info"></span>
-          <button type="button" class="btn btn-primary" id="machine-view-all">Ver todos</button>
+          <button type="button" class="btn" id="machine-clear" hidden>Ver máquinas</button>
+          <button type="button" class="btn btn-primary" id="machine-view-all" hidden>Ampliar listado</button>
         </div>
         <div id="machine-empty" class="machine-empty">Selecciona una máquina para ver los equipos que tiene actualmente.</div>
-        <table class="mini-table" id="table-machine-equipment" style="display:none;">
+        <div class="machine-list" id="machine-list" hidden>
+        <table class="mini-table" id="table-machine-equipment">
           <thead>
             <tr><th>Código</th><th>Descripción</th><th>Vigencia</th><th>Próximo control</th><th>Acciones</th></tr>
           </thead>
           <tbody id="tbody-machine-equipment"></tbody>
         </table>
+        </div>
               </section>
 
       <dialog id="machine-all-dialog">
@@ -781,7 +804,7 @@
           </div>
         </div>
         <table class="mini-table" id="table-movimientos">
-          <thead><tr><th>Fecha</th><th>Código</th><th>Tipo</th><th>Operario 1</th><th>Operario 2</th><th>Destino</th><th>Responsable</th><th>Vigencia</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Código</th><th>Destino</th><th>Tipo</th><th>Operario 1</th><th>Operario 2</th><th>Responsable</th><th>Vigencia</th><th>Acciones</th></tr></thead>
           <tbody id="tbody-movimientos"><tr><td colspan="9">Cargando movimientos...</td></tr></tbody>
         </table>
         <div class="mov-pagination">
@@ -959,11 +982,10 @@ import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, t
   const machineCount = document.getElementById("machine-count");
   const machineStatus = document.getElementById("machine-status");
   const machineEmpty = document.getElementById("machine-empty");
-  const tableMachineEquipment = document.getElementById("table-machine-equipment");
+  const machineList = document.getElementById("machine-list");
+  const machineClear = document.getElementById("machine-clear");
   const tbodyMachineEquipment = document.getElementById("tbody-machine-equipment");
   const machineOverviewGrid = document.getElementById("machine-overview-grid");
-  const machineMoreRow = document.getElementById("machine-more-row");
-  const machineMoreInfo = document.getElementById("machine-more-info");
   const machineViewAll = document.getElementById("machine-view-all");
   const machineAllDialog = document.getElementById("machine-all-dialog");
   const machineDialogTitle = document.getElementById("machine-dialog-title");
@@ -1214,6 +1236,8 @@ import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, t
   function renderEquiposMaquina(){
     if (!machineSelect || !tbodyMachineEquipment) return;
     const {maquina,q,todos,filtrados} = getEquiposMaquinaActual();
+    machineOverviewGrid.hidden = Boolean(maquina);
+    machineClear.hidden = !maquina;
 
     if (!maquina){
       machineCount.textContent = "Selecciona una máquina";
@@ -1221,37 +1245,30 @@ import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, t
       machineSearch.disabled = true;
       machineEmpty.style.display = "block";
       machineEmpty.textContent = "Selecciona una máquina para ver un resumen de sus equipos.";
-      tableMachineEquipment.style.display = "none";
+      machineList.hidden = true;
       tbodyMachineEquipment.innerHTML = "";
-      if (machineMoreRow) machineMoreRow.style.display = "none";
+      machineViewAll.hidden = true;
       return;
     }
 
     machineSearch.disabled = false;
     machineCount.textContent = `${maquina} · ${todos.length} equipo${todos.length === 1 ? "" : "s"}`;
-    machineStatus.textContent = q ? `${filtrados.length} coinciden con el filtro` : "Resumen · primeros 5 equipos";
+    machineStatus.textContent = q ? `${filtrados.length} coinciden con el filtro` : "Equipos asignados";
 
     if (!filtrados.length){
       machineEmpty.style.display = "block";
       machineEmpty.textContent = q ? "No hay equipos en esta máquina que coincidan con el filtro." : "No hay equipos asignados actualmente a esta máquina.";
-      tableMachineEquipment.style.display = "none";
+      machineList.hidden = true;
       tbodyMachineEquipment.innerHTML = "";
-      if (machineMoreRow) machineMoreRow.style.display = "none";
+      machineViewAll.hidden = true;
       return;
     }
 
     machineEmpty.style.display = "none";
-    tableMachineEquipment.style.display = "table";
-    const visibles = filtrados.slice(0,5);
-    tbodyMachineEquipment.innerHTML = visibles.map(machineRowHtml).join("");
+    machineList.hidden = false;
+    tbodyMachineEquipment.innerHTML = filtrados.map(machineRowHtml).join("");
 
-    if (machineMoreRow){
-      machineMoreRow.style.display = "flex";
-      machineMoreInfo.textContent = filtrados.length > visibles.length
-        ? `Mostrando ${visibles.length} de ${filtrados.length}`
-        : `${filtrados.length} equipo${filtrados.length===1?'':'s'} mostrado${filtrados.length===1?'':'s'}`;
-      machineViewAll.textContent = `Ver todos (${filtrados.length})`;
-    }
+    machineViewAll.hidden = false;
   }
 
   function abrirTodosEquiposMaquina(){
@@ -1264,6 +1281,11 @@ import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, t
   }
 
   machineViewAll?.addEventListener("click", abrirTodosEquiposMaquina);
+  machineClear.addEventListener("click", () => {
+    machineSelect.value = "";
+    machineSelect.dispatchEvent(new Event("change"));
+    machineSelect.focus();
+  });
   machineDialogClose?.addEventListener("click", () => machineAllDialog?.close());
 
 
@@ -1319,9 +1341,8 @@ import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, t
     tbodyMov.innerHTML = pageItems.map(mov => {
 
       const fecha = mov.fecha ? new Date(mov.fecha) : null;
-      const fechaTxt = fecha
-        ? fecha.toLocaleString("es-ES", { dateStyle:"short", timeStyle:"short" })
-        : "—";
+      const fechaTxt = fecha ? fecha.toLocaleDateString("es-ES",{dateStyle:"short",timeZone:"Europe/Madrid"}) : "—";
+      const horaTxt = fecha ? fecha.toLocaleTimeString("es-ES",{timeStyle:"short",timeZone:"Europe/Madrid"}) : "";
 
       let icon = "✚";
       let claseTipo = "mov-row-ok";
@@ -1343,20 +1364,20 @@ import { CAMPOS_INVENTARIO, controlaPorMT16, estadoVigencia, esEquipoRetirado, t
 
       if (mov.tipo_movimiento === "Salida") {
         if (mov.operario1)
-          op1 = `<span class="op-chip op1">${mov.operario1}</span>`;
+          op1 = `<span class="op-chip op1">${escapeHome(mov.operario1)}</span>`;
         if (mov.operario2)
-          op2 = `<span class="op-chip op2">${mov.operario2}</span>`;
+          op2 = `<span class="op-chip op2">${escapeHome(mov.operario2)}</span>`;
       }
 
       return `
         <tr>
-          <td>${fechaTxt}</td>
-          <td>${mov.codigo_instrumento || ""}</td>
-          <td class="${claseTipo}">${icon} ${mov.tipo_movimiento}</td>
+          <td class="mov-fecha"><strong>${fechaTxt}</strong><span>${horaTxt}</span></td>
+          <td class="mov-dato">${escapeHome(mov.codigo_instrumento || "—")}</td>
+          <td class="mov-dato">${escapeHome(mov.destino || "—")}</td>
+          <td class="${claseTipo}">${icon} ${escapeHome(mov.tipo_movimiento)}</td>
           <td>${op1 || "-"}</td>
           <td>${op2 || "-"}</td>
-          <td>${mov.destino || "-"}</td>
-          <td>${mov.responsable || "-"}</td>
+          <td>${escapeHome(mov.responsable || "—")}</td>
           <td>${chip}</td>
           <td>
             <a class="btn" href="/qr/qr.info_instrumentos.html?codigo=${encodeURIComponent(mov.codigo_instrumento || "")}">
