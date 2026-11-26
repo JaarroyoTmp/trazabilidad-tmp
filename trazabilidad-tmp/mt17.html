@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MT17 · Comparadores / relojes</title>
+<style>
+:root{--ink:#0d2340;--line:#dbe7f2;--line2:#cbddeb}
+*{box-sizing:border-box}
+body{margin:0;background:#eef6ff;color:var(--ink);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
+main{max-width:1280px;margin:auto;padding:20px}
+nav{margin-bottom:16px}
+.box{padding:clamp(14px,3vw,24px);background:#fff;border:1px solid var(--line);border-radius:18px}
+label{display:block;margin-bottom:7px;font-size:14px;font-weight:700}
+.btn{display:inline-block;padding:9px 12px;border:1px solid var(--line2);border-radius:9px;background:#fff;color:#16488a;font:inherit;text-decoration:none;cursor:pointer}
+#trial-profile{max-width:100%;margin-bottom:4px}
+.trial h1{margin:0}.trial h2{font-size:16px;margin:20px 0 8px}.trial p{line-height:1.45;font-size:14px;color:#425f7d}.trial .trial-notice{padding:12px;background:#fff8eb;border:1px solid #fed7aa;border-radius:10px;color:#854004}.trial .trial-check{display:flex;align-items:center;gap:8px;margin:0 0 16px;font-size:14px}.trial-table{overflow-x:auto;margin-bottom:10px}.trial table{border-collapse:collapse;text-align:left;width:100%;font-size:13px}.trial th,.trial td{padding:8px;border-bottom:1px solid var(--line)}.trial thead{background:#f0f6ff}.trial td input{padding:8px;border:1px solid var(--line2);border-radius:8px;width:100%;min-width:62px;color:var(--ink);font:inherit}.trial td input[aria-invalid=true]{border-color:#b45309}.trial .trial-result{font-variant-numeric:tabular-nums;background:#f8fbff;font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <nav aria-label="Navegación"><a class="btn" href="calibraciones.html">← Centro de Calibración</a></nav>
+    <section class="box trial" id="comparadores" aria-labelledby="trial-title">
+      <h1 id="trial-title">MT17 · Comparadores / relojes</h1>
+      <p class="trial-notice">Hoja de ensayo. Las lecturas se pierden al recargar. El registro oficial requiere validar la incertidumbre total con el montaje y el criterio de aceptación.</p>
+      <h2>Montaje y puesta a cero</h2>
+      <label for="trial-profile">División de escala del equipo piloto</label>
+      <select class="btn" id="trial-profile">
+        <option value="centesimal">0,01 mm · Centesimal · 20102644 ACCUD</option>
+        <option value="milesimal">0,001 mm · Milesimal · JZF962 Mitutoyo</option>
+      </select>
+      <p><strong>Banco horizontal Trimos TELMA 500</strong> · 1288 en TMP · 1288-5 en Calibrator · Certificado C-11377.00002</p>
+      <p>Monta el reloj con el adaptador. Lleva el banco a la posición inicial y pon a cero el reloj.</p>
+      <label class="trial-check"><input id="trial-zero-confirmed" type="checkbox"> Montaje preparado y reloj puesto a cero</label>
+      <h2>Cinco lecturas por desplazamiento</h2>
+      <p>Los puntos iniciales proceden de Calibrator. Si el banco indica otro desplazamiento, edita la primera celda de la fila. Introduce cinco indicaciones del reloj por punto, en mm desde la posición inicial.</p>
+      <label class="trial-check"><input id="trial-independent-confirmed" type="checkbox"> En cada toma he retirado el palpador del punto y me he acercado de nuevo en el mismo sentido.</label>
+      <div class="trial-table" tabindex="0" role="region" aria-label="Tabla de lecturas desplazable"><table aria-label="Lecturas y errores por desplazamiento en milímetros">
+        <thead><tr><th scope="col">Indicación del banco</th><th scope="col">L1</th><th scope="col">L2</th><th scope="col">L3</th><th scope="col">L4</th><th scope="col">L5</th><th scope="col">Media</th><th scope="col">Diferencia con el banco</th><th scope="col">Dispersión</th><th scope="col">Referencia alternativa</th><th scope="col">Corrección del reloj</th><th scope="col">U del banco (k=2)</th><th scope="col">U parcial (k=2)</th></tr></thead>
+        <tbody id="trial-points-centesimal"></tbody>
+        <tbody id="trial-points-milesimal" hidden></tbody>
+      </table></div>
+      <button class="btn" type="button" id="trial-add">Añadir punto</button>
+      <p>Con la puesta a cero confirmada y las cinco lecturas completas, TMP aplica el certificado del Trimos con corrección global nula. La U mostrada corresponde al banco. Si introduces otra referencia trazable ya corregida, TMP calcula la corrección del reloj con esa referencia y deja la U del banco en blanco.</p>
+      <p>La U parcial combina el banco, la división de escala y la repetibilidad de la media. Se calcula al confirmar cinco aproximaciones independientes por punto. Para completar el presupuesto queda evaluar el montaje, la deriva, la temperatura y el sentido de medida.</p>
+    </section>
+</main>
+<script type="module">
+import { COMPARADOR_TRIAL_PROFILES, COMPARADOR_TRIAL_REPETITIONS, summarizeComparadorTrial } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js";
+
+const $ = selector => document.querySelector(selector);
+const trialFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
+const trialNumber = value => /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(value.trim()) ? Number(value.trim().replace(",", ".")) : NaN;
+const trialDisplay = value => Number.isFinite(value) ? trialFormat.format(Math.abs(value) < 0.0000005 ? 0 : value) : "—";
+const profileSelect = $("#trial-profile");
+const zeroConfirmed = $("#trial-zero-confirmed");
+const independentConfirmed = $("#trial-independent-confirmed");
+const trialRows = [];
+const confirmedProfiles = new Set();
+const independentProfiles = new Set();
+function addTrialPoint(profile, initialNominal = "") {
+ const trialPoints = $(`#trial-points-${profile}`);
+ const { max, scaleDivisionMm } = COMPARADOR_TRIAL_PROFILES[profile];
+ const point = trialPoints.rows.length + 1;
+ const row = trialPoints.insertRow();
+ const readingLabels = Array.from({ length: COMPARADOR_TRIAL_REPETITIONS }, (_, index) => `Lectura ${index + 1}`);
+ function addInput(label) {
+  const field = document.createElement("input");
+  field.type = "text";
+  field.inputMode = "decimal";
+  field.autocomplete = "off";
+  field.setAttribute("aria-label", `${label} del punto ${point} en milímetros`);
+  row.insertCell().append(field);
+  return field;
+ }
+ function addResult(key) {
+  const cell = row.insertCell();
+  cell.className = "trial-result";
+  return [key, cell];
+ }
+ const nominalField = addInput("Desplazamiento indicado por el banco");
+ nominalField.value = initialNominal;
+ nominalField.title = `Introduce un desplazamiento superior a 0 y hasta ${max} mm`;
+ const readingFields = readingLabels.map(addInput);
+ const results = ["mean", "nominalDifference", "spread"].map(addResult);
+ const referenceField = addInput("Desplazamiento de referencia corregido");
+ referenceField.title = "Opcional. Introduce el desplazamiento trazable ya corregido";
+ results.push(addResult("correction"), addResult("bankUncertaintyMm"));
+ const [, budgetCell] = addResult("partialBudget");
+ function updatePoint() {
+  const nominal = trialNumber(nominalField.value);
+  const validNominal = nominal > 0 && nominal <= max;
+  nominalField.setAttribute("aria-invalid", String(Boolean(nominalField.value.trim()) && !validNominal));
+  const reference = trialNumber(referenceField.value);
+  const validReference = Number.isFinite(reference) && reference > 0;
+  const manualReferenceEntered = Boolean(referenceField.value.trim());
+  referenceField.setAttribute("aria-invalid", String(manualReferenceEntered && !validReference));
+  const manualReference = validReference ? reference : null;
+  const readings = readingFields.map(field => {
+   const value = trialNumber(field.value);
+   field.setAttribute("aria-invalid", String(Boolean(field.value.trim()) && !Number.isFinite(value)));
+   return value;
+  });
+  const summary = confirmedProfiles.has(profile) && validNominal
+   ? summarizeComparadorTrial({ nominal, reference: manualReferenceEntered ? manualReference : undefined, readings,
+      scaleDivisionMm, independentReadings: independentProfiles.has(profile) })
+   : null;
+  results.forEach(([key, cell]) => { cell.textContent = trialDisplay(summary?.[key]); });
+  const budget = summary?.partialBudget;
+  budgetCell.textContent = trialDisplay(budget?.expandedMm);
+  if (budget) {
+   budgetCell.title = [
+    `u banco ${trialDisplay(budget.standardBankMm)} mm`,
+    `u división ${trialDisplay(budget.standardResolutionMm)} mm`,
+    `u repetibilidad ${trialDisplay(budget.standardRepeatabilityMm)} mm`
+   ].join(" · ");
+  } else budgetCell.removeAttribute("title");
+ }
+ trialRows.push(updatePoint);
+ updatePoint();
+ row.addEventListener("input", updatePoint);
+ return nominalField;
+}
+function showTrialProfile() {
+ for (const profile of Object.keys(COMPARADOR_TRIAL_PROFILES)) {
+  $(`#trial-points-${profile}`).hidden = profile !== profileSelect.value;
+ }
+ zeroConfirmed.checked = confirmedProfiles.has(profileSelect.value);
+ independentConfirmed.checked = independentProfiles.has(profileSelect.value);
+}
+for (const [profile, { points }] of Object.entries(COMPARADOR_TRIAL_PROFILES)) {
+ points.forEach(nominal => addTrialPoint(profile, trialDisplay(nominal)));
+}
+if (new URLSearchParams(location.search).get("comparador") === "milesimal") profileSelect.value = "milesimal";
+showTrialProfile();
+profileSelect.addEventListener("change", showTrialProfile);
+$("#trial-add").addEventListener("click", () => addTrialPoint(profileSelect.value).focus());
+zeroConfirmed.addEventListener("change", () => {
+ if (zeroConfirmed.checked) confirmedProfiles.add(profileSelect.value);
+ else confirmedProfiles.delete(profileSelect.value);
+ trialRows.forEach(updatePoint => updatePoint());
+});
+independentConfirmed.addEventListener("change", () => {
+ if (independentConfirmed.checked) independentProfiles.add(profileSelect.value);
+ else independentProfiles.delete(profileSelect.value);
+ trialRows.forEach(updatePoint => updatePoint());
+});
+</script>
+</body>
+</html>
