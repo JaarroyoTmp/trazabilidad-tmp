@@ -136,6 +136,54 @@ export function evaluateComparadorDI010({ plan, sweeps, repeatability, criterion
   };
 }
 
+const CALIBRATOR_CENTESIMAL = {
+  points: [0.05, 0.1, 1], divisionMm: 0.01, limitMm: 0.020, maxExpandedMm: 0.020,
+  document: 'MT-15 caps. 1 y 5 rev. 04 · pauta centesimal Calibrator 2026/00153'
+};
+const CALIBRATOR_PROFILES = new Map([
+  ['1A8881', CALIBRATOR_CENTESIMAL],
+  ['RC005', {...CALIBRATOR_CENTESIMAL, document: CALIBRATOR_CENTESIMAL.document + ' · aplicada a RC005 por indicación de TMP'}],
+  ['JZF962', {points:[0.005,0.05,0.5], divisionMm:0.001, limitMm:0.002, maxExpandedMm:0.003,
+    document:'MT-15 caps. 1 y 5 rev. 04 · pauta Calibrator 2009/00193 · equipo JZF962'}]
+]);
+
+export const CALIBRATOR_COUNT = 5;
+
+export function comparadorCalibratorProfile(equipment, plan) {
+  const profile = CALIBRATOR_PROFILES.get(String(equipment.codigo).trim().toUpperCase());
+  return profile?.divisionMm === plan.scaleDivisionMm && profile.points.at(-1) <= plan.max ? profile : null;
+}
+
+export function evaluateComparadorCalibrator({profile, readings, certificate = trimos1288GeneralU}) {
+  if (!profile || profile.points.length !== readings.length ||
+      readings.some(series => series.length !== CALIBRATOR_COUNT || series.some(value => !Number.isFinite(value)))) return null;
+  // MT-15 cap. 1, rev. 04, table for νef = n − 1 = 4.
+  const k = 2.87;
+  const points = readings.map((series, i) => {
+    const nominalMm = profile.points[i];
+    const reference = certificate(nominalMm);
+    if (!Number.isFinite(reference?.U_mm) || reference.U_mm <= 0 ||
+        !Number.isFinite(reference.k) || reference.k <= 0) return null;
+    const meanMm = series.reduce((sum, value) => sum + value, 0) / series.length;
+    const deviationMm = Math.sqrt(series.reduce((sum, value) => sum + (value - meanMm) ** 2, 0) / (series.length - 1));
+    // C-11377.00002 declares the Us envelope for a global correction of zero.
+    const referenceCorrectionMm = reference.correctionMm ?? 0;
+    const correctionMm = meanMm - (nominalMm + referenceCorrectionMm);
+    const bankStandardMm = reference.U_mm / reference.k;
+    const resolutionStandardMm = profile.divisionMm / Math.sqrt(3);
+    const repeatStandardMm = deviationMm / Math.sqrt(series.length);
+    const expandedMm = k * Math.hypot(bankStandardMm, resolutionStandardMm, repeatStandardMm);
+    return {nominalMm, meanMm, deviationMm, correctionMm, expandedMm, bankStandardMm, resolutionStandardMm, repeatStandardMm,
+      referenceCorrectionMm, bankExpandedMm:reference.U_mm, bankK:reference.k,
+      correctionAccepted:Math.abs(correctionMm) <= profile.limitMm + 1e-12,
+      uncertaintyAccepted:expandedMm <= profile.maxExpandedMm + 1e-12};
+  });
+  if (points.some(point => !point || !Number.isFinite(point.correctionMm) || !Number.isFinite(point.expandedMm))) return null;
+  return {k, points, resultado:points.every(p => p.correctionAccepted && p.uncertaintyAccepted) ? 'APTO' : 'NO APTO',
+    maxCorrectionMm:Math.max(...points.map(p => Math.abs(p.correctionMm))),
+    maxExpandedMm:Math.max(...points.map(p => p.expandedMm))};
+}
+
 export function buildComparadorProcedure(ctx = {}) {
   const max = ctx.rango_max || 10;
   const rep = ctx.repeticiones || 5;

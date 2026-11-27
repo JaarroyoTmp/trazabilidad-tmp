@@ -22,6 +22,7 @@ select{display:block;margin-top:6px;max-width:100%}
 .notice{padding:12px;background:#fff8eb;border:1px solid #fed7aa;border-radius:10px;color:#854004}
 .check{display:flex;align-items:baseline;gap:8px;margin:9px 0}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media(min-width:851px){#calibrator-tables{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .ambient{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:16px 0}
 .ambient input{display:block;width:100%;margin-top:6px}
 .table-wrap{overflow:auto}
@@ -51,7 +52,7 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
   <nav aria-label="Navegación"><a class="btn" href="calibraciones.html">← Centro de Calibración</a></nav>
   <section class="box" aria-labelledby="title">
     <h1 id="title">MT17 · Comparadores / relojes</h1>
-    <p class="notice">Calibración de comparadores mecánicos centesimales y milesimales basada en CEM DI‑010. Registra las lecturas y las condiciones del ensayo. MT17 calcula el resultado con los datos del equipo y del patrón.</p>
+    <p class="notice">Calibración de comparadores mecánicos centesimales y milesimales con pauta Calibrator o CEM DI‑010 según el equipo. Registra las lecturas y las condiciones del ensayo. MT17 calcula el resultado con los datos del equipo y del patrón.</p>
     <h2>Buscar equipo</h2>
     <form id="equipment-form" class="search">
       <label for="equipment-query">Código, descripción o fabricante
@@ -69,12 +70,18 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
     <p><strong>Patrón</strong> · Trimos TELMA 500 · 1288 en TMP · 1288-5 en Calibrator · Certificado C-11377.00002</p>
     <p id="bank-capability"></p>
     <label class="check"><input id="setup" type="checkbox"> Identificación, limpieza y movimiento del palpador comprobados. Adaptador fijo y ejes alineados.</label>
-    <p>Aclimata los equipos 24 h en el recinto. Tras montar el reloj, espera al menos 15 min para estabilizarlo, salvo indicación del fabricante. Anota las condiciones iniciales. El DI‑010 indica 17–23 °C para estas divisiones y recomienda hasta 60 % HR.</p>
+    <p id="di-environment">Aclimata los equipos 24 h en el recinto. Tras montar el reloj, espera al menos 15 min para estabilizarlo, salvo indicación del fabricante. Anota las condiciones iniciales. El DI‑010 indica 17–23 °C para estas divisiones y recomienda hasta 60 % HR.</p>
     <div class="ambient">
       <label>Temperatura inicial (°C)<input id="temp-start" type="text" inputmode="decimal"></label>
       <label>Humedad inicial (% HR)<input id="humidity-start" type="text" inputmode="decimal"></label>
     </div>
     <label class="check"><input id="zero" type="checkbox"> Banco y reloj puestos a cero al inicio del recorrido.</label>
+    <section id="calibrator-series" hidden>
+      <h2>Lecturas · Pauta Calibrator</h2>
+      <p>Con el cero fijo, lleva el banco a cada valor indicado. Retira el palpador y vuelve a aproximarte en el mismo sentido antes de cada lectura. Introduce cinco indicaciones del reloj por punto, en mm.</p>
+      <div class="grid" id="calibrator-tables"></div>
+    </section>
+    <section id="di-series">
     <h2>Recorrido de la escala</h2>
     <p>Haz una pasada en subida y otra en bajada, sin reajustar el cero entre ambas. Empieza cada pasada cerca del extremo correspondiente y mantén el sentido de avance. Lleva el banco al valor de la toma y escribe lo que marca el reloj. Todos los valores están en mm.</p>
     <p id="coverage"></p>
@@ -83,6 +90,7 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
     <p>Haz seis tomas en el punto superior y otras seis en el inferior. Antes de cada toma, vuelve a la posición inicial, pon el banco y el reloj a cero y acércate de nuevo al punto. Lleva el banco al valor indicado en cada extremo y escribe la indicación del reloj en cada toma.</p>
     <div class="grid" id="repeats"></div>
     <p>Repetibilidad combinada s<sub>R</sub> (mm) <output id="repeatability">—</output></p>
+    </section>
     <h2>Cierre</h2>
     <p>Al terminar, vuelve a medir la temperatura y la humedad para dejar constancia de las condiciones durante el ensayo.</p>
     <div class="ambient">
@@ -91,14 +99,22 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
     </div>
     <p id="progress" role="status"></p>
     <h2>Decisión e informe</h2>
-    <p><a href="https://www.cem.es/es/divulgacion/publicaciones/di-010-procedimiento-calibracion-comparadores-mecanicos" target="_blank" rel="noopener">CEM DI-010</a> · §5.7 recorrido, §5.8 repetibilidad, §6.1 y tabla 13 incertidumbre, anexo 8.4 banco.
+    <p id="di-method"><a href="https://www.cem.es/es/divulgacion/publicaciones/di-010-procedimiento-calibracion-comparadores-mecanicos" target="_blank" rel="noopener">CEM DI-010</a> · §5.7 recorrido, §5.8 repetibilidad, §6.1 y tabla 13 incertidumbre, anexo 8.4 banco.
     La declaración usa la <a href="https://ilac.org/publications-and-resources/ilac-guidance-series/" target="_blank" rel="noopener">regla binaria con banda de guarda de ILAC G8</a>.</p>
+    <p id="calibrator-method" hidden>MT‑15, capítulos 1 y 5, rev. 04 · Cálculo de Calibrator. El dictamen se aplica a los tres puntos indicados.</p>
     <div class="ambient">
       <label>Fecha de calibración<input id="date" type="date"></label>
       <label>Operario<input id="operator" type="text" maxlength="120"></label>
     </div>
     <p id="criterion-summary"></p>
     <p id="calculation-summary" aria-live="polite"></p>
+    <details id="calibrator-calculation" hidden>
+      <summary>Ver cálculos por punto</summary>
+      <p>Corrección = media − (nominal + corrección del patrón). U = k × √[(U patrón / k patrón)² + s²/5 + D²/3]. k = 2,87 para cinco lecturas. La corrección y la U se comparan por separado con sus límites.</p>
+      <div class="table-wrap"><table aria-label="Cálculos Calibrator"><thead><tr>
+      <th scope="col">Punto (mm)</th><th scope="col">Media (mm)</th><th scope="col">s (mm)</th><th scope="col">Corrección (mm)</th><th scope="col">U (mm)</th><th scope="col">Corrección</th><th scope="col">Incertidumbre</th>
+      </tr></thead><tbody id="calibrator-calculation-rows"></tbody></table></div>
+    </details>
     <details id="calculation" hidden>
       <summary>Ver cálculos por punto</summary>
       <p>Error = (reloj − referencia) − (reloj − referencia) al inicio. Corrección = −error.
@@ -127,9 +143,9 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
 <script type="module">
 import "./config.mjs";
 import { mt16Access } from "./mt16_cloud.js";
-import { downloadMT17, loadCloudMT17, mt17ReportNumber, publishMT17 } from "./mt17_reports.js?v=ensayo";
+import { downloadMT17, loadCloudMT17, mt17ReportNumber, publishMT17 } from "./mt17_reports.js?v=calibrator";
 import "./mt16_cloud_access.js?v=informes";
-import { COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Plan, comparadorDI010Repeatability, evaluateComparadorDI010, isMechanicalComparatorRecord, resolveComparadorBudget, resolveComparadorCriterion } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=ensayo";
+import { COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Plan, comparadorDI010Repeatability, evaluateComparadorDI010, isMechanicalComparatorRecord, CALIBRATOR_COUNT, comparadorCalibratorProfile, evaluateComparadorCalibrator, resolveComparadorBudget, resolveComparadorCriterion } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=calibrator";
 
 const $ = id => document.getElementById(id);
 const format = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
@@ -141,7 +157,8 @@ function parse(field) {
 
 const drafts = new Map();
 function draftKey() {
- return `tmp:mt17:borrador:2:${activeEquipment.id}:${plan.max}:${plan.scaleDivisionMm}`;
+ const version = calibratorProfile ? "calibrator-1" : "2";
+ return `tmp:mt17:borrador:${version}:${activeEquipment.id}:${plan.max}:${plan.scaleDivisionMm}`;
 }
 function storeDraft() {
  const key = draftKey();
@@ -162,6 +179,9 @@ function clearDraft() {
 let inventoryRequest;
 let activeEquipment;
 let plan;
+let calibratorProfile;
+let calibratorRows = [];
+let recoveringDI010 = false;
 let upDown = [];
 let repetitions = [];
 let fields = [];
@@ -190,7 +210,7 @@ function captureSeries(groups, pairs) {
 
 function renderSeries(host, { heading, targets }, repeat = false) {
  const section = document.createElement("section");
- section.innerHTML = `<h3>${heading}${repeat ? " · " + display(targets[0]) + " mm" : ""}</h3>
+ section.innerHTML = `<h3>${heading}${repeat && !calibratorProfile ? " · " + display(targets[0]) + " mm" : ""}</h3>
  <div class="table-wrap"><table aria-label="${heading}"><thead><tr>
  <th scope="col">Toma</th><th scope="col">Reloj</th></tr></thead><tbody></tbody></table></div>`;
  host.append(section);
@@ -242,7 +262,90 @@ function renderCalculation(evaluation, sweepPairs, canDecide) {
  $("calculation-rows").replaceChildren(...rows);
 }
 
+function showDecision(result, reasons, fallback) {
+ const decision = $("decision");
+ decision.dataset.result = result || "";
+ decision.textContent = result || fallback;
+ $("decision-details").hidden = Boolean(result) || !reasons.length;
+ $("decision-reasons").replaceChildren(...reasons.map(reason => {
+  const item = document.createElement("li");
+  item.textContent = reason;
+  return item;
+ }));
+}
+
+function showSave(result) {
+ const fingerprint = prepared && JSON.stringify(prepared);
+ const previous = saved;
+ saved = completed.get(fingerprint);
+ if (saved) {
+  const number = mt17ReportNumber(saved.record);
+  $("save-status").textContent = `Guardado en Supabase · ${number} · ${saved.record.resultado}.`;
+  $("reports").href = "certificados.html?codigo=" + encodeURIComponent(number);
+ } else if (previous) {
+  $("save-status").textContent = "Cambios pendientes de guardar.";
+ }
+ $("save").textContent = result || calibratorProfile ? "Guardar calibración" : "Guardar ensayo";
+ $("save").disabled = !prepared || saving || Boolean(saved);
+ $("download").textContent = saved?.record.resultado === "PENDIENTE" ? "Descargar registro" : "Descargar informe";
+ $("download").disabled = !saved;
+}
+
+function measurementRecord({fecha, resultado, operario, temperatures, humidities, data}) {
+ return {
+  instrumento_id: activeEquipment.id, fecha, resultado,
+  equipo_snapshot: {codigo: activeEquipment.codigo, descripcion: activeEquipment.descripcion, fabricante: activeEquipment.fabricante},
+  datos: {
+   operario, patron: bank, equipo: {alcanceMm: plan.max, divisionMm: plan.scaleDivisionMm},
+   ambiente: {temperatura: temperatures, humedad: humidities}, ...data
+  }
+ };
+}
+
+function updateCalibrator() {
+ const readings = calibratorRows.map(series => series.map(row => {
+  const value = parse(row.indicator);
+  row.indicator.setAttribute("aria-invalid", String(Boolean(row.indicator.value.trim()) && !Number.isFinite(value)));
+  return value;
+ }));
+ const count = readings.flat().filter(Number.isFinite).length;
+ const evaluation = evaluateComparadorCalibrator({profile:calibratorProfile, readings});
+ const date = $("date").value;
+ const operator = $("operator").value.trim();
+ const bankValid = dateValid(date) && date >= bank.desde && date <= bank.hasta;
+ const temperatures = ["temp-start","temp-end"].map(id => parse($(id)));
+ const humidities = ["humidity-start","humidity-end"].map(id => parse($(id)));
+ const ambient = temperatures.every(Number.isFinite) && humidities.every(h => h >= 0 && h <= 100);
+ const reasons = [];
+ if (!evaluation) reasons.push("15 lecturas del reloj.");
+ if (!$("setup").checked || !$("zero").checked) reasons.push("Comprobación del montaje y la puesta a cero.");
+ if (!ambient) reasons.push("Temperatura y humedad al inicio y al cierre.");
+ if (!dateValid(date) || !operator) reasons.push("Fecha de calibración y operario.");
+ else if (!bankValid) reasons.push("Certificado del patrón que cubra la fecha indicada.");
+ const result = reasons.length ? null : evaluation.resultado;
+ $("progress").textContent = `${count}/${calibratorProfile.points.length * CALIBRATOR_COUNT} lecturas registradas.`;
+ $("criterion-summary").textContent = `${calibratorProfile.document} · Corrección ±${display(calibratorProfile.limitMm)} mm · U máxima ${display(calibratorProfile.maxExpandedMm)} mm.`;
+ $("calculation-summary").textContent = evaluation
+  ? `Mayor |corrección|: ${display(evaluation.maxCorrectionMm)} mm · Mayor U: ${display(evaluation.maxExpandedMm)} mm · k = ${display(evaluation.k)}` : "";
+ $("calibrator-calculation").hidden = !evaluation;
+ $("calibrator-calculation-rows").replaceChildren(...(evaluation?.points || []).map(point => {
+  const row = document.createElement("tr");
+  const cells = [point.nominalMm, point.meanMm, point.deviationMm, point.correctionMm, point.expandedMm].map(display);
+  cells.push(...[point.correctionAccepted, point.uncertaintyAccepted].map(ok => result ? (ok ? "Cumple" : "No cumple") : "—"));
+  cells.forEach(value => { row.insertCell().textContent = value; });
+  return row;
+ }));
+ showDecision(result, reasons, "Decisión pendiente.");
+ prepared = result && activeEquipment.id ? measurementRecord({
+  fecha:date, resultado:result, operario:operator, temperatures, humidities,
+  data:{version:4, metodo:"MT17 · Calibrator · MT-15 rev. 04", criterio:calibratorProfile,
+    evaluacion:evaluation, lecturas:readings}
+ }) : null;
+ showSave(result);
+}
+
 function update() {
+ if (calibratorProfile) { updateCalibrator(); return; }
  const sweepPairs = upDown.map(group => group.map(readPair));
  const repeatPairs = repetitions.map(group => group.map(readPair));
  const repeatability = comparadorDI010Repeatability(...repeatPairs.map(group => group.map(pair => pair?.deviationMm)));
@@ -285,46 +388,16 @@ function update() {
       `Mayor U parcial: ${display(evaluation.maxCalculatedExpandedMm)} mm`) +
     (evaluation.comparablePoints ? ` · Diferencia máxima subida/bajada: ${display(evaluation.maxHysteresisMm)} mm` : "")
   : "";
- const decision = $("decision");
- decision.dataset.result = result || "";
- decision.textContent = result || (complete && ambientOk
-  ? "Mediciones completas. Puedes guardar el ensayo pendiente de dictamen."
-  : "Decisión pendiente.");
- $("decision-details").hidden = Boolean(result) || !reasons.length;
- $("decision-reasons").replaceChildren(...reasons.map(reason => {
-  const item = document.createElement("li");
-  item.textContent = reason;
-  return item;
- }));
- prepared = complete && ambientComplete && dateValid(date) && operator && activeEquipment.id ? {
-  instrumento_id: activeEquipment.id,
-  fecha: date,
-  resultado: result || "PENDIENTE",
-  equipo_snapshot: { codigo: activeEquipment.codigo, descripcion: activeEquipment.descripcion, fabricante: activeEquipment.fabricante },
-  datos: {
-   version: 3, metodo: "MT17 · CEM DI-010", operario: operator, patron: bank,
-   equipo: { alcanceMm: plan.max, divisionMm: plan.scaleDivisionMm },
-   ambiente: { temperatura: temperatures, humedad: humidities },
-   criterio: criterion, presupuesto: budget, evaluacion: evaluation,
-   ...(result ? {} : {pendientes: reasons}),
-   ...(sourceRecord ? {ensayo_origen: sourceRecord.id} : {}),
-   recorrido: captureSeries(upDown, sweepPairs), repetibilidad: captureSeries(repetitions, repeatPairs)
-  }
- } : null;
- const fingerprint = prepared && JSON.stringify(prepared);
- const previous = saved;
- saved = completed.get(fingerprint);
- if (saved) {
-  const number = mt17ReportNumber(saved.record);
-  $("save-status").textContent = `Guardado en Supabase · ${number} · ${saved.record.resultado}.`;
-  $("reports").href = "certificados.html?codigo=" + encodeURIComponent(number);
- } else if (previous) {
-  $("save-status").textContent = "Cambios pendientes de guardar.";
- }
- $("save").textContent = result ? "Guardar calibración" : "Guardar ensayo";
- $("save").disabled = !prepared || saving || Boolean(saved);
- $("download").textContent = saved?.record.resultado === "PENDIENTE" ? "Descargar registro" : "Descargar informe";
- $("download").disabled = !saved;
+ showDecision(result, reasons, complete && ambientOk
+  ? "Mediciones completas. Puedes guardar el ensayo pendiente de dictamen." : "Decisión pendiente.");
+ prepared = complete && ambientComplete && dateValid(date) && operator && activeEquipment.id ? measurementRecord({
+  fecha:date, resultado:result || "PENDIENTE", operario:operator, temperatures, humidities,
+  data:{version:3, metodo:"MT17 · CEM DI-010", criterio:criterion, presupuesto:budget, evaluacion:evaluation,
+   ...(result ? {} : {pendientes:reasons}),
+   ...(sourceRecord ? {ensayo_origen:sourceRecord.id} : {}),
+   recorrido:captureSeries(upDown,sweepPairs), repetibilidad:captureSeries(repetitions,repeatPairs)}
+ }) : null;
+ showSave(result);
 }
 
 async function saveCalibration() {
@@ -374,6 +447,7 @@ function selectEquipment(equipment) {
  $("save-status").textContent = "El registro se conserva en Supabase al guardar.";
  activeEquipment = equipment;
  plan = nextPlan;
+ calibratorProfile = recoveringDI010 ? null : comparadorCalibratorProfile(equipment, plan);
  const url = new URL(location.href);
  url.searchParams.set("codigo", equipment.codigo);
  history.replaceState(null, "", url);
@@ -389,16 +463,29 @@ function selectEquipment(equipment) {
   ? `La incertidumbre del Trimos en el punto superior (${display(bankUAtTopMm)} mm) supera los ${display(recommended)} mm recomendados por DI‑010 para este reloj. Requiere revisar la aptitud del banco.`
   : `La incertidumbre del Trimos en el punto superior (${display(bankUAtTopMm)} mm) está dentro de los ${display(recommended)} mm recomendados por DI‑010.`;
 
+ $("calibrator-series").hidden = $("calibrator-method").hidden = !calibratorProfile;
+ $("di-series").hidden = $("di-method").hidden = $("di-environment").hidden = Boolean(calibratorProfile);
+ $("calculation").hidden = $("calibrator-calculation").hidden = true;
  $("sweeps").replaceChildren();
  $("repeats").replaceChildren();
- upDown = [
-  renderSeries($("sweeps"), {heading: "Subida", targets: points}),
-  renderSeries($("sweeps"), {heading: "Bajada", targets: [...points].reverse()})
- ];
- repetitions = [
-  renderSeries($("repeats"), {heading: "Punto superior", targets: Array(repeatCount).fill(points.at(-1))}, true),
-  renderSeries($("repeats"), {heading: "Punto inferior", targets: Array(repeatCount).fill(points[0])}, true)
- ];
+ $("calibrator-tables").replaceChildren();
+ if (calibratorProfile) {
+  $("bank-capability").textContent = "Se usa la corrección global nula y la incertidumbre Us del certificado vigente del Trimos.";
+  calibratorRows = calibratorProfile.points.map(point => renderSeries($("calibrator-tables"),
+   {heading:"Punto " + display(point) + " mm", targets:Array(CALIBRATOR_COUNT).fill(point)}, true));
+  calibratorRows.flat().forEach(row => { row.label.textContent = row.index; });
+  upDown = repetitions = [];
+ } else {
+  calibratorRows = [];
+  upDown = [
+   renderSeries($("sweeps"), {heading: "Subida", targets: points}),
+   renderSeries($("sweeps"), {heading: "Bajada", targets: [...points].reverse()})
+  ];
+  repetitions = [
+   renderSeries($("repeats"), {heading: "Punto superior", targets: Array(repeatCount).fill(points.at(-1))}, true),
+   renderSeries($("repeats"), {heading: "Punto inferior", targets: Array(repeatCount).fill(points[0])}, true)
+  ];
+ }
  const existing = readDraft();
  fields = [...$("worksheet").querySelectorAll("input")];
  fields.forEach((field, index) => {
@@ -512,7 +599,8 @@ async function resumeCloudRecord(id) {
   const record = await loadCloudMT17(id);
   if (record?.resultado !== "PENDIENTE") throw new Error("Ensayo no disponible");
   $("equipment-query").value = record.equipo_snapshot.codigo;
-  await findEquipment();
+  recoveringDI010 = true;
+  try { await findEquipment(); } finally { recoveringDI010 = false; }
   if (activeEquipment?.id !== record.instrumento_id ||
       plan.max !== record.datos.equipo.alcanceMm || plan.scaleDivisionMm !== record.datos.equipo.divisionMm ||
       bank.certificado !== record.datos.patron.certificado) {

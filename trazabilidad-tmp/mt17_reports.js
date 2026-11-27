@@ -47,7 +47,53 @@ function reportTable(title, headers, rows) {
     <tbody>${rows.map(row => `<tr>${row.map(value => `<td>${escape(value)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 
+function buildCalibratorReport(record) {
+  const {equipo_snapshot: equipo, datos} = record;
+  const {operario, ambiente, patron, criterio, evaluacion, lecturas} = datos;
+  const fmtDate = date => date.split('-').reverse().join('/');
+  const reportNumber = mt17ReportNumber(record);
+  const result = flag => flag ? 'Cumple' : 'No cumple';
+  const measurements = evaluacion.points.map((point, i) => [
+    mm(point.nominalMm), ...lecturas[i].map(mm), mm(point.meanMm), mm(point.deviationMm)
+  ]);
+  const decisions = evaluacion.points.map(point => [
+    mm(point.nominalMm), mm(point.referenceCorrectionMm), mm(point.bankExpandedMm), mm(point.bankK),
+    mm(point.correctionMm), mm(point.expandedMm), result(point.correctionAccepted), result(point.uncertaintyAccepted)
+  ]);
+  return `<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escape(reportNumber)} · Calibración de reloj comparador</title>
+<style>
+body{max-width:1020px;margin:auto;padding:24px;font:14px/1.45 system-ui,sans-serif;color:#10243c} h2,h3{break-after:avoid}
+table{width:100%;border-collapse:collapse}td,th{padding:6px;text-align:right;border-bottom:1px solid #aebdce}th{background:#edf4ff}
+tr{break-inside:avoid}thead{display:table-header-group}@media print{body{padding:0;font-size:10pt}td,th{padding:4px}}
+</style>
+<header><p>Talleres Mecánicos Paramio · Trazabilidad Metrológica</p>
+<h1>Informe de calibración de reloj comparador</h1>
+<p>${escape(reportNumber)} · ${escape(fmtDate(record.fecha))} · MT17</p></header>
+<h2>Resultado · ${escape(record.resultado)}</h2>
+<p>Equipo ${escape(equipo.codigo)} · ${escape(equipo.descripcion)} · ${escape(equipo.fabricante)}.
+Rango de la ficha 0–${mm(datos.equipo.alcanceMm)} mm · División de escala ${mm(criterio.divisionMm)} mm · Operario ${escape(operario)}.</p>
+<p>Alcance del informe: ${criterio.points.map(mm).join(' / ')} mm. El dictamen corresponde a estos tres puntos.</p>
+<p>Mayor |corrección| ${mm(evaluacion.maxCorrectionMm)} mm · Mayor U ${mm(evaluacion.maxExpandedMm)} mm.</p>
+<h2>Método y trazabilidad</h2>
+<p>${escape(criterio.document)}. Patrón ${escape(patron.nombre)} · ${escape(patron.codigo)} ·
+Certificado ${escape(patron.certificado)}, válido hasta ${escape(fmtDate(patron.hasta))}. Se utiliza la envolvente Us para corrección global nula.</p>
+<p>Montaje y puesta a cero comprobados · Inicio ${mm(ambiente.temperatura[0])} °C y ${mm(ambiente.humedad[0])} % HR ·
+Cierre ${mm(ambiente.temperatura[1])} °C y ${mm(ambiente.humedad[1])} % HR.</p>
+${reportTable('Lecturas del reloj (mm)', ['Nominal','L1','L2','L3','L4','L5','Media','s'], measurements)}
+${reportTable('Corrección, incertidumbre y decisión', ['Nominal (mm)','C patrón (mm)','Us patrón (mm)','k patrón','Corrección (mm)','U (mm)','Corrección','Incertidumbre'], decisions)}
+<h2>Cálculo y límites</h2>
+<p>Corrección = media − (nominal + corrección del patrón).
+U = k × √[(Us patrón / k patrón)² + s²/5 + D²/3].
+s es la desviación típica muestral y D el valor de división de escala registrado. Factor de cobertura k = ${mm(evaluacion.k)} para cinco lecturas.</p>
+<p>APTO si en los tres puntos |corrección| ≤ ${mm(criterio.limitMm)} mm y U ≤ ${mm(criterio.maxExpandedMm)} mm.
+Cada límite se comprueba por separado según la pauta Calibrator.</p>
+</html>`;
+}
+
 export function buildMT17Report(record) {
+  if (record.datos.version === 4) return buildCalibratorReport(record);
   const {equipo_snapshot: equipment, datos} = record;
   const {operario, ambiente, patron, criterio, evaluacion, recorrido, repetibilidad, equipo} = datos;
   const number = mt17ReportNumber(record);

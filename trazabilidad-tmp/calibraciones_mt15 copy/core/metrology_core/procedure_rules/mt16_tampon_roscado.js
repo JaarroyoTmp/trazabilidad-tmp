@@ -1,4 +1,4 @@
-import {MT16_CATALOGUE} from './mt16_catalogue.js?v=20261126';
+import {MT16_CATALOGUE} from './mt16_catalogue.js?v=m16x2';
 import { createPoint, parseNum } from "./shared.js";
 import { BSP_THREAD_TABLE, parseThreadDesignation } from '../thread/core/thread_parser.js';
 
