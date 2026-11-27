@@ -40,8 +40,8 @@ output{font-weight:700}
 #mt16-cloud-access form[hidden]{display:none}
 #mt16-cloud-access input{display:block;margin-top:6px}
 .report-actions{display:flex;flex-wrap:wrap;gap:8px}
-#decision-details{margin-bottom:12px;font-size:14px}
-#decision-details summary{cursor:pointer}
+#calculation,#decision-details{margin-bottom:12px;font-size:14px}
+#calculation summary,#decision-details summary{cursor:pointer}
 fieldset{padding:0;border:0;margin:0;min-width:0}
 @media(max-width:850px){.grid{grid-template-columns:1fr}main{padding:12px}}
 </style>
@@ -91,12 +91,24 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
     </div>
     <p id="progress" role="status"></p>
     <h2>Decisión e informe</h2>
+    <p><a href="https://www.cem.es/es/divulgacion/publicaciones/di-010-procedimiento-calibracion-comparadores-mecanicos" target="_blank" rel="noopener">CEM DI-010</a> · §5.7 recorrido, §5.8 repetibilidad, §6.1 y tabla 13 incertidumbre, anexo 8.4 banco.
+    La declaración usa la <a href="https://ilac.org/publications-and-resources/ilac-guidance-series/" target="_blank" rel="noopener">regla binaria con banda de guarda de ILAC G8</a>.</p>
     <div class="ambient">
       <label>Fecha de calibración<input id="date" type="date"></label>
       <label>Operario<input id="operator" type="text" maxlength="120"></label>
     </div>
     <p id="criterion-summary"></p>
     <p id="calculation-summary" aria-live="polite"></p>
+    <details id="calculation" hidden>
+      <summary>Ver cálculos por punto</summary>
+      <p>Error = (reloj − referencia) − (reloj − referencia) al inicio. Corrección = −error.
+      u<sub>c</sub> = √(u<sub>banco</sub>² + u<sub>escala</sub>² + u<sub>repetibilidad</sub>² + u<sub>térmica</sub>² + u<sub>alineación</sub>² + u<sub>deriva</sub>²).
+      U = k × u<sub>c</sub>. APTO si en todos los puntos |corrección| + U ≤ límite y U ≤ U máxima cuando esté especificada.</p>
+      <p id="budget-summary"></p>
+      <div class="table-wrap"><table aria-label="Cálculos por punto"><thead><tr>
+      <th scope="col">Sentido</th><th scope="col">Toma (mm)</th><th scope="col">Error (mm)</th><th scope="col">u banco (mm)</th><th scope="col">u térmica (mm)</th><th scope="col">u alineación (mm)</th><th scope="col">u combinada (mm)</th><th scope="col">k</th><th scope="col" id="u-title">U (mm)</th><th scope="col">|Corrección| + U (mm)</th><th scope="col">Decisión</th>
+      </tr></thead><tbody id="calculation-rows"></tbody></table></div>
+    </details>
     <p id="decision" class="decision" role="status">Decisión pendiente.</p>
     <details id="decision-details" hidden>
       <summary>Datos necesarios para emitir el informe</summary>
@@ -115,9 +127,9 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
 <script type="module">
 import "./config.mjs";
 import { mt16Access } from "./mt16_cloud.js";
-import { downloadMT17, mt17ReportNumber, publishMT17 } from "./mt17_reports.js?v=automatico";
+import { downloadMT17, loadCloudMT17, mt17ReportNumber, publishMT17 } from "./mt17_reports.js?v=ensayo";
 import "./mt16_cloud_access.js?v=informes";
-import { COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Plan, comparadorDI010Repeatability, evaluateComparadorDI010, isMechanicalComparatorRecord, resolveComparadorBudget, resolveComparadorCriterion } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=automatico";
+import { COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Plan, comparadorDI010Repeatability, evaluateComparadorDI010, isMechanicalComparatorRecord, resolveComparadorBudget, resolveComparadorCriterion } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=ensayo";
 
 const $ = id => document.getElementById(id);
 const format = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
@@ -154,6 +166,7 @@ let upDown = [];
 let repetitions = [];
 let fields = [];
 let prepared;
+let sourceRecord;
 const pending = new Map();
 let saved;
 const completed = new Map();
@@ -206,6 +219,29 @@ function readPair(row) {
  return pair && {...pair, bank};
 }
 
+function renderCalculation(evaluation, sweepPairs, canDecide) {
+ $("calculation").hidden = !evaluation;
+ if (!evaluation) return;
+ const number = value => display(value);
+ $("u-title").textContent = budget ? "U (mm)" : "U parcial sin redondear (mm)";
+ $("budget-summary").textContent = `u escala: ${number(evaluation.scaleStandardMm)} mm · u repetibilidad: ${number(evaluation.repeatStandardMm)} mm` +
+  (budget ? ` · u deriva: ${number(evaluation.driftStandardMm)} mm. U redondeada por exceso a la división de escala.` :
+   ". Incertidumbre parcial con los términos disponibles.");
+ const rows = evaluation.points.flatMap((series, direction) => series.map((point, i) => {
+  const cells = [
+   direction === 0 ? "Subida" : "Bajada", number(sweepPairs[direction][i].bank), number(-point.correctionMm),
+   number(point.bankStandardMm), number(point.thermalStandardMm), number(point.alignmentStandardMm),
+   number(point.combinedStandardMm), number(point.k), number(budget ? point.expandedMm : point.calculatedExpandedMm),
+   canDecide ? number(point.guardedErrorMm) : "—",
+   canDecide ? (point.accepted ? "APTO" : "NO APTO · " + point.failures.join(" y ")) : "—"
+  ];
+  const row = document.createElement("tr");
+  cells.forEach(value => { row.insertCell().textContent = value; });
+  return row;
+ }));
+ $("calculation-rows").replaceChildren(...rows);
+}
+
 function update() {
  const sweepPairs = upDown.map(group => group.map(readPair));
  const repeatPairs = repetitions.map(group => group.map(readPair));
@@ -228,14 +264,17 @@ function update() {
  const operator = $("operator").value.trim();
  const bankValid = dateValid(date) && date >= bank.desde && date <= bank.hasta;
  const evaluation = complete && ambientOk
-  ? evaluateComparadorDI010({plan, sweeps: sweepPairs, repeatability, criterion, budget}) : null;
+  ? evaluateComparadorDI010({plan, sweeps: sweepPairs, repeatability, criterion: bankValid && operator ? criterion : null, budget}) : null;
  const reasons = [];
  if (!criterion) reasons.push("Criterio de aceptación de " + activeEquipment.codigo + ".");
  if (!budget) reasons.push("Presupuesto del montaje con la deriva del Trimos y la alineación.");
  if (dateValid(date) && !bankValid) reasons.push("Certificado del patrón que cubra la fecha indicada.");
  if (!dateValid(date) || !operator) reasons.push("Fecha de calibración y operario.");
- if (!complete || !ambientOk) reasons.push("Lecturas y condiciones del ensayo completas.");
- const result = bankValid && operator && evaluation?.resultado;
+ if (!complete || !ambientComplete) reasons.push("Lecturas y condiciones del ensayo completas.");
+ else if (!ambientOk) reasons.push("Revisión de las condiciones ambientales fuera del intervalo.");
+ else if (!evaluation) reasons.push("Revisión de las lecturas para obtener un cálculo válido.");
+ const result = evaluation?.resultado;
+ renderCalculation(evaluation, sweepPairs, Boolean(result));
  $("criterion-summary").textContent = criterion
   ? `${criterion.document} · Límite ±${display(criterion.limitMm)} mm` +
     (criterion.maxExpandedMm === null ? "" : ` · U máxima ${display(criterion.maxExpandedMm)} mm`)
@@ -243,12 +282,13 @@ function update() {
  $("calculation-summary").textContent = evaluation
   ? `Mayor |corrección|: ${display(evaluation.maxCorrectionMm)} mm · ` +
     (budget ? `Mayor U: ${display(evaluation.maxExpandedMm)} mm` :
-      `Mayor U parcial: ${display(evaluation.maxCalculatedExpandedMm)} mm`)
+      `Mayor U parcial: ${display(evaluation.maxCalculatedExpandedMm)} mm`) +
+    (evaluation.comparablePoints ? ` · Diferencia máxima subida/bajada: ${display(evaluation.maxHysteresisMm)} mm` : "")
   : "";
  const decision = $("decision");
  decision.dataset.result = result || "";
  decision.textContent = result || (complete && ambientOk
-  ? "Mediciones completas. Informe pendiente de validación."
+  ? "Mediciones completas. Puedes guardar el ensayo pendiente de dictamen."
   : "Decisión pendiente.");
  $("decision-details").hidden = Boolean(result) || !reasons.length;
  $("decision-reasons").replaceChildren(...reasons.map(reason => {
@@ -256,16 +296,18 @@ function update() {
   item.textContent = reason;
   return item;
  }));
- prepared = result && activeEquipment.id ? {
+ prepared = complete && ambientComplete && dateValid(date) && operator && activeEquipment.id ? {
   instrumento_id: activeEquipment.id,
   fecha: date,
-  resultado: evaluation.resultado,
+  resultado: result || "PENDIENTE",
   equipo_snapshot: { codigo: activeEquipment.codigo, descripcion: activeEquipment.descripcion, fabricante: activeEquipment.fabricante },
   datos: {
-   version: 2, metodo: "MT17 · CEM DI-010", operario: operator, patron: bank,
+   version: 3, metodo: "MT17 · CEM DI-010", operario: operator, patron: bank,
    equipo: { alcanceMm: plan.max, divisionMm: plan.scaleDivisionMm },
    ambiente: { temperatura: temperatures, humedad: humidities },
    criterio: criterion, presupuesto: budget, evaluacion: evaluation,
+   ...(result ? {} : {pendientes: reasons}),
+   ...(sourceRecord ? {ensayo_origen: sourceRecord.id} : {}),
    recorrido: captureSeries(upDown, sweepPairs), repetibilidad: captureSeries(repetitions, repeatPairs)
   }
  } : null;
@@ -273,11 +315,15 @@ function update() {
  const previous = saved;
  saved = completed.get(fingerprint);
  if (saved) {
-  $("save-status").textContent = `Guardado en Supabase · ${mt17ReportNumber(saved.record)}.`;
+  const number = mt17ReportNumber(saved.record);
+  $("save-status").textContent = `Guardado en Supabase · ${number} · ${saved.record.resultado}.`;
+  $("reports").href = "certificados.html?codigo=" + encodeURIComponent(number);
  } else if (previous) {
   $("save-status").textContent = "Cambios pendientes de guardar.";
  }
+ $("save").textContent = result ? "Guardar calibración" : "Guardar ensayo";
  $("save").disabled = !prepared || saving || Boolean(saved);
+ $("download").textContent = saved?.record.resultado === "PENDIENTE" ? "Descargar registro" : "Descargar informe";
  $("download").disabled = !saved;
 }
 
@@ -292,7 +338,7 @@ async function saveCalibration() {
  $("worksheet").disabled = true;
  $("equipment-form").querySelector("button").disabled = true;
  $("equipment-results").disabled = true;
- $("save-status").textContent = "Guardando calibración…";
+ $("save-status").textContent = "Guardando en Supabase…";
  try {
   if (!await mt16Access()) {
    waitingForAccess = true;
@@ -305,7 +351,7 @@ async function saveCalibration() {
   pending.delete(fingerprint);
   clearDraft();
  } catch {
-  $("save-status").textContent = "No se pudo confirmar el guardado. Vuelve a pulsar Guardar calibración para reintentar.";
+  $("save-status").textContent = "No se pudo confirmar el guardado. Vuelve a pulsar Guardar para reintentar.";
  } finally {
   saving = false;
   $("worksheet").disabled = false;
@@ -323,6 +369,8 @@ function selectEquipment(equipment) {
   return;
  }
  waitingForAccess = false;
+ sourceRecord = undefined;
+ $("reports").href = "certificados.html";
  $("save-status").textContent = "El registro se conserva en Supabase al guardar.";
  activeEquipment = equipment;
  plan = nextPlan;
@@ -459,7 +507,41 @@ $("equipment-results").addEventListener("change", async event => {
 const params = new URLSearchParams(location.search);
 const priorProfileCodes = {centesimal: "20102644", milesimal: "JZF962"};
 $("equipment-query").value = params.get("codigo") || priorProfileCodes[params.get("comparador")] || "";
-findEquipment();
+async function resumeCloudRecord(id) {
+ try {
+  const record = await loadCloudMT17(id);
+  if (record?.resultado !== "PENDIENTE") throw new Error("Ensayo no disponible");
+  $("equipment-query").value = record.equipo_snapshot.codigo;
+  await findEquipment();
+  if (activeEquipment?.id !== record.instrumento_id ||
+      plan.max !== record.datos.equipo.alcanceMm || plan.scaleDivisionMm !== record.datos.equipo.divisionMm ||
+      bank.certificado !== record.datos.patron.certificado) {
+   throw new Error("La ficha o el patrón han cambiado");
+  }
+  const data = record.datos;
+  sourceRecord = record;
+  $("setup").checked = $("zero").checked = true;
+  $("date").value = record.fecha;
+  $("operator").value = data.operario;
+  ["temp-start","temp-end"].forEach((name, i) => { $(name).value = data.ambiente.temperatura[i]; });
+  ["humidity-start","humidity-end"].forEach((name, i) => { $(name).value = data.ambiente.humedad[i]; });
+  for (const [groups, values] of [[upDown, data.recorrido], [repetitions, data.repetibilidad]]) {
+   groups.forEach((rows, i) => rows.forEach((row, j) => {
+    row.reference.value = values[i][j].bank;
+    row.indicator.value = values[i][j].indicator;
+   }));
+  }
+  update();
+  if (prepared?.resultado === "PENDIENTE") {
+   completed.set(JSON.stringify(prepared), {record});
+   update();
+  }
+ } catch {
+  $("equipment-status").textContent = "No se pudo recuperar el ensayo. Comprueba el acceso de Calidad y la ficha del equipo.";
+ }
+}
+if (params.has("ensayo")) resumeCloudRecord(params.get("ensayo"));
+else findEquipment();
 </script>
 </body>
 </html>

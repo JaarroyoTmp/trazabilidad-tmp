@@ -1,4 +1,4 @@
-import {downloadMT17, listCloudMT17, loadCloudMT17, mt17ReportNumber} from './mt17_reports.js';
+import {downloadMT17, listCloudMT17, loadCloudMT17, mt17ReportNumber} from './mt17_reports.js?v=ensayo';
 import {loadCloudMT16, mt16Access} from './mt16_cloud.js';
 
 const el = id => document.getElementById(id);
@@ -7,7 +7,7 @@ const body = el('records');
 const controls = Object.fromEntries(fields.map(id => [id,el(id)]));
 const status = el('status');
 const tipo = {CALIBRACION:'Calibración',CALIBRACION_MT17:'Calibración MT17',VERIFICACION:'Verificación MT16'};
-const resultClass = {APTO:'ok','NO APTO':'nok',INDETERMINADO:'pending'};
+const resultClass = {APTO:'ok','NO APTO':'nok',INDETERMINADO:'pending',PENDIENTE:'pending'};
 const query = new URLSearchParams(location.search);
 controls.search.value = query.get('codigo')?.trim() || '';
 let registros = [];
@@ -99,15 +99,17 @@ function rowFor(r) {
   } else equipo.textContent='—';
   if (r.descripcion) equipo.append(element('span',r.descripcion,'sub'));
   const kind = element('td');
-  kind.append(element('span',tipo[r.tipo] || r.tipo,'badge'+(r.tipo==='VERIFICACION'?' quality':'')));
+  kind.append(element('span',r.tipo === 'CALIBRACION_MT17' && r.resultado === 'PENDIENTE' ? 'Ensayo MT17' : (tipo[r.tipo] || r.tipo),'badge'+(r.tipo==='VERIFICACION'?' quality':'')));
   const decision = element('td');
   decision.append(element('span',r.resultado,'badge '+(resultClass[r.resultado] || '')));
   const documento = element('td',r.documento || (r.tiene_documento ? 'Documento disponible' : 'Sin documento'));
   const actions = element('td');
   const group = element('div',null,'actions');
   group.append(button('Detalle',()=>showDetail(r)));
+  const ensayo = r.tipo === 'CALIBRACION_MT17' && r.resultado === 'PENDIENTE';
+  if (ensayo) group.append(enlace('Recuperar ensayo','./mt17.html?ensayo='+encodeURIComponent(r.id)));
   if (['VERIFICACION','CALIBRACION_MT17'].includes(r.tipo) && r.tiene_documento) {
-    group.append(button('Descargar informe',async event=>{
+    group.append(button(ensayo ? 'Descargar registro' : 'Descargar informe',async event=>{
       const control = event.currentTarget;
       control.disabled = true;
       try {
@@ -189,13 +191,13 @@ async function load() {
       operario:r.operario, criterio:r.criterio, laboratorio:'TMP', tiene_documento:true
     }));
     registros = [...(legacy.value ?? []), ...mt17Rows]
-      .map(r => ({...r, resultado:resultado(r.resultado)}))
+      .map(r => r.tipo === 'CALIBRACION_MT17' && r.resultado === 'PENDIENTE' ? r : {...r, resultado:resultado(r.resultado)})
       .sort((a,b) => (b.fecha ?? '').localeCompare(a.fecha ?? ''));
     const previousYear=controls.year.value;
     const years=[...new Set(registros.map(r=>r.fecha?.slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse();
     controls.year.replaceChildren(new Option('Todos',''),...years.map(y=>new Option(y,y)));
     if(years.includes(previousYear)) controls.year.value=previousYear;
-    el('total-cal').textContent=registros.filter(esCalibracion).length;
+    el('total-cal').textContent=registros.filter(r=>esCalibracion(r) && r.resultado!=='PENDIENTE').length;
     el('total-mt16').textContent=registros.filter(r=>r.tipo==='VERIFICACION').length;
     el('total-apto').textContent=registros.filter(r=>r.resultado==='APTO').length;
     el('total-no-apto').textContent=registros.filter(r=>r.resultado==='NO APTO').length;

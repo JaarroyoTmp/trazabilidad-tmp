@@ -54,7 +54,7 @@
   @media(max-width:520px){.metrics{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start}}
   @media print{.access,nav,button,.actions,.filters,footer,th:last-child,td:last-child{display:none!important}.page{padding:0}.intro{color:black;background:white;padding:0}.intro p{color:black}table{min-width:0}}
 </style>
-<script type="module" src="./registro_documental.js?v=mt17"></script>
+<script type="module" src="./registro_documental.js?v=ensayo"></script>
 <script type="module" src="./mt16_cloud_access.js?v=informes"></script>
 </head>
 <body>
@@ -89,7 +89,7 @@
     <div class="filters">
       <label>Buscar <input type="search" id="search" placeholder="Equipo, informe u operario"></label>
       <label>Tipo <select id="type"><option value="">Todos</option><option value="CALIBRACION">Todas las calibraciones</option><option value="CALIBRACION_MT17">Calibración MT17</option><option value="VERIFICACION">Verificación MT16</option></select></label>
-      <label>Resultado <select id="result"><option value="">Todos</option><option value="APTO">Apto</option><option value="NO APTO">No apto</option><option value="INDETERMINADO">Indeterminado</option><option value="SIN DECISIÓN">Sin decisión</option></select></label>
+      <label>Resultado <select id="result"><option value="">Todos</option><option value="APTO">Apto</option><option value="NO APTO">No apto</option><option value="PENDIENTE">Ensayo pendiente</option><option value="INDETERMINADO">Indeterminado</option><option value="SIN DECISIÓN">Sin decisión</option></select></label>
       <label>Año <select id="year"><option value="">Todos</option></select></label>
       <button id="reset" type="button">Limpiar filtros</button>
     </div>

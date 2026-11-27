@@ -108,22 +108,31 @@ export function evaluateComparadorDI010({ plan, sweeps, repeatability, criterion
     // CEM DI-010 §6.1.6, round the reported U up to the instrument division.
     const expandedMm = Math.ceil(calculatedExpandedMm / plan.scaleDivisionMm - 1e-12) * plan.scaleDivisionMm;
     const guardedErrorMm = Math.abs(correctionMm) + expandedMm;
-    const accepted = criterion && budget
-      ? guardedErrorMm <= criterion.limitMm + 1e-12 &&
-        (criterion.maxExpandedMm === null || expandedMm <= criterion.maxExpandedMm + 1e-12)
-      : null;
-    return { correctionMm, expandedMm, calculatedExpandedMm, guardedErrorMm, accepted, k,
-      bankStandardMm, thermalStandardMm, alignmentStandardMm };
+    const failures = criterion && budget ? [
+      ...(guardedErrorMm > criterion.limitMm + 1e-12 ? ['Límite de corrección con banda de guarda'] : []),
+      ...(criterion.maxExpandedMm !== null && expandedMm > criterion.maxExpandedMm + 1e-12
+        ? ['Incertidumbre máxima admitida'] : [])
+    ] : null;
+    const accepted = failures ? failures.length === 0 : null;
+    return { correctionMm, expandedMm, calculatedExpandedMm, guardedErrorMm, accepted, failures, k,
+      bankStandardMm, thermalStandardMm, alignmentStandardMm: budget ? alignmentStandardMm : null,
+      combinedStandardMm: combined, effectiveDegrees: Number.isFinite(degrees) ? degrees : null };
   }));
   const all = points.flat();
   if (all.some(p => !Number.isFinite(p.guardedErrorMm))) return null;
+  // Compare the two directions only when the reference position is the same.
+  const descending = [...sweeps[1]].reverse();
+  const differences = sweeps[0].flatMap((ascending, i) => Math.abs(ascending.bank - descending[i].bank) <= 1e-12
+    ? [Math.abs(ascending.deviationMm - descending[i].deviationMm)] : []);
   return {
+    comparablePoints: differences.length,
+    maxHysteresisMm: differences.length ? Math.max(...differences) : null,
     resultado: criterion && budget ? (all.every(p => p.accepted) ? 'APTO' : 'NO APTO') : null,
     points, maxCorrectionMm: Math.max(...all.map(p => Math.abs(p.correctionMm))),
     maxGuardedMm: Math.max(...all.map(p => p.guardedErrorMm)),
     maxExpandedMm: Math.max(...all.map(p => p.expandedMm)),
     maxCalculatedExpandedMm: Math.max(...all.map(p => p.calculatedExpandedMm)),
-    repeatabilityMm: repeatability, scaleStandardMm: resolution, repeatStandardMm: repeatContribution, driftStandardMm
+    repeatabilityMm: repeatability, scaleStandardMm: resolution, repeatStandardMm: repeatContribution, driftStandardMm: budget ? driftStandardMm : null
   };
 }
 

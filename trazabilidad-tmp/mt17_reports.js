@@ -7,7 +7,7 @@ export function mt17ReportNumber({id, fecha}) {
 }
 
 export async function loadCloudMT17(id) {
-  const {data, error} = await table().select('id,fecha,resultado,equipo_snapshot,datos').eq('id', id).maybeSingle();
+  const {data, error} = await table().select('id,instrumento_id,fecha,resultado,equipo_snapshot,datos').eq('id', id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -52,12 +52,22 @@ export function buildMT17Report(record) {
   const {operario, ambiente, patron, criterio, evaluacion, recorrido, repetibilidad, equipo} = datos;
   const number = mt17ReportNumber(record);
   const automatic = datos.version >= 2;
+  const pending = record.resultado === 'PENDIENTE';
+  const title = pending ? 'Registro de ensayo de reloj comparador' : 'Informe de calibración de reloj comparador';
+  const budget = datos.presupuesto;
+  const detailed = datos.version >= 3;
+  const partial = pending && !budget;
   const sections = recorrido.map((group, direction) => reportTable(direction === 0 ? 'Subida' : 'Bajada',
-    ['Punto', 'Banco', 'Reloj', 'Corrección', 'U del banco (k=2)', 'U', ...(automatic ? ['k'] : []), '|Corrección| + U', 'Decisión'],
+    ['Punto', 'Banco', 'Reloj', 'Corrección', ...(detailed ? ['u banco', 'u térmica', 'u alineación', 'u combinada'] : ['U del banco (k=2)']),
+      partial ? 'U parcial' : 'U', ...(automatic ? ['k'] : []), '|Corrección| + U', 'Decisión'],
     group.map((row, index) => {
-      const point = evaluacion.points[direction][index];
-      return [row.target, row.bank, row.indicator, point.correctionMm, row.bankExpandedMm,
-        point.expandedMm, ...(automatic ? [point.k] : []), point.guardedErrorMm].map(mm).concat(status(point.accepted));
+      const point = evaluacion?.points?.[direction]?.[index];
+      return [row.target, row.bank, row.indicator, point?.correctionMm,
+        ...(detailed ? [point?.bankStandardMm, point?.thermalStandardMm, point?.alignmentStandardMm,
+          point?.combinedStandardMm] : [row.bankExpandedMm]),
+        partial ? point?.calculatedExpandedMm : point?.expandedMm,
+        ...(automatic ? [point?.k] : []), pending ? null : point?.guardedErrorMm]
+        .map(mm).concat(pending ? '—' : status(point.accepted));
     })));
   const repeats = repetibilidad.map((group, index) => reportTable(index === 0 ? 'Punto superior' : 'Punto inferior',
     ['Toma', 'Banco', 'Reloj', 'Reloj − banco'],
@@ -65,35 +75,41 @@ export function buildMT17Report(record) {
 
   return `<!doctype html>
 <html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escape(number)} · Calibración de reloj comparador</title>
+<title>${escape(number)} · ${title}</title>
 <style>
 body{max-width:1020px;margin:auto;padding:24px;font:14px/1.45 system-ui,sans-serif;color:#10243c}
 h1,h2,h3{line-height:1.2}h2,h3{break-after:avoid}table{width:100%;border-collapse:collapse;margin-bottom:18px}td,th{padding:6px;text-align:right;border-bottom:1px solid #aebdce}th{background:#edf4ff}tr{break-inside:avoid}thead{display:table-header-group}
 .summary{padding:10px 14px;border:1px solid #aebdce}
 @media print{body{padding:0;font-size:10pt}td,th{padding:4px}}
 </style>
-<header><p>Talleres Mecánicos Paramio · Trazabilidad Metrológica</p><h1>Informe de calibración de reloj comparador</h1>
+<header><p>Talleres Mecánicos Paramio · Trazabilidad Metrológica</p><h1>${title}</h1>
 <p>${escape(number)} · MT17 · ${escape(record.fecha.split('-').reverse().join('/'))}</p></header>
 <section class="summary"><h2>Resultado · ${escape(record.resultado)}</h2>
 <p>Equipo ${escape(equipment.codigo)} · ${escape(equipment.descripcion)} · ${escape(equipment.fabricante)}<br>
 Rango 0–${mm(equipo.alcanceMm)} mm · División de escala ${mm(equipo.divisionMm)} mm · Operario ${escape(operario)}</p>
-<p>Mayor |corrección| + U: ${mm(evaluacion.maxGuardedMm)} mm · Mayor U: ${mm(evaluacion.maxExpandedMm)} mm</p></section>
+${pending ? `<p>Ensayo pendiente de dictamen de conformidad.</p><ul>${(datos.pendientes ?? []).map(reason => `<li>${escape(reason)}</li>`).join('')}</ul>`
+  : `<p>Mayor |corrección| + U: ${mm(evaluacion.maxGuardedMm)} mm · Mayor U: ${mm(evaluacion.maxExpandedMm)} mm</p>`}
+${evaluacion?.comparablePoints ? `<p>Diferencia máxima subida/bajada: ${mm(evaluacion.maxHysteresisMm)} mm en ${evaluacion.comparablePoints} posiciones coincidentes.</p>` : ''}
+${datos.ensayo_origen ? `<p>Identificador del ensayo de origen: ${escape(datos.ensayo_origen)}.</p>` : ''}</section>
 <h2>Método y trazabilidad</h2>
-<p>Procedimiento ${escape(datos.metodo)}. Patrón ${escape(patron.nombre)} · ${escape(patron.codigo)} · Certificado ${escape(patron.certificado)}.</p>
+<p>Procedimiento ${escape(datos.metodo)} (§5.7, §5.8, §6.1 y tabla 13, anexo 8.4). Patrón ${escape(patron.nombre)} · ${escape(patron.codigo)} · Certificado ${escape(patron.certificado)}.</p>
 <p>Adaptador fijo, alineación del palpador y puesta a cero confirmados. Inicio ${mm(ambiente.temperatura[0])} °C y ${mm(ambiente.humedad[0])} % HR. Cierre ${mm(ambiente.temperatura[1])} °C y ${mm(ambiente.humedad[1])} % HR.</p>
 <h2>Criterio e incertidumbre</h2>
-<p>Referencia documentada: ${escape(criterio.document)}. Límite simétrico ±${mm(criterio.limitMm)} mm.
-${criterio.maxExpandedMm === null ? '' : `Incertidumbre máxima admitida ${mm(criterio.maxExpandedMm)} mm.`}
-APTO si todos los puntos de subida y bajada cumplen |corrección| + U ≤ límite y, cuando aplica, U ≤ incertidumbre máxima.</p>
+${criterio ? `<p>Referencia documentada: ${escape(criterio.document)}. Límite simétrico ±${mm(criterio.limitMm)} mm.
+${criterio.maxExpandedMm === null ? '' : `Incertidumbre máxima admitida ${mm(criterio.maxExpandedMm)} mm.`}</p>` : ''}
+<p>Regla binaria con banda de guarda (ILAC G8:09/2019). APTO si todos los puntos de subida y bajada cumplen
+|corrección| + U ≤ límite y, cuando aplica, U ≤ incertidumbre máxima.</p>
 <p>Corrección = desviación inicial − (indicación del reloj − indicación del banco).</p>
-${automatic ? `<p>Presupuesto de incertidumbre: ${escape(datos.presupuesto.document)}.
+${automatic ? `<p>Presupuesto de incertidumbre: ${escape(budget?.document ?? 'pendiente')}.
 U = k × √[(U banco/2)² + u escala² + u repetibilidad² + u térmica² + u alineación² + u deriva²].
-La U de la tabla se redondea por exceso a la división de escala. Mayor U antes de redondear ${mm(evaluacion.maxCalculatedExpandedMm)} mm.</p>
-<p>u escala = ${mm(evaluacion.scaleStandardMm)} mm · s<sub>R</sub> = ${mm(evaluacion.repeatabilityMm)} mm ·
-u repetibilidad = ${mm(evaluacion.repeatStandardMm)} mm · u deriva = ${mm(evaluacion.driftStandardMm)} mm ·
-Ángulo máximo del montaje ${mm(datos.presupuesto.alignmentMaxDegrees)}°.</p>`
+${partial ? 'La U parcial usa los términos disponibles y se indica sin redondeo a la división de escala.'
+  : 'La U de la tabla se redondea por exceso a la división de escala.'}
+${evaluacion ? `Mayor U calculada antes de redondear ${mm(evaluacion.maxCalculatedExpandedMm)} mm.` : 'Cálculo pendiente de revisión de las condiciones del ensayo.'}</p>
+<p>u escala = ${mm(evaluacion?.scaleStandardMm)} mm · s<sub>R</sub> = ${mm(evaluacion?.repeatabilityMm)} mm ·
+u repetibilidad = ${mm(evaluacion?.repeatStandardMm)} mm · u deriva = ${mm(evaluacion?.driftStandardMm)} mm ·
+Ángulo máximo del montaje ${mm(budget?.alignmentMaxDegrees)}°.</p>`
   : `<p>U = k × √[(U banco/2)² + u escala² + u repetibilidad² + u adicional²].
-k = ${mm(criterio.k)} · u escala = ${mm(evaluacion.scaleStandardMm)} mm · s<sub>R</sub> = ${mm(evaluacion.repeatabilityMm)} mm · u repetibilidad = ${mm(evaluacion.repeatStandardMm)} mm · u adicional = ${mm(criterio.otherStandardMm)} mm.</p>`}
+k = ${mm(criterio.k)} · u escala = ${mm(evaluacion?.scaleStandardMm)} mm · s<sub>R</sub> = ${mm(evaluacion?.repeatabilityMm)} mm · u repetibilidad = ${mm(evaluacion?.repeatStandardMm)} mm · u adicional = ${mm(criterio.otherStandardMm)} mm.</p>`}
 <h2>Recorrido de la escala (mm)</h2>${sections.join('')}
 <h2>Tomas de repetibilidad (mm)</h2>${repeats.join('')}
 </html>`;
