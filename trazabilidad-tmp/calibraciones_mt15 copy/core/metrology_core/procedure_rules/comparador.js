@@ -1,47 +1,28 @@
 import { createPoint, rangePoints } from "./shared.js";
 import { trimos1288GeneralU } from "../pattern_correction_resolver.js";
 
-export const COMPARADOR_TRIAL_REPETITIONS = 5;
+// CEM DI-010, §§5.7 and 5.9. MT17 currently covers the two 0–10 mm pilots.
+export const COMPARADOR_DI010_POINTS = Array.from({length: 11}, (_, i) => i * 95 / 100);
+export const COMPARADOR_DI010_REPEAT_COUNT = 6;
+export const COMPARADOR_DI010_APPROACH_TOLERANCE_MM = 0.095;
 
-export const COMPARADOR_TRIAL_PROFILES = {
-  centesimal: { points: [0.05, 0.1, 1], max: 10, scaleDivisionMm: 0.01 },
-  milesimal: { points: [0.005, 0.05, 0.5], max: 10, scaleDivisionMm: 0.001 }
-};
+export function comparadorDI010Pair({ target, bank, indicator }) {
+  if (!Number.isFinite(indicator) || !Number.isFinite(bank)) return null;
+  if (Math.abs(bank - target) >= COMPARADOR_DI010_APPROACH_TOLERANCE_MM - 1e-12) return null;
 
-export function summarizeComparadorTrial({ nominal, readings, scaleDivisionMm, independentReadings }) {
-  if (!Number.isFinite(nominal) || readings.length !== COMPARADOR_TRIAL_REPETITIONS || !readings.every(Number.isFinite)) return null;
-
-  const mean = readings.reduce((sum, reading) => sum + reading, 0) / readings.length;
-  const bank = trimos1288GeneralU(nominal);
-  const budget = bank && independentReadings === true && Number.isFinite(scaleDivisionMm) && scaleDivisionMm > 0
-    ? estimatePartialUncertainty(readings, mean, scaleDivisionMm, bank)
-    : null;
-  return {
-    mean,
-    nominalDifference: mean - nominal,
-    spread: Math.max(...readings) - Math.min(...readings),
-    correction: bank ? nominal - mean : null,
-    bankUncertaintyMm: bank?.U_mm ?? null,
-    partialBudget: budget
-  };
+  return { deviationMm: indicator - bank, bankExpandedMm: trimos1288GeneralU(Math.abs(bank))?.U_mm ?? null };
 }
 
-// Pilot estimate for the mean of five independent approaches at one point.
-// Adapter, alignment, drift, temperature and reversal effects are not modelled here.
-function estimatePartialUncertainty(readings, mean, scaleDivisionMm, bank) {
-  const n = readings.length;
-  const sumSquares = readings.reduce((sum, reading) => sum + (reading - mean) ** 2, 0);
-  const standardBankMm = bank.U_mm / bank.k;
-  const standardResolutionMm = scaleDivisionMm / Math.sqrt(12);
-  const standardRepeatabilityMm = Math.sqrt(sumSquares / (n * (n - 1)));
-  const k = 2;
-  return {
-    standardBankMm,
-    standardResolutionMm,
-    standardRepeatabilityMm,
-    expandedMm: k * Math.hypot(standardBankMm, standardResolutionMm, standardRepeatabilityMm),
-    k
-  };
+export function comparadorDI010Repeatability(low, high) {
+  if (![low, high].every(series =>
+    series.length === COMPARADOR_DI010_REPEAT_COUNT && series.every(Number.isFinite)
+  )) return null;
+
+  const variances = [low, high].map(series => {
+    const mean = series.reduce((sum, value) => sum + value, 0) / series.length;
+    return series.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (series.length - 1);
+  });
+  return Math.sqrt((variances[0] + variances[1]) / 2);
 }
 
 export function buildComparadorProcedure(ctx = {}) {

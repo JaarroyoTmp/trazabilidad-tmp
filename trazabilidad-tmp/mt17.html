@@ -5,138 +5,173 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MT17 · Comparadores / relojes</title>
 <style>
-:root{--ink:#0d2340;--line:#dbe7f2;--line2:#cbddeb}
+:root{--ink:#0d2340;--muted:#425f7d;--line:#dbe7f2;--input:#aabfd5}
 *{box-sizing:border-box}
 body{margin:0;background:#eef6ff;color:var(--ink);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
 main{max-width:1280px;margin:auto;padding:20px}
 nav{margin-bottom:16px}
 .box{padding:clamp(14px,3vw,24px);background:#fff;border:1px solid var(--line);border-radius:18px}
-label{display:block;margin-bottom:7px;font-size:14px;font-weight:700}
-.btn{display:inline-block;padding:9px 12px;border:1px solid var(--line2);border-radius:9px;background:#fff;color:#16488a;font:inherit;text-decoration:none;cursor:pointer}
-#trial-profile{max-width:100%;margin-bottom:4px}
-.trial h1{margin:0}.trial h2{font-size:16px;margin:20px 0 8px}.trial p{line-height:1.45;font-size:14px;color:#425f7d}.trial .trial-notice{padding:12px;background:#fff8eb;border:1px solid #fed7aa;border-radius:10px;color:#854004}.trial .trial-check{display:flex;align-items:center;gap:8px;margin:0 0 16px;font-size:14px}.trial-table{overflow-x:auto;margin-bottom:10px}.trial table{border-collapse:collapse;text-align:left;width:100%;font-size:13px}.trial th,.trial td{padding:8px;border-bottom:1px solid var(--line)}.trial thead{background:#f0f6ff}.trial td input{padding:8px;border:1px solid var(--line2);border-radius:8px;width:100%;min-width:62px;color:var(--ink);font:inherit}.trial td input[aria-invalid=true]{border-color:#b45309}.trial .trial-result{font-variant-numeric:tabular-nums;background:#f8fbff;font-weight:700}
+h1{margin:0}h2{font-size:18px;margin:20px 0 8px}h3{font-size:16px;margin:0 0 9px}
+p{line-height:1.5;font-size:14px;color:var(--muted)}
+label{display:block;font-size:14px;font-weight:650}
+input,select,.btn{padding:8px 10px;border:1px solid var(--input);border-radius:8px;background:#fff;color:var(--ink);font:inherit}
+select{display:block;margin-top:6px;max-width:100%}
+.btn{display:inline-block;text-decoration:none}
+.notice{padding:12px;background:#fff8eb;border:1px solid #fed7aa;border-radius:10px;color:#854004}
+.check{display:flex;align-items:baseline;gap:8px;margin:9px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ambient{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:16px 0}
+.ambient input{display:block;width:100%;margin-top:6px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px;border-bottom:1px solid var(--line)}
+thead{background:#f0f6ff}
+td input{width:100%;min-width:59px;padding:7px}
+input[aria-invalid=true]{border:2px solid #a33b22}
+output{font-weight:700}
+@media(max-width:850px){.grid{grid-template-columns:1fr}main{padding:12px}}
 </style>
 </head>
 <body>
 <main>
   <nav aria-label="Navegación"><a class="btn" href="calibraciones.html">← Centro de Calibración</a></nav>
-    <section class="box trial" id="comparadores" aria-labelledby="trial-title">
-      <h1 id="trial-title">MT17 · Comparadores / relojes</h1>
-      <p class="trial-notice">Hoja de ensayo. Las lecturas se pierden al recargar. El registro oficial requiere validar la incertidumbre total con el montaje y el criterio de aceptación.</p>
-      <h2>Montaje y puesta a cero</h2>
-      <label for="trial-profile">División de escala del equipo piloto</label>
-      <select class="btn" id="trial-profile">
-        <option value="centesimal">0,01 mm · Centesimal · 20102644 ACCUD</option>
-        <option value="milesimal">0,001 mm · Milesimal · JZF962 Mitutoyo</option>
-      </select>
-      <p><strong>Banco horizontal Trimos TELMA 500</strong> · 1288 en TMP · 1288-5 en Calibrator · Certificado C-11377.00002</p>
-      <p>Monta el reloj con el adaptador. En la posición inicial, pon a cero el banco y el reloj.</p>
-      <label class="trial-check"><input id="trial-zero-confirmed" type="checkbox"> Montaje preparado. Banco y reloj puestos a cero.</label>
-      <h2>Cinco lecturas por desplazamiento</h2>
-      <p>Los puntos iniciales proceden de Calibrator. Usa el desplazamiento que indica el banco desde su cero. Retira el palpador y vuelve al punto en el mismo sentido para cada una de las cinco tomas.</p>
-      <label class="trial-check"><input id="trial-independent-confirmed" type="checkbox"> En cada toma he retirado el palpador del punto y me he acercado de nuevo en el mismo sentido.</label>
-      <div class="trial-table" tabindex="0" role="region" aria-label="Tabla de lecturas desplazable"><table aria-label="Lecturas y errores por desplazamiento en milímetros">
-        <thead><tr><th scope="col">Indicación del banco</th><th scope="col">L1</th><th scope="col">L2</th><th scope="col">L3</th><th scope="col">L4</th><th scope="col">L5</th><th scope="col">Media</th><th scope="col">Diferencia con el banco</th><th scope="col">Dispersión</th><th scope="col">Corrección del reloj</th><th scope="col">U del banco (k=2)</th><th scope="col">U parcial (k=2)</th></tr></thead>
-        <tbody id="trial-points-centesimal"></tbody>
-        <tbody id="trial-points-milesimal" hidden></tbody>
-      </table></div>
-      <button class="btn" type="button" id="trial-add">Añadir punto</button>
-      <p>Al confirmar ambos ceros y completar las cinco lecturas, MT17 calcula la corrección del reloj restando su media al desplazamiento del Trimos, con la corrección global nula de su certificado.</p>
-      <p>La U parcial combina el banco, la división de escala y la repetibilidad de la media. Se calcula al confirmar cinco aproximaciones independientes por punto. Para completar el presupuesto queda evaluar el montaje, la deriva, la temperatura y el sentido de medida.</p>
-    </section>
+  <section class="box" aria-labelledby="title">
+    <h1 id="title">MT17 · Comparadores / relojes</h1>
+    <p class="notice">Hoja de toma de datos basada en CEM DI‑010 para comparadores mecánicos de 0 a 10 mm. Las lecturas se pierden al recargar. El informe oficial queda pendiente de validar la incertidumbre completa y el criterio de aceptación.</p>
+    <h2>Preparación</h2>
+    <label for="profile">Equipo y división de escala</label>
+    <select id="profile">
+      <option value="centesimal">20102644 · ACCUD · 0,01 mm</option>
+      <option value="milesimal">JZF962 · Mitutoyo · 0,001 mm</option>
+    </select>
+    <p><strong>Patrón</strong> · Trimos TELMA 500 · 1288 en TMP · 1288-5 en Calibrator · Certificado C-11377.00002</p>
+    <p id="bank-capability"></p>
+    <label class="check"><input id="setup" type="checkbox"> Identificación, limpieza y movimiento del palpador comprobados. Adaptador fijo y ejes alineados.</label>
+    <p>Aclimata los equipos 24 h en el recinto. Tras montar el reloj, espera al menos 15 min para estabilizarlo, salvo indicación del fabricante. Registra temperatura y humedad al inicio y al final. El DI‑010 indica 17–23 °C para estas divisiones y recomienda hasta 60 % HR.</p>
+    <div class="ambient">
+      <label>Temperatura inicial (°C)<input id="temp-start" type="text" inputmode="decimal"></label>
+      <label>Humedad inicial (% HR)<input id="humidity-start" type="text" inputmode="decimal"></label>
+      <label>Temperatura final (°C)<input id="temp-end" type="text" inputmode="decimal"></label>
+      <label>Humedad final (% HR)<input id="humidity-end" type="text" inputmode="decimal"></label>
+    </div>
+    <label class="check"><input id="zero" type="checkbox"> Banco y reloj puestos a cero al inicio del recorrido.</label>
+    <h2>Recorrido de la escala</h2>
+    <p>Haz una pasada en subida y otra en bajada, sin reajustar el cero entre ambas. Empieza cada pasada cerca del extremo correspondiente y mantén el sentido de avance. Anota la indicación real de ambos equipos en cada punto. La diferencia admitida entre el nominal y la indicación del banco es menor que 0,095 mm. Todos los valores están en mm.</p>
+    <div class="grid" id="sweeps"></div>
+    <h2>Repetibilidad</h2>
+    <p>Haz seis tomas en el punto superior y otras seis en el inferior. Antes de cada toma, vuelve a la posición inicial, pon el banco y el reloj a cero y acércate de nuevo al punto. Anota ambas indicaciones en cada toma.</p>
+    <div class="grid" id="repeats"></div>
+    <p>Repetibilidad combinada s<sub>R</sub> (mm) <output id="repeatability">—</output></p>
+    <p id="progress" role="status"></p>
+  </section>
 </main>
 <script type="module">
-import { COMPARADOR_TRIAL_PROFILES, COMPARADOR_TRIAL_REPETITIONS, summarizeComparadorTrial } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=20261127";
+import { COMPARADOR_DI010_POINTS as points, COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Repeatability } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=di010";
 
-const $ = selector => document.querySelector(selector);
-const trialFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
-const trialNumber = value => /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(value.trim()) ? Number(value.trim().replace(",", ".")) : NaN;
-const trialDisplay = value => Number.isFinite(value) ? trialFormat.format(Math.abs(value) < 0.0000005 ? 0 : value) : "—";
-const profileSelect = $("#trial-profile");
-const zeroConfirmed = $("#trial-zero-confirmed");
-const independentConfirmed = $("#trial-independent-confirmed");
-const trialRows = [];
-const confirmedProfiles = new Set();
-const independentProfiles = new Set();
-function addTrialPoint(profile, initialNominal = "") {
- const trialPoints = $(`#trial-points-${profile}`);
- const { max, scaleDivisionMm } = COMPARADOR_TRIAL_PROFILES[profile];
- const point = trialPoints.rows.length + 1;
- const row = trialPoints.insertRow();
- const readingLabels = Array.from({ length: COMPARADOR_TRIAL_REPETITIONS }, (_, index) => `Lectura ${index + 1}`);
- function addInput(label) {
-  const field = document.createElement("input");
-  field.type = "text";
-  field.inputMode = "decimal";
-  field.autocomplete = "off";
-  field.setAttribute("aria-label", `${label} del punto ${point} en milímetros`);
-  row.insertCell().append(field);
-  return field;
- }
- function addResult(key) {
-  const cell = row.insertCell();
-  cell.className = "trial-result";
-  return [key, cell];
- }
- const nominalField = addInput("Desplazamiento indicado por el banco");
- nominalField.value = initialNominal;
- nominalField.title = `Introduce un desplazamiento superior a 0 y hasta ${max} mm`;
- const readingFields = readingLabels.map(addInput);
- const results = ["mean", "nominalDifference", "spread", "correction", "bankUncertaintyMm"].map(addResult);
- const [, budgetCell] = addResult("partialBudget");
- function updatePoint() {
-  const nominal = trialNumber(nominalField.value);
-  const validNominal = nominal > 0 && nominal <= max;
-  nominalField.setAttribute("aria-invalid", String(Boolean(nominalField.value.trim()) && !validNominal));
-  const readings = readingFields.map(field => {
-   const value = trialNumber(field.value);
-   field.setAttribute("aria-invalid", String(Boolean(field.value.trim()) && !Number.isFinite(value)));
-   return value;
-  });
-  const summary = confirmedProfiles.has(profile) && validNominal
-   ? summarizeComparadorTrial({ nominal, readings,
-      scaleDivisionMm, independentReadings: independentProfiles.has(profile) })
-   : null;
-  results.forEach(([key, cell]) => { cell.textContent = trialDisplay(summary?.[key]); });
-  const budget = summary?.partialBudget;
-  budgetCell.textContent = trialDisplay(budget?.expandedMm);
-  if (budget) {
-   budgetCell.title = [
-    `u banco ${trialDisplay(budget.standardBankMm)} mm`,
-    `u división ${trialDisplay(budget.standardResolutionMm)} mm`,
-    `u repetibilidad ${trialDisplay(budget.standardRepeatabilityMm)} mm`
-   ].join(" · ");
-  } else budgetCell.removeAttribute("title");
- }
- trialRows.push(updatePoint);
- updatePoint();
- row.addEventListener("input", updatePoint);
- return nominalField;
+const $ = id => document.getElementById(id);
+const format = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
+const display = value => Number.isFinite(value) ? format.format(Math.abs(value) < 0.0000005 ? 0 : value) : "—";
+function parse(field) {
+ const value = field.value.trim();
+ return /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(value) ? Number(value.replace(",", ".")) : NaN;
 }
-function showTrialProfile() {
- for (const profile of Object.keys(COMPARADOR_TRIAL_PROFILES)) {
-  $(`#trial-points-${profile}`).hidden = profile !== profileSelect.value;
- }
- zeroConfirmed.checked = confirmedProfiles.has(profileSelect.value);
- independentConfirmed.checked = independentProfiles.has(profileSelect.value);
+
+const sweeps = [
+ { heading: "Subida", targets: points },
+ { heading: "Bajada", targets: [...points].reverse() }
+];
+const repeats = [
+ { heading: "Punto superior", targets: Array(repeatCount).fill(points.at(-1)) },
+ { heading: "Punto inferior", targets: Array(repeatCount).fill(points[0]) }
+];
+
+function renderSeries(host, { heading, targets }, repeat = false) {
+ const section = document.createElement("section");
+ section.innerHTML = `<h3>${heading}${repeat ? " · " + display(targets[0]) + " mm" : ""}</h3>
+ <div class="table-wrap"><table aria-label="${heading}"><thead><tr>
+ <th scope="col">${repeat ? "Toma" : "Punto"}</th><th scope="col">Banco</th><th scope="col">Reloj</th>
+ <th scope="col">${repeat ? "Reloj − banco" : "Corrección"}</th>${repeat ? "" : '<th scope="col">U banco (k=2)</th>'}</tr></thead><tbody></tbody></table></div>`;
+ host.append(section);
+ const body = section.querySelector("tbody");
+ return targets.map((target, i) => {
+  const row = body.insertRow();
+  row.innerHTML = `<th scope="row">${repeat ? i + 1 : display(target)}</th>
+  <td><input type="text" inputmode="decimal" aria-label="${heading}, banco, toma ${i + 1}"></td>
+  <td><input type="text" inputmode="decimal" aria-label="${heading}, reloj, toma ${i + 1}"></td>
+  <td><output>—</output></td>${repeat ? "" : "<td><output>—</output></td>"}`;
+  const [bank, indicator] = row.querySelectorAll("input");
+  const [output, bankU] = row.querySelectorAll("output");
+  return { target, bank, indicator, output, bankU };
+ });
 }
-for (const [profile, { points }] of Object.entries(COMPARADOR_TRIAL_PROFILES)) {
- points.forEach(nominal => addTrialPoint(profile, trialDisplay(nominal)));
+
+const upDown = sweeps.map(s => renderSeries($("sweeps"), s));
+const repetitions = repeats.map(s => renderSeries($("repeats"), s, true));
+const fields = [...document.querySelectorAll("main input")];
+const profiles = new Map();
+let activeProfile = "centesimal";
+
+function readPair(row) {
+ const bank = parse(row.bank), indicator = parse(row.indicator);
+ const pair = comparadorDI010Pair({ target: row.target, bank, indicator });
+ const nearTarget = comparadorDI010Pair({target: row.target, bank, indicator: 0}) !== null;
+ row.bank.setAttribute("aria-invalid", String(Boolean(row.bank.value.trim()) && !nearTarget));
+ row.indicator.setAttribute("aria-invalid", String(Boolean(row.indicator.value.trim()) && !Number.isFinite(indicator)));
+ return pair;
 }
-if (new URLSearchParams(location.search).get("comparador") === "milesimal") profileSelect.value = "milesimal";
-showTrialProfile();
-profileSelect.addEventListener("change", showTrialProfile);
-$("#trial-add").addEventListener("click", () => addTrialPoint(profileSelect.value).focus());
-zeroConfirmed.addEventListener("change", () => {
- if (zeroConfirmed.checked) confirmedProfiles.add(profileSelect.value);
- else confirmedProfiles.delete(profileSelect.value);
- trialRows.forEach(updatePoint => updatePoint());
+
+function update() {
+ const sweepPairs = upDown.map(group => group.map(readPair));
+ const repeatPairs = repetitions.map(group => group.map(readPair));
+ const zeroDeviation = $("zero").checked ? sweepPairs[0][0]?.deviationMm : undefined;
+ upDown.forEach((group, i) => group.forEach((row, j) => {
+  const deviation = sweepPairs[i][j]?.deviationMm;
+  row.output.textContent = display(zeroDeviation - deviation);
+  row.bankU.textContent = display(sweepPairs[i][j]?.bankExpandedMm);
+ }));
+ repetitions.forEach((group, i) => group.forEach((row, j) => {
+  row.output.textContent = display(repeatPairs[i][j]?.deviationMm);
+ }));
+ const repeatability = comparadorDI010Repeatability(...repeatPairs.map(group => group.map(pair => pair?.deviationMm)));
+ $("repeatability").textContent = display(repeatability);
+ const temperatures = ["temp-start","temp-end"].map(id => parse($(id)));
+ const humidities = ["humidity-start","humidity-end"].map(id => parse($(id)));
+ const sweepDone = sweepPairs.flat().filter(Boolean).length;
+ const repeatDone = repeatPairs.flat().filter(Boolean).length;
+ const complete = sweepDone === 2 * points.length && repeatDone === 2 * repeatCount && $("zero").checked && $("setup").checked;
+ const ambientComplete = temperatures.every(Number.isFinite) && humidities.every(Number.isFinite);
+ const ambientOk = ambientComplete && temperatures.every(t => t >= 17 && t <= 23) && humidities.every(h => h >= 0 && h <= 60);
+ const ambientNote = ambientComplete ? (ambientOk ? "" : " Revisa las condiciones ambientales registradas.") : " Registra la temperatura y humedad iniciales y finales.";
+ $("progress").textContent =
+  `${sweepDone}/${2 * points.length} puntos de recorrido y ${repeatDone}/${2 * repeatCount} tomas de repetibilidad.${ambientNote}` +
+  (complete && ambientOk ? " Toma de datos completa para revisión técnica." : "");
+}
+
+function showProfile(profile) {
+ const existing = profiles.get(profile);
+ fields.forEach((field, index) => {
+  if (field.type === "checkbox") field.checked = existing?.[index] ?? false;
+  else field.value = existing?.[index] ?? "";
+ });
+ $("bank-capability").textContent = profile === "milesimal"
+  ? "Para el reloj de 0,001 mm, la incertidumbre del Trimos supera 0,0005 mm, la mitad de la división de escala recomendada por DI‑010. Requiere revisar la aptitud del banco para este alcance."
+  : "Para el reloj de 0,01 mm, la incertidumbre certificada del Trimos en este recorrido está por debajo de 0,005 mm, la mitad de su división de escala.";
+ update();
+}
+
+document.querySelector("main").addEventListener("input", event => {
+ if (event.target.matches("input")) update();
 });
-independentConfirmed.addEventListener("change", () => {
- if (independentConfirmed.checked) independentProfiles.add(profileSelect.value);
- else independentProfiles.delete(profileSelect.value);
- trialRows.forEach(updatePoint => updatePoint());
+$("profile").addEventListener("change", event => {
+ profiles.set(activeProfile, fields.map(field => field.type === "checkbox" ? field.checked : field.value));
+ activeProfile = event.target.value;
+ showProfile(activeProfile);
 });
+if (new URLSearchParams(location.search).get("comparador") === "milesimal") {
+ activeProfile = "milesimal";
+ $("profile").value = activeProfile;
+}
+showProfile(activeProfile);
 </script>
 </body>
 </html>
