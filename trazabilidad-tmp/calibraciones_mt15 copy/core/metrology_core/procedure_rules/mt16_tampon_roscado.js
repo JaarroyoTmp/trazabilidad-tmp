@@ -1,4 +1,5 @@
 import {MT16_CATALOGUE} from './mt16_catalogue.js?v=m16x2';
+import {getISO965Data} from '../thread/data/thread_iso965_database.js';
 import { createPoint, parseNum } from "./shared.js";
 import { BSP_THREAD_TABLE, parseThreadDesignation } from '../thread/core/thread_parser.js';
 
@@ -349,6 +350,9 @@ export function parseMT16VerificationDesignation(raw) {
 export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   if(!parsed?.ok)return {key:null,reason:parsed?.warnings?.[0]||'La designación de rosca no se ha podido identificar.'};
   const raw=String(equipment.rango||equipment.descripcion||'');
+  const metricMarking = [equipment.rango,equipment.descripcion].filter(Boolean).join(' ');
+  const specialMetric = parsed.thread_system==='METRIC_ISO' &&
+    /HELI\s*[- ]?COIL|\bSTI\b|\bEG\s*M\d|\bMOD(?:IFICAD[AO])?\b|\bESPECIAL\b/i.test(metricMarking);
   let cls=String(parsed.tolerance_class||'');
   if(parsed.thread_system==='METRIC_ISO'){
     const matches=[...raw.matchAll(/\b([1-9][HhGg]|[HhGg][1-9])\b/g)].map(m=>m[1]);
@@ -359,10 +363,10 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   }
   if(!cls && !parsed.tpi)return {key:null,reason:'Falta la clase o serie necesaria para asociar una pauta.'};
   const direction=/IZQ|LEFT|\bLH\b/i.test([equipment.rango,equipment.descripcion].filter(Boolean).join(' '))?'IZQUIERDA':'DERECHA';
-  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL'].join('|');
-  const reason=!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
+  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL',...(specialMetric?['ESPECIAL',raw.toUpperCase()]:[])].join('|');
+  const reason=specialMetric?'El marcado indica una rosca especial o para inserto. Usa su pauta específica.':!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
     !cls&&parsed.thread_system==='BSW_BS84'?'Falta identificar la clase de rosca Whitworth, por ejemplo Normal o Media.':null;
-  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,reason};
+  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,reason};
 }
 export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
   if(config?.regla_decision==='INTERNA_EXCEL'){
@@ -470,9 +474,42 @@ export function resolveMT16PlugLimitReference(identity) {
   return null;
 }
 
-// Independently checked scope: this exact ISO 965-2:1998 table 3 row only.
-// ISO 1502:1996 tables 4, 5 and 12; dimensions in mm.
+// ISO 1502:1996 tables 4 and 5, cylindrical screw plug gauges, in µm.
+const METRIC_PLUG_TOLERANCES = [
+  {upTo:50,TPL:6,ZPL:0,WGO:8,WNG:6},
+  {upTo:80,TPL:7,ZPL:2,WGO:9.5,WNG:7.5},
+  {upTo:125,TPL:9,ZPL:6,WGO:12.5,WNG:9.5},
+  {upTo:200,TPL:11,ZPL:12,WGO:17.5,WNG:11.5},
+  {upTo:315,TPL:14,ZPL:16,WGO:21,WNG:15},
+  {upTo:500,TPL:18,ZPL:24,WGO:27,WNG:19},
+  {upTo:670,TPL:22,ZPL:32,WGO:33,WNG:23}
+];
+
+function resolveISO965MetricPlugServiceLimits(identity) {
+  if(identity.tolerance_class?.toUpperCase()!=='6H'||identity.angle!==60) return null;
+  const data=getISO965Data(`M${identity.nominal}x${identity.pitch}-6H`);
+  if(data?.type!=='internal'||data.major_diameter!==identity.nominal||data.pitch!==identity.pitch||
+     data.tolerance_class!=='6H'||data.source!=='ISO965-2:1998_TABLE_3') return null;
+  const lower=Math.round(data.pitch_diameter_min*1000),upper=Math.round(data.pitch_diameter_max*1000);
+  if(!Number.isFinite(lower)||!Number.isFinite(upper)||lower<=0||upper<=lower) return null;
+  const tolerance=METRIC_PLUG_TOLERANCES.find(row=>upper-lower<=row.upTo);
+  if(!tolerance)return null;
+  const {TPL,ZPL,WGO,WNG}=tolerance;
+  const point=(center,wear)=>({
+    center:center/1000,new_min:(center-TPL/2)/1000,new_max:(center+TPL/2)/1000,
+    wear_min:(center-wear)/1000,min:(center-wear)/1000,max:(center+TPL/2)/1000
+  });
+  return {
+    version:'MT16_ISO965_ISO1502',standard:'ISO 965-2:1998 e ISO 1502:1996',designation:identity.label,
+    criterio:'ISO 965-2:1998 · tabla 3; ISO 1502:1996 · tablas 4, 5 y 12; límites de desgaste y máximo de fabricación',
+    sources:['https://cdn.standards.iteh.ai/samples/23594/74d3eec3e0d04d999a1680f11b4f04ec/ISO-965-2-1998.pdf','https://www.iso.org/standard/6092.html'],
+    workpiece:{min:lower/1000,max:upper/1000},parameters:{TPL:TPL/1000,ZPL:ZPL/1000,WGO:WGO/1000,WNG:WNG/1000},
+    puntos:{PASA:point(lower+ZPL,WGO),NO_PASA:point(upper+TPL/2,WNG)}
+  };
+}
+
 export function resolveMT16ServiceLimits(identity){
+  if(identity?.specialMetric)return null;
   if(identity?.key&&identity.family==='TAMPON_ROSCADO_PNP'){
     const bspp=resolveBSPPPlugLimits(identity);
     if(bspp)return bspp;
@@ -495,15 +532,7 @@ export function resolveMT16ServiceLimits(identity){
   const catalogueClass=metricPlug?identity.tolerance_class?.toUpperCase():identity?.tolerance_class;
   const row=MT16_CATALOGUE.find(r=>identity?.key&&r.family===identity.family&&r.system===identity.system&&r.tolerance_class===catalogueClass&&r.nominal===identity.nominal&&r.pitch===identity.pitch&&r.angle===identity.angle&&r.direction===(identity.direction||'DERECHA'));
   if(row)return {...structuredClone(row),version:'MT16_CATALOGUE_20261117',criterio:row.criterion+' · '+row.source_file.split('/').pop(),sources:[{file:row.source_file,sha256:row.source_sha256}]};
-  if(!identity?.key||!metricPlug||catalogueClass!=='6H'||identity.nominal!==12||identity.pitch!==1.25||identity.angle!==60)return null;
-  const workMin=11.188,workMax=11.368,Z=0.012,T=0.011,Wgo=0.0175,Wng=0.0115;
-  const r=v=>Number(v.toFixed(7));
-  const point=(center,W)=>({center:r(center),new_min:r(center-T/2),new_max:r(center+T/2),wear_min:r(center-W),min:r(center-W),max:r(center+T/2)});
-  return {version:'MT16_LIMITS_75148_20261109',designation:'M12x1.25 · 6H',
-    criterio:'ISO 1502:1996 · tablas 4, 5 y 12; ISO 965-2:1998 · tabla 3; servicio: desgaste mínimo a máximo de fabricación',
-    sources:['https://law.resource.org/pub/in/bis/S01/is.2334.2001.pdf','https://law.resource.org/pub/in/bis/S01/is.14962.2.2001.pdf'],
-    workpiece:{min:workMin,max:workMax},parameters:{ZPL:Z,TPL:T,WGO:Wgo,WNG:Wng},
-    puntos:{PASA:point(workMin+Z,Wgo),NO_PASA:point(workMax+T/2,Wng)}};
+  return identity?.key && metricPlug ? resolveISO965MetricPlugServiceLimits(identity) : null;
 }
 
 // EURAMET cg-10 v2.1, equation 14. All corrections must be supplied by
