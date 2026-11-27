@@ -16,7 +16,9 @@ p{line-height:1.5;font-size:14px;color:var(--muted)}
 label{display:block;font-size:14px;font-weight:650}
 input,select,.btn{padding:8px 10px;border:1px solid var(--input);border-radius:8px;background:#fff;color:var(--ink);font:inherit}
 select{display:block;margin-top:6px;max-width:100%}
-.btn{display:inline-block;text-decoration:none}
+.btn{display:inline-block;text-decoration:none;cursor:pointer}
+.search{display:flex;flex-wrap:wrap;align-items:end;gap:10px}.search label{flex:1 1 240px}.search input{display:block;margin-top:6px;width:100%}
+#equipment-results{width:100%;margin-bottom:12px}.equipment-summary{background:#f0f6ff;border-radius:8px;padding:10px}
 .notice{padding:12px;background:#fff8eb;border:1px solid #fed7aa;border-radius:10px;color:#854004}
 .check{display:flex;align-items:baseline;gap:8px;margin:9px 0}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -37,36 +39,51 @@ output{font-weight:700}
   <nav aria-label="Navegación"><a class="btn" href="calibraciones.html">← Centro de Calibración</a></nav>
   <section class="box" aria-labelledby="title">
     <h1 id="title">MT17 · Comparadores / relojes</h1>
-    <p class="notice">Hoja de toma de datos basada en CEM DI‑010 para comparadores mecánicos de 0 a 10 mm. Las lecturas se pierden al recargar. El informe oficial queda pendiente de validar la incertidumbre completa y el criterio de aceptación.</p>
+    <p class="notice">Hoja de toma de datos basada en CEM DI‑010 para comparadores mecánicos centesimales y milesimales. Las lecturas se pierden al recargar. El informe oficial queda pendiente de validar la incertidumbre completa y el criterio de aceptación.</p>
+    <h2>Buscar equipo</h2>
+    <form id="equipment-form" class="search">
+      <label for="equipment-query">Código, descripción o fabricante
+        <input id="equipment-query" type="search" autocomplete="off" placeholder="Ej. 20102644 o Mitutoyo">
+      </label>
+      <button class="btn" type="submit">Buscar</button>
+    </form>
+    <p id="equipment-status" role="status"></p>
+    <label id="results-label" for="equipment-results" hidden>Equipos encontrados
+      <select id="equipment-results"><option value="">Selecciona un equipo</option></select>
+    </label>
+    <div id="worksheet" hidden>
+    <p id="equipment-summary" class="equipment-summary"></p>
     <h2>Preparación</h2>
-    <label for="profile">Equipo y división de escala</label>
-    <select id="profile">
-      <option value="centesimal">20102644 · ACCUD · 0,01 mm</option>
-      <option value="milesimal">JZF962 · Mitutoyo · 0,001 mm</option>
-    </select>
     <p><strong>Patrón</strong> · Trimos TELMA 500 · 1288 en TMP · 1288-5 en Calibrator · Certificado C-11377.00002</p>
     <p id="bank-capability"></p>
     <label class="check"><input id="setup" type="checkbox"> Identificación, limpieza y movimiento del palpador comprobados. Adaptador fijo y ejes alineados.</label>
-    <p>Aclimata los equipos 24 h en el recinto. Tras montar el reloj, espera al menos 15 min para estabilizarlo, salvo indicación del fabricante. Registra temperatura y humedad al inicio y al final. El DI‑010 indica 17–23 °C para estas divisiones y recomienda hasta 60 % HR.</p>
+    <p>Aclimata los equipos 24 h en el recinto. Tras montar el reloj, espera al menos 15 min para estabilizarlo, salvo indicación del fabricante. Anota las condiciones iniciales. El DI‑010 indica 17–23 °C para estas divisiones y recomienda hasta 60 % HR.</p>
     <div class="ambient">
       <label>Temperatura inicial (°C)<input id="temp-start" type="text" inputmode="decimal"></label>
       <label>Humedad inicial (% HR)<input id="humidity-start" type="text" inputmode="decimal"></label>
-      <label>Temperatura final (°C)<input id="temp-end" type="text" inputmode="decimal"></label>
-      <label>Humedad final (% HR)<input id="humidity-end" type="text" inputmode="decimal"></label>
     </div>
     <label class="check"><input id="zero" type="checkbox"> Banco y reloj puestos a cero al inicio del recorrido.</label>
     <h2>Recorrido de la escala</h2>
-    <p>Haz una pasada en subida y otra en bajada, sin reajustar el cero entre ambas. Empieza cada pasada cerca del extremo correspondiente y mantén el sentido de avance. Anota la indicación real de ambos equipos en cada punto. La diferencia admitida entre el nominal y la indicación del banco es menor que 0,095 mm. Todos los valores están en mm.</p>
+    <p>Haz una pasada en subida y otra en bajada, sin reajustar el cero entre ambas. Empieza cada pasada cerca del extremo correspondiente y mantén el sentido de avance. Lleva el banco al valor propuesto y escribe lo que marca el reloj. Si el banco queda en otro valor, corrige solo esa casilla. Todos los valores están en mm.</p>
+    <p id="coverage"></p>
     <div class="grid" id="sweeps"></div>
     <h2>Repetibilidad</h2>
-    <p>Haz seis tomas en el punto superior y otras seis en el inferior. Antes de cada toma, vuelve a la posición inicial, pon el banco y el reloj a cero y acércate de nuevo al punto. Anota ambas indicaciones en cada toma.</p>
+    <p>Haz seis tomas en el punto superior y otras seis en el inferior. Antes de cada toma, vuelve a la posición inicial, pon el banco y el reloj a cero y acércate de nuevo al punto. Escribe la indicación del reloj en cada toma y corrige el valor del banco si difiere del propuesto.</p>
     <div class="grid" id="repeats"></div>
     <p>Repetibilidad combinada s<sub>R</sub> (mm) <output id="repeatability">—</output></p>
+    <h2>Cierre</h2>
+    <p>Al terminar, vuelve a medir la temperatura y la humedad para dejar constancia de las condiciones durante el ensayo.</p>
+    <div class="ambient">
+      <label>Temperatura final (°C)<input id="temp-end" type="text" inputmode="decimal"></label>
+      <label>Humedad final (% HR)<input id="humidity-end" type="text" inputmode="decimal"></label>
+    </div>
     <p id="progress" role="status"></p>
+    </div>
   </section>
 </main>
 <script type="module">
-import { COMPARADOR_DI010_POINTS as points, COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Repeatability } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=di010";
+import "./config.mjs";
+import { COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Plan, comparadorDI010Repeatability, isMechanicalComparatorRecord } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=inventario";
 
 const $ = id => document.getElementById(id);
 const format = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
@@ -76,14 +93,13 @@ function parse(field) {
  return /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(value) ? Number(value.replace(",", ".")) : NaN;
 }
 
-const sweeps = [
- { heading: "Subida", targets: points },
- { heading: "Bajada", targets: [...points].reverse() }
-];
-const repeats = [
- { heading: "Punto superior", targets: Array(repeatCount).fill(points.at(-1)) },
- { heading: "Punto inferior", targets: Array(repeatCount).fill(points[0]) }
-];
+const drafts = new Map();
+let inventoryRequest;
+let activeEquipment;
+let plan;
+let upDown = [];
+let repetitions = [];
+let fields = [];
 
 function renderSeries(host, { heading, targets }, repeat = false) {
  const section = document.createElement("section");
@@ -101,20 +117,15 @@ function renderSeries(host, { heading, targets }, repeat = false) {
   <td><output>—</output></td>${repeat ? "" : "<td><output>—</output></td>"}`;
   const [bank, indicator] = row.querySelectorAll("input");
   const [output, bankU] = row.querySelectorAll("output");
+  bank.defaultValue = display(target);
   return { target, bank, indicator, output, bankU };
  });
 }
 
-const upDown = sweeps.map(s => renderSeries($("sweeps"), s));
-const repetitions = repeats.map(s => renderSeries($("repeats"), s, true));
-const fields = [...document.querySelectorAll("main input")];
-const profiles = new Map();
-let activeProfile = "centesimal";
-
 function readPair(row) {
  const bank = parse(row.bank), indicator = parse(row.indicator);
- const pair = comparadorDI010Pair({ target: row.target, bank, indicator });
- const nearTarget = comparadorDI010Pair({target: row.target, bank, indicator: 0}) !== null;
+ const pair = comparadorDI010Pair({ target: row.target, toleranceMm: plan.toleranceMm, bank, indicator });
+ const nearTarget = comparadorDI010Pair({target: row.target, toleranceMm: plan.toleranceMm, bank, indicator: 0}) !== null;
  row.bank.setAttribute("aria-invalid", String(Boolean(row.bank.value.trim()) && !nearTarget));
  row.indicator.setAttribute("aria-invalid", String(Boolean(row.indicator.value.trim()) && !Number.isFinite(indicator)));
  return pair;
@@ -138,40 +149,134 @@ function update() {
  const humidities = ["humidity-start","humidity-end"].map(id => parse($(id)));
  const sweepDone = sweepPairs.flat().filter(Boolean).length;
  const repeatDone = repeatPairs.flat().filter(Boolean).length;
- const complete = sweepDone === 2 * points.length && repeatDone === 2 * repeatCount && $("zero").checked && $("setup").checked;
+ const complete = sweepDone === 2 * plan.points.length && repeatDone === 2 * repeatCount && $("zero").checked && $("setup").checked;
  const ambientComplete = temperatures.every(Number.isFinite) && humidities.every(Number.isFinite);
  const ambientOk = ambientComplete && temperatures.every(t => t >= 17 && t <= 23) && humidities.every(h => h >= 0 && h <= 60);
- const ambientNote = ambientComplete ? (ambientOk ? "" : " Revisa las condiciones ambientales registradas.") : " Registra la temperatura y humedad iniciales y finales.";
+ const ambientNote = ambientComplete ? (ambientOk ? "" : " Revisa las condiciones ambientales registradas.") : " Pendientes condiciones ambientales al inicio o al cierre.";
  $("progress").textContent =
-  `${sweepDone}/${2 * points.length} puntos de recorrido y ${repeatDone}/${2 * repeatCount} tomas de repetibilidad.${ambientNote}` +
+  `${sweepDone}/${2 * plan.points.length} puntos de recorrido y ${repeatDone}/${2 * repeatCount} tomas de repetibilidad.${ambientNote}` +
   (complete && ambientOk ? " Toma de datos completa para revisión técnica." : "");
 }
 
-function showProfile(profile) {
- const existing = profiles.get(profile);
+function selectEquipment(equipment) {
+ if (activeEquipment?.codigo === equipment.codigo) return;
+ const nextPlan = comparadorDI010Plan(equipment);
+ if (!nextPlan) {
+  $("equipment-status").textContent = "La ficha necesita un rango desde 0 en mm y una división de escala de 0,01 o 0,001 mm.";
+  return;
+ }
+ if (activeEquipment) {
+  drafts.set(activeEquipment.codigo, fields.map(field => field.type === "checkbox" ? field.checked : field.value));
+ }
+ activeEquipment = equipment;
+ plan = nextPlan;
+ const { points, toleranceMm, max, scaleDivisionMm, bankUAtTopMm } = plan;
+ const scaleType = scaleDivisionMm === 0.01 ? "centesimal" : "milesimal";
+ $("equipment-summary").textContent = [
+  equipment.codigo, equipment.descripcion, equipment.fabricante,
+  `0–${display(max)} mm`, `${scaleType} · ${display(scaleDivisionMm)} mm`
+ ].filter(Boolean).join(" · ");
+ $("coverage").textContent = `11 puntos hasta ${display(points.at(-1))} mm. Si editas el valor del banco, debe quedar a menos de ${display(toleranceMm)} mm del punto propuesto.`;
+ const recommended = scaleDivisionMm / 2;
+ $("bank-capability").textContent = bankUAtTopMm > recommended
+  ? `La incertidumbre del Trimos en el punto superior (${display(bankUAtTopMm)} mm) supera los ${display(recommended)} mm recomendados por DI‑010 para este reloj. Requiere revisar la aptitud del banco.`
+  : `La incertidumbre del Trimos en el punto superior (${display(bankUAtTopMm)} mm) está dentro de los ${display(recommended)} mm recomendados por DI‑010.`;
+
+ $("sweeps").replaceChildren();
+ $("repeats").replaceChildren();
+ upDown = [
+  renderSeries($("sweeps"), {heading: "Subida", targets: points}),
+  renderSeries($("sweeps"), {heading: "Bajada", targets: [...points].reverse()})
+ ];
+ repetitions = [
+  renderSeries($("repeats"), {heading: "Punto superior", targets: Array(repeatCount).fill(points.at(-1))}, true),
+  renderSeries($("repeats"), {heading: "Punto inferior", targets: Array(repeatCount).fill(points[0])}, true)
+ ];
+ const existing = drafts.get(equipment.codigo);
+ fields = [...$("worksheet").querySelectorAll("input")];
  fields.forEach((field, index) => {
   if (field.type === "checkbox") field.checked = existing?.[index] ?? false;
-  else field.value = existing?.[index] ?? "";
+  else field.value = existing?.[index] ?? field.defaultValue;
  });
- $("bank-capability").textContent = profile === "milesimal"
-  ? "Para el reloj de 0,001 mm, la incertidumbre del Trimos supera 0,0005 mm, la mitad de la división de escala recomendada por DI‑010. Requiere revisar la aptitud del banco para este alcance."
-  : "Para el reloj de 0,01 mm, la incertidumbre certificada del Trimos en este recorrido está por debajo de 0,005 mm, la mitad de su división de escala.";
+ $("worksheet").hidden = false;
+ $("equipment-status").textContent = "";
  update();
 }
 
-document.querySelector("main").addEventListener("input", event => {
- if (event.target.matches("input")) update();
-});
-$("profile").addEventListener("change", event => {
- profiles.set(activeProfile, fields.map(field => field.type === "checkbox" ? field.checked : field.value));
- activeProfile = event.target.value;
- showProfile(activeProfile);
-});
-if (new URLSearchParams(location.search).get("comparador") === "milesimal") {
- activeProfile = "milesimal";
- $("profile").value = activeProfile;
+function equipmentSearchText(value) {
+ return String(value ?? "").toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").trim();
 }
-showProfile(activeProfile);
+
+function readInventory() {
+ if (!inventoryRequest) {
+  inventoryRequest = (async () => {
+   if (!window.supabase) throw new Error("Supabase no disponible");
+   const {data, error} = await window.supabase.from("instrumentos")
+    .select("codigo,descripcion,fabricante,rango,precision")
+    .ilike("descripcion", "%reloj%comparador%").order("codigo").limit(1000);
+   if (error) throw error;
+   return (data ?? []).filter(isMechanicalComparatorRecord);
+  })().catch(error => {
+   inventoryRequest = undefined;
+   throw error;
+  });
+ }
+ return inventoryRequest;
+}
+
+let searchVersion = 0;
+async function findEquipment() {
+ const version = ++searchVersion;
+ const query = equipmentSearchText($("equipment-query").value);
+ const results = $("equipment-results");
+ $("results-label").hidden = true;
+ results.replaceChildren(new Option("Selecciona un equipo", ""));
+ $("equipment-status").textContent = "Consultando el inventario…";
+ try {
+  const records = await readInventory();
+  if (version !== searchVersion) return;
+  const exact = records.filter(record => equipmentSearchText(record.codigo) === query);
+  if (exact.length > 1) {
+   $("equipment-status").textContent = "Hay más de un equipo con ese código. Revisa las fichas en Alta / Edición.";
+   return;
+  }
+  if (exact.length === 1) {
+   $("equipment-query").value = exact[0].codigo;
+   selectEquipment(exact[0]);
+   return;
+  }
+  const matches = records.filter(record =>
+   [record.codigo, record.descripcion, record.fabricante, record.rango].some(value => equipmentSearchText(value).includes(query))
+  );
+  for (const record of matches.slice(0, 50)) {
+   results.add(new Option([record.codigo, record.descripcion, record.fabricante, record.rango].filter(Boolean).join(" · "), record.codigo));
+  }
+  $("results-label").hidden = matches.length === 0;
+  $("equipment-status").textContent = matches.length === 0 ? "No se han encontrado relojes comparadores con esa búsqueda."
+   : matches.length > 50 ? "Se muestran 50 equipos. Afina la búsqueda por código o fabricante."
+   : "Selecciona el equipo del listado.";
+ } catch {
+  if (version === searchVersion) $("equipment-status").textContent = "No se pudo consultar el inventario. Vuelve a pulsar Buscar.";
+ }
+}
+
+$("worksheet").addEventListener("input", update);
+$("equipment-form").addEventListener("submit", event => {
+ event.preventDefault();
+ findEquipment();
+});
+$("equipment-results").addEventListener("change", async event => {
+ const selectedCode = event.target.value;
+ if (!selectedCode) return;
+ const records = await readInventory();
+ const matches = records.filter(record => record.codigo === selectedCode);
+ if (matches.length === 1) selectEquipment(matches[0]);
+ else $("equipment-status").textContent = "Hay más de un equipo con ese código. Revisa las fichas en Alta / Edición.";
+});
+const params = new URLSearchParams(location.search);
+const priorProfileCodes = {centesimal: "20102644", milesimal: "JZF962"};
+$("equipment-query").value = params.get("codigo") || priorProfileCodes[params.get("comparador")] || "";
+findEquipment();
 </script>
 </body>
 </html>

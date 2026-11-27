@@ -57,13 +57,13 @@
 <script type="module" src="config.mjs"></script>
 
 <script type="module">
+import {isMechanicalComparatorRecord} from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=inventario";
 const $=s=>document.querySelector(s); const supabase=window.supabase;
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
 function norm(v=""){return String(v||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/×/g,"X").replace(/,/g,".").replace(/\s+/g," ").trim()}
 function classify(inst={}){
  const t=norm([inst.codigo,inst.descripcion,inst.descripcion_equipo,inst.tipo,inst.tipo_instrumento,inst.familia,inst.rango,inst.modelo].filter(Boolean).join(" "));
- if (String(inst.codigo) === "20102644" && t.includes("RELOJ COMPARADOR CENTESIMAL")) return {label:"MT17 · Comparadores / relojes",href:"mt17.html?comparador=centesimal",notes:["Equipo piloto"],future:false};
- if (String(inst.codigo) === "JZF962" && t.includes("RELOJ COMPARADOR MILESIMAL")) return {label:"MT17 · Comparadores / relojes",href:"mt17.html?comparador=milesimal",notes:["Equipo piloto"],future:false};
+ if(isMechanicalComparatorRecord(inst)) return {label:"MT17 · Comparadores / relojes",href:"mt17.html?codigo="+encodeURIComponent(inst.codigo),notes:["Equipo del inventario"],future:false};
  if(t.includes("ROSCA")||t.includes("ROSCADO")||t.includes("ANILLO")||/\bM\s*\d+(?:\.\d+)?\s*(?:X|-)\s*\d+(?:\.\d+)?/.test(t)) return {label:"MT16 · Roscados P/NP",href:"mt16.html?codigo="+encodeURIComponent(inst.codigo||$("#equipmentCode").value||""),notes:["ISO 1502","ISO 965","Banco Trimos","Rodillos normativos"],future:false};
  if(t.includes("TAMPON")||t.includes("TAPÓN")||t.includes("LISO")||t.includes("P/NP")||t.includes("PASA")||t.includes("NO PASA")) return {label:"MT15 · Tampones lisos P/NP",href:"mt15.html?codigo="+encodeURIComponent(inst.codigo||$("#equipmentCode").value||""),notes:["ISO 286","ISO 1938","Patrón dimensional","ILAC-G8"],future:false};
  if(t.includes("PIE DE REY")||t.includes("CALIBRE")) return {label:"Pie de rey",href:"#",notes:["Módulo pendiente"],future:true};

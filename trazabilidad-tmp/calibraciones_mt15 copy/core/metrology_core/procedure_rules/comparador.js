@@ -1,14 +1,31 @@
 import { createPoint, rangePoints } from "./shared.js";
 import { trimos1288GeneralU } from "../pattern_correction_resolver.js";
 
-// CEM DI-010, §§5.7 and 5.9. MT17 currently covers the two 0–10 mm pilots.
-export const COMPARADOR_DI010_POINTS = Array.from({length: 11}, (_, i) => i * 95 / 100);
+// CEM DI-010, §§5.7 and 5.9. The targets span 95% of the instrument range.
 export const COMPARADOR_DI010_REPEAT_COUNT = 6;
-export const COMPARADOR_DI010_APPROACH_TOLERANCE_MM = 0.095;
 
-export function comparadorDI010Pair({ target, bank, indicator }) {
+export function isMechanicalComparatorRecord(equipment) {
+  const description = String(equipment?.descripcion ?? "").normalize("NFD").replace(/\p{M}/gu, "");
+  return /\breloj\b.*\bcomparador\b/i.test(description) && !/\bdigital\b|\belectronico\b|\bpalanca\b|\binteriores\b|\bpupitast\b/i.test(description);
+}
+
+export function comparadorDI010Plan(equipment) {
+  if (!isMechanicalComparatorRecord(equipment)) return null;
+
+  const scale = String(equipment.precision ?? "").trim().replace(",", ".").replace(/\s*mm$/i, "");
+  const scaleDivisionMm = Number(scale);
+  const range = String(equipment.rango ?? "").trim().match(/^0\s*[-–—/÷]\s*(\d+(?:[.,]\d+)?)\s*(?:mm)?$/i);
+  const max = Number(range?.[1].replace(",", "."));
+  if (![0.001, 0.01].includes(scaleDivisionMm) || !(max > 0 && max <= 300)) return null;
+
+  const points = Array.from({length: 11}, (_, i) => Number((i * max * 0.095).toFixed(6)));
+  const toleranceMm = Number((points.at(-1) / (points.length - 1) / 10).toFixed(9));
+  return { points, toleranceMm, max, scaleDivisionMm, bankUAtTopMm: trimos1288GeneralU(points.at(-1)).U_mm };
+}
+
+export function comparadorDI010Pair({ target, toleranceMm, bank, indicator }) {
   if (!Number.isFinite(indicator) || !Number.isFinite(bank)) return null;
-  if (Math.abs(bank - target) >= COMPARADOR_DI010_APPROACH_TOLERANCE_MM - 1e-12) return null;
+  if (!(Math.abs(bank - target) < toleranceMm - 1e-12)) return null;
 
   return { deviationMm: indicator - bank, bankExpandedMm: trimos1288GeneralU(Math.abs(bank))?.U_mm ?? null };
 }
