@@ -338,7 +338,7 @@ export function parseMT16VerificationDesignation(raw) {
     const parallel=parseMT16VerificationDesignation(normalized.replace(/\bR\s*(?=\d)/,'G '));
     if(parallel.ok&&parallel.thread_system==='BSPP_ISO228'){
       return {...parallel,din259LegacyR:true,raw:String(raw),warnings:[
-        'DIN 259 usa la letra R para rosca cilíndrica. Consulta la pauta DIN 259 del calibre para decidir su aptitud.'
+        'DIN 259 usa la letra R para rosca cilíndrica. Su designación equivalente es G.'
       ]};
     }
   }
@@ -382,12 +382,16 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   const direction=/IZQ|LEFT|\bLH\b/i.test([equipment.rango,equipment.descripcion].filter(Boolean).join(' '))?'IZQUIERDA':'DERECHA';
   const egM6Mod=specialMetric&&parsed.nominal_mm===6&&parsed.pitch_mm===1&&cls.toUpperCase()==='6H'&&
     /\bEG[ -]*M\s*6(?:\s*[X×]\s*1(?:[.,]0+)?)?\s*-?\s*6H\s*MOD\b/i.test(metricMarking);
-  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL',...(parsed.din259LegacyR?['DIN259']:[]),...(specialMetric?['ESPECIAL',raw.toUpperCase()]:[])].join('|');
+  const code=String(equipment.codigo??'').trim().toUpperCase();
+  const historicalTRG02=code==='TRG02'&&family==='TAMPON_ROSCADO_PNP'&&
+    parsed.thread_system==='BSPP_ISO228'&&parsed.nominal_label==='G 3/8'&&parsed.tpi===19&&
+    parsed.angle_deg===55&&cls==='G_INTERNAL'&&direction==='DERECHA'&&!parsed.din259LegacyR;
+  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL',...(parsed.din259LegacyR?['DIN259']:[]),...(historicalTRG02?['TRG02']:[]),...(specialMetric?['ESPECIAL',raw.toUpperCase()]:[])].join('|');
   const reason=parsed.din259LegacyR?'DIN 259 cilíndrica. La pauta de servicio del calibre DIN 259 está pendiente.':parsed.thread_system==='BSPT_ISO7'
     ? 'Rosca R/Rc/Rp de estanqueidad. Requiere identificar el tipo de calibre y verificar D2 en el plano de referencia según ISO 7-2.'
     :specialMetric&&!egM6Mod?'El marcado indica una rosca especial o para inserto. Usa su pauta específica.':!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
     !cls&&parsed.thread_system==='BSW_BS84'?'Falta identificar la clase de rosca Whitworth, por ejemplo Normal o Media.':null;
-  return {key,label:parsed.din259LegacyR?raw:egM6Mod?'EG M6x1 · 6H mod':(specialMetric?raw:[parsed.normalized,cls].filter(Boolean).join(' · ')),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,egM6Mod,din259LegacyR:parsed.din259LegacyR,reason};
+  return {key,label:parsed.din259LegacyR?raw:egM6Mod?'EG M6x1 · 6H mod':(specialMetric?raw:[parsed.normalized,cls].filter(Boolean).join(' · ')),code,family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,egM6Mod,din259LegacyR:parsed.din259LegacyR,reason};
 }
 export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
   if(config?.regla_decision==='INTERNA_EXCEL'){
@@ -542,6 +546,24 @@ function metricPlugServicePoints(lower, upper, designation, reference) {
 }
 
 export function resolveMT16ServiceLimits(identity){
+  if(identity?.key&&identity.family==='TAMPON_ROSCADO_PNP'&&identity.direction==='DERECHA'){
+    if(identity.code==='TRG02'&&!identity.din259LegacyR&&identity.system==='BSPP_ISO228'&&
+       identity.size==='G 3/8'&&identity.tpi===19&&identity.angle===55&&identity.tolerance_class==='G_INTERNAL'){
+      return {version:'MT16_TMP_TRG02_CERT288',standard:'Pauta interna TMP · certificado 288',designation:identity.label,
+        criterio:'TMP · TRG02 (código histórico 02) · certificado interno 288 del 07/02/2022 · G 3/8–19 BSP · límites D2 en servicio de la hoja TOLERANCIAS',
+        sources:[{file:'ROSCAS WHITWORTH/ROSCAS G-BSP/G 3%8-19 BSP- .xlsm',
+          sha256:'a0c578cb4c16c59c31640e53c00ae1ea1f882bfe028a96a9d5e371ebe4d4e1d6',
+          sheet:'TOLERANCIAS',cells:{PASA:['M20','M19'],NO_PASA:['M28','M27']}}],
+        puntos:{PASA:{min:15.811,max:15.824},NO_PASA:{min:15.931,max:15.944}}};
+    }
+    if(identity.code==='178580101'&&identity.din259LegacyR&&identity.size==='G 3/4'&&identity.tpi===14){
+      const equivalent=resolveBSPPPlugLimits(identity);
+      if(equivalent)return {...equivalent,version:'MT16_TMP_DIN259_G34',
+        criterio:'TMP · 178580101 · marcado original R 3/4–14 DIN 259 · se aplica el criterio G 3/4–14. '+equivalent.criterio,
+        sources:[...equivalent.sources,'https://www.dinmedia.de/en/standard/din-259-3/1886127',
+          'https://www.dinmedia.de/de/norm/din-iso-228-2/2848635']};
+    }
+  }
   if(identity?.din259LegacyR)return null;
   if(identity?.specialMetric){
     if(!identity.key||!identity.egM6Mod||identity.family!=='TAMPON_ROSCADO_PNP'||
