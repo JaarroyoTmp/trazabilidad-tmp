@@ -51,12 +51,13 @@ export function buildMT17Report(record) {
   const {equipo_snapshot: equipment, datos} = record;
   const {operario, ambiente, patron, criterio, evaluacion, recorrido, repetibilidad, equipo} = datos;
   const number = mt17ReportNumber(record);
+  const automatic = datos.version >= 2;
   const sections = recorrido.map((group, direction) => reportTable(direction === 0 ? 'Subida' : 'Bajada',
-    ['Punto', 'Banco', 'Reloj', 'Corrección', 'U del banco (k=2)', 'U', '|Corrección| + U', 'Decisión'],
+    ['Punto', 'Banco', 'Reloj', 'Corrección', 'U del banco (k=2)', 'U', ...(automatic ? ['k'] : []), '|Corrección| + U', 'Decisión'],
     group.map((row, index) => {
       const point = evaluacion.points[direction][index];
       return [row.target, row.bank, row.indicator, point.correctionMm, row.bankExpandedMm,
-        point.expandedMm, point.guardedErrorMm].map(mm).concat(status(point.accepted));
+        point.expandedMm, ...(automatic ? [point.k] : []), point.guardedErrorMm].map(mm).concat(status(point.accepted));
     })));
   const repeats = repetibilidad.map((group, index) => reportTable(index === 0 ? 'Punto superior' : 'Punto inferior',
     ['Toma', 'Banco', 'Reloj', 'Reloj − banco'],
@@ -84,9 +85,15 @@ Rango 0–${mm(equipo.alcanceMm)} mm · División de escala ${mm(equipo.division
 <p>Referencia documentada: ${escape(criterio.document)}. Límite simétrico ±${mm(criterio.limitMm)} mm.
 ${criterio.maxExpandedMm === null ? '' : `Incertidumbre máxima admitida ${mm(criterio.maxExpandedMm)} mm.`}
 APTO si todos los puntos de subida y bajada cumplen |corrección| + U ≤ límite y, cuando aplica, U ≤ incertidumbre máxima.</p>
-<p>Corrección = desviación inicial − (indicación del reloj − indicación del banco).
-U = k × √[(U banco/2)² + u escala² + u repetibilidad² + u adicional²].
-k = ${mm(criterio.k)} · u escala = ${mm(evaluacion.scaleStandardMm)} mm · s<sub>R</sub> = ${mm(evaluacion.repeatabilityMm)} mm · u repetibilidad = ${mm(evaluacion.repeatStandardMm)} mm · u adicional = ${mm(criterio.otherStandardMm)} mm.</p>
+<p>Corrección = desviación inicial − (indicación del reloj − indicación del banco).</p>
+${automatic ? `<p>Presupuesto de incertidumbre: ${escape(datos.presupuesto.document)}.
+U = k × √[(U banco/2)² + u escala² + u repetibilidad² + u térmica² + u alineación² + u deriva²].
+La U de la tabla se redondea por exceso a la división de escala. Mayor U antes de redondear ${mm(evaluacion.maxCalculatedExpandedMm)} mm.</p>
+<p>u escala = ${mm(evaluacion.scaleStandardMm)} mm · s<sub>R</sub> = ${mm(evaluacion.repeatabilityMm)} mm ·
+u repetibilidad = ${mm(evaluacion.repeatStandardMm)} mm · u deriva = ${mm(evaluacion.driftStandardMm)} mm ·
+Ángulo máximo del montaje ${mm(datos.presupuesto.alignmentMaxDegrees)}°.</p>`
+  : `<p>U = k × √[(U banco/2)² + u escala² + u repetibilidad² + u adicional²].
+k = ${mm(criterio.k)} · u escala = ${mm(evaluacion.scaleStandardMm)} mm · s<sub>R</sub> = ${mm(evaluacion.repeatabilityMm)} mm · u repetibilidad = ${mm(evaluacion.repeatStandardMm)} mm · u adicional = ${mm(criterio.otherStandardMm)} mm.</p>`}
 <h2>Recorrido de la escala (mm)</h2>${sections.join('')}
 <h2>Tomas de repetibilidad (mm)</h2>${repeats.join('')}
 </html>`;

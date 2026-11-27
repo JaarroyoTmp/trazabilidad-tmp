@@ -39,7 +39,6 @@ output{font-weight:700}
 #mt16-cloud-access form{display:flex;flex-wrap:wrap;align-items:end;gap:10px}
 #mt16-cloud-access form[hidden]{display:none}
 #mt16-cloud-access input{display:block;margin-top:6px}
-#document-label{grid-column:1/-1}
 .report-actions{display:flex;flex-wrap:wrap;gap:8px}
 fieldset{padding:0;border:0;margin:0;min-width:0}
 @media(max-width:850px){.grid{grid-template-columns:1fr}main{padding:12px}}
@@ -50,7 +49,7 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
   <nav aria-label="Navegación"><a class="btn" href="calibraciones.html">← Centro de Calibración</a></nav>
   <section class="box" aria-labelledby="title">
     <h1 id="title">MT17 · Comparadores / relojes</h1>
-    <p class="notice">Calibración de comparadores mecánicos centesimales y milesimales basada en CEM DI‑010. Completa la toma y el criterio aprobado por Calidad para guardar el informe.</p>
+    <p class="notice">Calibración de comparadores mecánicos centesimales y milesimales basada en CEM DI‑010. Registra las lecturas y las condiciones del ensayo. MT17 calcula el resultado con los datos del equipo y del patrón.</p>
     <h2>Buscar equipo</h2>
     <form id="equipment-form" class="search">
       <label for="equipment-query">Código, descripción o fabricante
@@ -90,18 +89,12 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
     </div>
     <p id="progress" role="status"></p>
     <h2>Decisión e informe</h2>
-    <p>Usa el límite simétrico y el presupuesto aprobados para el equipo. Se obtiene APTO cuando todos los puntos cumplen |corrección| + U ≤ límite y respetan la U máxima si está especificada.</p>
     <div class="ambient">
       <label>Fecha de calibración<input id="date" type="date"></label>
       <label>Operario<input id="operator" type="text" maxlength="120"></label>
-      <label id="document-label">Referencia del criterio y del presupuesto de incertidumbre<input id="criterion-source" type="text" maxlength="240" placeholder="Documento y revisión"></label>
-      <label>Límite simétrico ± (mm)<input id="tolerance" type="text" inputmode="decimal"></label>
-      <label>U máxima (mm, opcional)<input id="limit-u" type="text" inputmode="decimal"></label>
-      <label>Incertidumbre típica adicional (mm)<input id="other-u" type="text" inputmode="decimal"></label>
-      <label>Factor de cobertura k<input id="factor-k" type="text" inputmode="decimal" value="2"></label>
     </div>
-    <p>La incertidumbre típica adicional recoge los efectos del montaje y del banco que el cálculo no incluye por separado, como alineación, temperatura, deriva y referencia de cero.</p>
-    <label class="check"><input id="validated" type="checkbox"> He comprobado que el patrón, el límite y el presupuesto documentados son aplicables a este equipo.</label>
+    <p id="criterion-summary"></p>
+    <p id="calculation-summary" aria-live="polite"></p>
     <p id="decision" class="decision" role="status">Decisión pendiente.</p>
     <div class="report-actions">
       <button class="btn primary" id="save" type="button" disabled>Guardar calibración</button>
@@ -116,9 +109,9 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
 <script type="module">
 import "./config.mjs";
 import { mt16Access } from "./mt16_cloud.js";
-import { downloadMT17, mt17ReportNumber, publishMT17 } from "./mt17_reports.js";
+import { downloadMT17, mt17ReportNumber, publishMT17 } from "./mt17_reports.js?v=automatico";
 import "./mt16_cloud_access.js?v=informes";
-import { COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Plan, comparadorDI010Repeatability, evaluateComparadorDI010, isMechanicalComparatorRecord } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=decision";
+import { COMPARADOR_DI010_REPEAT_COUNT as repeatCount, comparadorDI010Pair, comparadorDI010Plan, comparadorDI010Repeatability, evaluateComparadorDI010, isMechanicalComparatorRecord, resolveComparadorBudget, resolveComparadorCriterion } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=automatico";
 
 const $ = id => document.getElementById(id);
 const format = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
@@ -129,6 +122,25 @@ function parse(field) {
 }
 
 const drafts = new Map();
+function draftKey() {
+ return `tmp:mt17:borrador:2:${activeEquipment.id}:${plan.max}:${plan.scaleDivisionMm}`;
+}
+function storeDraft() {
+ const key = draftKey();
+ const values = fields.map(field => field.type === "checkbox" ? field.checked : field.value);
+ drafts.set(key, values);
+ try { sessionStorage.setItem(key, JSON.stringify(values)); } catch {}
+}
+function readDraft() {
+ const key = draftKey();
+ try { return drafts.get(key) ?? JSON.parse(sessionStorage.getItem(key)); }
+ catch { return drafts.get(key); }
+}
+function clearDraft() {
+ const key = draftKey();
+ drafts.delete(key);
+ try { sessionStorage.removeItem(key); } catch {}
+}
 let inventoryRequest;
 let activeEquipment;
 let plan;
@@ -144,7 +156,8 @@ let waitingForAccess = false;
 const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Madrid", dateStyle: "short" }).format(new Date());
 $("date").defaultValue = today;
 $("date").max = today;
-const bank = { nombre: "Trimos TELMA 500", codigo: "1288 (TMP) / 1288-5 (Calibrator)", certificado: "C-11377.00002" };
+const bank = { nombre: "Trimos TELMA 500", codigo: "1288 (TMP) / 1288-5 (Calibrator)", certificado: "C-11377.00002", desde: "2023-04-26", hasta: "2027-04-26" };
+const budget = resolveComparadorBudget(bank.certificado);
 
 function dateValid(value) {
  return /^\d{4}-\d{2}-\d{2}$/.test(value) && value <= today;
@@ -187,7 +200,10 @@ function readPair(row) {
 }
 
 function update() {
- const sweepPairs = upDown.map(group => group.map(readPair));
+ const sweepPairs = upDown.map(group => group.map(row => {
+  const pair = readPair(row);
+  return pair && { ...pair, bank: parse(row.bank) };
+ }));
  const repeatPairs = repetitions.map(group => group.map(readPair));
  const zeroDeviation = $("zero").checked ? sweepPairs[0][0]?.deviationMm : undefined;
  upDown.forEach((group, i) => group.forEach((row, j) => {
@@ -212,32 +228,41 @@ function update() {
   `${sweepDone}/${2 * plan.points.length} puntos de recorrido y ${repeatDone}/${2 * repeatCount} tomas de repetibilidad.${ambientNote}` +
   (complete && ambientOk ? " Toma de datos completa." : "");
 
- const criterion = {
-  document: $("criterion-source").value.trim(),
-  limitMm: parse($("tolerance")),
-  maxExpandedMm: $("limit-u").value.trim() ? parse($("limit-u")) : null,
-  otherStandardMm: parse($("other-u")),
-  k: parse($("factor-k"))
- };
+ const criterion = resolveComparadorCriterion(activeEquipment, plan);
  const date = $("date").value;
  const operator = $("operator").value.trim();
- const evaluation = complete && ambientOk && $("validated").checked && dateValid(date) && operator
-  ? evaluateComparadorDI010({plan, sweeps: sweepPairs, repeatability, criterion}) : null;
+ const bankValid = dateValid(date) && date >= bank.desde && date <= bank.hasta;
+ const evaluation = complete && ambientOk
+  ? evaluateComparadorDI010({plan, sweeps: sweepPairs, repeatability, criterion, budget}) : null;
+ const reasons = [];
+ if (!criterion) reasons.push("falta un criterio documentado para " + activeEquipment.codigo);
+ if (!budget) reasons.push("falta documentar la deriva del Trimos y la alineación del montaje");
+ if (dateValid(date) && !bankValid) reasons.push("el certificado del patrón no cubre la fecha indicada");
+ if (!dateValid(date) || !operator) reasons.push("falta la fecha o el operario");
+ const result = bankValid && operator && evaluation?.resultado;
+ $("criterion-summary").textContent = criterion
+  ? `${criterion.document} · Límite ±${display(criterion.limitMm)} mm` +
+    (criterion.maxExpandedMm === null ? "" : ` · U máxima ${display(criterion.maxExpandedMm)} mm`)
+  : "";
+ $("calculation-summary").textContent = evaluation
+  ? `Mayor |corrección|: ${display(evaluation.maxCorrectionMm)} mm · ` +
+    (budget ? `Mayor U: ${display(evaluation.maxExpandedMm)} mm` :
+      `Mayor U parcial: ${display(evaluation.maxCalculatedExpandedMm)} mm`)
+  : "";
  const decision = $("decision");
- decision.dataset.result = evaluation?.resultado || "";
- decision.textContent = evaluation
-  ? `${evaluation.resultado} · Máximo |corrección| + U: ${display(evaluation.maxGuardedMm)} mm · Mayor U: ${display(evaluation.maxExpandedMm)} mm`
-  : "Decisión pendiente. Completa las lecturas, las condiciones, la fecha, el operario y el criterio documentado.";
- prepared = evaluation && activeEquipment.id ? {
+ decision.dataset.result = result || "";
+ decision.textContent = result || (reasons.length ? "Decisión pendiente · " + reasons.join(" · ") + "." :
+  "Decisión pendiente. Completa las lecturas y comprueba las condiciones del ensayo.");
+ prepared = result && activeEquipment.id ? {
   instrumento_id: activeEquipment.id,
   fecha: date,
   resultado: evaluation.resultado,
   equipo_snapshot: { codigo: activeEquipment.codigo, descripcion: activeEquipment.descripcion, fabricante: activeEquipment.fabricante },
   datos: {
-   version: 1, metodo: "MT17 · CEM DI-010", operario: operator, patron: bank,
+   version: 2, metodo: "MT17 · CEM DI-010", operario: operator, patron: bank,
    equipo: { alcanceMm: plan.max, divisionMm: plan.scaleDivisionMm },
    ambiente: { temperatura: temperatures, humedad: humidities },
-   criterio: criterion, evaluacion: evaluation,
+   criterio: criterion, presupuesto: budget, evaluacion: evaluation,
    recorrido: captureSeries(upDown, sweepPairs), repetibilidad: captureSeries(repetitions, repeatPairs)
   }
  } : null;
@@ -275,6 +300,7 @@ async function saveCalibration() {
   await publishMT17(attempt.record);
   completed.set(fingerprint, attempt);
   pending.delete(fingerprint);
+  clearDraft();
  } catch {
   $("save-status").textContent = "No se pudo confirmar el guardado. Vuelve a pulsar Guardar calibración para reintentar.";
  } finally {
@@ -293,13 +319,13 @@ function selectEquipment(equipment) {
   $("equipment-status").textContent = "La ficha necesita un rango desde 0 en mm y una división de escala de 0,01 o 0,001 mm.";
   return;
  }
- if (activeEquipment) {
-  drafts.set(activeEquipment.codigo, fields.map(field => field.type === "checkbox" ? field.checked : field.value));
- }
  waitingForAccess = false;
  $("save-status").textContent = "El registro se conserva en Supabase al guardar.";
  activeEquipment = equipment;
  plan = nextPlan;
+ const url = new URL(location.href);
+ url.searchParams.set("codigo", equipment.codigo);
+ history.replaceState(null, "", url);
  const { points, toleranceMm, max, scaleDivisionMm, bankUAtTopMm } = plan;
  const scaleType = scaleDivisionMm === 0.01 ? "centesimal" : "milesimal";
  $("equipment-summary").textContent = [
@@ -322,7 +348,7 @@ function selectEquipment(equipment) {
   renderSeries($("repeats"), {heading: "Punto superior", targets: Array(repeatCount).fill(points.at(-1))}, true),
   renderSeries($("repeats"), {heading: "Punto inferior", targets: Array(repeatCount).fill(points[0])}, true)
  ];
- const existing = drafts.get(equipment.codigo);
+ const existing = readDraft();
  fields = [...$("worksheet").querySelectorAll("input")];
  fields.forEach((field, index) => {
   if (field.type === "checkbox") field.checked = existing?.[index] ?? false;
@@ -391,6 +417,7 @@ async function findEquipment() {
 }
 
 $("worksheet").addEventListener("input", () => {
+ storeDraft();
  if (waitingForAccess) {
   waitingForAccess = false;
   $("save-status").textContent = "Cambios pendientes de guardar.";
