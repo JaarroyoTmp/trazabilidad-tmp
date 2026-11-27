@@ -322,6 +322,8 @@ export function parseMT16VerificationDesignation(raw) {
     .replace(/\b(\d+)\.\s+(?=\d+\/\d+)/g, '$1 ')
     .replace(/[\\"'“”″]+/g, ' ')
     .replace(/\bGAS\s+CIL[IÍ]NDRIC[AO]\b/g, 'G')
+    .replace(/(?<![\w/])((?:\d+\s+)?\d+\/\d+|\d+(?:[.,]\d+)?)\s*(?:-\s*(\d+))?\s*(G|BSPP)\b/g,
+      (_, size, tpi) => `G ${size}${tpi ? ' - ' + tpi : ''}`)
     .replace(/\b(UNF|UNC|UNEF|UN|UNS)\s*(?=[123][AB]\b)/g, '$1 - ')
     .replace(/(\d)\s*X\s*(\d+)\s*-?\s*(?=UN(?:[CFJS]|EF)?\b)/g, '$1-$2 ')
     .replace(/\b(BSW|BSF)\s+(?=NORMAL\b|MED(?:IA|IUM)?\b)/g, '$1 - ');
@@ -333,7 +335,7 @@ export function parseMT16VerificationDesignation(raw) {
     const gaugeSize = result.nominal_label?.replace(/^G /, '');
     const row = BSP_THREAD_TABLE[gaugeSize];
     const externalClass = /\b(?:G|BSPP)\s*(?:\d+\s+)?(?:\d+\/\d+|\d+)\s*(?:-\s*\d+\s*)?-?\s*[AB]\b/.test(normalized);
-    if (externalClass || /\b(?:BSPT|R[CP]?)\b/.test(normalized)) {
+    if (externalClass || /\b(?:BSPT\b|R[CP]?(?=\d|\s))/.test(normalized)) {
       return {...result,ok:false,warnings:['El marcado combina G con una clase exterior o con una designación de rosca para estanqueidad. Comprueba el calibre.']};
     }
     if (row && result.tpi !== row.tpi) {
@@ -341,7 +343,7 @@ export function parseMT16VerificationDesignation(raw) {
     }
   }
   if (!result.ok && /\bBSP\b|\bGAS\b/.test(designation)) {
-    return {...result, warnings:['La ficha dice BSP o GAS. Identifica si el calibre es G cilíndrico o R/Rc/Rp según el marcado.']};
+    return {...result, warnings:['La ficha indica BSP o GAS sin identificar la serie. Comprueba el marcado físico: G (ISO 228) o R/Rc/Rp (ISO 7).']};
   }
   return result;
 }
@@ -366,7 +368,9 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   const egM6Mod=specialMetric&&parsed.nominal_mm===6&&parsed.pitch_mm===1&&cls.toUpperCase()==='6H'&&
     /\bEG[ -]*M\s*6(?:\s*[X×]\s*1(?:[.,]0+)?)?\s*-?\s*6H\s*MOD\b/i.test(metricMarking);
   const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL',...(specialMetric?['ESPECIAL',raw.toUpperCase()]:[])].join('|');
-  const reason=specialMetric&&!egM6Mod?'El marcado indica una rosca especial o para inserto. Usa su pauta específica.':!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
+  const reason=parsed.thread_system==='BSPT_ISO7'
+    ? 'Rosca R/Rc/Rp de estanqueidad. Requiere identificar el tipo de calibre y verificar D2 en el plano de referencia según ISO 7-2.'
+    :specialMetric&&!egM6Mod?'El marcado indica una rosca especial o para inserto. Usa su pauta específica.':!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
     !cls&&parsed.thread_system==='BSW_BS84'?'Falta identificar la clase de rosca Whitworth, por ejemplo Normal o Media.':null;
   return {key,label:egM6Mod?'EG M6x1 · 6H mod':(specialMetric?raw:[parsed.normalized,cls].filter(Boolean).join(' · ')),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,egM6Mod,reason};
 }
