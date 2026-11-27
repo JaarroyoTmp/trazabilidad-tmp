@@ -40,6 +40,8 @@ output{font-weight:700}
 #mt16-cloud-access form[hidden]{display:none}
 #mt16-cloud-access input{display:block;margin-top:6px}
 .report-actions{display:flex;flex-wrap:wrap;gap:8px}
+#decision-details{margin-bottom:12px;font-size:14px}
+#decision-details summary{cursor:pointer}
 fieldset{padding:0;border:0;margin:0;min-width:0}
 @media(max-width:850px){.grid{grid-template-columns:1fr}main{padding:12px}}
 </style>
@@ -74,11 +76,11 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
     </div>
     <label class="check"><input id="zero" type="checkbox"> Banco y reloj puestos a cero al inicio del recorrido.</label>
     <h2>Recorrido de la escala</h2>
-    <p>Haz una pasada en subida y otra en bajada, sin reajustar el cero entre ambas. Empieza cada pasada cerca del extremo correspondiente y mantén el sentido de avance. Lleva el banco al valor propuesto y escribe lo que marca el reloj. Si el banco queda en otro valor, corrige solo esa casilla. Todos los valores están en mm.</p>
+    <p>Haz una pasada en subida y otra en bajada, sin reajustar el cero entre ambas. Empieza cada pasada cerca del extremo correspondiente y mantén el sentido de avance. Lleva el banco al valor de la toma y escribe lo que marca el reloj. Todos los valores están en mm.</p>
     <p id="coverage"></p>
     <div class="grid" id="sweeps"></div>
     <h2>Repetibilidad</h2>
-    <p>Haz seis tomas en el punto superior y otras seis en el inferior. Antes de cada toma, vuelve a la posición inicial, pon el banco y el reloj a cero y acércate de nuevo al punto. Escribe la indicación del reloj en cada toma y corrige el valor del banco si difiere del propuesto.</p>
+    <p>Haz seis tomas en el punto superior y otras seis en el inferior. Antes de cada toma, vuelve a la posición inicial, pon el banco y el reloj a cero y acércate de nuevo al punto. Lleva el banco al valor indicado en cada extremo y escribe la indicación del reloj en cada toma.</p>
     <div class="grid" id="repeats"></div>
     <p>Repetibilidad combinada s<sub>R</sub> (mm) <output id="repeatability">—</output></p>
     <h2>Cierre</h2>
@@ -96,6 +98,10 @@ fieldset{padding:0;border:0;margin:0;min-width:0}
     <p id="criterion-summary"></p>
     <p id="calculation-summary" aria-live="polite"></p>
     <p id="decision" class="decision" role="status">Decisión pendiente.</p>
+    <details id="decision-details" hidden>
+      <summary>Datos necesarios para emitir el informe</summary>
+      <ul id="decision-reasons"></ul>
+    </details>
     <div class="report-actions">
       <button class="btn primary" id="save" type="button" disabled>Guardar calibración</button>
       <button class="btn" id="download" type="button" disabled>Descargar informe</button>
@@ -165,7 +171,7 @@ function dateValid(value) {
 
 function captureSeries(groups, pairs) {
  return groups.map((group, i) => group.map((row, j) => ({
-  target: row.target, bank: parse(row.bank), indicator: parse(row.indicator), ...pairs[i][j]
+  target: row.target, indicator: parse(row.indicator), ...pairs[i][j]
  })));
 }
 
@@ -173,47 +179,36 @@ function renderSeries(host, { heading, targets }, repeat = false) {
  const section = document.createElement("section");
  section.innerHTML = `<h3>${heading}${repeat ? " · " + display(targets[0]) + " mm" : ""}</h3>
  <div class="table-wrap"><table aria-label="${heading}"><thead><tr>
- <th scope="col">${repeat ? "Toma" : "Punto"}</th><th scope="col">Banco</th><th scope="col">Reloj</th>
- <th scope="col">${repeat ? "Reloj − banco" : "Corrección"}</th>${repeat ? "" : '<th scope="col">U banco (k=2)</th>'}</tr></thead><tbody></tbody></table></div>`;
+ <th scope="col">Toma</th><th scope="col">Reloj</th></tr></thead><tbody></tbody></table></div>`;
  host.append(section);
  const body = section.querySelector("tbody");
  return targets.map((target, i) => {
   const row = body.insertRow();
-  row.innerHTML = `<th scope="row">${repeat ? i + 1 : display(target)}</th>
-  <td><input type="text" inputmode="decimal" aria-label="${heading}, banco, toma ${i + 1}"></td>
-  <td><input type="text" inputmode="decimal" aria-label="${heading}, reloj, toma ${i + 1}"></td>
-  <td><output>—</output></td>${repeat ? "" : "<td><output>—</output></td>"}`;
-  const [bank, indicator] = row.querySelectorAll("input");
-  const [output, bankU] = row.querySelectorAll("output");
-  bank.defaultValue = display(target);
-  return { target, bank, indicator, output, bankU };
+  row.innerHTML = `<th scope="row"></th><td>
+   <input type="hidden">
+   <input type="text" inputmode="decimal" aria-label="${heading}, reloj, toma ${i + 1}">
+  </td>`;
+  const [reference, indicator] = row.querySelectorAll("input");
+  // Keep the stored reference in the same position so earlier drafts retain their readings.
+  reference.defaultValue = display(target);
+  return { target, reference, indicator, label: row.firstElementChild, index: i + 1, repeat };
  });
 }
 
 function readPair(row) {
- const bank = parse(row.bank), indicator = parse(row.indicator);
- const pair = comparadorDI010Pair({ target: row.target, toleranceMm: plan.toleranceMm, bank, indicator });
- const nearTarget = comparadorDI010Pair({target: row.target, toleranceMm: plan.toleranceMm, bank, indicator: 0}) !== null;
- row.bank.setAttribute("aria-invalid", String(Boolean(row.bank.value.trim()) && !nearTarget));
+ const bank = parse(row.reference);
+ const indicator = parse(row.indicator);
+ row.label.textContent = row.repeat
+  ? String(row.index) + (bank !== row.target ? ` · ${display(bank)} mm` : "")
+  : display(bank);
  row.indicator.setAttribute("aria-invalid", String(Boolean(row.indicator.value.trim()) && !Number.isFinite(indicator)));
- return pair;
+ const pair = comparadorDI010Pair({target: row.target, toleranceMm: plan.toleranceMm, bank, indicator});
+ return pair && {...pair, bank};
 }
 
 function update() {
- const sweepPairs = upDown.map(group => group.map(row => {
-  const pair = readPair(row);
-  return pair && { ...pair, bank: parse(row.bank) };
- }));
+ const sweepPairs = upDown.map(group => group.map(readPair));
  const repeatPairs = repetitions.map(group => group.map(readPair));
- const zeroDeviation = $("zero").checked ? sweepPairs[0][0]?.deviationMm : undefined;
- upDown.forEach((group, i) => group.forEach((row, j) => {
-  const deviation = sweepPairs[i][j]?.deviationMm;
-  row.output.textContent = display(zeroDeviation - deviation);
-  row.bankU.textContent = display(sweepPairs[i][j]?.bankExpandedMm);
- }));
- repetitions.forEach((group, i) => group.forEach((row, j) => {
-  row.output.textContent = display(repeatPairs[i][j]?.deviationMm);
- }));
  const repeatability = comparadorDI010Repeatability(...repeatPairs.map(group => group.map(pair => pair?.deviationMm)));
  $("repeatability").textContent = display(repeatability);
  const temperatures = ["temp-start","temp-end"].map(id => parse($(id)));
@@ -235,10 +230,11 @@ function update() {
  const evaluation = complete && ambientOk
   ? evaluateComparadorDI010({plan, sweeps: sweepPairs, repeatability, criterion, budget}) : null;
  const reasons = [];
- if (!criterion) reasons.push("falta un criterio documentado para " + activeEquipment.codigo);
- if (!budget) reasons.push("falta documentar la deriva del Trimos y la alineación del montaje");
- if (dateValid(date) && !bankValid) reasons.push("el certificado del patrón no cubre la fecha indicada");
- if (!dateValid(date) || !operator) reasons.push("falta la fecha o el operario");
+ if (!criterion) reasons.push("Criterio de aceptación de " + activeEquipment.codigo + ".");
+ if (!budget) reasons.push("Presupuesto del montaje con la deriva del Trimos y la alineación.");
+ if (dateValid(date) && !bankValid) reasons.push("Certificado del patrón que cubra la fecha indicada.");
+ if (!dateValid(date) || !operator) reasons.push("Fecha de calibración y operario.");
+ if (!complete || !ambientOk) reasons.push("Lecturas y condiciones del ensayo completas.");
  const result = bankValid && operator && evaluation?.resultado;
  $("criterion-summary").textContent = criterion
   ? `${criterion.document} · Límite ±${display(criterion.limitMm)} mm` +
@@ -251,8 +247,15 @@ function update() {
   : "";
  const decision = $("decision");
  decision.dataset.result = result || "";
- decision.textContent = result || (reasons.length ? "Decisión pendiente · " + reasons.join(" · ") + "." :
-  "Decisión pendiente. Completa las lecturas y comprueba las condiciones del ensayo.");
+ decision.textContent = result || (complete && ambientOk
+  ? "Mediciones completas. Informe pendiente de validación."
+  : "Decisión pendiente.");
+ $("decision-details").hidden = Boolean(result) || !reasons.length;
+ $("decision-reasons").replaceChildren(...reasons.map(reason => {
+  const item = document.createElement("li");
+  item.textContent = reason;
+  return item;
+ }));
  prepared = result && activeEquipment.id ? {
   instrumento_id: activeEquipment.id,
   fecha: date,
@@ -326,13 +329,13 @@ function selectEquipment(equipment) {
  const url = new URL(location.href);
  url.searchParams.set("codigo", equipment.codigo);
  history.replaceState(null, "", url);
- const { points, toleranceMm, max, scaleDivisionMm, bankUAtTopMm } = plan;
+ const { points, max, scaleDivisionMm, bankUAtTopMm } = plan;
  const scaleType = scaleDivisionMm === 0.01 ? "centesimal" : "milesimal";
  $("equipment-summary").textContent = [
   equipment.codigo, equipment.descripcion, equipment.fabricante,
   `0–${display(max)} mm`, `${scaleType} · ${display(scaleDivisionMm)} mm`
  ].filter(Boolean).join(" · ");
- $("coverage").textContent = `11 puntos hasta ${display(points.at(-1))} mm. Si editas el valor del banco, debe quedar a menos de ${display(toleranceMm)} mm del punto propuesto.`;
+ $("coverage").textContent = `11 puntos por sentido, hasta ${display(points.at(-1))} mm.`;
  const recommended = scaleDivisionMm / 2;
  $("bank-capability").textContent = bankUAtTopMm > recommended
   ? `La incertidumbre del Trimos en el punto superior (${display(bankUAtTopMm)} mm) supera los ${display(recommended)} mm recomendados por DI‑010 para este reloj. Requiere revisar la aptitud del banco.`
@@ -354,8 +357,18 @@ function selectEquipment(equipment) {
   if (field.type === "checkbox") field.checked = existing?.[index] ?? false;
   else field.value = existing?.[index] ?? field.defaultValue;
  });
+ let repeatRequired = false;
+ for (const row of [...upDown.flat(), ...repetitions.flat()]) {
+  const reference = parse(row.reference);
+  if (comparadorDI010Pair({target: row.target, toleranceMm: plan.toleranceMm, bank: reference, indicator: 0})) continue;
+  repeatRequired ||= Boolean(row.indicator.value.trim());
+  row.reference.value = display(row.target);
+  row.indicator.value = "";
+ }
  $("worksheet").hidden = false;
- $("equipment-status").textContent = "";
+ $("equipment-status").textContent = repeatRequired
+  ? "Repite las lecturas que tenían un valor de banco fuera del margen y aparecen vacías."
+  : "";
  update();
 }
 
