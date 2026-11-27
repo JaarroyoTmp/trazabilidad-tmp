@@ -38,7 +38,7 @@ if (host) {
       const nextId = user?.id || null;
       status.textContent = nextId
         ? 'Acceso de Calidad activo.'
-        : 'Autoriza este navegador para guardar y consultar los informes MT16.';
+        : 'Autoriza este navegador para guardar y consultar los informes.';
       const changed = userId !== nextId;
       userId = nextId;
       showAccess();
@@ -72,12 +72,12 @@ if (host) {
       if (error) {
         status.textContent = error.code === 'invalid_credentials'
           ? 'Supabase no ha aceptado el correo o la contraseña de Calidad.'
-          : 'No se pudo iniciar sesión en Supabase. El informe pendiente se conserva en este navegador.';
+          : 'No se pudo iniciar sesión en Supabase. Puedes volver a intentarlo.';
         return;
       }
       await refresh();
     } catch {
-      status.textContent = 'No se pudo conectar con Supabase. El informe pendiente se conserva en este navegador.';
+      status.textContent = 'No se pudo conectar con Supabase. Puedes volver a intentarlo.';
     } finally {
       signingIn = false;
       button.disabled = false;

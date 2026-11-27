@@ -1,3 +1,4 @@
+import {downloadMT17, listCloudMT17, loadCloudMT17, mt17ReportNumber} from './mt17_reports.js';
 import {loadCloudMT16, mt16Access} from './mt16_cloud.js';
 
 const el = id => document.getElementById(id);
@@ -5,13 +6,15 @@ const fields = ['search','type','result','year'];
 const body = el('records');
 const controls = Object.fromEntries(fields.map(id => [id,el(id)]));
 const status = el('status');
-const tipo = {CALIBRACION:'Calibración',VERIFICACION:'Verificación MT16'};
+const tipo = {CALIBRACION:'Calibración',CALIBRACION_MT17:'Calibración MT17',VERIFICACION:'Verificación MT16'};
 const resultClass = {APTO:'ok','NO APTO':'nok',INDETERMINADO:'pending'};
 const query = new URLSearchParams(location.search);
 controls.search.value = query.get('codigo')?.trim() || '';
 let registros = [];
 let consultado = false;
 let solicitud = 0;
+let avisoConsulta = '';
+const esCalibracion = r => r.tipo === 'CALIBRACION' || r.tipo === 'CALIBRACION_MT17';
 
 function canon(value) {
   return String(value ?? '').normalize('NFD').replace(/\p{Diacritic}/gu,'').trim().toLowerCase();
@@ -33,7 +36,7 @@ function fecha(value) {
 function filtered() {
   const term = canon(controls.search.value);
   return registros.filter(r => (!term || canon([r.equipo,r.descripcion,r.documento,r.operario].join(' ')).includes(term))
-    && (!controls.type.value || r.tipo === controls.type.value)
+    && (!controls.type.value || (controls.type.value === 'CALIBRACION' ? esCalibracion(r) : r.tipo === controls.type.value))
     && (!controls.result.value || r.resultado === controls.result.value)
     && (!controls.year.value || r.fecha?.startsWith(controls.year.value+'-')));
 }
@@ -103,14 +106,20 @@ function rowFor(r) {
   const actions = element('td');
   const group = element('div',null,'actions');
   group.append(button('Detalle',()=>showDetail(r)));
-  if (r.tipo === 'VERIFICACION' && r.tiene_documento) {
+  if (['VERIFICACION','CALIBRACION_MT17'].includes(r.tipo) && r.tiene_documento) {
     group.append(button('Descargar informe',async event=>{
       const control = event.currentTarget;
       control.disabled = true;
       try {
-        const record = await loadCloudMT16(r.id);
-        if (!record?.informe_html) throw Error('Sin informe disponible');
-        download(r.documento.replace(/[^\w.-]/g,'_')+'.html',record.informe_html,'text/html;charset=utf-8');
+        if (r.tipo === 'CALIBRACION_MT17') {
+          const record = await loadCloudMT17(r.id);
+          if (!record) throw Error('Sin informe disponible');
+          downloadMT17(record);
+        } else {
+          const record = await loadCloudMT16(r.id);
+          if (!record?.informe_html) throw Error('Sin informe disponible');
+          download(r.documento.replace(/[^\w.-]/g,'_')+'.html',record.informe_html,'text/html;charset=utf-8');
+        }
       } catch {
         status.textContent='No se pudo descargar el informe. Comprueba el acceso de Calidad.';
       } finally { control.disabled=false; }
@@ -135,13 +144,24 @@ function render() {
   if (!consultado) return;
   const visibles = filtered();
   el('csv').disabled = !visibles.length;
-  status.textContent = visibles.length+' de '+registros.length+' registros';
+  status.textContent = visibles.length+' de '+registros.length+' registros'+avisoConsulta;
   body.replaceChildren(...visibles.map(rowFor));
   if (!visibles.length) {
     const cell = element('td',registros.length ? 'Ningún registro coincide con los filtros.' : 'No hay registros oficiales disponibles para esta cuenta.','empty');
     cell.colSpan = 6;
     body.append(element('tr'));
     body.firstChild.append(cell);
+  }
+}
+
+async function loadLegacy() {
+  const rows = [];
+  for (let offset=0; ;offset+=200) {
+    const {data,error} = await window.supabase.from('registro_documental_tmp').select('*')
+      .order('fecha',{ascending:false,nullsFirst:false}).order('tipo').order('id').range(offset,offset+199);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length<200) return rows;
   }
 }
 
@@ -158,21 +178,24 @@ async function load() {
       if(ticket===solicitud) status.textContent='Autoriza el acceso de Calidad para consultar el registro oficial.';
       return;
     }
-    const rows = [];
-    for (let offset=0; ;offset+=200) {
-      const {data,error} = await window.supabase.from('registro_documental_tmp').select('*')
-        .order('fecha',{ascending:false,nullsFirst:false}).order('tipo').order('id').range(offset,offset+199);
-      if (ticket!==solicitud) return;
-      if (error) throw error;
-      rows.push(...data);
-      if (data.length<200) break;
-    }
-    registros=rows.map(r=>({...r,resultado:resultado(r.resultado)}));
+    const [legacy, mt17] = await Promise.allSettled([loadLegacy(), listCloudMT17()]);
+    if (ticket !== solicitud) return;
+    if (legacy.status === 'rejected' && mt17.status === 'rejected') throw legacy.reason;
+    avisoConsulta = legacy.status === 'rejected' ? ' · No se pudieron consultar los certificados y las verificaciones MT16.'
+      : mt17.status === 'rejected' ? ' · No se pudieron consultar las calibraciones MT17.' : '';
+    const mt17Rows = (mt17.value ?? []).map(r => ({
+      id:r.id, fecha:r.fecha, equipo:r.equipo_snapshot.codigo, descripcion:r.equipo_snapshot.descripcion,
+      tipo:'CALIBRACION_MT17', resultado:r.resultado, documento:mt17ReportNumber(r),
+      operario:r.operario, criterio:r.criterio, laboratorio:'TMP', tiene_documento:true
+    }));
+    registros = [...(legacy.value ?? []), ...mt17Rows]
+      .map(r => ({...r, resultado:resultado(r.resultado)}))
+      .sort((a,b) => (b.fecha ?? '').localeCompare(a.fecha ?? ''));
     const previousYear=controls.year.value;
     const years=[...new Set(registros.map(r=>r.fecha?.slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse();
     controls.year.replaceChildren(new Option('Todos',''),...years.map(y=>new Option(y,y)));
     if(years.includes(previousYear)) controls.year.value=previousYear;
-    el('total-cal').textContent=registros.filter(r=>r.tipo==='CALIBRACION').length;
+    el('total-cal').textContent=registros.filter(esCalibracion).length;
     el('total-mt16').textContent=registros.filter(r=>r.tipo==='VERIFICACION').length;
     el('total-apto').textContent=registros.filter(r=>r.resultado==='APTO').length;
     el('total-no-apto').textContent=registros.filter(r=>r.resultado==='NO APTO').length;

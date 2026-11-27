@@ -42,6 +42,34 @@ export function comparadorDI010Repeatability(low, high) {
   return Math.sqrt((variances[0] + variances[1]) / 2);
 }
 
+// Binary decision with a guard band equal to the expanded uncertainty.
+// otherStandardMm is the validated aggregate contribution for effects not
+// represented separately (reference zero, drift, alignment and temperature).
+export function evaluateComparadorDI010({ plan, sweeps, repeatability, criterion }) {
+  const { limitMm, maxExpandedMm, otherStandardMm, k, document } = criterion;
+  if (!document?.trim() || !Number.isFinite(limitMm) || limitMm <= 0 ||
+      !Number.isFinite(otherStandardMm) || otherStandardMm <= 0 || !Number.isFinite(k) || k < 1 ||
+      (maxExpandedMm !== null && (!Number.isFinite(maxExpandedMm) || maxExpandedMm <= 0)) ||
+      !Number.isFinite(repeatability) || repeatability < 0 || sweeps.length !== 2 ||
+      !sweeps.every(sweep => sweep.length === plan.points.length && sweep.every(pair =>
+        Number.isFinite(pair?.deviationMm) && Number.isFinite(pair?.bankExpandedMm) && pair.bankExpandedMm > 0))) return null;
+
+  const zero = sweeps[0][0].deviationMm;
+  const resolution = plan.scaleDivisionMm / Math.sqrt(12);
+  const repeatContribution = Math.SQRT2 * repeatability;
+  const points = sweeps.map(sweep => sweep.map(pair => {
+    const correctionMm = zero - pair.deviationMm;
+    const expandedMm = k * Math.hypot(pair.bankExpandedMm / 2, resolution, repeatContribution, otherStandardMm);
+    const guardedErrorMm = Math.abs(correctionMm) + expandedMm;
+    const accepted = guardedErrorMm <= limitMm && (maxExpandedMm === null || expandedMm <= maxExpandedMm);
+    return { correctionMm, expandedMm, guardedErrorMm, accepted };
+  }));
+  const all = points.flat();
+  return { resultado: all.every(p => p.accepted) ? 'APTO' : 'NO APTO', points,
+    maxGuardedMm: Math.max(...all.map(p => p.guardedErrorMm)), maxExpandedMm: Math.max(...all.map(p => p.expandedMm)),
+    repeatabilityMm: repeatability, scaleStandardMm: resolution, repeatStandardMm: repeatContribution };
+}
+
 export function buildComparadorProcedure(ctx = {}) {
   const max = ctx.rango_max || 10;
   const rep = ctx.repeticiones || 5;
