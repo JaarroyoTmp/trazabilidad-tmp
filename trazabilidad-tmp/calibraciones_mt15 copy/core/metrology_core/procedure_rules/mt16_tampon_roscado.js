@@ -321,6 +321,7 @@ export function parseMT16VerificationDesignation(raw) {
   const designation = String(raw || '').toUpperCase()
     .replace(/\b(\d+)\.\s+(?=\d+\/\d+)/g, '$1 ')
     .replace(/[\\"'“”″]+/g, ' ')
+    .replace(/\bR\s*\.\s*(?=\d)/g, 'R ')
     .replace(/\bGAS\s+CIL[IÍ]NDRIC[AO]\b/g, 'G')
     .replace(/(?<![\w/])((?:\d+\s+)?\d+\/\d+|\d+(?:[.,]\d+)?)\s*(?:-\s*(\d+))?\s*(G|BSPP)\b/g,
       (_, size, tpi) => `G ${size}${tpi ? ' - ' + tpi : ''}`)
@@ -330,6 +331,17 @@ export function parseMT16VerificationDesignation(raw) {
   const bsw = designation.match(/\b(1\/4|5\/16|3\/8|1\/2|5\/8|3\/4)\s+BSW\b/);
   const size = bsw && WHITWORTH_BSW[bsw[1]];
   const normalized = size ? designation.replace(bsw[0], `${bsw[1]}-${size.tpi} BSW`) : designation;
+  const din259 = /\bDIN\s*259(?:\s*-\s*[123])?\b/.test(normalized);
+  const din259LegacyR = din259 && /\bR\s*(?=\d)/.test(normalized) &&
+    !/\b(?:ISO\s*7|DIN\s*2999|EN\s*10226|BSPT|RC|RP)\b/.test(normalized);
+  if(din259LegacyR){
+    const parallel=parseMT16VerificationDesignation(normalized.replace(/\bR\s*(?=\d)/,'G '));
+    if(parallel.ok&&parallel.thread_system==='BSPP_ISO228'){
+      return {...parallel,din259LegacyR:true,raw:String(raw),warnings:[
+        'DIN 259 usa la letra R para rosca cilíndrica. Consulta la pauta DIN 259 del calibre para decidir su aptitud.'
+      ]};
+    }
+  }
   const result = parseThreadDesignation(normalized);
   if (result.thread_system === 'BSPP_ISO228') {
     const gaugeSize = result.nominal_label?.replace(/^G /, '');
@@ -341,6 +353,9 @@ export function parseMT16VerificationDesignation(raw) {
     if (row && result.tpi !== row.tpi) {
       return {...result,ok:false,warnings:[`El paso indicado no corresponde a G ${gaugeSize} según ISO 228-1.`]};
     }
+  }
+  if (!result.ok && /\bBSP\s*-?\s*NORMAL\b/.test(designation)) {
+    return {...result,warnings:['Marcado BSP NORMAL. Confirma la norma y los límites del calibre antes de usar una pauta G.']};
   }
   if (!result.ok && /\bBSP\b|\bGAS\b/.test(designation)) {
     return {...result, warnings:['La ficha indica BSP o GAS sin identificar la serie. Comprueba el marcado físico: G (ISO 228) o R/Rc/Rp (ISO 7).']};
@@ -367,12 +382,12 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   const direction=/IZQ|LEFT|\bLH\b/i.test([equipment.rango,equipment.descripcion].filter(Boolean).join(' '))?'IZQUIERDA':'DERECHA';
   const egM6Mod=specialMetric&&parsed.nominal_mm===6&&parsed.pitch_mm===1&&cls.toUpperCase()==='6H'&&
     /\bEG[ -]*M\s*6(?:\s*[X×]\s*1(?:[.,]0+)?)?\s*-?\s*6H\s*MOD\b/i.test(metricMarking);
-  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL',...(specialMetric?['ESPECIAL',raw.toUpperCase()]:[])].join('|');
-  const reason=parsed.thread_system==='BSPT_ISO7'
+  const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL',...(parsed.din259LegacyR?['DIN259']:[]),...(specialMetric?['ESPECIAL',raw.toUpperCase()]:[])].join('|');
+  const reason=parsed.din259LegacyR?'DIN 259 cilíndrica. La pauta de servicio del calibre DIN 259 está pendiente.':parsed.thread_system==='BSPT_ISO7'
     ? 'Rosca R/Rc/Rp de estanqueidad. Requiere identificar el tipo de calibre y verificar D2 en el plano de referencia según ISO 7-2.'
     :specialMetric&&!egM6Mod?'El marcado indica una rosca especial o para inserto. Usa su pauta específica.':!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
     !cls&&parsed.thread_system==='BSW_BS84'?'Falta identificar la clase de rosca Whitworth, por ejemplo Normal o Media.':null;
-  return {key,label:egM6Mod?'EG M6x1 · 6H mod':(specialMetric?raw:[parsed.normalized,cls].filter(Boolean).join(' · ')),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,egM6Mod,reason};
+  return {key,label:parsed.din259LegacyR?raw:egM6Mod?'EG M6x1 · 6H mod':(specialMetric?raw:[parsed.normalized,cls].filter(Boolean).join(' · ')),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,egM6Mod,din259LegacyR:parsed.din259LegacyR,reason};
 }
 export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
   if(config?.regla_decision==='INTERNA_EXCEL'){
@@ -462,6 +477,12 @@ const WHITWORTH_BSW = {
 // They are never passed to the evaluator as incorporated service limits.
 export function resolveMT16PlugLimitReference(identity) {
   if(!identity?.key||identity.family!=='TAMPON_ROSCADO_PNP')return null;
+  if(identity.din259LegacyR){
+    const related=resolveBSPPPlugLimits(identity);
+    if(related)return {standard:'ISO 228-2 · equivalente dimensional G',
+      note:'Valores de consulta del calibre G moderno. Para el calibre DIN 259 se requiere su propia pauta de servicio.',
+      puntos:related.puntos};
+  }
   const mm=units=>Number((units*0.00254).toFixed(6));
   const limits=(min,max)=>({min:mm(min),max:mm(max)});
   if(identity.system==='UN_ASME_B1_1'&&identity.angle===60){
@@ -521,6 +542,7 @@ function metricPlugServicePoints(lower, upper, designation, reference) {
 }
 
 export function resolveMT16ServiceLimits(identity){
+  if(identity?.din259LegacyR)return null;
   if(identity?.specialMetric){
     if(!identity.key||!identity.egM6Mod||identity.family!=='TAMPON_ROSCADO_PNP'||
        identity.angle!==60||identity.direction!=='DERECHA')return null;
