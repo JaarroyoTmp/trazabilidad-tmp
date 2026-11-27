@@ -30,23 +30,23 @@ label{display:block;margin-bottom:7px;font-size:14px;font-weight:700}
         <option value="milesimal">0,001 mm · Milesimal · JZF962 Mitutoyo</option>
       </select>
       <p><strong>Banco horizontal Trimos TELMA 500</strong> · 1288 en TMP · 1288-5 en Calibrator · Certificado C-11377.00002</p>
-      <p>Monta el reloj con el adaptador. Lleva el banco a la posición inicial y pon a cero el reloj.</p>
-      <label class="trial-check"><input id="trial-zero-confirmed" type="checkbox"> Montaje preparado y reloj puesto a cero</label>
+      <p>Monta el reloj con el adaptador. En la posición inicial, pon a cero el banco y el reloj.</p>
+      <label class="trial-check"><input id="trial-zero-confirmed" type="checkbox"> Montaje preparado. Banco y reloj puestos a cero.</label>
       <h2>Cinco lecturas por desplazamiento</h2>
-      <p>Los puntos iniciales proceden de Calibrator. Si el banco indica otro desplazamiento, edita la primera celda de la fila. Introduce cinco indicaciones del reloj por punto, en mm desde la posición inicial.</p>
+      <p>Los puntos iniciales proceden de Calibrator. Usa el desplazamiento que indica el banco desde su cero. Retira el palpador y vuelve al punto en el mismo sentido para cada una de las cinco tomas.</p>
       <label class="trial-check"><input id="trial-independent-confirmed" type="checkbox"> En cada toma he retirado el palpador del punto y me he acercado de nuevo en el mismo sentido.</label>
       <div class="trial-table" tabindex="0" role="region" aria-label="Tabla de lecturas desplazable"><table aria-label="Lecturas y errores por desplazamiento en milímetros">
-        <thead><tr><th scope="col">Indicación del banco</th><th scope="col">L1</th><th scope="col">L2</th><th scope="col">L3</th><th scope="col">L4</th><th scope="col">L5</th><th scope="col">Media</th><th scope="col">Diferencia con el banco</th><th scope="col">Dispersión</th><th scope="col">Referencia alternativa</th><th scope="col">Corrección del reloj</th><th scope="col">U del banco (k=2)</th><th scope="col">U parcial (k=2)</th></tr></thead>
+        <thead><tr><th scope="col">Indicación del banco</th><th scope="col">L1</th><th scope="col">L2</th><th scope="col">L3</th><th scope="col">L4</th><th scope="col">L5</th><th scope="col">Media</th><th scope="col">Diferencia con el banco</th><th scope="col">Dispersión</th><th scope="col">Corrección del reloj</th><th scope="col">U del banco (k=2)</th><th scope="col">U parcial (k=2)</th></tr></thead>
         <tbody id="trial-points-centesimal"></tbody>
         <tbody id="trial-points-milesimal" hidden></tbody>
       </table></div>
       <button class="btn" type="button" id="trial-add">Añadir punto</button>
-      <p>Con la puesta a cero confirmada y las cinco lecturas completas, TMP aplica el certificado del Trimos con corrección global nula. La U mostrada corresponde al banco. Si introduces otra referencia trazable ya corregida, TMP calcula la corrección del reloj con esa referencia y deja la U del banco en blanco.</p>
+      <p>Al confirmar ambos ceros y completar las cinco lecturas, MT17 calcula la corrección del reloj restando su media al desplazamiento del Trimos, con la corrección global nula de su certificado.</p>
       <p>La U parcial combina el banco, la división de escala y la repetibilidad de la media. Se calcula al confirmar cinco aproximaciones independientes por punto. Para completar el presupuesto queda evaluar el montaje, la deriva, la temperatura y el sentido de medida.</p>
     </section>
 </main>
 <script type="module">
-import { COMPARADOR_TRIAL_PROFILES, COMPARADOR_TRIAL_REPETITIONS, summarizeComparadorTrial } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js";
+import { COMPARADOR_TRIAL_PROFILES, COMPARADOR_TRIAL_REPETITIONS, summarizeComparadorTrial } from "./calibraciones_mt15%20copy/core/metrology_core/procedure_rules/comparador.js?v=20261127";
 
 const $ = selector => document.querySelector(selector);
 const trialFormat = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 6 });
@@ -82,27 +82,19 @@ function addTrialPoint(profile, initialNominal = "") {
  nominalField.value = initialNominal;
  nominalField.title = `Introduce un desplazamiento superior a 0 y hasta ${max} mm`;
  const readingFields = readingLabels.map(addInput);
- const results = ["mean", "nominalDifference", "spread"].map(addResult);
- const referenceField = addInput("Desplazamiento de referencia corregido");
- referenceField.title = "Opcional. Introduce el desplazamiento trazable ya corregido";
- results.push(addResult("correction"), addResult("bankUncertaintyMm"));
+ const results = ["mean", "nominalDifference", "spread", "correction", "bankUncertaintyMm"].map(addResult);
  const [, budgetCell] = addResult("partialBudget");
  function updatePoint() {
   const nominal = trialNumber(nominalField.value);
   const validNominal = nominal > 0 && nominal <= max;
   nominalField.setAttribute("aria-invalid", String(Boolean(nominalField.value.trim()) && !validNominal));
-  const reference = trialNumber(referenceField.value);
-  const validReference = Number.isFinite(reference) && reference > 0;
-  const manualReferenceEntered = Boolean(referenceField.value.trim());
-  referenceField.setAttribute("aria-invalid", String(manualReferenceEntered && !validReference));
-  const manualReference = validReference ? reference : null;
   const readings = readingFields.map(field => {
    const value = trialNumber(field.value);
    field.setAttribute("aria-invalid", String(Boolean(field.value.trim()) && !Number.isFinite(value)));
    return value;
   });
   const summary = confirmedProfiles.has(profile) && validNominal
-   ? summarizeComparadorTrial({ nominal, reference: manualReferenceEntered ? manualReference : undefined, readings,
+   ? summarizeComparadorTrial({ nominal, readings,
       scaleDivisionMm, independentReadings: independentProfiles.has(profile) })
    : null;
   results.forEach(([key, cell]) => { cell.textContent = trialDisplay(summary?.[key]); });

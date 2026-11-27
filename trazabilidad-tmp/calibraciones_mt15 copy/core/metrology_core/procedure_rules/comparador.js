@@ -8,12 +8,11 @@ export const COMPARADOR_TRIAL_PROFILES = {
   milesimal: { points: [0.005, 0.05, 0.5], max: 10, scaleDivisionMm: 0.001 }
 };
 
-export function summarizeComparadorTrial({ nominal, reference, readings, scaleDivisionMm, independentReadings }) {
+export function summarizeComparadorTrial({ nominal, readings, scaleDivisionMm, independentReadings }) {
   if (!Number.isFinite(nominal) || readings.length !== COMPARADOR_TRIAL_REPETITIONS || !readings.every(Number.isFinite)) return null;
 
   const mean = readings.reduce((sum, reading) => sum + reading, 0) / readings.length;
-  const bank = reference === undefined ? trimos1288GeneralU(nominal) : null;
-  const displacement = bank ? nominal : reference;
+  const bank = trimos1288GeneralU(nominal);
   const budget = bank && independentReadings === true && Number.isFinite(scaleDivisionMm) && scaleDivisionMm > 0
     ? estimatePartialUncertainty(readings, mean, scaleDivisionMm, bank)
     : null;
@@ -21,7 +20,7 @@ export function summarizeComparadorTrial({ nominal, reference, readings, scaleDi
     mean,
     nominalDifference: mean - nominal,
     spread: Math.max(...readings) - Math.min(...readings),
-    correction: Number.isFinite(displacement) ? displacement - mean : null,
+    correction: bank ? nominal - mean : null,
     bankUncertaintyMm: bank?.U_mm ?? null,
     partialBudget: budget
   };
