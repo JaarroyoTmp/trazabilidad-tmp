@@ -363,10 +363,12 @@ export function resolveMT16CriterionIdentity(equipment, family, parsed) {
   }
   if(!cls && !parsed.tpi)return {key:null,reason:'Falta la clase o serie necesaria para asociar una pauta.'};
   const direction=/IZQ|LEFT|\bLH\b/i.test([equipment.rango,equipment.descripcion].filter(Boolean).join(' '))?'IZQUIERDA':'DERECHA';
+  const egM6Mod=specialMetric&&parsed.nominal_mm===6&&parsed.pitch_mm===1&&cls.toUpperCase()==='6H'&&
+    /\bEG[ -]*M\s*6(?:\s*[X×]\s*1(?:[.,]0+)?)?\s*-?\s*6H\s*MOD\b/i.test(metricMarking);
   const key=[family,parsed.thread_system,parsed.normalized,cls,parsed.pitch_mm,parsed.angle_deg,direction,'D2','DIMENSION_ACTUAL',...(specialMetric?['ESPECIAL',raw.toUpperCase()]:[])].join('|');
-  const reason=specialMetric?'El marcado indica una rosca especial o para inserto. Usa su pauta específica.':!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
+  const reason=specialMetric&&!egM6Mod?'El marcado indica una rosca especial o para inserto. Usa su pauta específica.':!cls&&parsed.thread_system==='UN_ASME_B1_1'?'Falta la clase interior del calibre, por ejemplo 2B o 3B.':
     !cls&&parsed.thread_system==='BSW_BS84'?'Falta identificar la clase de rosca Whitworth, por ejemplo Normal o Media.':null;
-  return {key,label:[parsed.normalized,cls].filter(Boolean).join(' · '),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,reason};
+  return {key,label:egM6Mod?'EG M6x1 · 6H mod':(specialMetric?raw:[parsed.normalized,cls].filter(Boolean).join(' · ')),family,system:parsed.thread_system,series:parsed.family,size:parsed.nominal_label,tpi:parsed.tpi,direction,nominal:parsed.nominal_mm,pitch:parsed.pitch_mm,angle:parsed.angle_deg,tolerance_class:cls,specialMetric,egM6Mod,reason};
 }
 export function validateMT16CriterionConfiguration(config, identity, bankCertificate) {
   if(config?.regla_decision==='INTERNA_EXCEL'){
@@ -490,7 +492,15 @@ function resolveISO965MetricPlugServiceLimits(identity) {
   const data=getISO965Data(`M${identity.nominal}x${identity.pitch}-6H`);
   if(data?.type!=='internal'||data.major_diameter!==identity.nominal||data.pitch!==identity.pitch||
      data.tolerance_class!=='6H'||data.source!=='ISO965-2:1998_TABLE_3') return null;
-  const lower=Math.round(data.pitch_diameter_min*1000),upper=Math.round(data.pitch_diameter_max*1000);
+  return metricPlugServicePoints(Math.round(data.pitch_diameter_min*1000),Math.round(data.pitch_diameter_max*1000),
+    identity.label, {
+      version:'MT16_ISO965_ISO1502',standard:'ISO 965-2:1998 e ISO 1502:1996',
+      criterio:'ISO 965-2:1998 · tabla 3; ISO 1502:1996 · tablas 4, 5 y 12; límites de desgaste y máximo de fabricación',
+      sources:['https://cdn.standards.iteh.ai/samples/23594/74d3eec3e0d04d999a1680f11b4f04ec/ISO-965-2-1998.pdf','https://www.iso.org/standard/6092.html']
+    });
+}
+
+function metricPlugServicePoints(lower, upper, designation, reference) {
   if(!Number.isFinite(lower)||!Number.isFinite(upper)||lower<=0||upper<=lower) return null;
   const tolerance=METRIC_PLUG_TOLERANCES.find(row=>upper-lower<=row.upTo);
   if(!tolerance)return null;
@@ -500,19 +510,37 @@ function resolveISO965MetricPlugServiceLimits(identity) {
     wear_min:(center-wear)/1000,min:(center-wear)/1000,max:(center+TPL/2)/1000
   });
   return {
-    version:'MT16_ISO965_ISO1502',standard:'ISO 965-2:1998 e ISO 1502:1996',designation:identity.label,
-    criterio:'ISO 965-2:1998 · tabla 3; ISO 1502:1996 · tablas 4, 5 y 12; límites de desgaste y máximo de fabricación',
-    sources:['https://cdn.standards.iteh.ai/samples/23594/74d3eec3e0d04d999a1680f11b4f04ec/ISO-965-2-1998.pdf','https://www.iso.org/standard/6092.html'],
+    ...reference,designation,
     workpiece:{min:lower/1000,max:upper/1000},parameters:{TPL:TPL/1000,ZPL:ZPL/1000,WGO:WGO/1000,WNG:WNG/1000},
     puntos:{PASA:point(lower+ZPL,WGO),NO_PASA:point(upper+TPL/2,WNG)}
   };
 }
 
 export function resolveMT16ServiceLimits(identity){
-  if(identity?.specialMetric)return null;
+  if(identity?.specialMetric){
+    if(!identity.key||!identity.egM6Mod||identity.family!=='TAMPON_ROSCADO_PNP'||
+       identity.angle!==60||identity.direction!=='DERECHA')return null;
+    // DIN 8140-2 limits of the receiving thread, not the assembled insert.
+    return metricPlugServicePoints(6650,6742,identity.label,{
+      version:'MT16_EG_M6_DIN8140',standard:'DIN 8140-2 e ISO 1502:1996',
+      criterio:'DIN 8140-2 · EG M6x1 6H mod; ISO 1502:1996 · tablas 4, 5 y 12; límites de desgaste y máximo de fabricación',
+      sources:['https://www.emuge.sk/sub/emuge.sk/images/katalogy/2022/EMUGE-FRANKEN_Technisches_Handbuch.pdf',
+        'https://cdn.hoffmann-group.com/dsh/en-GB/dsh_en-gb_587825.pdf','https://www.iso.org/standard/6092.html']
+    });
+  }
   if(identity?.key&&identity.family==='TAMPON_ROSCADO_PNP'){
     const bspp=resolveBSPPPlugLimits(identity);
     if(bspp)return bspp;
+    if(identity.system==='UN_ASME_B1_1'&&identity.size==='UNF 1 1/4'&&identity.tpi===12&&
+       identity.tolerance_class==='2B'&&identity.direction==='DERECHA'){
+      const reference=resolveMT16PlugLimitReference(identity);
+      if(reference){
+        const puntos=Object.fromEntries(Object.entries(reference.puntos).map(([side,p])=>[side,{...p,new_min:p.min,new_max:p.max}]));
+        return {version:'MT16_UNF_114_CLASS_X',standard:'ASME B1.2 · clase X',designation:identity.label,
+          criterio:'ASME B1.2 · 1 1/4-12 UNF 2B · tapón de trabajo clase X; se exige mantener los límites de fabricación, sin margen adicional de desgaste',
+          sources:['https://osgtool.com/1500104100/','https://www.swansongage.com/Customer-Content/www/CMS/files/Swanson-Gage-Catalog_2025-1_Final.pdf'],puntos};
+      }
+    }
     // TMP worksheet explicitly uses these bounds in service. Its designation,
     // angle, pitch and all four bounds agree with the independent class X table.
     if(identity.system==='UN_ASME_B1_1'&&identity.size==='UNF 3/4'&&identity.tolerance_class==='2B'&&identity.direction==='DERECHA'){
